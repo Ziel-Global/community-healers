@@ -118,7 +118,7 @@ export default function Index() {
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button variant="gradient" size="xl">
+              <Button variant="neon" size="xl">
                 Get Started
                 <ArrowRight className="w-5 h-5 ml-1" />
               </Button>

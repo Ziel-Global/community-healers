@@ -104,7 +104,7 @@ export default function SuperAdminPortal() {
             <h3 className="text-lg font-display font-semibold text-foreground">
               Training Centers
             </h3>
-            <Button variant="gradient" size="sm">
+            <Button variant="neon" size="sm">
               <Plus className="w-4 h-4 mr-1" />
               Add Center
             </Button>
