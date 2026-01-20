@@ -123,10 +123,10 @@ export default function MinistryPortal() {
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Pending Certificates */}
-        <div className="lg:col-span-2 p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
+        <div className="lg:col-span-2 p-6 rounded-xl bg-card border border-border/60 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="text-lg font-display font-semibold text-foreground">
                 Pending Certificates
               </h3>
               <p className="text-sm text-muted-foreground">
@@ -142,23 +142,23 @@ export default function MinistryPortal() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border/50">
+                <tr className="border-b border-border">
                   <th className="text-left py-3 pr-2">
                     <Checkbox />
                   </th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     Candidate
                   </th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     Center
                   </th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     Exam Date
                   </th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     Score
                   </th>
-                  <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                  <th className="text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     Actions
                   </th>
                 </tr>
@@ -167,7 +167,7 @@ export default function MinistryPortal() {
                 {pendingCertificates.map((cert) => (
                   <tr
                     key={cert.id}
-                    className="border-b border-border/30 hover:bg-secondary/20 transition-colors"
+                    className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
                   >
                     <td className="py-4 pr-2">
                       <Checkbox />
@@ -189,7 +189,7 @@ export default function MinistryPortal() {
                       {cert.examDate}
                     </td>
                     <td className="py-4">
-                      <Badge className="bg-success/20 text-success border-success/30">
+                      <Badge className="bg-success/10 text-success border border-success/20">
                         {cert.score}%
                       </Badge>
                     </td>
@@ -209,7 +209,7 @@ export default function MinistryPortal() {
             </table>
           </div>
 
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
               Showing 4 of 892 pending certificates
             </p>
@@ -222,8 +222,8 @@ export default function MinistryPortal() {
         {/* Stats & Actions */}
         <div className="space-y-6">
           {/* Issuance Stats */}
-          <div className="p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
+          <div className="p-6 rounded-xl bg-card border border-border/60 shadow-sm">
+            <h3 className="text-lg font-display font-semibold text-foreground mb-4">
               This Week
             </h3>
 
@@ -232,9 +232,9 @@ export default function MinistryPortal() {
                 <span className="text-sm text-muted-foreground">Issued</span>
                 <span className="text-lg font-bold text-foreground">1,234</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-secondary">
+              <div className="w-full h-2 rounded-full bg-border">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
+                  className="h-full rounded-full gradient-primary"
                   style={{ width: "78%" }}
                 />
               </div>
@@ -244,19 +244,19 @@ export default function MinistryPortal() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 mt-6">
-              <div className="p-3 rounded-lg bg-secondary/30 text-center">
+              <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 text-center">
                 <p className="text-lg font-bold text-foreground">42</p>
                 <p className="text-xs text-muted-foreground">Lahore</p>
               </div>
-              <div className="p-3 rounded-lg bg-secondary/30 text-center">
+              <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 text-center">
                 <p className="text-lg font-bold text-foreground">38</p>
                 <p className="text-xs text-muted-foreground">Karachi</p>
               </div>
-              <div className="p-3 rounded-lg bg-secondary/30 text-center">
+              <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 text-center">
                 <p className="text-lg font-bold text-foreground">28</p>
                 <p className="text-xs text-muted-foreground">Islamabad</p>
               </div>
-              <div className="p-3 rounded-lg bg-secondary/30 text-center">
+              <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 text-center">
                 <p className="text-lg font-bold text-foreground">48</p>
                 <p className="text-xs text-muted-foreground">Others</p>
               </div>
@@ -264,8 +264,8 @@ export default function MinistryPortal() {
           </div>
 
           {/* Quick Actions */}
-          <div className="p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
+          <div className="p-6 rounded-xl bg-card border border-border/60 shadow-sm">
+            <h3 className="text-lg font-display font-semibold text-foreground mb-4">
               Quick Actions
             </h3>
 

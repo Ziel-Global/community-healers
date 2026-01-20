@@ -129,9 +129,9 @@ export default function CenterAdminPortal() {
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Today's Candidates Table */}
-        <div className="lg:col-span-2 p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
+        <div className="lg:col-span-2 p-6 rounded-xl bg-card border border-border/60 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">
+            <h3 className="text-lg font-display font-semibold text-foreground">
               Today's Candidates
             </h3>
             <Button variant="outline" size="sm">
@@ -142,20 +142,20 @@ export default function CenterAdminPortal() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border/50">
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                <tr className="border-b border-border">
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     Candidate
                   </th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     CNIC
                   </th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     Time
                   </th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     Status
                   </th>
-                  <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider py-3">
+                  <th className="text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
                     Action
                   </th>
                 </tr>
@@ -164,7 +164,7 @@ export default function CenterAdminPortal() {
                 {todaysCandidates.map((candidate) => (
                   <tr
                     key={candidate.id}
-                    className="border-b border-border/30 hover:bg-secondary/20 transition-colors"
+                    className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
                   >
                     <td className="py-4">
                       <div>
@@ -191,8 +191,8 @@ export default function CenterAdminPortal() {
                         }
                         className={
                           candidate.status === "verified"
-                            ? "bg-success/20 text-success border-success/30"
-                            : "bg-warning/20 text-warning border-warning/30"
+                            ? "bg-success/10 text-success border border-success/20"
+                            : "bg-warning/10 text-warning border border-warning/20"
                         }
                       >
                         {candidate.status === "verified"
@@ -219,8 +219,8 @@ export default function CenterAdminPortal() {
         </div>
 
         {/* Exam Progress */}
-        <div className="p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
-          <h3 className="text-lg font-semibold text-foreground mb-4">
+        <div className="p-6 rounded-xl bg-card border border-border/60 shadow-sm">
+          <h3 className="text-lg font-display font-semibold text-foreground mb-4">
             Exam Progress
           </h3>
 
@@ -230,18 +230,18 @@ export default function CenterAdminPortal() {
               { name: "Fatima Khan", progress: 45, timeLeft: "11:00" },
               { name: "Zain Abbas", progress: 90, timeLeft: "2:00" },
             ].map((exam, index) => (
-              <div key={index} className="p-4 rounded-lg bg-secondary/30">
+              <div key={index} className="p-4 rounded-xl bg-secondary/30 border border-border/40">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-medium text-foreground">
                     {exam.name}
                   </p>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground font-medium">
                     {exam.timeLeft} left
                   </span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-secondary">
+                <div className="w-full h-2 rounded-full bg-border">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300"
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
                     style={{ width: `${exam.progress}%` }}
                   />
                 </div>
@@ -252,22 +252,22 @@ export default function CenterAdminPortal() {
             ))}
           </div>
 
-          <div className="mt-6 pt-4 border-t border-border/50">
-            <h4 className="text-sm font-medium text-foreground mb-3">
+          <div className="mt-6 pt-4 border-t border-border">
+            <h4 className="text-sm font-semibold text-foreground mb-3">
               Today's Results
             </h4>
             <div className="grid grid-cols-3 gap-2">
-              <div className="p-3 rounded-lg bg-success/10 text-center">
+              <div className="p-3 rounded-xl bg-success/10 border border-success/20 text-center">
                 <CheckCircle2 className="w-4 h-4 text-success mx-auto mb-1" />
                 <p className="text-lg font-bold text-success">14</p>
                 <p className="text-xs text-muted-foreground">Passed</p>
               </div>
-              <div className="p-3 rounded-lg bg-destructive/10 text-center">
+              <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-center">
                 <XCircle className="w-4 h-4 text-destructive mx-auto mb-1" />
                 <p className="text-lg font-bold text-destructive">2</p>
                 <p className="text-xs text-muted-foreground">Failed</p>
               </div>
-              <div className="p-3 rounded-lg bg-muted text-center">
+              <div className="p-3 rounded-xl bg-secondary border border-border text-center">
                 <Clock className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
                 <p className="text-lg font-bold text-foreground">12</p>
                 <p className="text-xs text-muted-foreground">In Progress</p>

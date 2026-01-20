@@ -17,17 +17,17 @@ export function StatCard({
   icon: Icon,
 }: StatCardProps) {
   return (
-    <div className="relative p-5 rounded-xl bg-card/60 backdrop-blur-xl border border-border/50 hover:border-primary/30 transition-all duration-300 group">
+    <div className="relative p-5 rounded-xl bg-card border border-border/60 hover:border-primary/30 hover:shadow-royal transition-all duration-300 group">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1">
             {title}
           </p>
           <p className="text-2xl font-bold text-foreground">{value}</p>
           {change && (
             <p
               className={cn(
-                "text-xs mt-1",
+                "text-xs mt-1 font-medium",
                 changeType === "positive" && "text-success",
                 changeType === "negative" && "text-destructive",
                 changeType === "neutral" && "text-muted-foreground"
@@ -37,7 +37,7 @@ export function StatCard({
             </p>
           )}
         </div>
-        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
           <Icon className="w-5 h-5 text-primary" />
         </div>
       </div>
