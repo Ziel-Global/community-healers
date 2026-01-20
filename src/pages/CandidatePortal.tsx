@@ -1,6 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
 import { Button } from "@/components/ui/button";
+import { candidateNavItems } from "./candidate/RegistrationPage";
 import {
   LayoutDashboard,
   FileText,
@@ -14,46 +15,13 @@ import {
   Play,
 } from "lucide-react";
 
-const navItems = [
-  {
-    label: "Dashboard",
-    href: "/candidate",
-    icon: <LayoutDashboard className="w-4 h-4" />,
-  },
-  {
-    label: "Registration",
-    href: "/candidate/registration",
-    icon: <FileText className="w-4 h-4" />,
-  },
-  {
-    label: "Schedule Exam",
-    href: "/candidate/schedule",
-    icon: <Calendar className="w-4 h-4" />,
-  },
-  {
-    label: "Training Videos",
-    href: "/candidate/training",
-    icon: <BookOpen className="w-4 h-4" />,
-  },
-  {
-    label: "Certificates",
-    href: "/candidate/certificates",
-    icon: <Award className="w-4 h-4" />,
-  },
-  {
-    label: "Profile",
-    href: "/candidate/profile",
-    icon: <User className="w-4 h-4" />,
-  },
-];
-
 export default function CandidatePortal() {
   return (
     <DashboardLayout
       title="Candidate Dashboard"
       subtitle="Welcome back, Muhammad Ahmed"
       portalType="candidate"
-      navItems={navItems}
+      navItems={candidateNavItems}
     >
       {/* Status Banner */}
       <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between flex-wrap gap-4">

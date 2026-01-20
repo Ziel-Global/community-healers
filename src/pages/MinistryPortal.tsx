@@ -1,286 +1,136 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { StatCard } from "@/components/StatCard";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { MinistryStats } from "@/components/MinistryPortal/Dashboard/MinistryStats";
+import { PassedCandidateTable } from "@/components/MinistryPortal/Review/PassedCandidateTable";
+import { VerifiableRegistry } from "@/components/MinistryPortal/Registry/VerifiableRegistry";
+import { MinistryIssuanceLogs } from "@/components/MinistryPortal/Audit/MinistryIssuanceLogs";
 import {
-  LayoutDashboard,
+  ShieldCheck,
   Award,
-  Building2,
-  BarChart3,
+  Search,
+  History,
+  LayoutDashboard,
+  Users,
   FileCheck,
-  Settings,
-  Download,
-  CheckCircle2,
-  Clock,
-  Calendar,
+  Building2,
+  PieChart
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-const navItems = [
+export const ministryNavItems = [
   {
-    label: "Dashboard",
+    label: "Authority Hub",
     href: "/ministry",
     icon: <LayoutDashboard className="w-4 h-4" />,
   },
   {
-    label: "Certificates",
-    href: "/ministry/certificates",
-    icon: <Award className="w-4 h-4" />,
+    label: "Candidate Review",
+    href: "/ministry/review",
+    icon: <Users className="w-4 h-4" />,
   },
   {
-    label: "Centers",
+    label: "Certificate Registry",
+    href: "/ministry/registry",
+    icon: <ShieldCheck className="w-4 h-4" />,
+  },
+  {
+    label: "Issuance Logs",
+    href: "/ministry/logs",
+    icon: <History className="w-4 h-4" />,
+  },
+  {
+    label: "Center Oversight",
     href: "/ministry/centers",
     icon: <Building2 className="w-4 h-4" />,
-  },
-  {
-    label: "Reports",
-    href: "/ministry/reports",
-    icon: <BarChart3 className="w-4 h-4" />,
-  },
-  {
-    label: "Approvals",
-    href: "/ministry/approvals",
-    icon: <FileCheck className="w-4 h-4" />,
-  },
-  {
-    label: "Settings",
-    href: "/ministry/settings",
-    icon: <Settings className="w-4 h-4" />,
-  },
-];
-
-const pendingCertificates = [
-  {
-    id: "CERT-2024-001",
-    name: "Muhammad Ahmed",
-    center: "Lahore Center #1",
-    examDate: "Jan 20, 2024",
-    score: 85,
-  },
-  {
-    id: "CERT-2024-002",
-    name: "Fatima Khan",
-    center: "Karachi Center #2",
-    examDate: "Jan 20, 2024",
-    score: 90,
-  },
-  {
-    id: "CERT-2024-003",
-    name: "Ali Hassan",
-    center: "Islamabad Center #1",
-    examDate: "Jan 19, 2024",
-    score: 75,
-  },
-  {
-    id: "CERT-2024-004",
-    name: "Ayesha Malik",
-    center: "Lahore Center #3",
-    examDate: "Jan 19, 2024",
-    score: 80,
   },
 ];
 
 export default function MinistryPortal() {
   return (
     <DashboardLayout
-      title="Ministry Dashboard"
-      subtitle="Certificate Authority Portal"
+      title="Ministry Authority Portal"
+      subtitle="Certification Issuance & Governance Oversight"
       portalType="ministry"
-      navItems={navItems}
+      navItems={ministryNavItems}
     >
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          title="Total Issued"
-          value="45,230"
-          icon={Award}
-          change="+1,234 this month"
-          changeType="positive"
-        />
-        <StatCard
-          title="Pending Review"
-          value="892"
-          icon={Clock}
-          change="142 urgent"
-          changeType="neutral"
-        />
-        <StatCard
-          title="Today's Issuances"
-          value="156"
-          icon={CheckCircle2}
-          change="On track"
-          changeType="positive"
-        />
-        <StatCard
-          title="Centers Active"
-          value="86"
-          icon={Building2}
-          change="100% operational"
-          changeType="positive"
-        />
-      </div>
+      <div className="space-y-8 max-w-[1600px] mx-auto pb-12">
+        {/* Authority Overview Stats */}
+        <MinistryStats />
 
-      {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Pending Certificates */}
-        <div className="lg:col-span-2 p-6 rounded-xl bg-card border border-border/60 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-display font-semibold text-foreground">
-                Pending Certificates
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Select candidates for bulk certificate issuance
-              </p>
-            </div>
-            <Button variant="neon">
-              <CheckCircle2 className="w-4 h-4 mr-2" />
-              Issue Selected
-            </Button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 pr-2">
-                    <Checkbox />
-                  </th>
-                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    Candidate
-                  </th>
-                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    Center
-                  </th>
-                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    Exam Date
-                  </th>
-                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    Score
-                  </th>
-                  <th className="text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingCertificates.map((cert) => (
-                  <tr
-                    key={cert.id}
-                    className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
-                  >
-                    <td className="py-4 pr-2">
-                      <Checkbox />
-                    </td>
-                    <td className="py-4">
-                      <div>
-                        <p className="font-medium text-foreground">
-                          {cert.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {cert.id}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="py-4 text-sm text-muted-foreground">
-                      {cert.center}
-                    </td>
-                    <td className="py-4 text-sm text-muted-foreground">
-                      {cert.examDate}
-                    </td>
-                    <td className="py-4">
-                      <Badge className="bg-success/10 text-success border border-success/20">
-                        {cert.score}%
-                      </Badge>
-                    </td>
-                    <td className="py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                        <Button variant="neon" size="sm">
-                          Issue
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-            <p className="text-sm text-muted-foreground">
-              Showing 4 of 892 pending certificates
-            </p>
-            <Button variant="outline" size="sm">
-              Load More
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats & Actions */}
-        <div className="space-y-6">
-          {/* Issuance Stats */}
-          <div className="p-6 rounded-xl bg-card border border-border/60 shadow-sm">
-            <h3 className="text-lg font-display font-semibold text-foreground mb-4">
-              This Week
-            </h3>
-
-            <div className="space-y-4">
+        <div className="grid lg:grid-cols-12 gap-8">
+          {/* Primary Issuance Queue */}
+          <div className="lg:col-span-8 space-y-10">
+            <section className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Issued</span>
-                <span className="text-lg font-bold text-foreground">1,234</span>
+                <h2 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
+                  <Award className="w-5 h-5 text-primary" />
+                  Pending Certification Review
+                </h2>
               </div>
-              <div className="w-full h-2 rounded-full bg-border">
-                <div
-                  className="h-full rounded-full gradient-primary"
-                  style={{ width: "78%" }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                78% of weekly target
-              </p>
-            </div>
+              <PassedCandidateTable />
+            </section>
 
-            <div className="grid grid-cols-2 gap-3 mt-6">
-              <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 text-center">
-                <p className="text-lg font-bold text-foreground">42</p>
-                <p className="text-xs text-muted-foreground">Lahore</p>
-              </div>
-              <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 text-center">
-                <p className="text-lg font-bold text-foreground">38</p>
-                <p className="text-xs text-muted-foreground">Karachi</p>
-              </div>
-              <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 text-center">
-                <p className="text-lg font-bold text-foreground">28</p>
-                <p className="text-xs text-muted-foreground">Islamabad</p>
-              </div>
-              <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 text-center">
-                <p className="text-lg font-bold text-foreground">48</p>
-                <p className="text-xs text-muted-foreground">Others</p>
-              </div>
-            </div>
+            <section className="space-y-4">
+              <h2 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
+                <Search className="w-5 h-5 text-primary" />
+                Global Certificate Registry
+              </h2>
+              <VerifiableRegistry />
+            </section>
           </div>
 
-          {/* Quick Actions */}
-          <div className="p-6 rounded-xl bg-card border border-border/60 shadow-sm">
-            <h3 className="text-lg font-display font-semibold text-foreground mb-4">
-              Quick Actions
-            </h3>
+          {/* Authority Oversight Side Panel */}
+          <div className="lg:col-span-4 space-y-8">
+            <section className="space-y-4">
+              <h2 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
+                <History className="w-5 h-5 text-primary" />
+                Recent Authority Actions
+              </h2>
+              <MinistryIssuanceLogs />
+            </section>
 
-            <div className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
-                <Download className="w-4 h-4 mr-2" />
-                Export Report
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Calendar className="w-4 h-4 mr-2" />
-                View Schedule
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Analytics
+            <Card className="border-border/40 bg-card overflow-hidden shadow-sm">
+              <CardHeader className="bg-secondary/30 border-b border-border/40">
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <PieChart className="w-4 h-4 text-primary" />
+                  Issuance Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {[
+                    { label: "Lahore Region", value: "45%", color: "bg-primary" },
+                    { label: "Karachi Region", value: "30%", color: "bg-indigo-500" },
+                    { label: "Islamabad Region", value: "15%", color: "bg-emerald-500" },
+                    { label: "Multan Region", value: "10%", color: "bg-amber-500" },
+                  ].map((region) => (
+                    <div key={region.label} className="space-y-1.5">
+                      <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                        <span>{region.label}</span>
+                        <span className="text-muted-foreground">{region.value}</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                        <div className={`h-full ${region.color}`} style={{ width: region.value }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button variant="outline" className="w-full mt-6 text-xs h-9 font-bold border-border/60">
+                  View Regional Analytics
+                </Button>
+              </CardContent>
+            </Card>
+
+            <div className="p-6 rounded-2xl bg-black text-white shadow-royal space-y-4">
+              <h3 className="font-display font-bold flex items-center gap-2 text-primary">
+                <FileCheck className="w-5 h-5" />
+                Quarterly Audit Prep
+              </h3>
+              <p className="text-xs font-medium leading-relaxed opacity-80">
+                Consolidate all issuance records and authority logs for the upcoming external compliance audit.
+              </p>
+              <Button className="w-full gradient-primary text-black font-bold h-11 rounded-xl">
+                Prepare Audit Bundle
               </Button>
             </div>
           </div>

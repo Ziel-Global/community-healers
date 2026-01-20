@@ -1,278 +1,120 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { StatCard } from "@/components/StatCard";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { CenterStats } from "@/components/CentreAdminPortal/Dashboard/CenterStats";
+import { CenterInfoCard } from "@/components/CentreAdminPortal/Dashboard/CenterInfoCard";
+import { CandidateSearch } from "@/components/CentreAdminPortal/Candidates/CandidateSearch";
+import { CandidateTable } from "@/components/CentreAdminPortal/Candidates/CandidateTable";
+import { CandidateActionCard } from "@/components/CentreAdminPortal/Candidates/CandidateActionCard";
+import { ExamMonitoringGrid } from "@/components/CentreAdminPortal/Monitoring/ExamMonitoringGrid";
+import { DailyResultsView } from "@/components/CentreAdminPortal/Results/DailyResultsView";
+import { HistoricalReports } from "@/components/CentreAdminPortal/Reports/HistoricalReports";
 import {
   LayoutDashboard,
   Users,
-  Calendar,
-  ClipboardCheck,
-  BarChart3,
-  Settings,
-  CheckCircle2,
-  Clock,
-  XCircle,
   UserCheck,
+  Monitor,
+  BarChart3,
+  FileText,
+  Settings
 } from "lucide-react";
 
-const navItems = [
+export const centerNavItems = [
   {
     label: "Dashboard",
     href: "/center",
     icon: <LayoutDashboard className="w-4 h-4" />,
   },
   {
-    label: "Today's Candidates",
+    label: "Candidates",
     href: "/center/candidates",
     icon: <Users className="w-4 h-4" />,
   },
   {
-    label: "Exam Schedule",
-    href: "/center/schedule",
-    icon: <Calendar className="w-4 h-4" />,
-  },
-  {
     label: "Verification",
     href: "/center/verification",
-    icon: <ClipboardCheck className="w-4 h-4" />,
+    icon: <UserCheck className="w-4 h-4" />,
+  },
+  {
+    label: "Exam Monitoring",
+    href: "/center/monitoring",
+    icon: <Monitor className="w-4 h-4" />,
+  },
+  {
+    label: "Results",
+    href: "/center/results",
+    icon: <BarChart3 className="w-4 h-4" />,
   },
   {
     label: "Reports",
     href: "/center/reports",
-    icon: <BarChart3 className="w-4 h-4" />,
-  },
-  {
-    label: "Settings",
-    href: "/center/settings",
-    icon: <Settings className="w-4 h-4" />,
-  },
-];
-
-const todaysCandidates = [
-  {
-    id: "CND-001",
-    name: "Muhammad Ahmed",
-    cnic: "35201-1234567-1",
-    time: "10:00 AM",
-    status: "verified",
-  },
-  {
-    id: "CND-002",
-    name: "Fatima Khan",
-    cnic: "35201-7654321-2",
-    time: "10:00 AM",
-    status: "verified",
-  },
-  {
-    id: "CND-003",
-    name: "Ali Hassan",
-    cnic: "35201-9876543-3",
-    time: "10:00 AM",
-    status: "pending",
-  },
-  {
-    id: "CND-004",
-    name: "Ayesha Malik",
-    cnic: "35201-1357924-4",
-    time: "11:00 AM",
-    status: "pending",
-  },
-  {
-    id: "CND-005",
-    name: "Usman Tariq",
-    cnic: "35201-2468135-5",
-    time: "11:00 AM",
-    status: "pending",
+    icon: <FileText className="w-4 h-4" />,
   },
 ];
 
 export default function CenterAdminPortal() {
   return (
     <DashboardLayout
-      title="Center Dashboard"
-      subtitle="Lahore Training Center #3"
+      title="Center Admin Portal"
+      subtitle="Operational Control Dashboard"
       portalType="center"
-      navItems={navItems}
+      navItems={centerNavItems}
     >
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          title="Today's Candidates"
-          value="42"
-          icon={Users}
-          change="+8 from yesterday"
-          changeType="positive"
+      <div className="space-y-8 max-w-[1600px] mx-auto">
+        {/* Center Info Section */}
+        <CenterInfoCard
+          name="Lahore Training Center #3"
+          id="LHR-003"
+          location="Model Town, Lahore"
+          adminName="M. Siddique"
         />
-        <StatCard
-          title="Verified"
-          value="28"
-          icon={CheckCircle2}
-          change="66.7% verified"
-          changeType="positive"
-        />
-        <StatCard
-          title="Exams in Progress"
-          value="12"
-          icon={Clock}
-          change="Currently active"
-          changeType="neutral"
-        />
-        <StatCard
-          title="Completed Today"
-          value="16"
-          icon={UserCheck}
-          change="14 passed, 2 failed"
-          changeType="positive"
-        />
-      </div>
 
-      {/* Main Content Grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Today's Candidates Table */}
-        <div className="lg:col-span-2 p-6 rounded-xl bg-card border border-border/60 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-display font-semibold text-foreground">
-              Today's Candidates
-            </h3>
-            <Button variant="outline" size="sm">
-              View All
-            </Button>
+        {/* Quick Stats Grid */}
+        <CenterStats />
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Candidate Table Section */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-display font-bold text-foreground">Today's Candidate Queue</h3>
+              <p className="text-sm text-muted-foreground">Jan 20, 2024</p>
+            </div>
+            <CandidateSearch />
+            <CandidateTable />
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    Candidate
-                  </th>
-                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    CNIC
-                  </th>
-                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    Time
-                  </th>
-                  <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    Status
-                  </th>
-                  <th className="text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {todaysCandidates.map((candidate) => (
-                  <tr
-                    key={candidate.id}
-                    className="border-b border-border/50 hover:bg-secondary/30 transition-colors"
-                  >
-                    <td className="py-4">
-                      <div>
-                        <p className="font-medium text-foreground">
-                          {candidate.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {candidate.id}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="py-4 text-sm text-muted-foreground">
-                      {candidate.cnic}
-                    </td>
-                    <td className="py-4 text-sm text-muted-foreground">
-                      {candidate.time}
-                    </td>
-                    <td className="py-4">
-                      <Badge
-                        variant={
-                          candidate.status === "verified"
-                            ? "default"
-                            : "secondary"
-                        }
-                        className={
-                          candidate.status === "verified"
-                            ? "bg-success/10 text-success border border-success/20"
-                            : "bg-warning/10 text-warning border border-warning/20"
-                        }
-                      >
-                        {candidate.status === "verified"
-                          ? "Verified"
-                          : "Pending"}
-                      </Badge>
-                    </td>
-                    <td className="py-4 text-right">
-                      {candidate.status === "pending" ? (
-                        <Button variant="neon" size="sm">
-                          Verify
-                        </Button>
-                      ) : (
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Quick Verification & Monitoring Side Panel */}
+          <div className="space-y-8">
+            <h3 className="text-xl font-display font-bold text-foreground">Quick Verification</h3>
+            <CandidateActionCard />
+
+            <div className="p-6 rounded-2xl bg-primary/5 border border-primary/20">
+              <h4 className="font-bold text-foreground mb-2 flex items-center gap-2">
+                <Monitor className="w-4 h-4 text-primary" />
+                Shift Status
+              </h4>
+              <p className="text-sm text-muted-foreground mb-4">You are currently managing the Morning Shift (09:00 AM - 01:00 PM).</p>
+              <div className="flex gap-2">
+                <span className="px-2 py-1 rounded-md bg-white text-[10px] font-bold border border-border/40 uppercase">Room 1: Active</span>
+                <span className="px-2 py-1 rounded-md bg-white text-[10px] font-bold border border-border/40 uppercase">Room 2: Idle</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Exam Progress */}
-        <div className="p-6 rounded-xl bg-card border border-border/60 shadow-sm">
-          <h3 className="text-lg font-display font-semibold text-foreground mb-4">
-            Exam Progress
-          </h3>
+        {/* Live Monitoring Section */}
+        <div className="space-y-6 pt-4">
+          <h3 className="text-xl font-display font-bold text-foreground">Live Exam Monitoring</h3>
+          <ExamMonitoringGrid />
+        </div>
 
-          <div className="space-y-4">
-            {[
-              { name: "Muhammad Ahmed", progress: 75, timeLeft: "5:00" },
-              { name: "Fatima Khan", progress: 45, timeLeft: "11:00" },
-              { name: "Zain Abbas", progress: 90, timeLeft: "2:00" },
-            ].map((exam, index) => (
-              <div key={index} className="p-4 rounded-xl bg-secondary/30 border border-border/40">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-foreground">
-                    {exam.name}
-                  </p>
-                  <span className="text-xs text-muted-foreground font-medium">
-                    {exam.timeLeft} left
-                  </span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-border">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
-                    style={{ width: `${exam.progress}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {exam.progress}% complete
-                </p>
-              </div>
-            ))}
+        {/* Results & Reports Preview */}
+        <div className="grid md:grid-cols-2 gap-8 pt-4">
+          <div className="space-y-6">
+            <h3 className="text-xl font-display font-bold text-foreground">Daily Results Breakdown</h3>
+            <DailyResultsView />
           </div>
-
-          <div className="mt-6 pt-4 border-t border-border">
-            <h4 className="text-sm font-semibold text-foreground mb-3">
-              Today's Results
-            </h4>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="p-3 rounded-xl bg-success/10 border border-success/20 text-center">
-                <CheckCircle2 className="w-4 h-4 text-success mx-auto mb-1" />
-                <p className="text-lg font-bold text-success">14</p>
-                <p className="text-xs text-muted-foreground">Passed</p>
-              </div>
-              <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-center">
-                <XCircle className="w-4 h-4 text-destructive mx-auto mb-1" />
-                <p className="text-lg font-bold text-destructive">2</p>
-                <p className="text-xs text-muted-foreground">Failed</p>
-              </div>
-              <div className="p-3 rounded-xl bg-secondary border border-border text-center">
-                <Clock className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
-                <p className="text-lg font-bold text-foreground">12</p>
-                <p className="text-xs text-muted-foreground">In Progress</p>
-              </div>
-            </div>
+          <div className="space-y-6">
+            <h3 className="text-xl font-display font-bold text-foreground">Historical Performance</h3>
+            <HistoricalReports />
           </div>
         </div>
       </div>
