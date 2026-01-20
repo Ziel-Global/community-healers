@@ -1,14 +1,204 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Header } from "@/components/Header";
+import { PortalCard } from "@/components/PortalCard";
+import { Button } from "@/components/ui/button";
+import {
+  GraduationCap,
+  Building2,
+  ShieldCheck,
+  Landmark,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  Award,
+  Users,
+} from "lucide-react";
 
-const Index = () => {
+const portals = [
+  {
+    title: "Candidate Portal",
+    description:
+      "Register, schedule exams, complete CBT tests, and download your official government certificates.",
+    icon: GraduationCap,
+    href: "/candidate",
+    stats: [
+      { label: "Active Candidates", value: "12,450" },
+      { label: "Exams Today", value: "342" },
+    ],
+  },
+  {
+    title: "Center Admin",
+    description:
+      "Manage exam day operations, verify candidate identity, and monitor examination progress.",
+    icon: Building2,
+    href: "/center",
+    stats: [
+      { label: "Centers Active", value: "86" },
+      { label: "Verified Today", value: "1,204" },
+    ],
+  },
+  {
+    title: "Super Admin",
+    description:
+      "Configure centers, manage question banks, upload training content, and oversee system operations.",
+    icon: ShieldCheck,
+    href: "/admin",
+    stats: [
+      { label: "Total Questions", value: "5,000+" },
+      { label: "Training Videos", value: "50" },
+    ],
+  },
+  {
+    title: "Ministry Portal",
+    description:
+      "Review exam results, approve certifications, and issue official government certificates.",
+    icon: Landmark,
+    href: "/ministry",
+    stats: [
+      { label: "Certificates Issued", value: "45,230" },
+      { label: "Pending Review", value: "892" },
+    ],
+  },
+];
+
+const features = [
+  {
+    icon: CheckCircle2,
+    title: "Automated Center Assignment",
+    description: "Fair and equal distribution of candidates across training centers",
+  },
+  {
+    icon: Clock,
+    title: "Secure CBT Exams",
+    description: "20 randomized questions with 20-minute time limit",
+  },
+  {
+    icon: Award,
+    title: "Digital Certificates",
+    description: "Government-issued certificates with unique verification codes",
+  },
+  {
+    icon: Users,
+    title: "Multi-Role Access",
+    description: "Dedicated dashboards for candidates, centers, admins, and ministry",
+  },
+];
+
+export default function Index() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header />
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container mx-auto relative">
+          <div className="max-w-4xl mx-auto text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs font-medium text-primary">
+                Government Certified Platform
+              </span>
+            </div>
+
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+              Digital Certification &{" "}
+              <span className="text-gradient">Examination</span> Platform
+            </h1>
+
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              End-to-end digital solution managing candidate journeys from
+              registration to government certificate issuance, with secure CBT
+              exams and full compliance.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Button variant="gradient" size="xl">
+                Get Started
+                <ArrowRight className="w-5 h-5 ml-1" />
+              </Button>
+              <Button variant="outline" size="xl">
+                Learn More
+              </Button>
+            </div>
+          </div>
+
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-20">
+            {[
+              { value: "45,000+", label: "Certificates Issued" },
+              { value: "86", label: "Training Centers" },
+              { value: "99.9%", label: "System Uptime" },
+              { value: "24/7", label: "Support Available" },
+            ].map((stat, index) => (
+              <div
+                key={index}
+                className="text-center p-4 rounded-xl bg-card/40 backdrop-blur border border-border/30"
+              >
+                <p className="text-2xl md:text-3xl font-bold text-gradient">
+                  {stat.value}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Portal Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+            {portals.map((portal) => (
+              <PortalCard key={portal.title} {...portal} />
+            ))}
+          </div>
+
+          {/* Features Section */}
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-12">
+              Platform Features
+            </h2>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {features.map((feature, index) => (
+                <div
+                  key={index}
+                  className="p-5 rounded-xl bg-card/40 backdrop-blur border border-border/30 hover:border-primary/30 transition-all duration-300"
+                >
+                  <feature.icon className="w-8 h-8 text-primary mb-4" />
+                  <h3 className="font-semibold text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border/30 py-8 px-6">
+        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            © 2024 CertifyPro. All rights reserved. Government Certified Platform.
+          </p>
+          <div className="flex items-center gap-6">
+            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Privacy Policy
+            </a>
+            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Terms of Service
+            </a>
+            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Support
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
-};
-
-export default Index;
+}
