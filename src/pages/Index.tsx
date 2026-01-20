@@ -19,7 +19,7 @@ const portals = [
     description:
       "Register, schedule exams, complete CBT tests, and download your official government certificates.",
     icon: GraduationCap,
-    href: "/candidate",
+    href: "/candidate/auth",
     stats: [
       { label: "Active Candidates", value: "12,450" },
       { label: "Exams Today", value: "342" },
@@ -30,7 +30,7 @@ const portals = [
     description:
       "Manage exam day operations, verify candidate identity, and monitor examination progress.",
     icon: Building2,
-    href: "/center",
+    href: "/center/auth",
     stats: [
       { label: "Centers Active", value: "86" },
       { label: "Verified Today", value: "1,204" },
@@ -41,7 +41,7 @@ const portals = [
     description:
       "Configure centers, manage question banks, upload training content, and oversee system operations.",
     icon: ShieldCheck,
-    href: "/admin",
+    href: "/admin/auth",
     stats: [
       { label: "Total Questions", value: "5,000+" },
       { label: "Training Videos", value: "50" },
@@ -52,7 +52,7 @@ const portals = [
     description:
       "Review exam results, approve certifications, and issue official government certificates.",
     icon: Landmark,
-    href: "/ministry",
+    href: "/ministry/auth",
     stats: [
       { label: "Certificates Issued", value: "45,230" },
       { label: "Pending Review", value: "892" },

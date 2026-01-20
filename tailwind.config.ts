@@ -69,23 +69,21 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        royal: {
-          50: "hsl(var(--royal-50))",
-          100: "hsl(var(--royal-100))",
-          200: "hsl(var(--royal-200))",
-          500: "hsl(var(--royal-500))",
-          600: "hsl(var(--royal-600))",
-          700: "hsl(var(--royal-700))",
+        charcoal: {
+          100: "hsl(var(--charcoal-100))",
+          200: "hsl(var(--charcoal-200))",
+          300: "hsl(var(--charcoal-300))",
+          400: "hsl(var(--charcoal-400))",
+          500: "hsl(var(--charcoal-500))",
+          600: "hsl(var(--charcoal-600))",
+          700: "hsl(var(--charcoal-700))",
+          800: "hsl(var(--charcoal-800))",
+          900: "hsl(var(--charcoal-900))",
         },
-        cream: {
-          50: "hsl(var(--cream-50))",
-          100: "hsl(var(--cream-100))",
-          200: "hsl(var(--cream-200))",
-        },
-        gold: {
-          DEFAULT: "hsl(var(--gold))",
-          light: "hsl(var(--gold-light))",
-          dark: "hsl(var(--gold-dark))",
+        lime: {
+          DEFAULT: "hsl(var(--lime))",
+          light: "hsl(var(--lime-light))",
+          dark: "hsl(var(--lime-dark))",
         },
       },
       borderRadius: {
