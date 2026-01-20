@@ -99,9 +99,9 @@ export default function SuperAdminPortal() {
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Centers Management */}
-        <div className="lg:col-span-2 p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
+        <div className="lg:col-span-2 p-6 rounded-xl bg-card border border-border/60 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">
+            <h3 className="text-lg font-display font-semibold text-foreground">
               Training Centers
             </h3>
             <Button variant="gradient" size="sm">
@@ -114,11 +114,11 @@ export default function SuperAdminPortal() {
             {centers.map((center, index) => (
               <div
                 key={index}
-                className="p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors flex items-center justify-between"
+                className="p-4 rounded-xl bg-secondary/30 border border-border/40 hover:border-primary/30 transition-colors flex items-center justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                    <Building2 className="w-5 h-5 text-violet-400" />
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <p className="font-medium text-foreground">{center.name}</p>
@@ -130,8 +130,8 @@ export default function SuperAdminPortal() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-foreground">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-sm font-semibold text-foreground">
                       {center.candidates}
                     </p>
                     <p className="text-xs text-muted-foreground">Candidates</p>
@@ -139,8 +139,8 @@ export default function SuperAdminPortal() {
                   <Badge
                     className={
                       center.status === "active"
-                        ? "bg-success/20 text-success border-success/30"
-                        : "bg-warning/20 text-warning border-warning/30"
+                        ? "bg-success/10 text-success border border-success/20"
+                        : "bg-warning/10 text-warning border border-warning/20"
                     }
                   >
                     {center.status}
@@ -161,8 +161,8 @@ export default function SuperAdminPortal() {
         {/* System Status */}
         <div className="space-y-6">
           {/* Quick Stats */}
-          <div className="p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
+          <div className="p-6 rounded-xl bg-card border border-border/60 shadow-sm">
+            <h3 className="text-lg font-display font-semibold text-foreground mb-4">
               System Status
             </h3>
 
@@ -172,7 +172,7 @@ export default function SuperAdminPortal() {
                   <Database className="w-4 h-4 text-success" />
                   <span className="text-sm text-foreground">Database</span>
                 </div>
-                <Badge className="bg-success/20 text-success border-success/30">
+                <Badge className="bg-success/10 text-success border border-success/20">
                   Healthy
                 </Badge>
               </div>
@@ -181,7 +181,7 @@ export default function SuperAdminPortal() {
                   <Shield className="w-4 h-4 text-success" />
                   <span className="text-sm text-foreground">Security</span>
                 </div>
-                <Badge className="bg-success/20 text-success border-success/30">
+                <Badge className="bg-success/10 text-success border border-success/20">
                   Secured
                 </Badge>
               </div>
@@ -190,7 +190,7 @@ export default function SuperAdminPortal() {
                   <TrendingUp className="w-4 h-4 text-success" />
                   <span className="text-sm text-foreground">API</span>
                 </div>
-                <Badge className="bg-success/20 text-success border-success/30">
+                <Badge className="bg-success/10 text-success border border-success/20">
                   99.9% Uptime
                 </Badge>
               </div>
@@ -198,8 +198,8 @@ export default function SuperAdminPortal() {
           </div>
 
           {/* Recent Activity */}
-          <div className="p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
+          <div className="p-6 rounded-xl bg-card border border-border/60 shadow-sm">
+            <h3 className="text-lg font-display font-semibold text-foreground mb-4">
               Recent Activity
             </h3>
 
@@ -212,7 +212,7 @@ export default function SuperAdminPortal() {
               ].map((activity, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between py-2 border-b border-border/30 last:border-0"
+                  className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
                 >
                   <p className="text-sm text-foreground">{activity.action}</p>
                   <p className="text-xs text-muted-foreground">

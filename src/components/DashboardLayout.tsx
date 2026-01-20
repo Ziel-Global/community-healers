@@ -19,10 +19,17 @@ interface DashboardLayoutProps {
 }
 
 const portalColors = {
-  candidate: "from-primary to-orange-400",
-  center: "from-emerald-500 to-teal-400",
-  admin: "from-violet-500 to-purple-400",
-  ministry: "from-blue-500 to-cyan-400",
+  candidate: "from-primary to-royal-600",
+  center: "from-emerald-500 to-teal-500",
+  admin: "from-violet-500 to-purple-500",
+  ministry: "from-primary to-royal-700",
+};
+
+const portalLabels = {
+  candidate: "Candidate",
+  center: "Center Admin",
+  admin: "Super Admin",
+  ministry: "Ministry",
 };
 
 export function DashboardLayout({
@@ -40,7 +47,7 @@ export function DashboardLayout({
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -58,16 +65,16 @@ export function DashboardLayout({
           <Link to="/" className="flex items-center gap-3 mb-8">
             <div
               className={cn(
-                "w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center",
+                "w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md",
                 portalColors[portalType]
               )}
             >
               <Shield className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <p className="font-bold text-foreground text-sm">CertifyPro</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                {portalType} Portal
+              <p className="font-display font-bold text-foreground text-sm">CertifyPro</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                {portalLabels[portalType]}
               </p>
             </div>
           </Link>
@@ -79,9 +86,9 @@ export function DashboardLayout({
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                   location.pathname === item.href
-                    ? "bg-primary/10 text-primary font-medium"
+                    ? "bg-primary/10 text-primary border border-primary/20"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 )}
               >
@@ -95,7 +102,7 @@ export function DashboardLayout({
         {/* Logout */}
         <div className="absolute bottom-6 left-6 right-6">
           <Link to="/">
-            <Button variant="ghost" className="w-full justify-start gap-3">
+            <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground">
               <LogOut className="w-4 h-4" />
               Back to Home
             </Button>
@@ -106,16 +113,16 @@ export function DashboardLayout({
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 h-16 bg-background/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-6">
+        <header className="sticky top-0 z-30 h-16 bg-card/90 backdrop-blur-xl border-b border-border flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5 text-foreground" />
             </button>
             <div>
-              <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+              <h1 className="text-lg font-display font-semibold text-foreground">{title}</h1>
               {subtitle && (
                 <p className="text-xs text-muted-foreground">{subtitle}</p>
               )}
@@ -123,24 +130,26 @@ export function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            <span className="text-xs text-muted-foreground hidden sm:block">
-              System Online
-            </span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20">
+              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+              <span className="text-xs font-medium text-success hidden sm:block">
+                Online
+              </span>
+            </div>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="p-6">{children}</main>
+        <main className="p-6 bg-background min-h-[calc(100vh-4rem)]">{children}</main>
       </div>
 
       {/* Mobile close button */}
       {sidebarOpen && (
         <button
           onClick={() => setSidebarOpen(false)}
-          className="fixed top-4 right-4 z-50 p-2 rounded-lg bg-card border border-border lg:hidden"
+          className="fixed top-4 right-4 z-50 p-2 rounded-lg bg-card border border-border lg:hidden shadow-lg"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 text-foreground" />
         </button>
       )}
     </div>

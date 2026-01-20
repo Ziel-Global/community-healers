@@ -23,27 +23,27 @@ export function PortalCard({
       to={href}
       className={cn(
         "group relative flex flex-col p-6 rounded-2xl",
-        "bg-card/60 backdrop-blur-xl border border-border/50",
-        "hover:bg-card/80 hover:border-primary/40",
+        "bg-card border border-border/60",
+        "hover:border-primary/30 hover:shadow-royal",
         "transition-all duration-500 ease-out",
-        "hover:shadow-glow hover:-translate-y-1"
+        "hover:-translate-y-1"
       )}
     >
-      {/* Glow effect */}
-      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/10 to-transparent" />
+      {/* Subtle gradient overlay on hover */}
+      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-gold/5" />
       </div>
 
       {/* Icon */}
       <div className="relative mb-4">
-        <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow duration-300">
+        <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center shadow-royal group-hover:shadow-lg transition-all duration-300">
           <Icon className="w-7 h-7 text-primary-foreground" />
         </div>
       </div>
 
       {/* Content */}
       <div className="relative flex-1">
-        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+        <h3 className="text-xl font-display font-bold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
           {title}
         </h3>
         <p className="text-muted-foreground text-sm leading-relaxed">

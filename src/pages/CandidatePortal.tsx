@@ -56,13 +56,13 @@ export default function CandidatePortal() {
       navItems={navItems}
     >
       {/* Status Banner */}
-      <div className="mb-6 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between flex-wrap gap-4">
+      <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <AlertCircle className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="font-medium text-foreground">Exam Scheduled</p>
+            <p className="font-semibold text-foreground">Exam Scheduled</p>
             <p className="text-sm text-muted-foreground">
               Your CBT exam is scheduled for January 25, 2024 at 10:00 AM
             </p>
@@ -108,19 +108,19 @@ export default function CandidatePortal() {
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Upcoming Exam Card */}
-        <div className="lg:col-span-2 p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
-          <h3 className="text-lg font-semibold text-foreground mb-4">
+        <div className="lg:col-span-2 p-6 rounded-xl bg-card border border-border/60 shadow-sm">
+          <h3 className="text-lg font-display font-semibold text-foreground mb-4">
             Upcoming Exam
           </h3>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border/40">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shadow-royal">
                   <Calendar className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">
+                  <p className="font-semibold text-foreground">
                     CBT Certification Exam
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -128,29 +128,29 @@ export default function CandidatePortal() {
                   </p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right hidden sm:block">
                 <p className="text-sm text-muted-foreground">Assigned Center</p>
-                <p className="font-medium text-foreground">
+                <p className="font-semibold text-foreground">
                   Lahore Training Center #3
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
-              <div className="p-4 rounded-lg bg-secondary/30 text-center">
+              <div className="p-4 rounded-xl bg-secondary/30 border border-border/40 text-center">
                 <Clock className="w-5 h-5 text-primary mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground">Duration</p>
-                <p className="font-semibold text-foreground">20 Minutes</p>
+                <p className="text-xs text-muted-foreground font-medium">Duration</p>
+                <p className="font-bold text-foreground">20 Minutes</p>
               </div>
-              <div className="p-4 rounded-lg bg-secondary/30 text-center">
+              <div className="p-4 rounded-xl bg-secondary/30 border border-border/40 text-center">
                 <FileText className="w-5 h-5 text-primary mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground">Questions</p>
-                <p className="font-semibold text-foreground">20 MCQs</p>
+                <p className="text-xs text-muted-foreground font-medium">Questions</p>
+                <p className="font-bold text-foreground">20 MCQs</p>
               </div>
-              <div className="p-4 rounded-lg bg-secondary/30 text-center">
+              <div className="p-4 rounded-xl bg-secondary/30 border border-border/40 text-center">
                 <CheckCircle2 className="w-5 h-5 text-primary mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground">Pass Score</p>
-                <p className="font-semibold text-foreground">60%</p>
+                <p className="text-xs text-muted-foreground font-medium">Pass Score</p>
+                <p className="font-bold text-foreground">60%</p>
               </div>
             </div>
 
@@ -166,8 +166,8 @@ export default function CandidatePortal() {
         </div>
 
         {/* Recent Training Videos */}
-        <div className="p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
-          <h3 className="text-lg font-semibold text-foreground mb-4">
+        <div className="p-6 rounded-xl bg-card border border-border/60 shadow-sm">
+          <h3 className="text-lg font-display font-semibold text-foreground mb-4">
             Continue Training
           </h3>
 
@@ -180,7 +180,7 @@ export default function CandidatePortal() {
             ].map((video, index) => (
               <div
                 key={index}
-                className="p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer group"
+                className="p-3 rounded-xl bg-secondary/30 border border-border/40 hover:border-primary/30 transition-colors cursor-pointer group"
               >
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-medium text-foreground">
@@ -188,7 +188,7 @@ export default function CandidatePortal() {
                   </p>
                   <Play className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-secondary">
+                <div className="w-full h-1.5 rounded-full bg-border">
                   <div
                     className="h-full rounded-full gradient-primary transition-all duration-300"
                     style={{ width: `${video.progress}%` }}
@@ -205,8 +205,8 @@ export default function CandidatePortal() {
       </div>
 
       {/* Quick Actions */}
-      <div className="mt-6 p-6 rounded-xl bg-card/60 backdrop-blur border border-border/50">
-        <h3 className="text-lg font-semibold text-foreground mb-4">
+      <div className="mt-6 p-6 rounded-xl bg-card border border-border/60 shadow-sm">
+        <h3 className="text-lg font-display font-semibold text-foreground mb-4">
           Quick Actions
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -218,10 +218,10 @@ export default function CandidatePortal() {
           ].map((action, index) => (
             <button
               key={index}
-              className="p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors text-center group"
+              className="p-4 rounded-xl bg-secondary/30 border border-border/40 hover:border-primary/30 hover:bg-secondary/50 transition-all text-center group"
             >
               <action.icon className="w-6 h-6 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-sm text-foreground">{action.label}</p>
+              <p className="text-sm font-medium text-foreground">{action.label}</p>
             </button>
           ))}
         </div>

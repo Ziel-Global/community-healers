@@ -89,28 +89,29 @@ export default function Index() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden gradient-hero">
+        {/* Background decorations */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-gold/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-3xl" />
         </div>
 
         <div className="container mx-auto relative">
           <div className="max-w-4xl mx-auto text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs font-medium text-primary">
+              <span className="text-xs font-semibold text-primary uppercase tracking-wider">
                 Government Certified Platform
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-display font-bold text-foreground mb-6 leading-tight">
               Digital Certification &{" "}
               <span className="text-gradient">Examination</span> Platform
             </h1>
 
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
               End-to-end digital solution managing candidate journeys from
               registration to government certificate issuance, with secure CBT
               exams and full compliance.
@@ -137,12 +138,12 @@ export default function Index() {
             ].map((stat, index) => (
               <div
                 key={index}
-                className="text-center p-4 rounded-xl bg-card/40 backdrop-blur border border-border/30"
+                className="text-center p-5 rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-royal transition-all duration-300"
               >
                 <p className="text-2xl md:text-3xl font-bold text-gradient">
                   {stat.value}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+                <p className="text-xs text-muted-foreground mt-1 font-medium">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -156,21 +157,26 @@ export default function Index() {
 
           {/* Features Section */}
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-12">
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-center text-foreground mb-4">
               Platform Features
             </h2>
+            <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+              Built with enterprise-grade security and reliability to manage your entire certification workflow.
+            </p>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className="p-5 rounded-xl bg-card/40 backdrop-blur border border-border/30 hover:border-primary/30 transition-all duration-300"
+                  className="p-6 rounded-xl bg-card border border-border/60 hover:border-primary/30 hover:shadow-royal transition-all duration-300 group"
                 >
-                  <feature.icon className="w-8 h-8 text-primary mb-4" />
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <feature.icon className="w-6 h-6 text-primary" />
+                  </div>
                   <h3 className="font-semibold text-foreground mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -181,19 +187,19 @@ export default function Index() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/30 py-8 px-6">
+      <footer className="border-t border-border bg-card py-8 px-6">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
             © 2024 CertifyPro. All rights reserved. Government Certified Platform.
           </p>
           <div className="flex items-center gap-6">
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
               Privacy Policy
             </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
               Terms of Service
             </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
               Support
             </a>
           </div>
