@@ -8,6 +8,10 @@ import CandidatePortal from "./pages/CandidatePortal";
 import CenterAdminPortal from "./pages/CenterAdminPortal";
 import SuperAdminPortal from "./pages/SuperAdminPortal";
 import MinistryPortal from "./pages/MinistryPortal";
+import CandidateAuth from "./pages/auth/CandidateAuth";
+import CenterAdminAuth from "./pages/auth/CenterAdminAuth";
+import SuperAdminAuth from "./pages/auth/SuperAdminAuth";
+import MinistryAuth from "./pages/auth/MinistryAuth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +24,12 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          {/* Auth Routes */}
+          <Route path="/candidate/auth" element={<CandidateAuth />} />
+          <Route path="/center/auth" element={<CenterAdminAuth />} />
+          <Route path="/admin/auth" element={<SuperAdminAuth />} />
+          <Route path="/ministry/auth" element={<MinistryAuth />} />
+          {/* Portal Routes */}
           <Route path="/candidate" element={<CandidatePortal />} />
           <Route path="/center" element={<CenterAdminPortal />} />
           <Route path="/admin" element={<SuperAdminPortal />} />
