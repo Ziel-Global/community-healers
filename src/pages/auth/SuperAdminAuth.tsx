@@ -15,54 +15,49 @@ export default function SuperAdminAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-charcoal-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
+    <div className="min-h-screen bg-white flex">
+      {/* Left Panel - Branding with Neon */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
         
-        <div className="relative z-10 flex flex-col justify-center px-12 text-white">
+        <div className="relative z-10 flex flex-col justify-center px-12">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center">
-              <ShieldCheck className="w-8 h-8 text-accent-foreground" />
+            <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center neon-glow">
+              <ShieldCheck className="w-8 h-8 text-primary" />
             </div>
-            <span className="text-2xl font-display font-bold">CertifyPro</span>
+            <span className="text-2xl font-display font-bold text-charcoal-900">CertifyPro</span>
           </div>
           
-          <h1 className="text-4xl font-display font-bold mb-4">
-            Super Admin Portal
+          <h1 className="text-4xl font-display font-bold mb-4 text-charcoal-900">
+            Super Admin
           </h1>
-          <p className="text-lg text-white/80 leading-relaxed max-w-md">
-            Full system control for center management, question banks, training content, and platform oversight.
+          <p className="text-lg text-charcoal-800 leading-relaxed max-w-md">
+            Complete system administration access. Manage centers, question banks, training content, and all platform operations.
           </p>
 
           <div className="mt-12 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                <span className="text-accent text-sm font-bold">⚡</span>
+            {[
+              { icon: "🏢", text: "Manage training centers" },
+              { icon: "📝", text: "Configure question banks" },
+              { icon: "🎥", text: "Upload training content" },
+              { icon: "👥", text: "Control user access" },
+            ].map((item, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-neon">
+                  <span className="text-sm">{item.icon}</span>
+                </div>
+                <span className="text-charcoal-800 font-medium">{item.text}</span>
               </div>
-              <span className="text-white/80">Manage all training centers</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                <span className="text-accent text-sm font-bold">⚡</span>
-              </div>
-              <span className="text-white/80">Configure question banks & exams</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                <span className="text-accent text-sm font-bold">⚡</span>
-              </div>
-              <span className="text-white/80">System-wide analytics & reports</span>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex flex-col justify-center px-6 lg:px-16">
+      <div className="flex-1 flex flex-col justify-center px-6 lg:px-16 bg-white">
         <Link
           to="/"
-          className="absolute top-6 left-6 lg:left-auto lg:right-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-6 left-6 lg:left-auto lg:right-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -70,8 +65,8 @@ export default function SuperAdminAuth() {
 
         <div className="max-w-md mx-auto w-full">
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-charcoal-900 flex items-center justify-center">
-              <ShieldCheck className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center neon-glow">
+              <ShieldCheck className="w-6 h-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-display font-bold">Super Admin</span>
           </div>
@@ -81,8 +76,8 @@ export default function SuperAdminAuth() {
           </h2>
           <p className="text-muted-foreground mb-8">
             {isSignUp
-              ? "Initialize your super admin credentials"
-              : "Access the system administration panel"}
+              ? "Configure your super admin credentials"
+              : "Access the system administration portal"}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -93,8 +88,8 @@ export default function SuperAdminAuth() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="superadmin@certifypro.gov"
-                  className="pl-10 h-12"
+                  placeholder="admin@certifypro.gov"
+                  className="pl-10 h-12 border-2 focus:border-primary"
                   required
                 />
               </div>
@@ -106,7 +101,7 @@ export default function SuperAdminAuth() {
                 {!isSignUp && (
                   <button
                     type="button"
-                    className="text-sm text-accent hover:text-lime-dark font-medium"
+                    className="text-sm text-primary hover:text-primary/80 font-semibold"
                   >
                     Reset password
                   </button>
@@ -118,7 +113,7 @@ export default function SuperAdminAuth() {
                   id="password"
                   type="password"
                   placeholder="Enter your password"
-                  className="pl-10 h-12"
+                  className="pl-10 h-12 border-2 focus:border-primary"
                   required
                 />
               </div>
@@ -133,7 +128,7 @@ export default function SuperAdminAuth() {
                     id="2fa"
                     type="text"
                     placeholder="Enter 6-digit code"
-                    className="pl-10 h-12"
+                    className="pl-10 h-12 border-2 focus:border-primary"
                     maxLength={6}
                     required
                   />
@@ -141,25 +136,25 @@ export default function SuperAdminAuth() {
               </div>
             )}
 
-            <Button type="submit" className="w-full h-12 bg-charcoal-900 text-white hover:bg-charcoal-800 font-semibold text-base">
-              {isSignUp ? "Initialize Admin" : "Secure Sign In"}
+            <Button type="submit" variant="neon" className="w-full h-12 text-base">
+              {isSignUp ? "Complete Setup" : "Secure Login"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-muted-foreground">
-            {isSignUp ? "Already initialized?" : "First time setup?"}{" "}
+            {isSignUp ? "Already configured?" : "First time setup?"}{" "}
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-foreground font-semibold hover:text-accent transition-colors"
+              className="text-primary font-semibold hover:text-primary/80 transition-colors"
             >
-              {isSignUp ? "Sign In" : "Setup Admin"}
+              {isSignUp ? "Sign In" : "Admin Setup"}
             </button>
           </p>
 
-          <div className="mt-8 p-4 rounded-lg bg-muted border border-border">
+          <div className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/20">
             <p className="text-xs text-muted-foreground text-center">
-              🔒 This is a secure administrative portal. All access attempts are logged and monitored.
+              🔒 This is a secure portal. All access attempts are logged and monitored.
             </p>
           </div>
         </div>

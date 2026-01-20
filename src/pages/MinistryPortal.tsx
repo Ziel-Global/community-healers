@@ -133,7 +133,7 @@ export default function MinistryPortal() {
                 Select candidates for bulk certificate issuance
               </p>
             </div>
-            <Button variant="gradient">
+            <Button variant="neon">
               <CheckCircle2 className="w-4 h-4 mr-2" />
               Issue Selected
             </Button>
@@ -198,7 +198,7 @@ export default function MinistryPortal() {
                         <Button variant="outline" size="sm">
                           View
                         </Button>
-                        <Button variant="gradient" size="sm">
+                        <Button variant="neon" size="sm">
                           Issue
                         </Button>
                       </div>

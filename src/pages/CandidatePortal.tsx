@@ -68,7 +68,7 @@ export default function CandidatePortal() {
             </p>
           </div>
         </div>
-        <Button variant="gradient" size="sm">
+        <Button variant="neon" size="sm">
           View Details
         </Button>
       </div>
@@ -155,7 +155,7 @@ export default function CandidatePortal() {
             </div>
 
             <div className="flex gap-3">
-              <Button variant="gradient" className="flex-1">
+              <Button variant="neon" className="flex-1">
                 View Exam Details
               </Button>
               <Button variant="outline">

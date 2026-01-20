@@ -9,16 +9,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-neon hover:shadow-neon-strong",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border-2 border-primary/20 bg-transparent hover:bg-primary/5 hover:border-primary/40 text-primary",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border",
-        ghost: "hover:bg-secondary hover:text-secondary-foreground",
+        outline: "border-2 border-primary bg-transparent hover:bg-primary/10 text-foreground",
+        secondary: "bg-charcoal-900 text-white hover:bg-charcoal-800",
+        ghost: "hover:bg-primary/10 hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        gradient: "gradient-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 hover:scale-[1.02]",
-        gold: "gradient-gold text-foreground shadow-lg shadow-gold/25 hover:shadow-xl hover:shadow-gold/35 hover:scale-[1.02]",
+        neon: "gradient-neon text-charcoal-900 font-bold shadow-neon hover:shadow-neon-strong hover:scale-[1.02]",
+        dark: "gradient-dark text-white shadow-dark hover:shadow-lg hover:scale-[1.02]",
         glass: "glass glass-hover text-foreground",
-        royal: "bg-royal-500 text-primary-foreground hover:bg-royal-600 shadow-royal",
       },
       size: {
         default: "h-10 px-4 py-2",

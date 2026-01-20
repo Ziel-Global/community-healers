@@ -202,7 +202,7 @@ export default function CenterAdminPortal() {
                     </td>
                     <td className="py-4 text-right">
                       {candidate.status === "pending" ? (
-                        <Button variant="gradient" size="sm">
+                        <Button variant="neon" size="sm">
                           Verify
                         </Button>
                       ) : (

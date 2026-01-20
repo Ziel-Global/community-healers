@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, ArrowLeft, Mail, Lock, User } from "lucide-react";
+import { Building2, ArrowLeft, Mail, Lock, User, Hash } from "lucide-react";
 
 export default function CenterAdminAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -15,54 +15,48 @@ export default function CenterAdminAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-charcoal-800 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
+    <div className="min-h-screen bg-white flex">
+      {/* Left Panel - Branding with Neon */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
         
-        <div className="relative z-10 flex flex-col justify-center px-12 text-white">
+        <div className="relative z-10 flex flex-col justify-center px-12">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center">
-              <Building2 className="w-8 h-8 text-accent-foreground" />
+            <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center neon-glow">
+              <Building2 className="w-8 h-8 text-primary" />
             </div>
-            <span className="text-2xl font-display font-bold">CertifyPro</span>
+            <span className="text-2xl font-display font-bold text-charcoal-900">CertifyPro</span>
           </div>
           
-          <h1 className="text-4xl font-display font-bold mb-4">
-            Center Admin Portal
+          <h1 className="text-4xl font-display font-bold mb-4 text-charcoal-900">
+            Center Admin
           </h1>
-          <p className="text-lg text-white/80 leading-relaxed max-w-md">
-            Manage exam day operations, verify candidate identities, and monitor examination progress at your training center.
+          <p className="text-lg text-charcoal-800 leading-relaxed max-w-md">
+            Manage your training center operations, verify candidates, and oversee examinations.
           </p>
 
           <div className="mt-12 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                <span className="text-accent text-sm font-bold">✓</span>
+            {[
+              { icon: "👤", text: "Verify candidate identity" },
+              { icon: "📋", text: "Monitor exam progress" },
+              { icon: "📊", text: "Generate daily reports" },
+            ].map((item, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-neon">
+                  <span className="text-sm">{item.icon}</span>
+                </div>
+                <span className="text-charcoal-800 font-medium">{item.text}</span>
               </div>
-              <span className="text-white/80">Verify candidates on exam day</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                <span className="text-accent text-sm font-bold">✓</span>
-              </div>
-              <span className="text-white/80">Monitor exam progress in real-time</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                <span className="text-accent text-sm font-bold">✓</span>
-              </div>
-              <span className="text-white/80">View center statistics & reports</span>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex flex-col justify-center px-6 lg:px-16">
+      <div className="flex-1 flex flex-col justify-center px-6 lg:px-16 bg-white">
         <Link
           to="/"
-          className="absolute top-6 left-6 lg:left-auto lg:right-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-6 left-6 lg:left-auto lg:right-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -70,35 +64,50 @@ export default function CenterAdminAuth() {
 
         <div className="max-w-md mx-auto w-full">
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-charcoal-700 flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center neon-glow">
+              <Building2 className="w-6 h-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-display font-bold">Center Admin</span>
           </div>
 
           <h2 className="text-3xl font-display font-bold text-foreground mb-2">
-            {isSignUp ? "Request Access" : "Admin Login"}
+            {isSignUp ? "Request Access" : "Sign In"}
           </h2>
           <p className="text-muted-foreground mb-8">
             {isSignUp
-              ? "Submit your credentials for center admin access"
-              : "Sign in to manage your training center"}
+              ? "Submit your details for center admin access"
+              : "Access your center administration dashboard"}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    placeholder="Enter your full name"
-                    className="pl-10 h-12"
-                    required
-                  />
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="name"
+                      placeholder="Enter your full name"
+                      className="pl-10 h-12 border-2 focus:border-primary"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="centerCode">Center Code</Label>
+                  <div className="relative">
+                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="centerCode"
+                      placeholder="e.g., LHR-001"
+                      className="pl-10 h-12 border-2 focus:border-primary"
+                      required
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             <div className="space-y-2">
@@ -109,7 +118,7 @@ export default function CenterAdminAuth() {
                   id="email"
                   type="email"
                   placeholder="admin@center.com"
-                  className="pl-10 h-12"
+                  className="pl-10 h-12 border-2 focus:border-primary"
                   required
                 />
               </div>
@@ -121,7 +130,7 @@ export default function CenterAdminAuth() {
                 {!isSignUp && (
                   <button
                     type="button"
-                    className="text-sm text-accent hover:text-lime-dark font-medium"
+                    className="text-sm text-primary hover:text-primary/80 font-semibold"
                   >
                     Forgot password?
                   </button>
@@ -133,26 +142,14 @@ export default function CenterAdminAuth() {
                   id="password"
                   type="password"
                   placeholder="Enter your password"
-                  className="pl-10 h-12"
+                  className="pl-10 h-12 border-2 focus:border-primary"
                   required
                 />
               </div>
             </div>
 
-            {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="centerCode">Center Code</Label>
-                <Input
-                  id="centerCode"
-                  placeholder="Enter assigned center code"
-                  className="h-12"
-                  required
-                />
-              </div>
-            )}
-
-            <Button type="submit" className="w-full h-12 bg-charcoal-800 text-white hover:bg-charcoal-700 font-semibold text-base">
-              {isSignUp ? "Submit Request" : "Sign In"}
+            <Button type="submit" variant="neon" className="w-full h-12 text-base">
+              {isSignUp ? "Request Access" : "Sign In"}
             </Button>
           </form>
 
@@ -161,11 +158,17 @@ export default function CenterAdminAuth() {
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-foreground font-semibold hover:text-accent transition-colors"
+              className="text-primary font-semibold hover:text-primary/80 transition-colors"
             >
               {isSignUp ? "Sign In" : "Request Access"}
             </button>
           </p>
+
+          <div className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/20">
+            <p className="text-xs text-muted-foreground text-center">
+              🏢 Center admins must be approved by Super Admin before access is granted.
+            </p>
+          </div>
         </div>
       </div>
     </div>
