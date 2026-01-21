@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { candidateNavItems } from "./RegistrationPage";
 import { CenterAssignmentStatus } from "@/components/StudentPortal/Scheduling/CenterAssignmentStatus";
@@ -5,6 +6,8 @@ import { ExamSlotPicker } from "@/components/StudentPortal/Scheduling/ExamSlotPi
 import { FeePaymentCard } from "@/components/StudentPortal/Payments/FeePaymentCard";
 
 export default function SchedulingPage() {
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+
     return (
         <DashboardLayout
             title="Exam Scheduling"
@@ -20,7 +23,10 @@ export default function SchedulingPage() {
                             centerId="LHR-003"
                             location="Model Town, Lahore"
                         />
-                        <ExamSlotPicker />
+                        <ExamSlotPicker 
+                            selectedDate={selectedDate}
+                            onDateSelect={setSelectedDate}
+                        />
                     </div>
                     <div className="space-y-8">
                         <FeePaymentCard
