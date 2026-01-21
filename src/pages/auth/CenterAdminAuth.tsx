@@ -22,7 +22,7 @@ export default function CenterAdminAuth() {
         
         <div className="relative z-10 flex flex-col justify-center px-12">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center neon-glow">
+            <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-lg">
               <Building2 className="w-8 h-8 text-primary" />
             </div>
             <span className="text-2xl font-display font-bold text-charcoal-900">CertifyPro</span>
@@ -42,7 +42,7 @@ export default function CenterAdminAuth() {
               { icon: "📊", text: "Generate daily reports" },
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-neon">
+                <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-md">
                   <span className="text-sm">{item.icon}</span>
                 </div>
                 <span className="text-charcoal-800 font-medium">{item.text}</span>
@@ -64,7 +64,7 @@ export default function CenterAdminAuth() {
 
         <div className="max-w-md mx-auto w-full">
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center neon-glow">
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-md">
               <Building2 className="w-6 h-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-display font-bold">Center Admin</span>
@@ -148,7 +148,7 @@ export default function CenterAdminAuth() {
               </div>
             </div>
 
-            <Button type="submit" variant="neon" className="w-full h-12 text-base">
+            <Button type="submit" variant="forest" className="w-full h-12 text-base">
               {isSignUp ? "Request Access" : "Sign In"}
             </Button>
           </form>

@@ -80,10 +80,13 @@ export default {
           800: "hsl(var(--charcoal-800))",
           900: "hsl(var(--charcoal-900))",
         },
-        lime: {
-          DEFAULT: "hsl(var(--lime))",
-          light: "hsl(var(--lime-light))",
-          dark: "hsl(var(--lime-dark))",
+        forest: {
+          DEFAULT: "hsl(var(--forest))",
+          light: "hsl(var(--forest-light))",
+          dark: "hsl(var(--forest-dark))",
+          50: "hsl(var(--forest-50))",
+          100: "hsl(var(--forest-100))",
+          200: "hsl(var(--forest-200))",
         },
       },
       borderRadius: {
