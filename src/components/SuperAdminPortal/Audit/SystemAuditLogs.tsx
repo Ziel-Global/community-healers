@@ -14,7 +14,7 @@ export function SystemAuditLogs() {
     return (
         <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
             <div className="bg-secondary/40 p-4 border-b border-border/40 flex items-center justify-between">
-                <h4 className="text-sm font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-lg font-bold text-foreground uppercase tracking-widest flex items-center gap-2 alumni-sans-title">
                     <History className="w-4 h-4 text-primary" />
                     Global Activity Audit
                 </h4>

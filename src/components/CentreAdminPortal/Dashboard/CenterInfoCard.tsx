@@ -18,7 +18,7 @@ export function CenterInfoCard({ name, id, location, adminName }: CenterInfoProp
                             <Building2 className="w-7 h-7 text-primary-foreground" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-display font-bold text-foreground">{name}</h2>
+                            <h2 className="text-2xl font-bold text-foreground alumni-sans-title">{name}</h2>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[10px] tracking-wider uppercase">
                                     ID: {id}

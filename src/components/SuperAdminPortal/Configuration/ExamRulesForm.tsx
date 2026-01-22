@@ -11,7 +11,7 @@ export function ExamRulesForm() {
             <CardHeader className="border-b border-border/40 bg-primary/5">
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle className="text-xl font-display font-bold flex items-center gap-2">
+                        <CardTitle className="text-2xl font-bold alumni-sans-title flex items-center gap-2">
                             <Settings2 className="w-5 h-5 text-primary" />
                             Global Exam Configuration
                         </CardTitle>

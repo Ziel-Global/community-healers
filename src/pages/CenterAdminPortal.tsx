@@ -72,7 +72,7 @@ export default function CenterAdminPortal() {
 
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-display font-bold text-foreground">Today's Candidate Queue</h3>
+            <h3 className="text-2xl font-bold text-foreground alumni-sans-title">Today's Candidate Queue</h3>
             <p className="text-sm text-muted-foreground">Jan 20, 2024</p>
           </div>
           <CandidateSearch />

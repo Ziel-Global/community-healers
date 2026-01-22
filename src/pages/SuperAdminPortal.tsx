@@ -164,7 +164,7 @@ export default function SuperAdminPortal() {
           <CardHeader>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <CardTitle className="text-xl font-display">Exam Participation Trend</CardTitle>
+                <CardTitle className="text-2xl alumni-sans-title">Exam Participation Trend</CardTitle>
                 <CardDescription>Number of candidates appearing in exams over time</CardDescription>
               </div>
               <div className="flex items-center gap-3">
