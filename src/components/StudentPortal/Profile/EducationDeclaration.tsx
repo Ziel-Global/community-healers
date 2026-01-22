@@ -18,7 +18,7 @@ export function EducationDeclaration() {
                         <BookOpen className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <CardTitle>Education Declaration</CardTitle>
+                        <CardTitle className="alumni-sans-title">Education Declaration</CardTitle>
                         <CardDescription>Declare your educational background</CardDescription>
                     </div>
                 </div>

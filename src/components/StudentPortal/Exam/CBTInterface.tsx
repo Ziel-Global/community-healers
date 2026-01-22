@@ -67,7 +67,7 @@ export function CBTInterface() {
                 <div className="lg:col-span-3 space-y-6">
                     <Card className="border-border/40 shadow-md min-h-[400px] flex flex-col">
                         <CardHeader className="border-b border-border/20 bg-secondary/10">
-                            <CardTitle className="text-xl font-display leading-relaxed">
+                            <CardTitle className="text-2xl leading-relaxed alumni-sans-title">
                                 {questions[currentQuestion]?.text || "Sample Question Text for the CBT Certification Exam?"}
                             </CardTitle>
                         </CardHeader>

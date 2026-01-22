@@ -58,7 +58,7 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
                 <Clock className="w-10 h-10 text-primary" />
               )}
             </div>
-            <CardTitle className="text-2xl font-display font-bold">
+            <CardTitle className="text-3xl font-bold alumni-sans-title">
               {canStartExam ? "Exam is Ready!" : "Exam Not Started Yet"}
             </CardTitle>
             <p className="text-muted-foreground mt-2">

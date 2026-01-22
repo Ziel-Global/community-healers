@@ -25,7 +25,7 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
             <Calendar className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h2 className="font-display font-bold text-xl text-foreground">
+            <h2 className="font-bold text-3xl text-foreground alumni-sans-title">
               Schedule Your Exam
             </h2>
             <p className="text-sm text-muted-foreground">

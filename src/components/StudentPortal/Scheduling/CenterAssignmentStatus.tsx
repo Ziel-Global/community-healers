@@ -20,7 +20,7 @@ export function CenterAssignmentStatus({ centerName, centerId, location, isLocke
                 {isLocked && <Badge variant="secondary" className="gap-1.5 font-medium"><Building2 className="w-3 h-3" /> Assigned</Badge>}
             </div>
             <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-display font-bold text-foreground">{centerName}</CardTitle>
+                <CardTitle className="text-2xl font-bold alumni-sans-title text-foreground">{centerName}</CardTitle>
                 <CardDescription>Official training and examination center assigned based on your location</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

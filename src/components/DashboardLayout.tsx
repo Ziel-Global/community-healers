@@ -72,7 +72,7 @@ export function DashboardLayout({
               <Shield className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <p className="font-display font-bold text-foreground text-sm">CertifyPro</p>
+              <p className="font-display font-bold text-foreground text-sm">Soft skill training</p>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
                 {portalLabels[portalType]}
               </p>
@@ -122,9 +122,15 @@ export function DashboardLayout({
               <Menu className="w-5 h-5 text-foreground" />
             </button>
             <div>
-              <h1 className="text-lg font-display font-semibold text-foreground">{title}</h1>
+              <h1 className={cn(
+                "font-display font-semibold text-foreground",
+                portalType === "admin" ? "text-2xl alumni-sans-title" : "text-lg"
+              )}>{title}</h1>
               {subtitle && (
-                <p className="text-xs text-muted-foreground">{subtitle}</p>
+                <p className={cn(
+                  "text-muted-foreground",
+                  portalType === "admin" ? "text-sm alumni-sans-subtitle" : "text-xs"
+                )}>{subtitle}</p>
               )}
             </div>
           </div>

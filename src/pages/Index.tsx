@@ -190,7 +190,7 @@ export default function Index() {
       <footer className="border-t border-border bg-card py-8 px-6">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2024 CertifyPro. All rights reserved. Government Certified Platform.
+            © 2024 Soft skill training. All rights reserved. Government Certified Platform.
           </p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">

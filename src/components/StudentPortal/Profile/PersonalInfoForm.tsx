@@ -70,7 +70,7 @@ export function PersonalInfoForm() {
                         <User className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <CardTitle>Personal Information</CardTitle>
+                        <CardTitle className="alumni-sans-title">Personal Information</CardTitle>
                         <CardDescription>Enter your official details as per CNIC</CardDescription>
                     </div>
                 </div>

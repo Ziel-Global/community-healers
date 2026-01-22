@@ -190,7 +190,7 @@ export function ExamStep({ onNext }: WizardStepProps) {
                 </div>
                 <span className="text-sm font-bold text-muted-foreground">Question {currentQuestion + 1}</span>
               </div>
-              <CardTitle className="text-xl font-display leading-relaxed">
+              <CardTitle className="text-2xl leading-relaxed alumni-sans-title">
                 {questions[currentQuestion].text}
               </CardTitle>
             </CardHeader>

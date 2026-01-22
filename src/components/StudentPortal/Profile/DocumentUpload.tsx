@@ -114,7 +114,7 @@ export function DocumentUpload() {
                         <Upload className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <CardTitle>Document Upload</CardTitle>
+                        <CardTitle className="alumni-sans-title">Document Upload</CardTitle>
                         <CardDescription>Upload high-quality scans of your original documents</CardDescription>
                     </div>
                 </div>

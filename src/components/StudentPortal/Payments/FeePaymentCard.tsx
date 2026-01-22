@@ -28,7 +28,7 @@ export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePayme
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                        <CardTitle className="text-xl font-display font-bold">{title}</CardTitle>
+                        <CardTitle className="text-2xl font-bold alumni-sans-title">{title}</CardTitle>
                         <CardDescription>{description}</CardDescription>
                     </div>
                     {isPaid && (

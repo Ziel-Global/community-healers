@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Landmark, ArrowLeft, Mail, Lock, KeyRound, Building } from "lucide-react";
+import { Landmark, ArrowLeft, Mail, Lock, KeyRound, Building, GraduationCap } from "lucide-react";
 
 export default function MinistryAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -21,9 +21,9 @@ export default function MinistryAuth() {
         <div className="relative z-10 flex flex-col justify-center px-12">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-lg">
-              <Landmark className="w-8 h-8 text-primary" />
+              <GraduationCap className="w-8 h-8 text-primary" />
             </div>
-            <span className="text-2xl font-display font-bold text-white">CertifyPro</span>
+            <span className="text-2xl font-display font-bold text-white">Soft skill training</span>
           </div>
           
           <h1 className="text-4xl font-display font-bold mb-4 text-white">

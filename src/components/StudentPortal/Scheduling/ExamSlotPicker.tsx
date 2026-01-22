@@ -18,7 +18,7 @@ export function ExamSlotPicker({ selectedDate, onDateSelect }: ExamSlotPickerPro
                         <CalendarDays className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <CardTitle className="text-xl font-display font-bold">Select Exam Date</CardTitle>
+                        <CardTitle className="text-2xl font-bold alumni-sans-title">Select Exam Date</CardTitle>
                         <CardDescription>Choose your preferred exam date</CardDescription>
                     </div>
                 </div>

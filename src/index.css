@@ -204,6 +204,21 @@
   .font-display {
     font-family: 'Playfair Display', serif;
   }
+
+  /* Alumni Sans font for Super Admin Portal */
+  .alumni-sans-title {
+    font-family: "Alumni Sans", sans-serif !important;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+  }
+
+  .alumni-sans-subtitle {
+    font-family: "Alumni Sans", sans-serif !important;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+  }
 }
 
 @keyframes float {

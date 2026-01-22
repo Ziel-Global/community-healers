@@ -56,7 +56,7 @@ export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComple
       <div className="mb-8 p-6 rounded-2xl bg-card border border-border/60 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="font-display font-bold text-xl text-foreground">
+            <h2 className="font-bold text-3xl text-foreground alumni-sans-title">
               Application Progress
             </h2>
             <p className="text-sm text-muted-foreground mt-1">

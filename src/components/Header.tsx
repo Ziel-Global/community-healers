@@ -11,7 +11,7 @@ export function Header() {
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-display font-bold text-foreground leading-tight">
-              CertifyPro
+              Soft skill training
             </span>
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
               Examination Portal

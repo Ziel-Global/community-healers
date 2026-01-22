@@ -23,7 +23,7 @@ export default function CandidateAuth() {
             <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-lg">
               <GraduationCap className="w-8 h-8 text-primary" />
             </div>
-            <span className="text-2xl font-display font-bold text-white">CertifyPro</span>
+            <span className="text-2xl font-display font-bold text-white">Soft skill training</span>
           </div>
           
           <h1 className="text-4xl font-display font-bold mb-4 text-white">
