@@ -43,15 +43,7 @@ export function ExamRulesForm() {
                             <p className="text-[10px] text-muted-foreground italic">Minimum score required to issue a certificate.</p>
                         </div>
 
-                        <div className="space-y-4 pt-2">
-                            <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border/40">
-                                <div className="space-y-0.5">
-                                    <Label className="text-sm font-bold">Allow Instant Retakes</Label>
-                                    <p className="text-[10px] text-muted-foreground">Enable retake scheduling immediately after failure.</p>
-                                </div>
-                                <Switch defaultChecked />
-                            </div>
-                        </div>
+                      
                     </div>
                 </div>
 
@@ -67,7 +59,7 @@ export function ExamRulesForm() {
                         <History className="w-4 h-4" />
                         View Change History
                     </Button>
-                    <Button className="gradient-primary text-black font-bold h-11 px-8 shadow-lg group">
+                    <Button className="gradient-primary text-white font-bold h-11 px-8 shadow-lg group">
                         <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
                         Save & Apply Configuration
                     </Button>

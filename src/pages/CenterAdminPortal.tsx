@@ -28,11 +28,11 @@ export const centerNavItems = [
     href: "/center/candidates",
     icon: <Users className="w-4 h-4" />,
   },
-  {
-    label: "Verification",
-    href: "/center/verification",
-    icon: <UserCheck className="w-4 h-4" />,
-  },
+  // {
+  //   label: "Verification",
+  //   href: "/center/verification",
+  //   icon: <UserCheck className="w-4 h-4" />,
+  // },
   {
     label: "Exam Monitoring",
     href: "/center/monitoring",
@@ -70,53 +70,15 @@ export default function CenterAdminPortal() {
         {/* Quick Stats Grid */}
         <CenterStats />
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Candidate Table Section */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-display font-bold text-foreground">Today's Candidate Queue</h3>
-              <p className="text-sm text-muted-foreground">Jan 20, 2024</p>
-            </div>
-            <CandidateSearch />
-            <CandidateTable />
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-display font-bold text-foreground">Today's Candidate Queue</h3>
+            <p className="text-sm text-muted-foreground">Jan 20, 2024</p>
           </div>
-
-          {/* Quick Verification & Monitoring Side Panel */}
-          <div className="space-y-8">
-            <h3 className="text-xl font-display font-bold text-foreground">Quick Verification</h3>
-            <CandidateActionCard />
-
-            <div className="p-6 rounded-2xl bg-primary/5 border border-primary/20">
-              <h4 className="font-bold text-foreground mb-2 flex items-center gap-2">
-                <Monitor className="w-4 h-4 text-primary" />
-                Shift Status
-              </h4>
-              <p className="text-sm text-muted-foreground mb-4">You are currently managing the Morning Shift (09:00 AM - 01:00 PM).</p>
-              <div className="flex gap-2">
-                <span className="px-2 py-1 rounded-md bg-white text-[10px] font-bold border border-border/40 uppercase">Room 1: Active</span>
-                <span className="px-2 py-1 rounded-md bg-white text-[10px] font-bold border border-border/40 uppercase">Room 2: Idle</span>
-              </div>
-            </div>
-          </div>
+          <CandidateSearch />
+          <CandidateTable />
         </div>
 
-        {/* Live Monitoring Section */}
-        <div className="space-y-6 pt-4">
-          <h3 className="text-xl font-display font-bold text-foreground">Live Exam Monitoring</h3>
-          <ExamMonitoringGrid />
-        </div>
-
-        {/* Results & Reports Preview */}
-        <div className="grid md:grid-cols-2 gap-8 pt-4">
-          <div className="space-y-6">
-            <h3 className="text-xl font-display font-bold text-foreground">Daily Results Breakdown</h3>
-            <DailyResultsView />
-          </div>
-          <div className="space-y-6">
-            <h3 className="text-xl font-display font-bold text-foreground">Historical Performance</h3>
-            <HistoricalReports />
-          </div>
-        </div>
       </div>
     </DashboardLayout>
   );

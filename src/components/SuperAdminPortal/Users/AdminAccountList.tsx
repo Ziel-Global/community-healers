@@ -1,15 +1,47 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserCog, Shield, Building2, Mail, ExternalLink, ShieldCheck } from "lucide-react";
 
-const admins = [
+interface Admin {
+    id: string;
+    name: string;
+    email: string;
+    centers: string[];
+    role: string;
+}
+
+const initialAdmins: Admin[] = [
     { id: "ADV-001", name: "M. Siddique", email: "siddique@center3.gov.pk", centers: ["LHR-003", "LHR-005"], role: "Center Admin" },
     { id: "ADV-002", name: "Amna Ali", email: "amna@karachihub.gov.pk", centers: ["KHI-012"], role: "Center Admin" },
     { id: "ADV-003", name: "Zubair Ahmed", email: "z.ahmed@isl.gov.pk", centers: ["ISL-001"], role: "Regional Lead" },
 ];
 
 export function AdminAccountList() {
+    const [admins, setAdmins] = useState<Admin[]>(initialAdmins);
+
+    // Listen for new admin additions from localStorage
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const savedAdmins = localStorage.getItem("centerAdmins");
+            if (savedAdmins) {
+                const parsedAdmins = JSON.parse(savedAdmins);
+                setAdmins([...initialAdmins, ...parsedAdmins]);
+            }
+        };
+
+        // Initial load
+        handleStorageChange();
+
+        // Listen for custom event
+        window.addEventListener("adminAdded", handleStorageChange);
+        
+        return () => {
+            window.removeEventListener("adminAdded", handleStorageChange);
+        };
+    }, []);
+
     return (
         <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
             <div className="overflow-x-auto">

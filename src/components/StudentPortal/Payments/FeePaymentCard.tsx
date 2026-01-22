@@ -62,7 +62,7 @@ export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePayme
                             </button>
                         </div>
 
-                        <Button onClick={onPay} className="w-full h-12 gradient-white font-semibold text-primary shadow-royal hover:opacity-90">
+                        <Button onClick={onPay} className="w-full h-12 gradient-white font-semibold text-white shadow-royal hover:opacity-90">
                             Pay Now & Proceed
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
