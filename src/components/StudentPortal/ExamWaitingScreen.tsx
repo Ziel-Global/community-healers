@@ -13,6 +13,11 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
   const [canStartExam, setCanStartExam] = useState(false);
 
   useEffect(() => {
+    // Auto-start exam after 2 seconds
+    const autoStartTimer = setTimeout(() => {
+      onStartExam();
+    }, 2000);
+
     const timer = setInterval(() => {
       const now = new Date();
       setCurrentTime(now);
@@ -24,8 +29,11 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
       setCanStartExam(now >= examDateTime);
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [examDate]);
+    return () => {
+      clearTimeout(autoStartTimer);
+      clearInterval(timer);
+    };
+  }, [examDate, onStartExam]);
 
   const examDateTime = new Date(examDate);
   examDateTime.setHours(10, 0, 0, 0);
