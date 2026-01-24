@@ -23,10 +23,10 @@ export default function CandidateAuth() {
             <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-lg">
               <GraduationCap className="w-8 h-8 text-primary" />
             </div>
-            <span className="text-2xl font-display font-bold text-white">Soft skill training</span>
+            <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
           </div>
           
-          <h1 className="text-4xl font-display font-bold mb-4 text-white">
+          <h1 className="text-4xl alumni-sans-title mb-4 text-white">
             Candidate Portal
           </h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-md">
@@ -65,10 +65,10 @@ export default function CandidateAuth() {
             <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-md">
               <GraduationCap className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-display font-bold">Candidate Portal</span>
+            <span className="text-xl alumni-sans-title">Candidate Portal</span>
           </div>
 
-          <h2 className="text-3xl font-display font-bold text-foreground mb-2">
+          <h2 className="text-3xl alumni-sans-title text-foreground mb-2">
             {isSignUp ? "Create Account" : "Welcome Back"}
           </h2>
           <p className="text-muted-foreground mb-8">

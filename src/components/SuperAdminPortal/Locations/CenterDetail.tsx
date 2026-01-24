@@ -94,7 +94,7 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                 </Button>
                 <div className="flex-1">
                     <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold text-foreground">{center.name}</h2>
+                        <h2 className="text-2xl alumni-sans-title text-foreground">{center.name}</h2>
                         <Badge variant={center.status === "Active" ? "success" : "secondary"}>
                             {center.status}
                         </Badge>

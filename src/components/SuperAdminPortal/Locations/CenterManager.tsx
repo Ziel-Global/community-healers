@@ -185,7 +185,7 @@ export function CenterManager() {
                                         <Building2 className="w-6 h-6 text-primary" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-lg text-foreground leading-tight">{center.name}</h4>
+                                        <h4 className="alumni-sans-title text-lg text-foreground leading-tight">{center.name}</h4>
                                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                             <MapPin className="w-3 h-3" /> {center.location} • ID: {center.id}
                                         </p>

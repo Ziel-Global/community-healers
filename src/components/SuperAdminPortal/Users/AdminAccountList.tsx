@@ -63,7 +63,7 @@ export function AdminAccountList() {
                                             <Shield className="w-5 h-5 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="font-bold text-foreground flex items-center gap-1.5">
+                                            <p className="alumni-sans-title text-lg font-semibold text-foreground flex items-center gap-1.5">
                                                 {admin.name}
                                                 {admin.role === "Regional Lead" && <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />}
                                             </p>

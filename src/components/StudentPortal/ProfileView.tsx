@@ -22,7 +22,7 @@ export function ProfileView({ examCompleted = false, examScore, certificateNumbe
             <div className="flex-1">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <h2 className="text-2xl font-display font-bold text-foreground">Muhammad Ahmed</h2>
+                  <h2 className="text-2xl alumni-sans-title text-foreground">Muhammad Ahmed</h2>
                   <p className="text-muted-foreground">Candidate ID: CA-2026-001234</p>
                 </div>
                 <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
@@ -52,7 +52,7 @@ export function ProfileView({ examCompleted = false, examScore, certificateNumbe
       {/* Personal Information */}
       <Card className="border-border/40 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 alumni-sans-title">
             <User className="w-5 h-5 text-primary" />
             Personal Information
           </CardTitle>
@@ -61,7 +61,7 @@ export function ProfileView({ examCompleted = false, examScore, certificateNumbe
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <p className="text-xs text-muted-foreground mb-1">Full Name</p>
-              <p className="font-semibold text-foreground">Muhammad Ahmed</p>
+              <p className="font-semibold text-foreground alumni-sans-subtitle">Muhammad Ahmed</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Father's Name</p>
@@ -90,7 +90,7 @@ export function ProfileView({ examCompleted = false, examScore, certificateNumbe
       {/* Application Status */}
       <Card className="border-border/40 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 alumni-sans-title">
             <Award className="w-5 h-5 text-primary" />
             Application Status
           </CardTitle>
@@ -195,7 +195,7 @@ export function ProfileView({ examCompleted = false, examScore, certificateNumbe
       {/* Documents */}
       <Card className="border-border/40 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 alumni-sans-title">
             <CreditCard className="w-5 h-5 text-primary" />
             Uploaded Documents
           </CardTitle>

@@ -34,11 +34,6 @@ export const centerNavItems = [
   //   icon: <UserCheck className="w-4 h-4" />,
   // },
   {
-    label: "Exam Monitoring",
-    href: "/center/monitoring",
-    icon: <Monitor className="w-4 h-4" />,
-  },
-  {
     label: "Results",
     href: "/center/results",
     icon: <BarChart3 className="w-4 h-4" />,

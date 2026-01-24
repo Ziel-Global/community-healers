@@ -10,7 +10,7 @@ export function Header() {
             <Shield className="w-5 h-5 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-display font-bold text-foreground leading-tight">
+            <span className="text-xl alumni-sans-title text-foreground leading-tight">
               Soft skill training
             </span>
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">

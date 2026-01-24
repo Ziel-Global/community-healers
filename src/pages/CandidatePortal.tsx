@@ -137,7 +137,7 @@ export default function CandidatePortal() {
                 <Shield className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="font-display font-bold text-lg text-foreground">Soft skill training</h1>
+                <h1 className="alumni-sans-title text-xl text-foreground">Soft skill training</h1>
                 <p className="text-xs text-muted-foreground">Candidate Portal</p>
               </div>
             </div>
