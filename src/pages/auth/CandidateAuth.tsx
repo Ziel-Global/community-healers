@@ -51,87 +51,87 @@ export default function CandidateAuth() {
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex flex-col justify-center px-6 lg:px-16 bg-white">
+      <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-16 bg-white py-8 sm:py-12">
         <Link
           to="/"
-          className="absolute top-6 left-6 lg:left-auto lg:right-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+          className="absolute top-4 sm:top-6 left-4 sm:left-6 lg:left-auto lg:right-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Home
+          <span className="hidden sm:inline">Back to Home</span>
         </Link>
 
-        <div className="max-w-md mx-auto w-full">
-          <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-md">
-              <GraduationCap className="w-6 h-6 text-primary-foreground" />
+        <div className="max-w-md mx-auto w-full mt-8 sm:mt-0">
+          <div className="lg:hidden flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary flex items-center justify-center shadow-md">
+              <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
             </div>
-            <span className="text-xl alumni-sans-title">Candidate Portal</span>
+            <span className="text-lg sm:text-xl font-display font-bold">Candidate Portal</span>
           </div>
 
-          <h2 className="text-3xl alumni-sans-title text-foreground mb-2">
+          <h2 className="text-2xl sm:text-3xl font-display font-bold text-foreground mb-2">
             {isSignUp ? "Create Account" : "Welcome Back"}
           </h2>
-          <p className="text-muted-foreground mb-8">
+          <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
             {isSignUp
               ? "Register to begin your certification journey"
               : "Sign in to access your candidate dashboard"}
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="name" className="text-sm">Full Name</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   <Input
                     id="name"
                     placeholder="Enter your full name"
-                    className="pl-10 h-12 border-2 focus:border-primary"
+                    className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                     required
                   />
                 </div>
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="phone" className="text-sm">Phone Number</Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
                   id="phone"
                   type="tel"
                   placeholder="+92 300 1234567"
-                  className="pl-10 h-12 border-2 focus:border-primary"
+                  className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                   required
                 />
               </div>
             </div>
 
             {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="email" className="text-sm">Email Address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="your@email.com"
-                    className="pl-10 h-12 border-2 focus:border-primary"
+                    className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                     required
                   />
                 </div>
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="otp">OTP Code</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="otp" className="text-sm">OTP Code</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
                   id="otp"
                   type="text"
                   placeholder="Enter 6-digit OTP"
-                  className="pl-10 h-12 border-2 focus:border-primary"
+                  className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                   maxLength={6}
                   required
                 />
@@ -144,12 +144,12 @@ export default function CandidateAuth() {
               </button>
             </div>
 
-            <Button type="submit" variant="forest" className="w-full h-12 text-base">
+            <Button type="submit" variant="forest" className="w-full h-11 sm:h-12 text-sm sm:text-base">
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-muted-foreground">
+          <p className="mt-4 sm:mt-6 text-center text-sm text-muted-foreground">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               type="button"

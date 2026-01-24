@@ -161,16 +161,16 @@ export default function SuperAdminPortal() {
 
         {/* Exam Candidates Trend Graph */}
         <Card className="border-border/40 shadow-sm">
-          <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <CardHeader className="pb-2 sm:pb-6">
+            <div className="flex flex-col gap-4">
               <div>
-                <CardTitle className="text-2xl alumni-sans-title">Exam Participation Trend</CardTitle>
-                <CardDescription>Number of candidates appearing in exams over time</CardDescription>
+                <CardTitle className="text-xl sm:text-2xl alumni-sans-title">Exam Participation Trend</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Number of candidates appearing in exams over time</CardDescription>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <TrendingUp className="w-4 h-4 text-emerald-600" />
-                  <span className="text-emerald-600 font-semibold">{getGrowthText()}</span>
+                  <span className="text-emerald-600 font-semibold text-xs sm:text-sm">{getGrowthText()}</span>
                 </div>
                 <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-lg">
                   <Button
@@ -178,7 +178,7 @@ export default function SuperAdminPortal() {
                     size="sm"
                     onClick={() => setTimeFilter("days")}
                     className={cn(
-                      "h-8 px-3 rounded-md text-xs font-semibold",
+                      "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold",
                       timeFilter === "days" ? "bg-white shadow-sm" : "hover:bg-white/50"
                     )}
                   >
@@ -189,7 +189,7 @@ export default function SuperAdminPortal() {
                     size="sm"
                     onClick={() => setTimeFilter("months")}
                     className={cn(
-                      "h-8 px-3 rounded-md text-xs font-semibold",
+                      "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold",
                       timeFilter === "months" ? "bg-white shadow-sm" : "hover:bg-white/50"
                     )}
                   >
@@ -200,7 +200,7 @@ export default function SuperAdminPortal() {
                     size="sm"
                     onClick={() => setTimeFilter("years")}
                     className={cn(
-                      "h-8 px-3 rounded-md text-xs font-semibold",
+                      "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold",
                       timeFilter === "years" ? "bg-white shadow-sm" : "hover:bg-white/50"
                     )}
                   >
@@ -210,8 +210,8 @@ export default function SuperAdminPortal() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartConfig} className="h-[400px] w-full">
+          <CardContent className="p-2 sm:p-6">
+            <ChartContainer config={chartConfig} className="h-[250px] sm:h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={getChartData()} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>

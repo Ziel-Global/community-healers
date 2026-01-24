@@ -58,20 +58,20 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between pt-6 border-t border-border/60">
-        <Button onClick={onBack} variant="outline" size="lg" className="group">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-border/60">
+        <Button onClick={onBack} variant="outline" size="lg" className="group w-full sm:w-auto">
           <ChevronLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
           Back to Payment
         </Button>
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+          <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
             Step 3 of 3 • Scheduling
           </div>
           <Button 
             onClick={handleNext} 
             size="lg" 
             disabled={!canProceed}
-            className="group"
+            className="group w-full sm:w-auto order-1 sm:order-2"
           >
             Complete Registration
             <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
