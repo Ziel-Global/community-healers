@@ -113,32 +113,32 @@ export function DashboardLayout({
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 h-16 bg-card/90 backdrop-blur-xl border-b border-border flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-30 h-14 sm:h-16 bg-card/90 backdrop-blur-xl border-b border-border flex items-center justify-between px-3 sm:px-6">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors flex-shrink-0"
             >
               <Menu className="w-5 h-5 text-foreground" />
             </button>
-            <div>
+            <div className="min-w-0">
               <h1 className={cn(
-                "font-display font-semibold text-foreground",
-                (portalType === "admin" || portalType === "center") ? "text-2xl alumni-sans-title" : "text-lg"
+                "font-display font-semibold text-foreground truncate",
+                (portalType === "admin" || portalType === "center") ? "text-lg sm:text-2xl alumni-sans-title" : "text-base sm:text-lg"
               )}>{title}</h1>
               {subtitle && (
                 <p className={cn(
-                  "text-muted-foreground",
-                  (portalType === "admin" || portalType === "center") ? "text-sm alumni-sans-subtitle" : "text-xs"
+                  "text-muted-foreground truncate",
+                  (portalType === "admin" || portalType === "center") ? "text-xs sm:text-sm alumni-sans-subtitle" : "text-[10px] sm:text-xs"
                 )}>{subtitle}</p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-success/10 border border-success/20">
               <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              <span className="text-xs font-medium text-success hidden sm:block">
+              <span className="text-[10px] sm:text-xs font-medium text-success hidden sm:block">
                 Online
               </span>
             </div>
@@ -146,7 +146,7 @@ export function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="p-6 bg-background min-h-[calc(100vh-4rem)]">{children}</main>
+        <main className="p-3 sm:p-6 bg-background min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)]">{children}</main>
       </div>
 
       {/* Mobile close button */}

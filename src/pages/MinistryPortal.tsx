@@ -57,22 +57,22 @@ export default function MinistryPortal() {
         {/* Authority Overview Stats */}
         <MinistryStats />
 
-        <div className="grid lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           {/* Primary Issuance Queue */}
-          <div className="lg:col-span-8 space-y-10">
-            <section className="space-y-4">
+          <div className="lg:col-span-8 space-y-6 lg:space-y-10">
+            <section className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
-                  <Award className="w-5 h-5 text-primary" />
+                <h2 className="text-base sm:text-xl font-display font-bold text-foreground flex items-center gap-2">
+                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   Pending Certification Review
                 </h2>
               </div>
               <PassedCandidateTable />
             </section>
 
-            <section className="space-y-4">
-              <h2 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
-                <Search className="w-5 h-5 text-primary" />
+            <section className="space-y-3 sm:space-y-4">
+              <h2 className="text-base sm:text-xl font-display font-bold text-foreground flex items-center gap-2">
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 Global Certificate Registry
               </h2>
               <VerifiableRegistry />
@@ -80,10 +80,10 @@ export default function MinistryPortal() {
           </div>
 
           {/* Authority Oversight Side Panel */}
-          <div className="lg:col-span-4 space-y-8">
-            <section className="space-y-4">
-              <h2 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
-                <History className="w-5 h-5 text-primary" />
+          <div className="lg:col-span-4 space-y-6 lg:space-y-8">
+            <section className="space-y-3 sm:space-y-4">
+              <h2 className="text-base sm:text-xl font-display font-bold text-foreground flex items-center gap-2">
+                <History className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 Recent Authority Actions
               </h2>
               <MinistryIssuanceLogs />
