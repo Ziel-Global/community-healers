@@ -89,47 +89,47 @@ export default function Index() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden gradient-hero">
+      <section className="relative pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 overflow-hidden gradient-hero">
         {/* Background decorations */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-gold/10 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-3xl" />
+          <div className="absolute top-20 left-10 w-48 sm:w-72 h-48 sm:h-72 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-64 sm:w-96 h-64 sm:h-96 bg-gold/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-primary/3 rounded-full blur-3xl" />
         </div>
 
         <div className="container mx-auto relative">
-          <div className="max-w-4xl mx-auto text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+          <div className="max-w-4xl mx-auto text-center mb-10 sm:mb-16">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/20 mb-4 sm:mb-6">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+              <span className="text-[10px] sm:text-xs font-semibold text-primary uppercase tracking-wider">
                 Government Certified Platform
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-display font-bold text-foreground mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-display font-bold text-foreground mb-4 sm:mb-6 leading-tight px-2">
               Digital Certification &{" "}
               <span className="text-gradient">Examination</span> Platform
             </h1>
 
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
+            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2">
               End-to-end digital solution managing candidate journeys from
               registration to government certificate issuance, with secure CBT
               exams and full compliance.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button variant="forest" size="xl">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">
+              <Button variant="forest" size="lg" className="w-full sm:w-auto">
                 Get Started
                 <ArrowRight className="w-5 h-5 ml-1" />
               </Button>
-              <Button variant="outline" size="xl">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto">
                 Learn More
               </Button>
             </div>
           </div>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mb-12 sm:mb-20">
             {[
               { value: "45,000+", label: "Certificates Issued" },
               { value: "86", label: "Training Centers" },
@@ -138,18 +138,18 @@ export default function Index() {
             ].map((stat, index) => (
               <div
                 key={index}
-                className="text-center p-5 rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-royal transition-all duration-300"
+                className="text-center p-3 sm:p-5 rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-royal transition-all duration-300"
               >
-                <p className="text-2xl md:text-3xl font-bold text-gradient">
+                <p className="text-lg sm:text-2xl md:text-3xl font-bold text-gradient">
                   {stat.value}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1 font-medium">{stat.label}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-medium">{stat.label}</p>
               </div>
             ))}
           </div>
 
           {/* Portal Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-20">
             {portals.map((portal) => (
               <PortalCard key={portal.title} {...portal} />
             ))}
@@ -157,26 +157,26 @@ export default function Index() {
 
           {/* Features Section */}
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-center text-foreground mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-center text-foreground mb-3 sm:mb-4">
               Platform Features
             </h2>
-            <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            <p className="text-center text-sm sm:text-base text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto px-2">
               Built with enterprise-grade security and reliability to manage your entire certification workflow.
             </p>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className="p-6 rounded-xl bg-card border border-border/60 hover:border-primary/30 hover:shadow-royal transition-all duration-300 group"
+                  className="p-4 sm:p-6 rounded-xl bg-card border border-border/60 hover:border-primary/30 hover:shadow-royal transition-all duration-300 group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <feature.icon className="w-6 h-6 text-primary" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-primary/20 transition-colors">
+                    <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">
+                  <h3 className="font-semibold text-sm sm:text-base text-foreground mb-1.5 sm:mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -187,19 +187,19 @@ export default function Index() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card py-8 px-6">
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
+      <footer className="border-t border-border bg-card py-6 sm:py-8 px-4 sm:px-6">
+        <div className="container mx-auto flex flex-col items-center gap-4 text-center sm:text-left sm:flex-row sm:justify-between">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             © 2024 Soft skill training. All rights reserved. Government Certified Platform.
           </p>
-          <div className="flex items-center gap-6">
-            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+            <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
               Privacy Policy
             </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+            <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
               Terms of Service
             </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
+            <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors font-medium">
               Support
             </a>
           </div>

@@ -22,7 +22,7 @@ export function PortalCard({
     <Link
       to={href}
       className={cn(
-        "group relative flex flex-col p-6 rounded-2xl",
+        "group relative flex flex-col p-4 sm:p-6 rounded-xl sm:rounded-2xl",
         "bg-card border border-border/60",
         "hover:border-primary/30 hover:shadow-royal",
         "transition-all duration-500 ease-out",
@@ -30,34 +30,34 @@ export function PortalCard({
       )}
     >
       {/* Subtle gradient overlay on hover */}
-      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-gold/5" />
       </div>
 
       {/* Icon */}
-      <div className="relative mb-4">
-        <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center shadow-royal group-hover:shadow-lg transition-all duration-300">
-          <Icon className="w-7 h-7 text-primary-foreground" />
+      <div className="relative mb-3 sm:mb-4">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl gradient-primary flex items-center justify-center shadow-royal group-hover:shadow-lg transition-all duration-300">
+          <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-primary-foreground" />
         </div>
       </div>
 
       {/* Content */}
       <div className="relative flex-1">
-        <h3 className="text-xl font-display font-bold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+        <h3 className="text-lg sm:text-xl font-display font-bold text-foreground mb-1.5 sm:mb-2 group-hover:text-primary transition-colors duration-300">
           {title}
         </h3>
-        <p className="text-muted-foreground text-sm leading-relaxed">
+        <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
           {description}
         </p>
       </div>
 
       {/* Stats */}
       {stats && stats.length > 0 && (
-        <div className="relative mt-6 pt-4 border-t border-border/50 grid grid-cols-2 gap-4">
+        <div className="relative mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-border/50 grid grid-cols-2 gap-3 sm:gap-4">
           {stats.map((stat, index) => (
             <div key={index}>
-              <p className="text-2xl font-bold text-gradient">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
+              <p className="text-lg sm:text-2xl font-bold text-gradient">{stat.value}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">{stat.label}</p>
             </div>
           ))}
         </div>

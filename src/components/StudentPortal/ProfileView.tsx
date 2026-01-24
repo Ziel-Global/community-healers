@@ -11,36 +11,36 @@ interface ProfileViewProps {
 
 export function ProfileView({ examCompleted = false, examScore, certificateNumber }: ProfileViewProps) {
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       {/* Profile Header */}
       <Card className="border-border/40 shadow-sm">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-6">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/20">
-              <User className="w-12 h-12 text-primary" />
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/20 flex-shrink-0">
+              <User className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-start justify-between mb-2">
+            <div className="flex-1 text-center sm:text-left w-full">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-2 mb-2">
                 <div>
-                  <h2 className="text-2xl font-display font-bold text-foreground">Muhammad Ahmed</h2>
-                  <p className="text-muted-foreground">Candidate ID: CA-2026-001234</p>
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground">Muhammad Ahmed</h2>
+                  <p className="text-sm text-muted-foreground">Candidate ID: CA-2026-001234</p>
                 </div>
                 <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
                   <CheckCircle2 className="w-3 h-3 mr-1" />
                   Active
                 </Badge>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <Mail className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-foreground">ahmed@example.com</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mt-4">
+                <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
+                  <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-foreground truncate">ahmed@example.com</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Phone className="w-4 h-4 text-muted-foreground" />
+                <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
+                  <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-foreground">03001234567</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
+                  <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-foreground">Lahore, Pakistan</span>
                 </div>
               </div>

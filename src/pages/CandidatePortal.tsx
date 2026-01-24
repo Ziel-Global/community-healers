@@ -129,39 +129,39 @@ export default function CandidatePortal() {
     <div className="min-h-screen bg-background">
       {/* Top Navigation Bar */}
       <div className="sticky top-0 z-50 border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
             {/* Logo/Branding */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
-                <Shield className="w-5 h-5 text-primary-foreground" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
               </div>
-              <div>
+              <div className="hidden sm:block">
                 <h1 className="font-display font-bold text-lg text-foreground">Soft skill training</h1>
                 <p className="text-xs text-muted-foreground">Candidate Portal</p>
               </div>
             </div>
 
             {/* Navigation Tabs & Logout */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 p-1 rounded-xl bg-secondary/40 border border-border/40">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-1 sm:gap-2 p-1 rounded-xl bg-secondary/40 border border-border/40">
                 <Button
                   variant={activeTab === "profile" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setActiveTab("profile")}
-                  className={activeTab === "profile" ? "shadow-md" : ""}
+                  className={`px-2 sm:px-3 ${activeTab === "profile" ? "shadow-md" : ""}`}
                 >
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
+                  <User className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Profile</span>
                 </Button>
                 <Button
                   variant={activeTab === "application" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setActiveTab("application")}
-                  className={activeTab === "application" ? "shadow-md" : ""}
+                  className={`px-2 sm:px-3 ${activeTab === "application" ? "shadow-md" : ""}`}
                 >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Application
+                  <FileText className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Application</span>
                 </Button>
               </div>
               
@@ -170,10 +170,10 @@ export default function CandidatePortal() {
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                className="gap-1 sm:gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive px-2 sm:px-3"
               >
                 <LogOut className="w-4 h-4" />
-                Logout
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
@@ -181,7 +181,7 @@ export default function CandidatePortal() {
       </div>
 
       {/* Content Area */}
-      <div className="py-8 px-6">
+      <div className="py-4 sm:py-8 px-3 sm:px-6">
         {renderContent()}
       </div>
     </div>
