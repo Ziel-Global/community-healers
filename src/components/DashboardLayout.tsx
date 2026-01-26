@@ -124,12 +124,12 @@ export function DashboardLayout({
             <div className="min-w-0">
               <h1 className={cn(
                 "font-display font-semibold text-foreground truncate",
-                (portalType === "admin" || portalType === "center") ? "text-lg sm:text-2xl alumni-sans-title" : "text-base sm:text-lg"
+                (portalType === "admin" || portalType === "center" || portalType === "ministry") ? "text-lg sm:text-2xl alumni-sans-title" : "text-base sm:text-lg"
               )}>{title}</h1>
               {subtitle && (
                 <p className={cn(
                   "text-muted-foreground truncate",
-                  (portalType === "admin" || portalType === "center") ? "text-xs sm:text-sm alumni-sans-subtitle" : "text-[10px] sm:text-xs"
+                  (portalType === "admin" || portalType === "center" || portalType === "ministry") ? "text-xs sm:text-sm alumni-sans-subtitle" : "text-[10px] sm:text-xs"
                 )}>{subtitle}</p>
               )}
             </div>

@@ -10,7 +10,7 @@ export function MinistryStats() {
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Total Issued</p>
-                            <h3 className="text-2xl font-display font-bold text-foreground">8,420</h3>
+                            <h3 className="text-2xl font-sans font-bold text-foreground">8,420</h3>
                             <p className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
                                 <TrendingUp className="w-3 h-3" /> +12% this month
                             </p>
@@ -27,7 +27,7 @@ export function MinistryStats() {
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Pending Review</p>
-                            <h3 className="text-2xl font-display font-bold text-foreground">145</h3>
+                            <h3 className="text-2xl font-sans font-bold text-foreground">145</h3>
                             <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
                                 <Clock className="w-3 h-3" /> Awaiting authority action
                             </p>
@@ -44,7 +44,7 @@ export function MinistryStats() {
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Verified Today</p>
-                            <h3 className="text-2xl font-display font-bold text-foreground">62</h3>
+                            <h3 className="text-2xl font-sans font-bold text-foreground">62</h3>
                             <p className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
                                 <ShieldCheck className="w-3 h-3" /> Normal volume
                             </p>
@@ -61,7 +61,7 @@ export function MinistryStats() {
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Registry Health</p>
-                            <h3 className="text-2xl font-display font-bold text-foreground">100%</h3>
+                            <h3 className="text-2xl font-sans font-bold text-foreground">100%</h3>
                             <p className="text-[10px] text-indigo-600 font-medium flex items-center gap-1">
                                 Immutable & Verifiable
                             </p>

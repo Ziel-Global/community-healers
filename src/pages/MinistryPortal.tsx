@@ -62,7 +62,7 @@ export default function MinistryPortal() {
           <div className="lg:col-span-8 space-y-6 lg:space-y-10">
             <section className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-base sm:text-xl font-display font-bold text-foreground flex items-center gap-2">
+                <h2 className="text-base sm:text-xl alumni-sans-title text-foreground flex items-center gap-2">
                   <Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   Pending Certification Review
                 </h2>
@@ -71,7 +71,7 @@ export default function MinistryPortal() {
             </section>
 
             <section className="space-y-3 sm:space-y-4">
-              <h2 className="text-base sm:text-xl font-display font-bold text-foreground flex items-center gap-2">
+              <h2 className="text-base sm:text-xl alumni-sans-title text-foreground flex items-center gap-2">
                 <Search className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 Global Certificate Registry
               </h2>
@@ -82,7 +82,7 @@ export default function MinistryPortal() {
           {/* Authority Oversight Side Panel */}
           <div className="lg:col-span-4 space-y-6 lg:space-y-8">
             <section className="space-y-3 sm:space-y-4">
-              <h2 className="text-base sm:text-xl font-display font-bold text-foreground flex items-center gap-2">
+              <h2 className="text-base sm:text-xl alumni-sans-title text-foreground flex items-center gap-2">
                 <History className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 Recent Authority Actions
               </h2>
@@ -122,7 +122,7 @@ export default function MinistryPortal() {
             </Card>
 
             <div className="p-6 rounded-2xl bg-black text-white shadow-royal space-y-4">
-              <h3 className="font-display font-bold flex items-center gap-2 text-primary">
+              <h3 className="text-lg alumni-sans-title flex items-center gap-2 text-primary">
                 <FileCheck className="w-5 h-5" />
                 Quarterly Audit Prep
               </h3>

@@ -43,7 +43,7 @@ export function PortalCard({
 
       {/* Content */}
       <div className="relative flex-1">
-        <h3 className="text-lg sm:text-xl font-display font-bold text-foreground mb-1.5 sm:mb-2 group-hover:text-primary transition-colors duration-300">
+        <h3 className="text-lg sm:text-xl alumni-sans-title text-foreground mb-1.5 sm:mb-2 group-hover:text-primary transition-colors duration-300">
           {title}
         </h3>
         <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">

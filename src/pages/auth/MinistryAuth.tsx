@@ -26,7 +26,7 @@ export default function MinistryAuth() {
             <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
           </div>
           
-          <h1 className="text-4xl font-display font-bold mb-4 text-white">
+          <h1 className="text-4xl alumni-sans-title mb-4 text-white">
             Ministry Portal
           </h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-md">
@@ -65,10 +65,10 @@ export default function MinistryAuth() {
             <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-md">
               <Landmark className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-display font-bold">Ministry Portal</span>
+            <span className="text-xl alumni-sans-title">Ministry Portal</span>
           </div>
 
-          <h2 className="text-3xl font-display font-bold text-foreground mb-2">
+          <h2 className="text-3xl alumni-sans-title text-foreground mb-2">
             {isSignUp ? "Request Ministry Access" : "Official Login"}
           </h2>
           <p className="text-muted-foreground mb-8">

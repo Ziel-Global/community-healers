@@ -157,7 +157,7 @@ export default function Index() {
 
           {/* Features Section */}
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-center text-foreground mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl alumni-sans-title text-center text-foreground mb-3 sm:mb-4">
               Platform Features
             </h2>
             <p className="text-center text-sm sm:text-base text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto px-2">
@@ -173,7 +173,7 @@ export default function Index() {
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-primary/20 transition-colors">
                     <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-sm sm:text-base text-foreground mb-1.5 sm:mb-2">
+                  <h3 className="alumni-sans-subtitle font-semibold text-base sm:text-lg text-foreground mb-1.5 sm:mb-2">
                     {feature.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
