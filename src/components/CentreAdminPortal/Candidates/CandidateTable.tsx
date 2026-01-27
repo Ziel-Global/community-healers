@@ -125,7 +125,7 @@ export function CandidateTable() {
                                     <div className="flex items-center gap-2 sm:gap-3">
                                         <img src={c.photo} alt={c.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-secondary object-cover border border-border/40 flex-shrink-0" />
                                         <div className="min-w-0">
-                                            <p className="font-bold text-foreground text-sm sm:text-base truncate">{c.name}</p>
+                                            <p className="alumni-sans-subtitle text-foreground text-base sm:text-lg truncate">{c.name}</p>
                                             <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono truncate">{c.id}</p>
                                         </div>
                                     </div>

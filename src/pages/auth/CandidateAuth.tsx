@@ -68,7 +68,7 @@ export default function CandidateAuth() {
             <span className="text-lg sm:text-xl font-display font-bold">Candidate Portal</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-display font-bold text-foreground mb-2">
+          <h2 className="text-3xl sm:text-4xl alumni-sans-title text-foreground mb-2">
             {isSignUp ? "Create Account" : "Welcome Back"}
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
@@ -138,13 +138,13 @@ export default function CandidateAuth() {
               </div>
               <button
                 type="button"
-                className="text-sm text-primary hover:text-primary/80 font-semibold"
+                className="text-base text-primary hover:text-primary/80 alumni-sans-subtitle"
               >
                 Send OTP
               </button>
             </div>
 
-            <Button type="submit" variant="forest" className="w-full h-11 sm:h-12 text-sm sm:text-base">
+            <Button type="submit" variant="forest" className="w-full h-11 sm:h-12 text-base sm:text-lg alumni-sans-subtitle">
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>

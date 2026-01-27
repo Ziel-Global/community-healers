@@ -91,7 +91,7 @@ export default function MinistryPortal() {
 
             <Card className="border-border/40 bg-card overflow-hidden shadow-sm">
               <CardHeader className="bg-secondary/30 border-b border-border/40">
-                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <CardTitle className="text-lg alumni-sans-subtitle flex items-center gap-2">
                   <PieChart className="w-4 h-4 text-primary" />
                   Issuance Distribution
                 </CardTitle>
@@ -105,7 +105,7 @@ export default function MinistryPortal() {
                     { label: "Multan Region", value: "10%", color: "bg-amber-500" },
                   ].map((region) => (
                     <div key={region.label} className="space-y-1.5">
-                      <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                      <div className="flex justify-between text-sm alumni-sans-subtitle uppercase tracking-wider">
                         <span>{region.label}</span>
                         <span className="text-muted-foreground">{region.value}</span>
                       </div>
@@ -115,7 +115,7 @@ export default function MinistryPortal() {
                     </div>
                   ))}
                 </div>
-                <Button variant="outline" className="w-full mt-6 text-xs h-9 font-bold border-border/60">
+                <Button variant="outline" className="w-full mt-6 text-xs h-9 alumni-sans-subtitle border-border/60">
                   View Regional Analytics
                 </Button>
               </CardContent>
@@ -129,7 +129,7 @@ export default function MinistryPortal() {
               <p className="text-xs font-medium leading-relaxed opacity-80">
                 Consolidate all issuance records and authority logs for the upcoming external compliance audit.
               </p>
-              <Button className="w-full gradient-primary text-black font-bold h-11 rounded-xl">
+              <Button className="w-full gradient-primary text-black alumni-sans-subtitle h-11 rounded-xl">
                 Prepare Audit Bundle
               </Button>
             </div>

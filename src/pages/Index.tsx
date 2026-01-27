@@ -106,7 +106,7 @@ export default function Index() {
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-display font-bold text-foreground mb-4 sm:mb-6 leading-tight px-2">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl alumni-sans-title text-foreground mb-4 sm:mb-6 leading-tight px-2">
               Digital Certification &{" "}
               <span className="text-gradient">Examination</span> Platform
             </h1>

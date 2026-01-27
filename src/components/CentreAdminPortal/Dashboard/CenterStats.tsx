@@ -18,8 +18,8 @@ const Stat = ({ title, value, icon: Icon, color, description }: StatProps) => (
                     <Icon className="w-6 h-6 text-white" />
                 </div>
                 <div className="text-right">
-                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{title}</p>
-                    <p className="text-3xl font-display font-bold text-foreground">{value}</p>
+                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest alumni-sans-subtitle">{title}</p>
+                    <p className="text-3xl font-sans font-bold text-foreground">{value}</p>
                 </div>
             </div>
             <p className="text-xs text-muted-foreground border-t border-border/40 pt-3 mt-2 italic">

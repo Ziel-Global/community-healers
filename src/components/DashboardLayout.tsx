@@ -72,7 +72,7 @@ export function DashboardLayout({
               <Shield className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <p className="alumni-sans-title text-foreground text-base">Soft skill training</p>
+              <p className="alumni-sans-title text-foreground text-lg">Soft skill training</p>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
                 {portalLabels[portalType]}
               </p>

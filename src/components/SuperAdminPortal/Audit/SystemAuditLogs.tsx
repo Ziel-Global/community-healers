@@ -29,7 +29,7 @@ export function SystemAuditLogs() {
 
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                                <span className="font-bold text-foreground text-sm leading-none">{log.action}</span>
+                                <span className="alumni-sans-subtitle text-foreground text-lg leading-none">{log.action}</span>
                                 <Badge variant={log.status === "Success" ? "success" : "secondary"} className="text-[8px] uppercase font-bold tracking-tight h-3.5 px-1 py-0 min-h-0">
                                     {log.status}
                                 </Badge>

@@ -22,11 +22,11 @@ export function PassedCandidateTable() {
                     />
                 </div>
                 <div className="flex flex-wrap gap-2 w-full">
-                    <Button variant="outline" className="flex-1 sm:flex-none h-9 sm:h-11 px-3 sm:px-4 border-border/60 gap-2 bg-white/50 text-xs sm:text-sm">
+                    <Button variant="outline" className="flex-1 sm:flex-none h-9 sm:h-11 px-3 sm:px-4 border-border/60 gap-2 bg-white/50 text-xs sm:text-lg alumni-sans-subtitle">
                         <Filter className="w-4 h-4 text-primary" />
                         <span className="hidden sm:inline">Center</span> Filter
                     </Button>
-                    <Button className="flex-1 sm:flex-none gradient-primary text-black font-bold h-9 sm:h-11 px-3 sm:px-6 rounded-xl shadow-lg gap-2 text-xs sm:text-sm">
+                    <Button className="flex-1 sm:flex-none gradient-primary text-black alumni-sans-subtitle h-9 sm:h-11 px-3 sm:px-6 rounded-xl shadow-lg gap-2 text-xs sm:text-lg">
                         <Award className="w-4 h-4" />
                         <span className="hidden sm:inline">Bulk Issue</span> Approval
                     </Button>
@@ -53,7 +53,7 @@ export function PassedCandidateTable() {
                                                 <User className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="font-bold text-foreground leading-none text-sm sm:text-base truncate">{candidate.name}</p>
+                                                <p className="alumni-sans-subtitle text-foreground leading-none text-sm sm:text-base truncate">{candidate.name}</p>
                                                 <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-1 font-mono truncate">{candidate.cnic}</p>
                                                 <p className="text-[9px] sm:text-[10px] text-primary font-bold mt-0.5 uppercase tracking-tighter">{candidate.id}</p>
                                             </div>

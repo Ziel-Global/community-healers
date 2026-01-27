@@ -12,7 +12,7 @@ export function HistoricalReports() {
     return (
         <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
             <div className="p-4 border-b border-border/40 bg-secondary/20 flex justify-between items-center">
-                <h4 className="text-sm font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-lg alumni-sans-title text-foreground uppercase tracking-widest flex items-center gap-2">
                     <FileText className="w-4 h-4 text-primary" /> Past Reports
                 </h4>
                 <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
@@ -33,7 +33,7 @@ export function HistoricalReports() {
                         {reports.map((r) => (
                             <tr key={r.date} className="hover:bg-primary/5 transition-colors">
                                 <td className="p-4">
-                                    <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                                    <div className="flex items-center gap-2 text-lg alumni-sans-subtitle text-foreground">
                                         <CalendarIcon className="w-3.5 h-3.5 text-primary" />
                                         {r.date}
                                     </div>

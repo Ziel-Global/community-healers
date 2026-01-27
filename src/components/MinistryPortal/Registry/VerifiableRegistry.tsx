@@ -14,7 +14,7 @@ export function VerifiableRegistry() {
         <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
             <div className="bg-secondary/40 p-6 border-b border-border/40 space-y-4">
                 <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
+                    <h4 className="text-lg alumni-sans-subtitle text-foreground uppercase tracking-widest flex items-center gap-2">
                         <ShieldCheck className="w-4 h-4 text-primary" />
                         Certification Registry (Global)
                     </h4>
@@ -38,11 +38,11 @@ export function VerifiableRegistry() {
 
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                                <span className="font-bold text-foreground text-sm font-mono tracking-tight">{cert.certNo}</span>
+                                <span className="alumni-sans-subtitle text-foreground text-sm font-mono tracking-tight">{cert.certNo}</span>
                                 <Badge variant="outline" className="text-[8px] uppercase font-bold tracking-tight h-3.5 px-1 bg-white/50">Official Registry Entry</Badge>
                             </div>
                             <div className="flex items-center gap-4 mt-2">
-                                <p className="text-xs text-foreground font-bold flex items-center gap-1.5">
+                                <p className="text-xs text-foreground alumni-sans-subtitle flex items-center gap-1.5">
                                     <UserCheck className="w-3.5 h-3.5 text-muted-foreground" /> {cert.name}
                                 </p>
                                 <span className="text-muted-foreground/30 text-[10px]">|</span>

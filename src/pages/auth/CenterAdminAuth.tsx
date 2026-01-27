@@ -128,7 +128,7 @@ export default function CenterAdminAuth() {
                 {!isSignUp && (
                   <button
                     type="button"
-                    className="text-sm text-primary hover:text-primary/80 font-semibold"
+                    className="text-base text-primary hover:text-primary/80 alumni-sans-subtitle"
                   >
                     Forgot password?
                   </button>
@@ -146,7 +146,7 @@ export default function CenterAdminAuth() {
               </div>
             </div>
 
-            <Button type="submit" variant="forest" className="w-full h-12 text-base">
+            <Button type="submit" variant="forest" className="w-full h-12 text-lg alumni-sans-subtitle">
               {isSignUp ? "Request Access" : "Sign In"}
             </Button>
           </form>

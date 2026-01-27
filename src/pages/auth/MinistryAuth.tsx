@@ -113,7 +113,7 @@ export default function MinistryAuth() {
                 {!isSignUp && (
                   <button
                     type="button"
-                    className="text-sm text-primary hover:text-primary/80 font-semibold"
+                    className="text-md text-primary hover:text-primary/80 alumni-sans-subtitle"
                   >
                     Reset password
                   </button>
@@ -148,7 +148,7 @@ export default function MinistryAuth() {
               </div>
             )}
 
-            <Button type="submit" variant="forest" className="w-full h-12 text-base">
+            <Button type="submit" variant="forest" className="w-full h-12 text-lg alumni-sans-subtitle">
               {isSignUp ? "Submit Request" : "Secure Login"}
             </Button>
           </form>

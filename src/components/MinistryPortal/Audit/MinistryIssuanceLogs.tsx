@@ -13,7 +13,7 @@ export function MinistryIssuanceLogs() {
     return (
         <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
             <div className="bg-secondary/40 p-4 border-b border-border/40 flex items-center justify-between">
-                <h4 className="text-sm font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-sm alumni-sans-subtitle text-foreground uppercase tracking-widest flex items-center gap-2">
                     <FileSignature className="w-4 h-4 text-primary" />
                     Issuance & Authority Trail
                 </h4>
@@ -28,7 +28,7 @@ export function MinistryIssuanceLogs() {
 
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                                <span className="font-bold text-foreground text-sm">{log.action}</span>
+                                <span className="alumni-sans-subtitle text-foreground text-sm">{log.action}</span>
                                 <Badge variant={log.status === "Success" ? "success" : "destructive"} className="text-[8px] uppercase font-bold tracking-tight h-3.5 px-1 pb-[1px]">
                                     {log.status}
                                 </Badge>

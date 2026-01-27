@@ -19,7 +19,7 @@ export function DailyResultsView() {
                             </div>
                             <div>
                                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{item.label}</p>
-                                <p className="text-2xl font-display font-bold text-foreground">{item.value}</p>
+                                <p className="text-2xl font-sans font-bold text-foreground">{item.value}</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -29,7 +29,7 @@ export function DailyResultsView() {
             <Card className="border-border/40 bg-card overflow-hidden">
                 <CardHeader className="bg-primary/5 border-b border-border/40 py-4 px-6">
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
+                        <CardTitle className="text-2xl alumni-sans-title flex items-center gap-2">
                             <BarChart3 className="w-5 h-5 text-primary" />
                             Day-End Summary
                         </CardTitle>

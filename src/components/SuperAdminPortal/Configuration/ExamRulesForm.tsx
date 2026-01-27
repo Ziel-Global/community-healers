@@ -24,13 +24,13 @@ export function ExamRulesForm() {
                 <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="duration" className="text-sm font-bold uppercase tracking-wider">Exam Duration (Minutes)</Label>
+                            <Label htmlFor="duration" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Exam Duration (Minutes)</Label>
                             <Input id="duration" type="number" defaultValue={20} className="h-11 bg-white/50 border-border/60" />
                             <p className="text-[10px] text-muted-foreground italic">Default duration for all standard certification exams.</p>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="questions" className="text-sm font-bold uppercase tracking-wider">Number of Questions</Label>
+                            <Label htmlFor="questions" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Number of Questions</Label>
                             <Input id="questions" type="number" defaultValue={20} className="h-11 bg-white/50 border-border/60" />
                             <p className="text-[10px] text-muted-foreground italic">Randomly pulled from the active question bank.</p>
                         </div>
@@ -38,7 +38,7 @@ export function ExamRulesForm() {
 
                     <div className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="threshold" className="text-sm font-bold uppercase tracking-wider">Passing Threshold (%)</Label>
+                            <Label htmlFor="threshold" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Passing Threshold (%)</Label>
                             <Input id="threshold" type="number" defaultValue={60} className="h-11 bg-white/50 border-border/60" />
                             <p className="text-[10px] text-muted-foreground italic">Minimum score required to issue a certificate.</p>
                         </div>

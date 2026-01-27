@@ -11,7 +11,7 @@ export function CertificateStep({ }: WizardStepProps) {
         <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
           <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
         </div>
-        <h2 className="font-display font-bold text-3xl text-foreground mb-2">
+        <h2 className="alumni-sans-title text-4xl text-foreground mb-2">
           Congratulations! 🎉
         </h2>
         <p className="text-lg text-muted-foreground mb-4">
@@ -32,7 +32,7 @@ export function CertificateStep({ }: WizardStepProps) {
                 <Award className="w-8 h-8 text-primary" />
               </div>
               <div>
-                <h3 className="font-display font-bold text-2xl text-foreground">
+                <h3 className="alumni-sans-title text-3xl text-foreground">
                   Official Certificate
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -61,7 +61,7 @@ export function CertificateStep({ }: WizardStepProps) {
                 <p className="text-sm uppercase tracking-widest text-muted-foreground font-bold mb-2">
                   Certificate of Achievement
                 </p>
-                <h4 className="font-display font-bold text-3xl text-foreground mb-4">
+                <h4 className="alumni-sans-title text-4xl text-foreground mb-4">
                   Professional Certification
                 </h4>
                 <p className="text-muted-foreground mb-6">
