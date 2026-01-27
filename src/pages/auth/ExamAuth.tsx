@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Smartphone, Lock, ArrowRight, Loader2, BookOpen } from "lucide-react";
+import { Shield, Smartphone, Lock, ArrowRight, Loader2, BookOpen, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ExamAuth() {
@@ -33,7 +33,11 @@ export default function ExamAuth() {
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex flex-col">
             {/* Header */}
             <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm">
-                <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-center">
+                <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
+                    <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                        <ArrowLeft className="w-4 h-4" />
+                        <span className="text-sm hidden sm:inline">Back to Home</span>
+                    </Link>
                     <div className="flex items-center gap-2 sm:gap-3">
                         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
                             <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
@@ -47,6 +51,7 @@ export default function ExamAuth() {
                             </span>
                         </div>
                     </div>
+                    <div className="w-20 sm:w-24"></div> {/* Spacer for centering */}
                 </div>
             </header>
 
