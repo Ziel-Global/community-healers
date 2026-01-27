@@ -3,39 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Shield, Smartphone, ArrowRight, Loader2, BookOpen } from "lucide-react";
+import { Shield, Smartphone, Lock, ArrowRight, Loader2, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ExamAuth() {
     const navigate = useNavigate();
-    const [step, setStep] = useState<"phone" | "otp">("phone");
     const [phone, setPhone] = useState("");
-    const [otp, setOtp] = useState("");
+    const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handleSendOtp = () => {
+    const handleLogin = () => {
         if (phone.length < 10) {
             toast.error("Please enter a valid phone number");
             return;
         }
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            setStep("otp");
-            toast.success("OTP sent to your mobile number");
-        }, 1500);
-    };
-
-    const handleVerifyOtp = () => {
-        if (otp.length < 6) {
-            toast.error("Please enter the 6-digit OTP");
+        if (password.length < 4) {
+            toast.error("Please enter your password");
             return;
         }
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
-            toast.success("Login successful! Preparing your exam...");
+            toast.success("Login successful!");
             navigate("/exam/start");
         }, 1500);
     };
@@ -71,80 +60,52 @@ export default function ExamAuth() {
                         <div>
                             <CardTitle className="text-xl sm:text-2xl font-display font-bold">Candidate Login</CardTitle>
                             <CardDescription className="text-sm">
-                                {step === "phone"
-                                    ? "Enter your registered mobile number"
-                                    : "Verify the 6-digit code sent to your mobile"}
+                                Enter your registered credentials to access the exam
                             </CardDescription>
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        {step === "phone" ? (
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <div className="relative">
-                                        <Smartphone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Mobile Number (e.g. 03001234567)"
-                                            className="pl-10 h-11 sm:h-12"
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            type="tel"
-                                        />
-                                    </div>
-                                </div>
-                                <Button
-                                    onClick={handleSendOtp}
-                                    className="w-full h-11 sm:h-12 gradient-primary text-white font-medium"
-                                    disabled={loading}
-                                >
-                                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Send OTP"}
-                                    {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
-                                </Button>
-                            </div>
-                        ) : (
-                            <div className="space-y-6">
-                                <div className="flex justify-center">
-                                    <InputOTP
-                                        maxLength={6}
-                                        value={otp}
-                                        onChange={setOtp}
-                                    >
-                                        <InputOTPGroup className="gap-1 sm:gap-2">
-                                            <InputOTPSlot index={0} className="h-10 w-10 sm:h-12 sm:w-12 text-lg border-border/60" />
-                                            <InputOTPSlot index={1} className="h-10 w-10 sm:h-12 sm:w-12 text-lg border-border/60" />
-                                            <InputOTPSlot index={2} className="h-10 w-10 sm:h-12 sm:w-12 text-lg border-border/60" />
-                                            <InputOTPSlot index={3} className="h-10 w-10 sm:h-12 sm:w-12 text-lg border-border/60" />
-                                            <InputOTPSlot index={4} className="h-10 w-10 sm:h-12 sm:w-12 text-lg border-border/60" />
-                                            <InputOTPSlot index={5} className="h-10 w-10 sm:h-12 sm:w-12 text-lg border-border/60" />
-                                        </InputOTPGroup>
-                                    </InputOTP>
-                                </div>
-                                <div className="space-y-3">
-                                    <Button
-                                        onClick={handleVerifyOtp}
-                                        className="w-full h-11 sm:h-12 gradient-primary text-white font-medium"
-                                        disabled={loading}
-                                    >
-                                        {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Start Examination"}
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full"
-                                        onClick={() => setStep("phone")}
-                                        disabled={loading}
-                                    >
-                                        Change Phone Number
-                                    </Button>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <div className="relative">
+                                    <Smartphone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Mobile Number (e.g. 03001234567)"
+                                        className="pl-10 h-11 sm:h-12"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        type="tel"
+                                    />
                                 </div>
                             </div>
-                        )}
+                            <div className="space-y-2">
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Password"
+                                        className="pl-10 h-11 sm:h-12"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        type="password"
+                                    />
+                                </div>
+                            </div>
+                            <Button
+                                onClick={handleLogin}
+                                className="w-full h-11 sm:h-12 gradient-primary text-white font-medium"
+                                disabled={loading}
+                            >
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Login to Exam"}
+                                {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
+                            </Button>
+                        </div>
 
                         <div className="bg-secondary/30 rounded-lg p-3 sm:p-4 space-y-2">
                             <p className="text-xs sm:text-sm font-medium text-foreground">Before you begin:</p>
                             <ul className="text-xs text-muted-foreground space-y-1">
                                 <li>• Ensure stable internet connection</li>
                                 <li>• Use a laptop/desktop for best experience</li>
-                                <li>• Keep your ID ready for verification</li>
+                                <li>• Wait for the center admin to start the exam</li>
                             </ul>
                         </div>
 
