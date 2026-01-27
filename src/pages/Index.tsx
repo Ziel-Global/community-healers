@@ -11,18 +11,30 @@ import {
   Clock,
   Award,
   Users,
+  BookOpen,
 } from "lucide-react";
 
 const portals = [
   {
     title: "Candidate Portal",
     description:
-      "Register, schedule exams, complete CBT tests, and download your official government certificates.",
+      "Register, schedule exams, complete training, and track your certification progress.",
     icon: GraduationCap,
     href: "/candidate/auth",
     stats: [
       { label: "Active Candidates", value: "12,450" },
+      { label: "Registered Today", value: "89" },
+    ],
+  },
+  {
+    title: "Examination Portal",
+    description:
+      "Login with your candidate credentials to take your scheduled CBT examination.",
+    icon: BookOpen,
+    href: "/exam/auth",
+    stats: [
       { label: "Exams Today", value: "342" },
+      { label: "Pass Rate", value: "78%" },
     ],
   },
   {
@@ -148,8 +160,7 @@ export default function Index() {
             ))}
           </div>
 
-          {/* Portal Cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-20">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-12 sm:mb-20">
             {portals.map((portal) => (
               <PortalCard key={portal.title} {...portal} />
             ))}
