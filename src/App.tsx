@@ -11,7 +11,6 @@ import TrainingPage from "./pages/candidate/TrainingPage";
 import CertificatesPage from "./pages/candidate/CertificatesPage";
 import NotificationsPage from "./pages/candidate/NotificationsPage";
 import ProfilePage from "./pages/candidate/ProfilePage";
-import ExamPage from "./pages/candidate/ExamPage";
 import CenterAdminPortal from "./pages/CenterAdminPortal";
 import CandidatesPage from "./pages/center/CandidatesPage";
 import VerificationPage from "./pages/center/VerificationPage";
@@ -34,6 +33,8 @@ import CandidateAuth from "./pages/auth/CandidateAuth";
 import CenterAdminAuth from "./pages/auth/CenterAdminAuth";
 import SuperAdminAuth from "./pages/auth/SuperAdminAuth";
 import MinistryAuth from "./pages/auth/MinistryAuth";
+import ExamAuth from "./pages/auth/ExamAuth";
+import ExamPortal from "./pages/ExamPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,9 @@ const App = () => (
           <Route path="/center/auth" element={<CenterAdminAuth />} />
           <Route path="/admin/auth" element={<SuperAdminAuth />} />
           <Route path="/ministry/auth" element={<MinistryAuth />} />
+          <Route path="/exam/auth" element={<ExamAuth />} />
+          {/* Examination Portal */}
+          <Route path="/exam/start" element={<ExamPortal />} />
           {/* Portal Routes */}
           <Route path="/candidate" element={<CandidatePortal />} />
           <Route path="/candidate/registration" element={<RegistrationPage />} />
@@ -59,7 +63,6 @@ const App = () => (
           <Route path="/candidate/certificates" element={<CertificatesPage />} />
           <Route path="/candidate/notifications" element={<NotificationsPage />} />
           <Route path="/candidate/profile" element={<ProfilePage />} />
-          <Route path="/candidate/exam" element={<ExamPage />} />
           <Route path="/center" element={<CenterAdminPortal />} />
           <Route path="/center/candidates" element={<CandidatesPage />} />
           <Route path="/center/verification" element={<VerificationPage />} />

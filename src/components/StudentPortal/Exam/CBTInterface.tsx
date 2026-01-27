@@ -7,7 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Clock, ChevronLeft, ChevronRight, Send, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function CBTInterface() {
+interface CBTInterfaceProps {
+    onComplete?: () => void;
+}
+
+export function CBTInterface({ onComplete }: CBTInterfaceProps) {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [timeLeft, setTimeLeft] = useState(20 * 60); // 20 minutes in seconds
     const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -152,7 +156,10 @@ export function CBTInterface() {
                                     </button>
                                 ))}
                             </div>
-                            <Button className="w-full mt-6 gradient-primary text-white font-bold gap-2 shadow-royal">
+                            <Button 
+                                onClick={onComplete}
+                                className="w-full mt-6 gradient-primary text-white font-bold gap-2 shadow-royal"
+                            >
                                 <Send className="w-4 h-4" /> Submit Exam
                             </Button>
                         </CardContent>
