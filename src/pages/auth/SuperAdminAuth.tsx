@@ -122,16 +122,6 @@ export default function SuperAdminAuth() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-muted-foreground">
-            {isSignUp ? "Already configured?" : "First time setup?"}{" "}
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary font-semibold hover:text-primary/80 transition-colors"
-            >
-              {isSignUp ? "Sign In" : "Admin Setup"}
-            </button>
-          </p>
 
           <div className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/20">
             <p className="text-xs text-muted-foreground text-center">

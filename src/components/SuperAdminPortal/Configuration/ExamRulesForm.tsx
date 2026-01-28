@@ -46,10 +46,6 @@ export function ExamRulesForm() {
                 </div>
 
                 <div className="flex justify-between items-center pt-4 border-t border-border/40">
-                    <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
-                        <History className="w-4 h-4" />
-                        View Change History
-                    </Button>
                     <Button className="gradient-primary text-white font-bold h-11 px-8 shadow-lg group">
                         <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
                         Save & Apply Configuration

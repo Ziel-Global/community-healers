@@ -2,20 +2,105 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Award, User, Calendar, ExternalLink, CheckCircle2, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, Filter, Award, User, Calendar, ExternalLink, CheckCircle2, X, Phone, Mail, MapPin, FileText, Download, UserCheck, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
-const candidates = [
-    { id: "REG-2024-001", name: "Ahmed Khan", cnic: "42101-1234567-1", score: "85/100", date: "Jan 18, 2024", center: "LHR-003", status: "Passed" },
-    { id: "REG-2024-005", name: "Sara Malik", cnic: "35201-9876543-2", score: "92/100", date: "Jan 18, 2024", center: "KHI-012", status: "Passed" },
-    { id: "REG-2024-012", name: "Zain Ali", cnic: "61101-4455667-3", score: "78/100", date: "Jan 17, 2024", center: "MUL-005", status: "Passed" },
+interface Document {
+    id: string;
+    name: string;
+    type: string;
+    uploadDate: string;
+    fileUrl: string;
+}
+
+interface Candidate {
+    id: string;
+    name: string;
+    cnic: string;
+    score: string;
+    date: string;
+    center: string;
+    status: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    dob?: string;
+    fatherName?: string;
+    photo?: string;
+    documents?: Document[];
+}
+
+const candidates: Candidate[] = [
+    { 
+        id: "REG-2024-001", 
+        name: "Ahmed Khan", 
+        cnic: "42101-1234567-1", 
+        score: "85/100", 
+        date: "Jan 18, 2024", 
+        center: "LHR-003", 
+        status: "Passed",
+        phone: "0300-1234567",
+        email: "ahmed.khan@example.com",
+        address: "Block 5, Gulberg III, Lahore",
+        dob: "January 15, 1995",
+        fatherName: "Muhammad Khan",
+        photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed",
+        documents: [
+            { id: "1", name: "Candidate Photo", type: "Image", uploadDate: "Jan 15, 2024", fileUrl: "#" },
+            { id: "2", name: "CNIC Front", type: "Image", uploadDate: "Jan 15, 2024", fileUrl: "#" },
+            { id: "3", name: "CNIC Back", type: "Image", uploadDate: "Jan 15, 2024", fileUrl: "#" },
+            { id: "4", name: "Educational Certificate", type: "PDF", uploadDate: "Jan 15, 2024", fileUrl: "#" },
+        ],
+    },
+    { 
+        id: "REG-2024-005", 
+        name: "Sara Malik", 
+        cnic: "35201-9876543-2", 
+        score: "92/100", 
+        date: "Jan 18, 2024", 
+        center: "KHI-012", 
+        status: "Passed",
+        phone: "0321-9876543",
+        email: "sara.malik@example.com",
+        address: "Defence Phase 6, Karachi",
+        dob: "March 22, 1998",
+        fatherName: "Ali Malik",
+        photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara",
+        documents: [
+            { id: "1", name: "Candidate Photo", type: "Image", uploadDate: "Jan 16, 2024", fileUrl: "#" },
+            { id: "2", name: "CNIC Front", type: "Image", uploadDate: "Jan 16, 2024", fileUrl: "#" },
+            { id: "3", name: "CNIC Back", type: "Image", uploadDate: "Jan 16, 2024", fileUrl: "#" },
+        ],
+    },
+    { 
+        id: "REG-2024-012", 
+        name: "Zain Ali", 
+        cnic: "61101-4455667-3", 
+        score: "78/100", 
+        date: "Jan 17, 2024", 
+        center: "MUL-005", 
+        status: "Passed",
+        phone: "0333-5551234",
+        email: "zain.ali@example.com",
+        address: "Cantt Area, Multan",
+        dob: "July 8, 1997",
+        fatherName: "Raza Ali",
+        photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Zain",
+        documents: [
+            { id: "1", name: "Candidate Photo", type: "Image", uploadDate: "Jan 14, 2024", fileUrl: "#" },
+            { id: "2", name: "CNIC Front", type: "Image", uploadDate: "Jan 14, 2024", fileUrl: "#" },
+            { id: "3", name: "Educational Certificate", type: "PDF", uploadDate: "Jan 14, 2024", fileUrl: "#" },
+        ],
+    },
 ];
 
 export function PassedCandidateTable() {
     const [isBulkMode, setIsBulkMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
 
     const handleBulkModeToggle = () => {
         if (!isBulkMode) {
@@ -75,7 +160,7 @@ export function PassedCandidateTable() {
                     {!isBulkMode ? (
                         <Button 
                             onClick={handleBulkModeToggle}
-                            className="flex-1 sm:flex-none gradient-primary text-black alumni-sans-subtitle h-9 sm:h-11 px-3 sm:px-6 rounded-xl shadow-lg gap-2 text-xs sm:text-lg"
+                            className="flex-1 sm:flex-none gradient-primary text-white alumni-sans-subtitle h-9 sm:h-11 px-3 sm:px-6 rounded-xl shadow-lg gap-2 text-xs sm:text-lg"
                         >
                             <Award className="w-4 h-4" />
                             <span className="hidden sm:inline">Bulk Issue</span> Approval
@@ -164,7 +249,12 @@ export function PassedCandidateTable() {
                                     </td>
                                     <td className="p-3 sm:p-4 text-right">
                                         <div className="flex justify-end gap-1 sm:gap-2">
-                                            <Button variant="ghost" size="sm" className="h-7 sm:h-9 px-2 sm:px-3 gap-1 sm:gap-2 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary text-xs">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="h-7 sm:h-9 px-2 sm:px-3 gap-1 sm:gap-2 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary text-xs"
+                                                onClick={() => setSelectedCandidate(candidate)}
+                                            >
                                                 <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 <span className="hidden sm:inline">Review</span>
                                             </Button>
@@ -182,6 +272,188 @@ export function PassedCandidateTable() {
                     </table>
                 </div>
             </Card>
+
+            {/* Candidate Detail Modal */}
+            <Dialog open={!!selectedCandidate} onOpenChange={() => setSelectedCandidate(null)}>
+                <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl sm:text-2xl font-bold">Candidate Details</DialogTitle>
+                    </DialogHeader>
+
+                    {selectedCandidate && (
+                        <div className="space-y-4 sm:space-y-6">
+                            {/* Candidate Header */}
+                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 pb-4 sm:pb-6 border-b text-center sm:text-left">
+                                <img 
+                                    src={selectedCandidate.photo} 
+                                    alt={selectedCandidate.name} 
+                                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-secondary object-cover border-2 border-border/40" 
+                                />
+                                <div className="flex-1">
+                                    <h3 className="text-lg sm:text-xl font-bold text-foreground">{selectedCandidate.name}</h3>
+                                    <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-1">{selectedCandidate.id}</p>
+                                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+                                        <Badge variant="success" className="text-[9px] sm:text-[10px] uppercase font-bold">
+                                            {selectedCandidate.status}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-[9px] sm:text-[10px]">
+                                            Score: {selectedCandidate.score}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Personal Information */}
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Personal Information</h4>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-start gap-3">
+                                        <FileText className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-semibold uppercase">CNIC</p>
+                                            <p className="text-sm font-medium">{selectedCandidate.cnic}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <Calendar className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-semibold uppercase">Date of Birth</p>
+                                            <p className="text-sm font-medium">{selectedCandidate.dob}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <UserCheck className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-semibold uppercase">Father's Name</p>
+                                            <p className="text-sm font-medium">{selectedCandidate.fatherName}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <Clock className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-semibold uppercase">Exam Date</p>
+                                            <p className="text-sm font-medium">{selectedCandidate.date}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-semibold uppercase">Center</p>
+                                            <p className="text-sm font-medium">{selectedCandidate.center}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Contact Information */}
+                            <div className="space-y-4 pt-4 border-t">
+                                <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Contact Information</h4>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="flex items-start gap-3">
+                                        <Phone className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-semibold uppercase">Phone Number</p>
+                                            <p className="text-sm font-medium">{selectedCandidate.phone}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <Mail className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-semibold uppercase">Email Address</p>
+                                            <p className="text-sm font-medium">{selectedCandidate.email}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3 md:col-span-2">
+                                        <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                                        <div>
+                                            <p className="text-xs text-muted-foreground font-semibold uppercase">Address</p>
+                                            <p className="text-sm font-medium">{selectedCandidate.address}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Uploaded Documents */}
+                            {selectedCandidate.documents && selectedCandidate.documents.length > 0 && (
+                                <div className="space-y-4 pt-4 border-t">
+                                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Uploaded Documents</h4>
+                                    
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {selectedCandidate.documents.map((doc) => (
+                                            <div 
+                                                key={doc.id}
+                                                className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-secondary/20 hover:bg-secondary/40 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                        <FileText className="w-5 h-5 text-primary" />
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
+                                                        <div className="flex items-center gap-2 mt-0.5">
+                                                            <span className="text-xs text-muted-foreground">{doc.type}</span>
+                                                            <span className="text-xs text-muted-foreground">•</span>
+                                                            <span className="text-xs text-muted-foreground">{doc.uploadDate}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 flex-shrink-0">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="h-8 w-8 p-0"
+                                                        onClick={() => window.open(doc.fileUrl, '_blank')}
+                                                    >
+                                                        <ExternalLink className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="h-8 w-8 p-0"
+                                                        onClick={() => {
+                                                            const link = document.createElement('a');
+                                                            link.href = doc.fileUrl;
+                                                            link.download = doc.name;
+                                                            link.click();
+                                                        }}
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex justify-end gap-3 pt-4 border-t">
+                                <Button variant="outline" onClick={() => setSelectedCandidate(null)}>
+                                    Close
+                                </Button>
+                                <Button 
+                                    className="bg-black text-white hover:bg-black/80"
+                                    onClick={() => {
+                                        toast.success(`Certificate issued for ${selectedCandidate.name}`);
+                                        setSelectedCandidate(null);
+                                    }}
+                                >
+                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    Issue Certificate
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
