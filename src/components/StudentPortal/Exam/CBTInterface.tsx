@@ -16,6 +16,7 @@ export function CBTInterface({ onComplete }: CBTInterfaceProps) {
     const [timeLeft, setTimeLeft] = useState(20 * 60); // 20 minutes in seconds
     const [answers, setAnswers] = useState<Record<number, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
     useEffect(() => {
         if (timeLeft <= 0) {
@@ -144,9 +145,31 @@ export function CBTInterface({ onComplete }: CBTInterfaceProps) {
         setIsSubmitting(true);
         // Simulate submission delay
         setTimeout(() => {
-            onComplete?.();
+            setIsSubmitting(false);
+            setIsSubmitted(true);
         }, 1500);
     };
+
+    if (isSubmitted) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <Card className="max-w-md w-full border-border/40 shadow-lg text-center">
+                    <CardContent className="p-8 space-y-6">
+                        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                            <Send className="w-10 h-10 text-primary" />
+                        </div>
+                        <div>
+                            <h3 className="font-display font-bold text-2xl text-foreground mb-2">Exam Submitted Successfully</h3>
+                            <p className="text-muted-foreground">Your answers have been recorded. You will be notified of your results shortly.</p>
+                        </div>
+                        <Button onClick={onComplete} className="w-full font-bold gap-2">
+                            Return to Portal
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     if (isSubmitting) {
         return (
