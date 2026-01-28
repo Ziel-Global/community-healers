@@ -4,7 +4,7 @@ import { Award, Clock, FileCheck, TrendingUp, ShieldCheck } from "lucide-react";
 
 export function MinistryStats() {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card className="border-border/40 bg-card/60 backdrop-blur-sm shadow-sm border-l-4 border-l-primary">
                 <CardContent className="p-5">
                     <div className="flex justify-between items-start">
@@ -51,23 +51,6 @@ export function MinistryStats() {
                         </div>
                         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
                             <FileCheck className="w-5 h-5 text-emerald-500" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="border-border/40 bg-card/60 backdrop-blur-sm shadow-sm border-l-4 border-l-indigo-500">
-                <CardContent className="p-5">
-                    <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Registry Health</p>
-                            <h3 className="text-2xl font-sans font-bold text-foreground">100%</h3>
-                            <p className="text-[10px] text-indigo-600 font-medium flex items-center gap-1">
-                                Immutable & Verifiable
-                            </p>
-                        </div>
-                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                            <ShieldCheck className="w-5 h-5 text-indigo-500" />
                         </div>
                     </div>
                 </CardContent>

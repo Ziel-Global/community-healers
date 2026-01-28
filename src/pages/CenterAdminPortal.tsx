@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CenterStats } from "@/components/CentreAdminPortal/Dashboard/CenterStats";
 import { CenterInfoCard } from "@/components/CentreAdminPortal/Dashboard/CenterInfoCard";
 import { CandidateTable } from "@/components/CentreAdminPortal/Candidates/CandidateTable";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Filter } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
@@ -29,6 +31,8 @@ export const centerNavItems = [
 ];
 
 export default function CenterAdminPortal() {
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
   return (
     <DashboardLayout
       title="Center Admin Portal"
@@ -63,8 +67,21 @@ export default function CenterAdminPortal() {
                 className="pl-10 sm:pl-12 h-10 sm:h-12 bg-white/50 border-border/60 focus:border-primary/40 focus:ring-primary/20 rounded-xl text-sm sm:text-base w-full"
               />
             </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-10 sm:h-12 px-3 sm:px-4 rounded-xl border-border/60 bg-white/50 hover:bg-white transition-all w-full sm:w-[180px] text-xs sm:text-sm">
+                <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary mr-2" />
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="Verified">Verified</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Absent">Absent</SelectItem>
+                <SelectItem value="Rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <CandidateTable />
+          <CandidateTable statusFilter={statusFilter} />
         </div>
 
       </div>

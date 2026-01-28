@@ -122,9 +122,18 @@ const StatusBadge = ({ status }: { status: string }) => {
     }
 };
 
-export function CandidateTable() {
+interface CandidateTableProps {
+    statusFilter?: string;
+}
+
+export function CandidateTable({ statusFilter = "all" }: CandidateTableProps) {
   const navigate = useNavigate();
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+
+  // Filter candidates by status
+  const filteredCandidates = statusFilter === "all" 
+    ? candidates 
+    : candidates.filter(c => c.status === statusFilter);
 
   const handleVerify = () => {
     // Navigate to verification page
@@ -147,7 +156,7 @@ export function CandidateTable() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
-                        {candidates.map((c) => (
+                        {filteredCandidates.map((c) => (
                             <tr key={c.id} className="hover:bg-primary/5 transition-colors group">
                                 <td className="p-3 sm:p-4">
                                     <div className="flex items-center gap-2 sm:gap-3">

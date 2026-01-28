@@ -6,6 +6,7 @@ import { CandidateTable } from "@/components/CentreAdminPortal/Candidates/Candid
 
 export default function CandidatesPage() {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [statusFilter, setStatusFilter] = useState<string>("all");
 
     return (
         <DashboardLayout
@@ -21,8 +22,13 @@ export default function CandidatesPage() {
                         {selectedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                 </div>
-                <CandidateSearch selectedDate={selectedDate} onDateChange={(date) => date && setSelectedDate(date)} />
-                <CandidateTable />
+                <CandidateSearch 
+                    selectedDate={selectedDate} 
+                    onDateChange={(date) => date && setSelectedDate(date)}
+                    statusFilter={statusFilter}
+                    onStatusChange={setStatusFilter}
+                />
+                <CandidateTable statusFilter={statusFilter} />
             </div>
         </DashboardLayout>
     );

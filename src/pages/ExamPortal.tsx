@@ -279,7 +279,7 @@ export default function ExamPortal() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {/* Exam Details */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
                                 <FileText className="w-5 h-5 text-primary" />
                                 <div>
@@ -292,13 +292,6 @@ export default function ExamPortal() {
                                 <div>
                                     <p className="text-xs text-muted-foreground">Duration</p>
                                     <p className="font-semibold">20 Minutes</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
-                                <Shield className="w-5 h-5 text-primary" />
-                                <div>
-                                    <p className="text-xs text-muted-foreground">Passing</p>
-                                    <p className="font-semibold">60% Required</p>
                                 </div>
                             </div>
                         </div>
