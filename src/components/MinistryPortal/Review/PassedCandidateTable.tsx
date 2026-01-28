@@ -1,8 +1,11 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Award, User, Calendar, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Search, Filter, Award, User, Calendar, ExternalLink, CheckCircle2, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 const candidates = [
     { id: "REG-2024-001", name: "Ahmed Khan", cnic: "42101-1234567-1", score: "85/100", date: "Jan 18, 2024", center: "LHR-003", status: "Passed" },
@@ -11,6 +14,49 @@ const candidates = [
 ];
 
 export function PassedCandidateTable() {
+    const [isBulkMode, setIsBulkMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+    const handleBulkModeToggle = () => {
+        if (!isBulkMode) {
+            // Enter bulk mode with all candidates selected
+            setSelectedIds(candidates.map(c => c.id));
+            setIsBulkMode(true);
+        } else {
+            // Exit bulk mode
+            setSelectedIds([]);
+            setIsBulkMode(false);
+        }
+    };
+
+    const handleCheckboxChange = (id: string, checked: boolean) => {
+        if (checked) {
+            setSelectedIds(prev => [...prev, id]);
+        } else {
+            setSelectedIds(prev => prev.filter(i => i !== id));
+        }
+    };
+
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            setSelectedIds(candidates.map(c => c.id));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleIssueCertificates = () => {
+        if (selectedIds.length === 0) {
+            toast.error("No candidates selected");
+            return;
+        }
+        toast.success(`Certificates issued for ${selectedIds.length} candidate(s)`);
+        setIsBulkMode(false);
+        setSelectedIds([]);
+    };
+
+    const allSelected = selectedIds.length === candidates.length;
+
     return (
         <div className="space-y-4 sm:space-y-6">
             <div className="flex flex-col gap-3 sm:gap-4">
@@ -26,10 +72,33 @@ export function PassedCandidateTable() {
                         <Filter className="w-4 h-4 text-primary" />
                         <span className="hidden sm:inline">Center</span> Filter
                     </Button>
-                    <Button className="flex-1 sm:flex-none gradient-primary text-black alumni-sans-subtitle h-9 sm:h-11 px-3 sm:px-6 rounded-xl shadow-lg gap-2 text-xs sm:text-lg">
-                        <Award className="w-4 h-4" />
-                        <span className="hidden sm:inline">Bulk Issue</span> Approval
-                    </Button>
+                    {!isBulkMode ? (
+                        <Button 
+                            onClick={handleBulkModeToggle}
+                            className="flex-1 sm:flex-none gradient-primary text-black alumni-sans-subtitle h-9 sm:h-11 px-3 sm:px-6 rounded-xl shadow-lg gap-2 text-xs sm:text-lg"
+                        >
+                            <Award className="w-4 h-4" />
+                            <span className="hidden sm:inline">Bulk Issue</span> Approval
+                        </Button>
+                    ) : (
+                        <div className="flex gap-2 flex-1 sm:flex-none">
+                            <Button 
+                                variant="outline"
+                                onClick={handleBulkModeToggle}
+                                className="h-9 sm:h-11 px-3 sm:px-4 border-border/60 gap-2 bg-white/50 text-xs sm:text-lg"
+                            >
+                                <X className="w-4 h-4" />
+                                Cancel
+                            </Button>
+                            <Button 
+                                onClick={handleIssueCertificates}
+                                className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white alumni-sans-subtitle h-9 sm:h-11 px-3 sm:px-6 rounded-xl shadow-lg gap-2 text-xs sm:text-lg"
+                            >
+                                <CheckCircle2 className="w-4 h-4" />
+                                Issue ({selectedIds.length})
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -38,6 +107,15 @@ export function PassedCandidateTable() {
                     <table className="w-full text-left border-collapse min-w-[600px]">
                         <thead>
                             <tr className="bg-secondary/40 border-b border-border/40">
+                                {isBulkMode && (
+                                    <th className="p-3 sm:p-4 w-10">
+                                        <Checkbox 
+                                            checked={allSelected}
+                                            onCheckedChange={handleSelectAll}
+                                            className="border-muted-foreground/50"
+                                        />
+                                    </th>
+                                )}
                                 <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Candidate</th>
                                 <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Score</th>
                                 <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed hidden sm:table-cell">Center</th>
@@ -47,6 +125,15 @@ export function PassedCandidateTable() {
                         <tbody className="divide-y divide-border/30">
                             {candidates.map((candidate) => (
                                 <tr key={candidate.id} className="hover:bg-primary/5 transition-colors group">
+                                    {isBulkMode && (
+                                        <td className="p-3 sm:p-4">
+                                            <Checkbox 
+                                                checked={selectedIds.includes(candidate.id)}
+                                                onCheckedChange={(checked) => handleCheckboxChange(candidate.id, checked as boolean)}
+                                                className="border-muted-foreground/50"
+                                            />
+                                        </td>
+                                    )}
                                     <td className="p-3 sm:p-4">
                                         <div className="flex items-center gap-2 sm:gap-3">
                                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -81,10 +168,12 @@ export function PassedCandidateTable() {
                                                 <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 <span className="hidden sm:inline">Review</span>
                                             </Button>
-                                            <Button size="sm" className="h-7 sm:h-9 px-2 sm:px-4 rounded-lg bg-black text-white hover:bg-black/80 font-bold gap-1 sm:gap-2 text-xs">
-                                                <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                                Issue
-                                            </Button>
+                                            {!isBulkMode && (
+                                                <Button size="sm" className="h-7 sm:h-9 px-2 sm:px-4 rounded-lg bg-black text-white hover:bg-black/80 font-bold gap-1 sm:gap-2 text-xs">
+                                                    <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                                    Issue
+                                                </Button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
