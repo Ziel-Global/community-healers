@@ -62,6 +62,7 @@ export default function CandidatePortal() {
           examDate={scheduledExamDate}
           centerName="Lahore Training Center #3"
           centerId="LHR-003"
+          onGoToProfile={() => setActiveTab("profile")}
         />
       );
     }

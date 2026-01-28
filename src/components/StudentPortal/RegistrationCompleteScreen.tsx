@@ -1,15 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Calendar, MapPin, Clock, PartyPopper, FileText, Shield, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, Calendar, MapPin, Clock, PartyPopper, FileText, Shield, AlertCircle, User } from "lucide-react";
 import { format } from "date-fns";
 
 interface RegistrationCompleteScreenProps {
   examDate: Date;
   centerName: string;
   centerId: string;
+  onGoToProfile: () => void;
 }
 
-export function RegistrationCompleteScreen({ examDate, centerName, centerId }: RegistrationCompleteScreenProps) {
+export function RegistrationCompleteScreen({ examDate, centerName, centerId, onGoToProfile }: RegistrationCompleteScreenProps) {
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-2">
       <div className="max-w-2xl w-full space-y-4 sm:space-y-6">
@@ -121,6 +123,17 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId }: R
                 <p className="text-[10px] text-green-600 dark:text-green-400">Scheduled</p>
               </div>
             </div>
+
+            {/* Go to Profile Button */}
+            <Button 
+              onClick={onGoToProfile} 
+              variant="outline" 
+              size="lg" 
+              className="w-full gap-2"
+            >
+              <User className="w-4 h-4" />
+              Go to Profile
+            </Button>
           </CardContent>
         </Card>
       </div>
