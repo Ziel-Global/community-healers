@@ -47,7 +47,23 @@ export function ProfileView({
 
   const handleViewDocument = (doc: UploadedDocument) => {
     if (doc.fileData) {
-      setPreviewDoc(doc);
+      // Open PDFs in a new tab
+      if (isPdfFile(doc.fileType)) {
+        const newWindow = window.open();
+        if (newWindow) {
+          newWindow.document.write(`
+            <html>
+              <head><title>${doc.name}</title></head>
+              <body style="margin:0;padding:0;">
+                <iframe src="${doc.fileData}" style="width:100%;height:100vh;border:none;"></iframe>
+              </body>
+            </html>
+          `);
+        }
+      } else {
+        // Show images in modal
+        setPreviewDoc(doc);
+      }
     }
   };
 
@@ -414,11 +430,12 @@ export function ProfileView({
                   />
                 )}
                 {isPdfFile(previewDoc.fileType) && (
-                  <iframe
-                    src={previewDoc.fileData}
-                    className="w-full h-[65vh]"
-                    title={previewDoc.name}
-                  />
+                  <div className="p-8 text-center">
+                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      PDF opened in a new tab
+                    </p>
+                  </div>
                 )}
                 {!isImageFile(previewDoc.fileType) && !isPdfFile(previewDoc.fileType) && (
                   <div className="p-8 text-center">
