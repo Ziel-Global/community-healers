@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X } from "lucide-react";
 import { format } from "date-fns";
 
 interface UploadedDocument {
@@ -12,6 +13,8 @@ interface UploadedDocument {
   isMandatory: boolean;
   status: "pending" | "uploading" | "complete" | "error";
   fileName?: string;
+  fileData?: string;
+  fileType?: string;
 }
 interface ProfileViewProps {
   isRegistrationComplete?: boolean;
@@ -29,6 +32,7 @@ export function ProfileView({
   certificateNumber 
 }: ProfileViewProps) {
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
+  const [previewDoc, setPreviewDoc] = useState<UploadedDocument | null>(null);
 
   // Load documents from localStorage on mount
   useEffect(() => {
@@ -40,6 +44,20 @@ export function ProfileView({
 
   const completedDocs = uploadedDocuments.filter(doc => doc.status === "complete");
   const pendingDocs = uploadedDocuments.filter(doc => doc.status === "pending" && doc.isMandatory);
+
+  const handleViewDocument = (doc: UploadedDocument) => {
+    if (doc.fileData) {
+      setPreviewDoc(doc);
+    }
+  };
+
+  const isImageFile = (fileType?: string) => {
+    return fileType?.startsWith('image/');
+  };
+
+  const isPdfFile = (fileType?: string) => {
+    return fileType === 'application/pdf';
+  };
   return (
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       {/* Profile Header */}
@@ -320,7 +338,12 @@ export function ProfileView({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground hover:text-foreground">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 gap-1 text-muted-foreground hover:text-foreground"
+                      onClick={() => handleViewDocument(doc)}
+                    >
                       <Eye className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">View</span>
                     </Button>
@@ -370,6 +393,52 @@ export function ProfileView({
           )}
         </CardContent>
       </Card>
+
+      {/* Document Preview Modal */}
+      <Dialog open={!!previewDoc} onOpenChange={() => setPreviewDoc(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              {previewDoc?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 max-h-[70vh] overflow-auto rounded-lg border border-border/40 bg-muted/20">
+            {previewDoc?.fileData && (
+              <>
+                {isImageFile(previewDoc.fileType) && (
+                  <img 
+                    src={previewDoc.fileData} 
+                    alt={previewDoc.name}
+                    className="w-full h-auto object-contain"
+                  />
+                )}
+                {isPdfFile(previewDoc.fileType) && (
+                  <iframe
+                    src={previewDoc.fileData}
+                    className="w-full h-[65vh]"
+                    title={previewDoc.name}
+                  />
+                )}
+                {!isImageFile(previewDoc.fileType) && !isPdfFile(previewDoc.fileType) && (
+                  <div className="p-8 text-center">
+                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      Preview not available for this file type
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">{previewDoc.fileName}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setPreviewDoc(null)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
