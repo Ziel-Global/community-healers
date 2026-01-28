@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,7 @@ interface CBTInterfaceProps {
 }
 
 export function CBTInterface({ onComplete }: CBTInterfaceProps) {
+    const navigate = useNavigate();
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [timeLeft, setTimeLeft] = useState(20 * 60); // 20 minutes in seconds
     const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -162,8 +164,8 @@ export function CBTInterface({ onComplete }: CBTInterfaceProps) {
                             <h3 className="font-display font-bold text-2xl text-foreground mb-2">Exam Submitted Successfully</h3>
                             <p className="text-muted-foreground">Your answers have been recorded. You will be notified of your results shortly.</p>
                         </div>
-                        <Button onClick={onComplete} className="w-full font-bold gap-2">
-                            Return to Portal
+                        <Button onClick={() => navigate("/exam/auth")} className="w-full font-bold gap-2">
+                            Return to Login
                         </Button>
                     </CardContent>
                 </Card>
