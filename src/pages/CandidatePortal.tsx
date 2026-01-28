@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { CandidateWizard } from "@/components/StudentPortal/CandidateWizard";
 import { ProfileView } from "@/components/StudentPortal/ProfileView";
-import { ExamWaitingScreen } from "@/components/StudentPortal/ExamWaitingScreen";
+import { RegistrationCompleteScreen } from "@/components/StudentPortal/RegistrationCompleteScreen";
 import { RegistrationStep } from "@/components/StudentPortal/Steps/RegistrationStep";
 import { PaymentStep } from "@/components/StudentPortal/Steps/PaymentStep";
 import { SchedulingStep } from "@/components/StudentPortal/Steps/SchedulingStep";
-import { ExamStep } from "@/components/StudentPortal/Steps/ExamStep";
-import { CertificateStep } from "@/components/StudentPortal/Steps/CertificateStep";
 import { Button } from "@/components/ui/button";
 import { User, FileText, Shield, LogOut } from "lucide-react";
 
@@ -15,10 +13,6 @@ export default function CandidatePortal() {
   const [currentWizardStep, setCurrentWizardStep] = useState(0);
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
   const [scheduledExamDate, setScheduledExamDate] = useState<Date | undefined>(undefined);
-  const [isInExam, setIsInExam] = useState(false);
-  const [examCompleted, setExamCompleted] = useState(false);
-  const [examScore, setExamScore] = useState<number>(0);
-  const [certificateNumber, setCertificateNumber] = useState<string>("");
 
   const wizardSteps = [
     {
@@ -44,65 +38,30 @@ export default function CandidatePortal() {
   const handleWizardComplete = () => {
     setIsRegistrationComplete(true);
     
-    // DEMO MODE: Exam available immediately
+    // Set exam date to 2 days from now
     const examDate = new Date();
-    
-    // PRODUCTION MODE: Uncomment to set exam date to future (e.g., 2 days from now)
-    // const examDate = new Date();
-    // examDate.setDate(examDate.getDate() + 2);
+    examDate.setDate(examDate.getDate() + 2);
     
     setScheduledExamDate(examDate);
-  };
-
-  const handleStartExam = () => {
-    setIsInExam(true);
-  };
-
-  const handleExamComplete = () => {
-    setIsInExam(false);
-    setExamCompleted(true);
-    // Calculate score (in a real app, this would come from the exam)
-    setExamScore(85);
-    // Generate certificate number
-    setCertificateNumber("CP-2026-88A21");
   };
 
   const renderContent = () => {
     if (activeTab === "profile") {
       return (
         <ProfileView 
-          examCompleted={examCompleted}
-          examScore={examScore}
-          certificateNumber={certificateNumber}
+          isRegistrationComplete={isRegistrationComplete}
+          scheduledExamDate={scheduledExamDate}
         />
       );
     }
 
-    // If exam is completed, show certificate
-    if (examCompleted) {
-      return <CertificateStep onNext={() => {}} onBack={() => {}} isFirstStep={false} isLastStep={true} />;
-    }
-
-    // If currently taking exam
-    if (isInExam) {
-      return (
-        <div className="max-w-6xl mx-auto">
-          <ExamStep 
-            onNext={handleExamComplete} 
-            onBack={() => setIsInExam(false)} 
-            isFirstStep={false} 
-            isLastStep={false} 
-          />
-        </div>
-      );
-    }
-
-    // If registration complete, show exam waiting screen
+    // If registration complete, show completion screen with exam date
     if (isRegistrationComplete && scheduledExamDate) {
       return (
-        <ExamWaitingScreen 
+        <RegistrationCompleteScreen 
           examDate={scheduledExamDate}
-          onStartExam={handleStartExam}
+          centerName="Lahore Training Center #3"
+          centerId="LHR-003"
         />
       );
     }

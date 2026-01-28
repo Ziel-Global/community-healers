@@ -2,14 +2,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User, Mail, Phone, MapPin, CreditCard, Calendar, Award, CheckCircle2, Clock, Download, Share2 } from "lucide-react";
+import { format } from "date-fns";
 
 interface ProfileViewProps {
+  isRegistrationComplete?: boolean;
+  scheduledExamDate?: Date;
   examCompleted?: boolean;
   examScore?: number;
   certificateNumber?: string;
 }
 
-export function ProfileView({ examCompleted = false, examScore, certificateNumber }: ProfileViewProps) {
+export function ProfileView({ 
+  isRegistrationComplete = false, 
+  scheduledExamDate,
+  examCompleted = false, 
+  examScore, 
+  certificateNumber 
+}: ProfileViewProps) {
   return (
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       {/* Profile Header */}
@@ -48,6 +57,46 @@ export function ProfileView({ examCompleted = false, examScore, certificateNumbe
           </div>
         </CardContent>
       </Card>
+
+      {/* Scheduled Exam Card - Only show if registration complete and exam scheduled */}
+      {isRegistrationComplete && scheduledExamDate && !examCompleted && (
+        <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-xl alumni-sans-title">Exam Scheduled</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Your examination has been scheduled
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-xl bg-card border border-border/40">
+                <p className="text-xs text-muted-foreground mb-1">Date</p>
+                <p className="font-bold text-foreground">{format(scheduledExamDate, 'MMMM d, yyyy')}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-card border border-border/40">
+                <p className="text-xs text-muted-foreground mb-1">Time</p>
+                <p className="font-bold text-foreground">10:00 AM</p>
+              </div>
+              <div className="p-4 rounded-xl bg-card border border-border/40">
+                <p className="text-xs text-muted-foreground mb-1">Center</p>
+                <p className="font-bold text-foreground">LHR-003</p>
+              </div>
+            </div>
+            <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <p className="text-xs text-muted-foreground">
+                <strong className="text-foreground">Note:</strong> Please visit your assigned center on the scheduled date. The center admin will initiate your exam.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Personal Information */}
       <Card className="border-border/40 shadow-sm">
@@ -97,24 +146,37 @@ export function ProfileView({ examCompleted = false, examScore, certificateNumbe
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/30">
+            <div className={`p-4 rounded-xl ${isRegistrationComplete ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
               <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <p className="font-semibold text-foreground">Registration</p>
-              </div>
-              <p className="text-xs text-muted-foreground">Completed & Verified</p>
-            </div>
-            <div className={`p-4 rounded-xl ${examCompleted ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
-              <div className="flex items-center gap-2 mb-2">
-                {examCompleted ? (
+                {isRegistrationComplete ? (
                   <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                 ) : (
                   <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 )}
+                <p className="font-semibold text-foreground">Registration</p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {isRegistrationComplete ? 'Completed & Verified' : 'In Progress'}
+              </p>
+            </div>
+            <div className={`p-4 rounded-xl ${examCompleted ? 'bg-green-500/10 border-green-500/30' : isRegistrationComplete ? 'bg-blue-500/10 border-blue-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                {examCompleted ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                ) : isRegistrationComplete ? (
+                  <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                ) : (
+                  <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                )}
                 <p className="font-semibold text-foreground">Exam Status</p>
               </div>
               <p className="text-xs text-muted-foreground">
-                {examCompleted ? `Passed - Score: ${examScore}%` : 'Scheduled - Jan 25, 2026'}
+                {examCompleted 
+                  ? `Passed - Score: ${examScore}%` 
+                  : isRegistrationComplete && scheduledExamDate
+                    ? `Scheduled - ${format(scheduledExamDate, 'MMM d, yyyy')}`
+                    : 'Pending Registration'
+                }
               </p>
             </div>
             <div className={`p-4 rounded-xl ${examCompleted ? 'bg-green-500/10 border-green-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
