@@ -1,9 +1,18 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Phone, MapPin, CreditCard, Calendar, Award, CheckCircle2, Clock, Download, Share2 } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 
+interface UploadedDocument {
+  id: string;
+  name: string;
+  type: string;
+  isMandatory: boolean;
+  status: "pending" | "uploading" | "complete" | "error";
+  fileName?: string;
+}
 interface ProfileViewProps {
   isRegistrationComplete?: boolean;
   scheduledExamDate?: Date;
@@ -19,6 +28,18 @@ export function ProfileView({
   examScore, 
   certificateNumber 
 }: ProfileViewProps) {
+  const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
+
+  // Load documents from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("candidateDocuments");
+    if (saved) {
+      setUploadedDocuments(JSON.parse(saved));
+    }
+  }, []);
+
+  const completedDocs = uploadedDocuments.filter(doc => doc.status === "complete");
+  const pendingDocs = uploadedDocuments.filter(doc => doc.status === "pending" && doc.isMandatory);
   return (
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       {/* Profile Header */}
@@ -257,39 +278,96 @@ export function ProfileView({
       {/* Documents */}
       <Card className="border-border/40 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 alumni-sans-title">
-            <CreditCard className="w-5 h-5 text-primary" />
-            Uploaded Documents
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 alumni-sans-title">
+              <FileText className="w-5 h-5 text-primary" />
+              Uploaded Documents
+            </CardTitle>
+            <Badge variant="outline" className="text-xs">
+              {completedDocs.length} of {uploadedDocuments.length} uploaded
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {[
-              { name: "CNIC Front", status: "Verified" },
-              { name: "CNIC Back", status: "Verified" },
-              { name: "Educational Certificate", status: "Verified" },
-              { name: "Passport Size Photo", status: "Verified" },
-            ].map((doc, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 rounded-lg bg-secondary/20 border border-border/40"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <CreditCard className="w-5 h-5 text-primary" />
+          {uploadedDocuments.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <FileText className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">No documents uploaded yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Complete your registration to upload documents</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* Completed Documents */}
+              {completedDocs.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-green-500/5 border border-green-500/20"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-foreground">{doc.name}</p>
+                        {doc.isMandatory && (
+                          <span className="text-[10px] font-bold text-primary uppercase">Required</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{doc.fileName}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-foreground">{doc.name}</p>
-                    <p className="text-xs text-muted-foreground">Uploaded on Jan 10, 2026</p>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground hover:text-foreground">
+                      <Eye className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">View</span>
+                    </Button>
+                    <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Uploaded
+                    </Badge>
                   </div>
                 </div>
-                <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  {doc.status}
-                </Badge>
-              </div>
-            ))}
-          </div>
+              ))}
+
+              {/* Pending Mandatory Documents */}
+              {pendingDocs.length > 0 && (
+                <>
+                  <div className="pt-2 pb-1">
+                    <p className="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      Missing Required Documents
+                    </p>
+                  </div>
+                  {pendingDocs.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-3 rounded-lg bg-amber-500/5 border border-amber-500/20"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-foreground">{doc.name}</p>
+                            <span className="text-[10px] font-bold text-destructive uppercase">Required</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Format: {doc.type}</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30">
+                        <Clock className="w-3 h-3 mr-1" />
+                        Pending
+                      </Badge>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
