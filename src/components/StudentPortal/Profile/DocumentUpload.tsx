@@ -12,6 +12,8 @@ interface Document {
     isMandatory: boolean;
     status: "pending" | "uploading" | "complete" | "error";
     fileName?: string;
+    fileData?: string; // Base64 encoded file data
+    fileType?: string; // MIME type
 }
 
 const initialDocuments: Document[] = [
@@ -56,21 +58,36 @@ export function DocumentUpload() {
                 : doc
         ));
 
-        // Simulate file upload
-        setTimeout(() => {
-            const updatedDocs = documents.map(doc => 
-                doc.id === docId 
-                    ? { ...doc, status: "complete" as const, fileName: file.name } 
-                    : doc
-            );
-            setDocuments(updatedDocs);
-            localStorage.setItem("candidateDocuments", JSON.stringify(updatedDocs));
+        // Read file as base64
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64Data = reader.result as string;
             
-            toast({
-                title: "Upload Successful",
-                description: `${file.name} has been uploaded successfully.`,
-            });
-        }, 1500);
+            // Simulate upload delay
+            setTimeout(() => {
+                setDocuments(prev => {
+                    const updatedDocs = prev.map(doc => 
+                        doc.id === docId 
+                            ? { 
+                                ...doc, 
+                                status: "complete" as const, 
+                                fileName: file.name,
+                                fileData: base64Data,
+                                fileType: file.type
+                              } 
+                            : doc
+                    );
+                    localStorage.setItem("candidateDocuments", JSON.stringify(updatedDocs));
+                    return updatedDocs;
+                });
+                
+                toast({
+                    title: "Upload Successful",
+                    description: `${file.name} has been uploaded successfully.`,
+                });
+            }, 1000);
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleRemoveFile = (docId: string) => {
