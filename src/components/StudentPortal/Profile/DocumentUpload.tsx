@@ -88,24 +88,6 @@ export function DocumentUpload() {
         });
     };
 
-    const handleSave = () => {
-        const mandatoryDocs = documents.filter(doc => doc.isMandatory);
-        const allMandatoryUploaded = mandatoryDocs.every(doc => doc.status === "complete");
-
-        if (!allMandatoryUploaded) {
-            toast({
-                title: "Missing Documents",
-                description: "Please upload all mandatory documents.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        toast({
-            title: "Documents Saved",
-            description: "All documents have been saved successfully.",
-        });
-    };
     return (
         <Card className="border-border/40 shadow-sm">
             <CardHeader>
@@ -200,10 +182,6 @@ export function DocumentUpload() {
                     <p className="text-xs text-amber-700 leading-relaxed">
                         Please ensure all documents are clearly legible. Blurry or incorrect documents may lead to registration rejection. Max file size: 5MB.
                     </p>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t border-border/40">
-                    <Button onClick={handleSave} className="gradient-primary text-white px-8">Save</Button>
                 </div>
             </CardContent>
         </Card>

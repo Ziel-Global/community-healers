@@ -82,11 +82,6 @@ export function EducationDeclaration() {
                         Minimum education requirement is 10 years (Matric) for this certification. Candidates with 16 years of education are eligible for advanced modules.
                     </p>
                 </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t border-border/40">
-                    <Button variant="outline">Previous</Button>
-                    <Button className="gradient-primary text-white px-8">Save & Proceed</Button>
-                </div>
             </CardContent>
         </Card>
     );

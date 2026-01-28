@@ -1,17 +1,82 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail } from "lucide-react";
 
 export default function CandidateAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", ""]);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/candidate");
+    if (isSignUp) {
+      // Open OTP modal for sign up
+      setShowOtpModal(true);
+    } else {
+      // Direct login for sign in
+      navigate("/candidate");
+    }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) {
+      value = value.slice(-1);
+    }
+    
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    // Auto-focus next input
+    if (value && index < 4) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").slice(0, 5);
+    if (!/^\d+$/.test(pastedData)) return;
+
+    const newOtp = pastedData.split("").concat(Array(5 - pastedData.length).fill("")).slice(0, 5);
+    setOtp(newOtp);
+    
+    const nextEmptyIndex = newOtp.findIndex(val => !val);
+    if (nextEmptyIndex !== -1) {
+      otpRefs.current[nextEmptyIndex]?.focus();
+    } else {
+      otpRefs.current[4]?.focus();
+    }
+  };
+
+  const handleOtpSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Verify OTP and navigate to portal
+    const otpValue = otp.join("");
+    if (otpValue.length === 5) {
+      setShowOtpModal(false);
+      navigate("/candidate");
+    }
   };
 
   return (
@@ -79,18 +144,49 @@ export default function CandidateAuth() {
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {isSignUp && (
-              <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="name" className="text-sm">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    placeholder="Enter your full name"
-                    className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
-                    required
-                  />
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="firstName" className="text-sm">First Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                      <Input
+                        id="firstName"
+                        placeholder="First name"
+                        className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="lastName" className="text-sm">Last Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                      <Input
+                        id="lastName"
+                        placeholder="Last name"
+                        className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
+
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="email" className="text-sm">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your@email.com"
+                      className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             <div className="space-y-1.5 sm:space-y-2">
@@ -108,41 +204,52 @@ export default function CandidateAuth() {
             </div>
 
             {isSignUp && (
+              <>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="password" className="text-sm">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Create a password"
+                      className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm your password"
+                      className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {!isSignUp && (
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="email" className="text-sm">Email Address</Label>
+                <Label htmlFor="password" className="text-sm">Password</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
                     className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                     required
                   />
                 </div>
               </div>
             )}
-
-            <div className="space-y-1.5 sm:space-y-2">
-              <Label htmlFor="otp" className="text-sm">OTP Code</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="Enter 6-digit OTP"
-                  className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
-                  maxLength={6}
-                  required
-                />
-              </div>
-              <button
-                type="button"
-                className="text-base text-primary hover:text-primary/80 alumni-sans-subtitle"
-              >
-                Send OTP
-              </button>
-            </div>
 
             <Button type="submit" variant="forest" className="w-full h-11 sm:h-12 text-base sm:text-lg alumni-sans-subtitle">
               {isSignUp ? "Create Account" : "Sign In"}
@@ -161,6 +268,61 @@ export default function CandidateAuth() {
           </p>
         </div>
       </div>
+
+      {/* OTP Modal */}
+      <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl alumni-sans-title">Verify OTP</DialogTitle>
+            <DialogDescription>
+              Enter the 5-digit OTP code sent to your phone number to complete your registration.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleOtpSubmit} className="space-y-6 mt-4">
+            <div className="space-y-4">
+              <Label className="text-sm">OTP Code</Label>
+              <div className="flex justify-center gap-2 sm:gap-3">
+                {otp.map((digit, index) => (
+                  <Input
+                    key={index}
+                    ref={(el) => (otpRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    onPaste={handleOtpPaste}
+                    className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold border-2 focus:border-primary"
+                    maxLength={1}
+                    required
+                    autoFocus={index === 0}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                className="text-sm text-primary hover:text-primary/80 font-medium w-full text-center"
+              >
+                Resend OTP
+              </button>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowOtpModal(false)}
+                className="flex-1 h-11"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" variant="forest" className="flex-1 h-11 alumni-sans-subtitle">
+                Verify & Continue
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

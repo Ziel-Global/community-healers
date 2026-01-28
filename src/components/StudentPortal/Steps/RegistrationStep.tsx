@@ -43,7 +43,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           Step 1 of 4 • Registration
         </div>
         <Button onClick={handleSubmit} size="lg" className="group">
-          Continue to Scheduling
+          Continue to Payment
           <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>
       </div>

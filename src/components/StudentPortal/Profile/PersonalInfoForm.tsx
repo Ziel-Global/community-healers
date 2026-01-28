@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon, CheckCircle2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon } from "lucide-react";
 
 interface PersonalInfo {
     fullName: string;
@@ -17,8 +15,6 @@ interface PersonalInfo {
 }
 
 export function PersonalInfoForm() {
-    const { toast } = useToast();
-    const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState<PersonalInfo>({
         fullName: "",
         fatherName: "",
@@ -35,32 +31,6 @@ export function PersonalInfoForm() {
             setFormData(JSON.parse(saved));
         }
     }, []);
-
-    const handleSave = () => {
-        // Validate required fields
-        if (!formData.fullName || !formData.fatherName || !formData.cnic || !formData.dob || !formData.city) {
-            toast({
-                title: "Incomplete Information",
-                description: "Please fill in all required fields.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        setIsSaving(true);
-        
-        // Simulate API call
-        setTimeout(() => {
-            // Save to localStorage
-            localStorage.setItem("candidatePersonalInfo", JSON.stringify(formData));
-            
-            setIsSaving(false);
-            toast({
-                title: "Information Saved",
-                description: "Your personal information has been saved successfully.",
-            });
-        }, 1000);
-    };
 
     return (
         <Card className="border-border/40 shadow-sm">
@@ -163,26 +133,6 @@ export function PersonalInfoForm() {
                             </Select>
                         </div>
                     </div>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t border-border/40">
-                    <Button 
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="gradient-primary text-white px-8 gap-2"
-                    >
-                        {isSaving ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Saving...
-                            </>
-                        ) : (
-                            <>
-                                <CheckCircle2 className="w-4 h-4" />
-                                Save & Continue
-                            </>
-                        )}
-                    </Button>
                 </div>
             </CardContent>
         </Card>
