@@ -51,7 +51,6 @@ export function AdminAccountList() {
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Administrator</th>
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Assigned Centers</th>
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Access Level</th>
-                            <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
@@ -89,16 +88,6 @@ export function AdminAccountList() {
                                     <Badge variant="secondary" className="px-2 py-0 text-[10px] uppercase font-bold tracking-tighter">
                                         {admin.role}
                                     </Badge>
-                                </td>
-                                <td className="p-4 text-right">
-                                    <div className="flex justify-end gap-2">
-                                        <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40">
-                                            <UserCog className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40">
-                                            <ExternalLink className="w-4 h-4" />
-                                        </Button>
-                                    </div>
                                 </td>
                             </tr>
                         ))}

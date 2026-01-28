@@ -24,17 +24,15 @@ import { useToast } from "@/hooks/use-toast";
 interface Question {
     id: number;
     text: string;
-    difficulty: string;
     category: string;
-    status: string;
     options?: string[];
     correctAnswer?: string;
 }
 
 const initialQuestions: Question[] = [
-    { id: 1, text: "Which piece of safety equipment is mandatory when working with high-voltage?", difficulty: "Medium", category: "Safety", status: "Active" },
-    { id: 2, text: "What should you do first in case of a chemical spill?", difficulty: "Hard", category: "Safety", status: "Active" },
-    { id: 3, text: "Define the term 'CertifyPro Standard' in industrial context.", difficulty: "Easy", category: "General", status: "Inactive" },
+    { id: 1, text: "Which piece of safety equipment is mandatory when working with high-voltage?", category: "Safety" },
+    { id: 2, text: "What should you do first in case of a chemical spill?", category: "Safety" },
+    { id: 3, text: "Define the term 'CertifyPro Standard' in industrial context.", category: "General" },
 ];
 
 export function QuestionEditor() {
@@ -51,9 +49,7 @@ export function QuestionEditor() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         text: "",
-        difficulty: "Medium",
         category: "General",
-        status: "Active",
         option1: "",
         option2: "",
         option3: "",
@@ -79,9 +75,7 @@ export function QuestionEditor() {
             const newQuestion: Question = {
                 id: questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1,
                 text: formData.text,
-                difficulty: formData.difficulty,
                 category: formData.category,
-                status: formData.status,
                 options: [formData.option1, formData.option2, formData.option3, formData.option4],
                 correctAnswer: formData.correctAnswer,
             };
@@ -98,9 +92,7 @@ export function QuestionEditor() {
             // Reset form
             setFormData({
                 text: "",
-                difficulty: "Medium",
                 category: "General",
-                status: "Active",
                 option1: "",
                 option2: "",
                 option3: "",
@@ -154,19 +146,6 @@ export function QuestionEditor() {
                                         <div className="flex flex-wrap gap-2">
                                             <Badge variant="outline" className="bg-white/50 text-[10px] uppercase font-bold tracking-tighter">
                                                 <Tag className="w-3 h-3 mr-1" /> {q.category}
-                                            </Badge>
-                                            <Badge
-                                                variant="secondary"
-                                                className={cn(
-                                                    "px-2 py-0 text-[10px] uppercase font-bold tracking-tighter",
-                                                    q.difficulty === "Easy" ? "text-emerald-600 bg-emerald-50" :
-                                                        q.difficulty === "Medium" ? "text-amber-600 bg-amber-50" : "text-destructive bg-destructive/5"
-                                                )}
-                                            >
-                                                {q.difficulty}
-                                            </Badge>
-                                            <Badge variant={q.status === "Active" ? "success" : "secondary"} className="px-2 py-0 text-[10px] uppercase font-bold tracking-tighter">
-                                                {q.status}
                                             </Badge>
                                         </div>
                                     </div>
@@ -282,58 +261,23 @@ export function QuestionEditor() {
                         <div className="space-y-4 pt-4 border-t">
                             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Question Metadata</h3>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="category">Category *</Label>
-                                    <Select
-                                        value={formData.category}
-                                        onValueChange={(value) => setFormData({ ...formData, category: value })}
-                                    >
-                                        <SelectTrigger id="category">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="General">General</SelectItem>
-                                            <SelectItem value="Safety">Safety</SelectItem>
-                                            <SelectItem value="Technical">Technical</SelectItem>
-                                            <SelectItem value="Procedures">Procedures</SelectItem>
-                                            <SelectItem value="Regulations">Regulations</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="difficulty">Difficulty *</Label>
-                                    <Select
-                                        value={formData.difficulty}
-                                        onValueChange={(value) => setFormData({ ...formData, difficulty: value })}
-                                    >
-                                        <SelectTrigger id="difficulty">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Easy">Easy</SelectItem>
-                                            <SelectItem value="Medium">Medium</SelectItem>
-                                            <SelectItem value="Hard">Hard</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="status">Status *</Label>
-                                    <Select
-                                        value={formData.status}
-                                        onValueChange={(value) => setFormData({ ...formData, status: value })}
-                                    >
-                                        <SelectTrigger id="status">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Active">Active</SelectItem>
-                                            <SelectItem value="Inactive">Inactive</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="category">Category *</Label>
+                                <Select
+                                    value={formData.category}
+                                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                                >
+                                    <SelectTrigger id="category">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="General">General</SelectItem>
+                                        <SelectItem value="Safety">Safety</SelectItem>
+                                        <SelectItem value="Technical">Technical</SelectItem>
+                                        <SelectItem value="Procedures">Procedures</SelectItem>
+                                        <SelectItem value="Regulations">Regulations</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     </div>

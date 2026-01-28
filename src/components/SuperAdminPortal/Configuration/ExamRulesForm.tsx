@@ -36,15 +36,6 @@ export function ExamRulesForm() {
                         </div>
                     </div>
 
-                    <div className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="threshold" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Passing Threshold (%)</Label>
-                            <Input id="threshold" type="number" defaultValue={60} className="h-11 bg-white/50 border-border/60" />
-                            <p className="text-[10px] text-muted-foreground italic">Minimum score required to issue a certificate.</p>
-                        </div>
-
-                      
-                    </div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex gap-4">

@@ -151,17 +151,6 @@ export default function CenterAdminAuth() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-muted-foreground">
-            {isSignUp ? "Already have access?" : "Need access?"}{" "}
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary font-semibold hover:text-primary/80 transition-colors"
-            >
-              {isSignUp ? "Sign In" : "Request Access"}
-            </button>
-          </p>
-
           <div className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/20">
             <p className="text-xs text-muted-foreground text-center">
               🏢 Center admins must be approved by Super Admin before access is granted.

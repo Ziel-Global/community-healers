@@ -2,6 +2,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { 
     Building2, 
     MapPin, 
@@ -80,6 +84,15 @@ const registeredStudents = [
 ];
 
 export function CenterDetail({ center, onBack }: CenterDetailProps) {
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [open, setOpen] = useState(false);
+
+    // Filter students by selected date
+    const filteredStudents = registeredStudents.filter(dayData => {
+        const dataDate = new Date(dayData.date);
+        return dataDate.toDateString() === selectedDate.toDateString();
+    });
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -200,61 +213,100 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
             {/* Registered Students List */}
             <Card className="border-border/40 shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-xl font-display">Registered Students (Day-wise)</CardTitle>
-                    <CardDescription>Students scheduled to appear at this center</CardDescription>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <CardTitle className="text-xl font-display">Registered Students</CardTitle>
+                            <CardDescription>Students scheduled to appear at this center</CardDescription>
+                        </div>
+                        <Popover open={open} onOpenChange={setOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className={cn(
+                                        "h-10 px-4 rounded-xl border-border/60 gap-2 hover:bg-white transition-all bg-white/50 text-sm justify-start text-left font-normal w-full sm:w-[240px]",
+                                        !selectedDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <Calendar className="w-4 h-4 text-primary" />
+                                    {selectedDate ? format(selectedDate, "MMM dd, yyyy") : <span>Select date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 pointer-events-auto" align="end" sideOffset={4}>
+                                <CalendarComponent
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={(date) => {
+                                        if (date) {
+                                            setSelectedDate(date);
+                                            setOpen(false);
+                                        }
+                                    }}
+                                    disabled={false}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {registeredStudents.map((dayData, index) => (
-                        <div key={index} className="space-y-3">
-                            <div className="flex items-center gap-2 pb-2 border-b border-border/40">
-                                <Calendar className="w-4 h-4 text-primary" />
-                                <h3 className="font-bold text-foreground">{dayData.date}</h3>
-                                <Badge variant="outline" className="ml-auto">
-                                    {dayData.students.length} students
-                                </Badge>
-                            </div>
+                    {filteredStudents.length > 0 ? (
+                        filteredStudents.map((dayData, index) => (
+                            <div key={index} className="space-y-3">
+                                <div className="flex items-center gap-2 pb-2 border-b border-border/40">
+                                    <Calendar className="w-4 h-4 text-primary" />
+                                    <h3 className="font-bold text-foreground">{dayData.date}</h3>
+                                    <Badge variant="outline" className="ml-auto">
+                                        {dayData.students.length} students
+                                    </Badge>
+                                </div>
 
-                            <div className="space-y-2">
-                                {dayData.students.map((student) => (
-                                    <div 
-                                        key={student.id}
-                                        className="flex items-center justify-between p-4 rounded-lg border border-border/40 bg-card/30 hover:bg-card/60 transition-colors"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <User className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-foreground">{student.name}</p>
-                                                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                                                    <span className="font-mono">{student.id}</span>
-                                                    <span>•</span>
-                                                    <span className="flex items-center gap-1">
-                                                        <Phone className="w-3 h-3" />
-                                                        {student.phone}
-                                                    </span>
+                                <div className="space-y-2">
+                                    {dayData.students.map((student) => (
+                                        <div 
+                                            key={student.id}
+                                            className="flex items-center justify-between p-4 rounded-lg border border-border/40 bg-card/30 hover:bg-card/60 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                                    <User className="w-5 h-5 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-foreground">{student.name}</p>
+                                                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                                                        <span className="font-mono">{student.id}</span>
+                                                        <span>•</span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Phone className="w-3 h-3" />
+                                                            {student.phone}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                                <Clock className="w-4 h-4" />
-                                                <span className="font-medium">{student.time}</span>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                                    <Clock className="w-4 h-4" />
+                                                    <span className="font-medium">{student.time}</span>
+                                                </div>
+                                                <Badge 
+                                                    variant={student.status === "Confirmed" ? "success" : "secondary"}
+                                                    className="px-3 py-1"
+                                                >
+                                                    {student.status === "Confirmed" && <CheckCircle2 className="w-3 h-3 mr-1" />}
+                                                    {student.status}
+                                                </Badge>
                                             </div>
-                                            <Badge 
-                                                variant={student.status === "Confirmed" ? "success" : "secondary"}
-                                                className="px-3 py-1"
-                                            >
-                                                {student.status === "Confirmed" && <CheckCircle2 className="w-3 h-3 mr-1" />}
-                                                {student.status}
-                                            </Badge>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-12">
+                            <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                            <p className="text-muted-foreground font-medium">No students registered for this date</p>
+                            <p className="text-xs text-muted-foreground mt-1">Select a different date to view registered students</p>
                         </div>
-                    ))}
+                    )}
                 </CardContent>
             </Card>
         </div>

@@ -152,11 +152,10 @@ export default function SuperAdminPortal() {
     >
       <div className="space-y-8 max-w-[1600px] mx-auto pb-12">
         {/* Global Summary Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard title="Total Registrations" value="12,405" icon={Users} desc="+4.2% this month" />
           <StatCard title="Active Centers" value="42" icon={MapPin} desc="Across 12 regions" />
           <StatCard title="Question Bank" value="850" icon={Database} desc="Vetted & categorized" />
-          <StatCard title="Compliance Rate" value="98.2%" icon={Shield} desc="Audit criteria met" />
         </div>
 
         {/* Exam Candidates Trend Graph */}

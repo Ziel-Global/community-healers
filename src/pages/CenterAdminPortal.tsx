@@ -1,20 +1,13 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CenterStats } from "@/components/CentreAdminPortal/Dashboard/CenterStats";
 import { CenterInfoCard } from "@/components/CentreAdminPortal/Dashboard/CenterInfoCard";
-import { CandidateSearch } from "@/components/CentreAdminPortal/Candidates/CandidateSearch";
 import { CandidateTable } from "@/components/CentreAdminPortal/Candidates/CandidateTable";
-import { CandidateActionCard } from "@/components/CentreAdminPortal/Candidates/CandidateActionCard";
-import { ExamMonitoringGrid } from "@/components/CentreAdminPortal/Monitoring/ExamMonitoringGrid";
-import { DailyResultsView } from "@/components/CentreAdminPortal/Results/DailyResultsView";
-import { HistoricalReports } from "@/components/CentreAdminPortal/Reports/HistoricalReports";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
-  UserCheck,
-  Monitor,
-  BarChart3,
   FileText,
-  Settings
 } from "lucide-react";
 
 export const centerNavItems = [
@@ -27,16 +20,6 @@ export const centerNavItems = [
     label: "Candidates",
     href: "/center/candidates",
     icon: <Users className="w-4 h-4" />,
-  },
-  // {
-  //   label: "Verification",
-  //   href: "/center/verification",
-  //   icon: <UserCheck className="w-4 h-4" />,
-  // },
-  {
-    label: "Results",
-    href: "/center/results",
-    icon: <BarChart3 className="w-4 h-4" />,
   },
   {
     label: "Reports",
@@ -67,10 +50,20 @@ export default function CenterAdminPortal() {
 
         <div className="space-y-4 sm:space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <h3 className="text-lg sm:text-2xl font-bold text-foreground alumni-sans-title">Today's Candidate Queue</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">Jan 20, 2024</p>
+            <h3 className="text-lg sm:text-2xl font-bold text-foreground alumni-sans-title">Today's Candidates</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
           </div>
-          <CandidateSearch />
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 bg-card/40 p-3 sm:p-4 rounded-2xl border border-border/40 backdrop-blur-sm">
+            <div className="relative flex-1 group">
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input
+                placeholder="Search by name, CNIC, or Reg ID..."
+                className="pl-10 sm:pl-12 h-10 sm:h-12 bg-white/50 border-border/60 focus:border-primary/40 focus:ring-primary/20 rounded-xl text-sm sm:text-base w-full"
+              />
+            </div>
+          </div>
           <CandidateTable />
         </div>
 

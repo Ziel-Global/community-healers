@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, UserCheck, Search, ShieldCheck, XCircle, Fingerprint } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 export function CandidateActionCard() {
+    const navigate = useNavigate();
     const [checklist, setChecklist] = useState({
         present: false,
         faceMatch: false,
@@ -13,6 +15,11 @@ export function CandidateActionCard() {
     });
 
     const isVerified = checklist.present && checklist.faceMatch && checklist.cnicMatch;
+
+    const handleVerifyAndUnlock = () => {
+        // Navigate back to candidates table
+        navigate("/center/candidates");
+    };
 
     return (
         <Card className="border-border/40 shadow-royal overflow-hidden bg-card/80 backdrop-blur-md">
@@ -89,16 +96,13 @@ export function CandidateActionCard() {
                     <Button
                         className={cn(
                             "flex-1 h-12 font-bold transition-all shadow-lg group",
-                            isVerified ? "gradient-primary text-black" : "bg-primary/20 text-muted-foreground cursor-not-allowed border-none"
+                            isVerified ? "gradient-primary text-white" : "bg-primary/20 text-muted-foreground cursor-not-allowed border-none"
                         )}
                         disabled={!isVerified}
+                        onClick={handleVerifyAndUnlock}
                     >
                         <CheckCircle2 className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                         Verify Account & Unlock Exam
-                    </Button>
-                    <Button variant="outline" className="px-6 h-12 rounded-xl text-destructive hover:bg-destructive/5 font-bold border-destructive/20">
-                        <XCircle className="w-5 h-5 mr-2" />
-                        Report Absence
                     </Button>
                 </div>
 

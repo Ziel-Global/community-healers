@@ -4,8 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Calendar, FileText } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Calendar, FileText, Download, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface Document {
+    id: string;
+    name: string;
+    type: string;
+    uploadDate: string;
+    fileUrl: string;
+}
 
 interface Candidate {
     id: string;
@@ -20,6 +28,7 @@ interface Candidate {
     address?: string;
     dob?: string;
     fatherName?: string;
+    documents?: Document[];
 }
 
 const candidates: Candidate[] = [
@@ -36,6 +45,13 @@ const candidates: Candidate[] = [
         address: "Block 5, Gulberg III, Lahore",
         dob: "January 15, 1995",
         fatherName: "Muhammad Aslam",
+        documents: [
+            { id: "1", name: "Candidate Photo", type: "Image", uploadDate: "Jan 20, 2024", fileUrl: "#" },
+            { id: "2", name: "CNIC Front", type: "Image", uploadDate: "Jan 20, 2024", fileUrl: "#" },
+            { id: "3", name: "CNIC Back", type: "Image", uploadDate: "Jan 20, 2024", fileUrl: "#" },
+            { id: "4", name: "Police Clearance Certificate", type: "PDF", uploadDate: "Jan 20, 2024", fileUrl: "#" },
+            { id: "5", name: "Medical Certificate", type: "PDF", uploadDate: "Jan 20, 2024", fileUrl: "#" },
+        ],
     },
     {
         id: "REG-2024-002",
@@ -50,6 +66,11 @@ const candidates: Candidate[] = [
         address: "Model Town, Lahore",
         dob: "March 22, 1998",
         fatherName: "Noor Ahmed",
+        documents: [
+            { id: "1", name: "Candidate Photo", type: "Image", uploadDate: "Jan 20, 2024", fileUrl: "#" },
+            { id: "2", name: "CNIC Front", type: "Image", uploadDate: "Jan 20, 2024", fileUrl: "#" },
+            { id: "3", name: "CNIC Back", type: "Image", uploadDate: "Jan 20, 2024", fileUrl: "#" },
+        ],
     },
     {
         id: "REG-2024-003",
@@ -64,6 +85,10 @@ const candidates: Candidate[] = [
         address: "Johar Town, Lahore",
         dob: "July 8, 1997",
         fatherName: "Raza Ali",
+        documents: [
+            { id: "1", name: "Candidate Photo", type: "Image", uploadDate: "Jan 19, 2024", fileUrl: "#" },
+            { id: "2", name: "CNIC Front", type: "Image", uploadDate: "Jan 19, 2024", fileUrl: "#" },
+        ],
     },
     {
         id: "REG-2024-004",
@@ -78,6 +103,9 @@ const candidates: Candidate[] = [
         address: "DHA Phase 5, Lahore",
         dob: "November 30, 1996",
         fatherName: "Muhammad Yousaf",
+        documents: [
+            { id: "1", name: "Candidate Photo", type: "Image", uploadDate: "Jan 18, 2024", fileUrl: "#" },
+        ],
     },
 ];
 
@@ -262,6 +290,60 @@ export function CandidateTable() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Uploaded Documents */}
+                        {selectedCandidate.documents && selectedCandidate.documents.length > 0 && (
+                            <div className="space-y-4 pt-4 border-t">
+                                <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Uploaded Documents</h4>
+                                
+                                <div className="grid grid-cols-1 gap-3">
+                                    {selectedCandidate.documents.map((doc) => (
+                                        <div 
+                                            key={doc.id}
+                                            className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-secondary/20 hover:bg-secondary/40 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                    <FileText className="w-5 h-5 text-primary" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="text-xs text-muted-foreground">{doc.type}</span>
+                                                        <span className="text-xs text-muted-foreground">•</span>
+                                                        <span className="text-xs text-muted-foreground">{doc.uploadDate}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 p-0"
+                                                    onClick={() => window.open(doc.fileUrl, '_blank')}
+                                                >
+                                                    <ExternalLink className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 p-0"
+                                                    onClick={() => {
+                                                        // Download logic
+                                                        const link = document.createElement('a');
+                                                        link.href = doc.fileUrl;
+                                                        link.download = doc.name;
+                                                        link.click();
+                                                    }}
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Action Buttons */}
                         <div className="flex justify-end gap-3 pt-4 border-t">

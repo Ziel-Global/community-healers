@@ -131,38 +131,10 @@ export default function MinistryAuth() {
               </div>
             </div>
 
-            {!isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="2fa">Security Code</Label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="2fa"
-                    type="text"
-                    placeholder="Enter 6-digit security code"
-                    className="pl-10 h-12 border-2 focus:border-primary"
-                    maxLength={6}
-                    required
-                  />
-                </div>
-              </div>
-            )}
-
             <Button type="submit" variant="forest" className="w-full h-12 text-lg alumni-sans-subtitle">
               {isSignUp ? "Submit Request" : "Secure Login"}
             </Button>
           </form>
-
-          <p className="mt-6 text-center text-muted-foreground">
-            {isSignUp ? "Already have access?" : "Need access?"}{" "}
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary font-semibold hover:text-primary/80 transition-colors"
-            >
-              {isSignUp ? "Sign In" : "Request Access"}
-            </button>
-          </p>
 
           <div className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/20">
             <p className="text-xs text-muted-foreground text-center">
