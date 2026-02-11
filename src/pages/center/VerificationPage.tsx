@@ -1,3 +1,4 @@
+import { useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { centerNavItems } from "../CenterAdminPortal";
 import { CandidateActionCard } from "@/components/CentreAdminPortal/Candidates/CandidateActionCard";
@@ -5,6 +6,9 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export default function VerificationPage() {
+    const location = useLocation();
+    const candidate = location.state?.candidate;
+
     return (
         <DashboardLayout
             title="Identity Verification"
@@ -20,7 +24,7 @@ export default function VerificationPage() {
                         className="pl-12 h-12 bg-white/50 border-border/60 focus:border-primary/40 focus:ring-primary/20 rounded-xl"
                     />
                 </div>
-                <CandidateActionCard />
+                <CandidateActionCard candidate={candidate} />
             </div>
         </DashboardLayout>
     );

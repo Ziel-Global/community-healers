@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CenterStats } from "@/components/CentreAdminPortal/Dashboard/CenterStats";
 import { CenterInfoCard } from "@/components/CentreAdminPortal/Dashboard/CenterInfoCard";
@@ -11,6 +11,7 @@ import {
   Users,
   FileText,
 } from "lucide-react";
+import { centerAdminService } from "@/services/centerAdminService";
 
 export const centerNavItems = [
   {
@@ -32,6 +33,19 @@ export const centerNavItems = [
 
 export default function CenterAdminPortal() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [centerData, setCenterData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchCenterDetails = async () => {
+      try {
+        const data = await centerAdminService.getCenterDetails();
+        setCenterData(data);
+      } catch (error) {
+        console.error("Failed to fetch center details", error);
+      }
+    };
+    fetchCenterDetails();
+  }, []);
 
   return (
     <DashboardLayout
@@ -43,10 +57,11 @@ export default function CenterAdminPortal() {
       <div className="space-y-8 max-w-[1600px] mx-auto">
         {/* Center Info Section */}
         <CenterInfoCard
-          name="Lahore Training Center #3"
-          id="LHR-003"
-          location="Model Town, Lahore"
-          adminName="M. Siddique"
+          name={centerData?.name}
+          id={centerData?.id?.split('-')[0].toUpperCase()} // Using short ID for display if needed, or full ID
+          location={centerData?.city?.name ? `${centerData.city.name}, Pakistan` : undefined}
+          adminName={centerData?.primaryAdmin ? `${centerData.primaryAdmin.firstName} ${centerData.primaryAdmin.lastName}` : undefined}
+          email={centerData?.primaryAdmin?.email}
         />
 
         {/* Quick Stats Grid */}

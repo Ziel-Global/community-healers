@@ -1,13 +1,26 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, UserCheck, Search, ShieldCheck, XCircle, Fingerprint } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { CheckCircle2, UserCheck, ShieldCheck, XCircle, Fingerprint, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { centerAdminService } from "@/services/centerAdminService";
+import { useToast } from "@/hooks/use-toast";
 
-export function CandidateActionCard() {
+interface Candidate {
+    id: string;
+    name: string;
+    cnic: string;
+    time: string;
+    photo: string;
+    [key: string]: any;
+}
+
+export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
     const navigate = useNavigate();
+    const { toast } = useToast();
+    const [loading, setLoading] = useState(false);
     const [checklist, setChecklist] = useState({
         present: false,
         faceMatch: false,
@@ -16,9 +29,54 @@ export function CandidateActionCard() {
 
     const isVerified = checklist.present && checklist.faceMatch && checklist.cnicMatch;
 
-    const handleVerifyAndUnlock = () => {
-        // Navigate back to candidates table
-        navigate("/center/candidates");
+    const handleVerifyAndUnlock = async () => {
+        if (!candidate?.id) return;
+        setLoading(true);
+        try {
+            await centerAdminService.updateCandidateStatus(candidate.id, 'VERIFIED');
+            toast({
+                title: "Success",
+                description: "Candidate verified and exam unlocked.",
+            });
+            navigate("/center/candidates");
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to verify candidate. Please try again.",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleReject = async () => {
+        if (!candidate?.id) return;
+        setLoading(true);
+        try {
+            await centerAdminService.updateCandidateStatus(candidate.id, 'REJECTED');
+            toast({
+                title: "Candidate Rejected",
+                description: "Candidate has been marked as rejected.",
+            });
+            navigate("/center/candidates");
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to reject candidate. Please try again.",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Use dynamic data or fallback to static defaults
+    const displayData = {
+        name: candidate?.name || "Muhammad Ahmed",
+        cnic: candidate?.cnic || "35201-1234567-1",
+        time: candidate?.time || "09:00 AM",
+        photo: candidate?.photo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate?.name || "Ahmed"}`
     };
 
     return (
@@ -28,7 +86,7 @@ export function CandidateActionCard() {
                     <div className="flex gap-4">
                         <div className="relative">
                             <img
-                                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed"
+                                src={displayData.photo}
                                 alt="Candidate"
                                 className="w-20 h-20 rounded-2xl bg-white p-1 border border-primary/20 shadow-md object-cover"
                             />
@@ -40,16 +98,16 @@ export function CandidateActionCard() {
                             <Badge variant="success" className="mb-2 uppercase tracking-widest text-[10px] bg-primary/20 text-primary border-primary/30">
                                 Payment Verified
                             </Badge>
-                            <CardTitle className="text-2xl font-display font-bold">Muhammad Ahmed</CardTitle>
+                            <CardTitle className="text-2xl font-display font-bold">{displayData.name}</CardTitle>
                             <CardDescription className="flex items-center gap-2 mt-1 font-mono text-xs">
                                 <Fingerprint className="w-3.5 h-3.5 text-primary" />
-                                CNIC: 35201-1234567-1
+                                CNIC: {displayData.cnic}
                             </CardDescription>
                         </div>
                     </div>
                     <div className="text-right">
                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-1">Time Slot</p>
-                        <p className="text-lg font-bold text-foreground">09:00 AM</p>
+                        <p className="text-lg font-bold text-foreground">{displayData.time}</p>
                     </div>
                 </div>
             </CardHeader>
@@ -94,15 +152,35 @@ export function CandidateActionCard() {
 
                 <div className="flex gap-3 pt-4 border-t border-border/40">
                     <Button
+                        variant="outline"
+                        className={cn(
+                            "flex-1 h-12 font-bold transition-all shadow-sm group",
+                            (isVerified || loading) ? "bg-secondary text-muted-foreground cursor-not-allowed" : "border-destructive/30 text-destructive hover:bg-destructive/5 hover:border-destructive/50"
+                        )}
+                        disabled={isVerified || loading}
+                        onClick={handleReject}
+                    >
+                        {loading ? (
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        ) : (
+                            <XCircle className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                        )}
+                        Reject Candidate
+                    </Button>
+                    <Button
                         className={cn(
                             "flex-1 h-12 font-bold transition-all shadow-lg group",
-                            isVerified ? "gradient-primary text-white" : "bg-primary/20 text-muted-foreground cursor-not-allowed border-none"
+                            (isVerified && !loading) ? "gradient-primary text-white" : "bg-primary/20 text-muted-foreground cursor-not-allowed border-none shadow-none"
                         )}
-                        disabled={!isVerified}
+                        disabled={!isVerified || loading}
                         onClick={handleVerifyAndUnlock}
                     >
-                        <CheckCircle2 className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                        Verify Account & Unlock Exam
+                        {loading ? (
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        ) : (
+                            <CheckCircle2 className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                        )}
+                        Verify & Unlock
                     </Button>
                 </div>
 

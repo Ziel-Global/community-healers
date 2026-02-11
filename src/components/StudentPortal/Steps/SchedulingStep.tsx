@@ -2,15 +2,41 @@ import { WizardStepProps } from "../CandidateWizard";
 import { CenterAssignmentStatus } from "../Scheduling/CenterAssignmentStatus";
 import { ExamSlotPicker } from "../Scheduling/ExamSlotPicker";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { api } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
+  const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [isScheduled, setIsScheduled] = useState(false);
 
-  const handleNext = () => {
-    if (selectedDate) {
+  const handleNext = async () => {
+    if (!selectedDate) return;
+
+    setIsScheduling(true);
+    try {
+      const examDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      await api.post('/candidates/me/schedule', { examDate });
+
+      setIsScheduled(true);
+      toast({
+        title: "Exam Scheduled",
+        description: `Your exam has been scheduled for ${selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`,
+      });
+
       onNext();
+    } catch (error: any) {
+      console.error("Scheduling error:", error);
+      toast({
+        title: "Scheduling Failed",
+        description: error.response?.data?.message || "Failed to schedule exam. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsScheduling(false);
     }
   };
 
@@ -42,9 +68,12 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
           centerId="LHR-003"
           location="Model Town, Lahore"
         />
-        <ExamSlotPicker 
+        <ExamSlotPicker
           selectedDate={selectedDate}
           onDateSelect={setSelectedDate}
+          onSchedule={handleNext}
+          isScheduling={isScheduling}
+          isScheduled={isScheduled}
         />
       </div>
 
@@ -67,14 +96,23 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
           <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
             Step 3 of 3 • Scheduling
           </div>
-          <Button 
-            onClick={handleNext} 
-            size="lg" 
-            disabled={!canProceed}
+          <Button
+            onClick={handleNext}
+            size="lg"
+            disabled={!canProceed || isScheduling}
             className="group w-full sm:w-auto order-1 sm:order-2"
           >
-            Complete Registration
-            <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            {isScheduling ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Scheduling...
+              </>
+            ) : (
+              <>
+                Complete Registration
+                <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
           </Button>
         </div>
       </div>

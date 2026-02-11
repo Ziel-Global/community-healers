@@ -4,14 +4,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, ArrowLeft, Mail, Lock, GraduationCap } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SuperAdminAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const { loginSuperAdmin } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/admin");
+    if (isSignUp) {
+      toast({
+        title: "Setup Restricted",
+        description: "Super Admin setup is restricted to system initialization. Please contact support.",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await loginSuperAdmin({ email, password });
+      navigate("/admin");
+      toast({
+        title: "Welcome back, Admin!",
+        description: "System administration access granted.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message || "Invalid credentials.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,7 +56,7 @@ export default function SuperAdminAuth() {
             </div>
             <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
           </div>
-          
+
           <h1 className="text-4xl alumni-sans-title mb-4 text-white">
             Super Admin
           </h1>
@@ -88,6 +119,8 @@ export default function SuperAdminAuth() {
                   type="email"
                   placeholder="admin@softskilltraining.gov"
                   className="pl-10 h-12 border-2 focus:border-primary"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -112,6 +145,8 @@ export default function SuperAdminAuth() {
                   type="password"
                   placeholder="Enter your password"
                   className="pl-10 h-12 border-2 focus:border-primary"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>

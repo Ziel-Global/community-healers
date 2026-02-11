@@ -5,14 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Smartphone, Lock, ArrowRight, Loader2, BookOpen, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ExamAuth() {
     const navigate = useNavigate();
+    const { loginCandidate } = useAuth();
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (phone.length < 10) {
             toast.error("Please enter a valid phone number");
             return;
@@ -22,11 +24,15 @@ export default function ExamAuth() {
             return;
         }
         setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
+        try {
+            await loginCandidate({ phoneNumber: phone, password });
             toast.success("Login successful!");
             navigate("/exam/start");
-        }, 1500);
+        } catch (error: any) {
+            toast.error(error.message || "Login failed. Please check your credentials.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

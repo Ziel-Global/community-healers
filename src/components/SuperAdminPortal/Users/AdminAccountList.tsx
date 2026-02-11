@@ -3,44 +3,90 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserCog, Shield, Building2, Mail, ExternalLink, ShieldCheck } from "lucide-react";
+import { superAdminService } from "@/services/superAdminService";
+import { useToast } from "@/hooks/use-toast";
 
-interface Admin {
+interface CenterAdmin {
     id: string;
     name: string;
     email: string;
-    centers: string[];
     role: string;
+    status: string;
+    centers: Array<{
+        id: string;
+        name: string;
+        code: string;
+    }>;
+    createdAt: string;
 }
 
-const initialAdmins: Admin[] = [
-    { id: "ADV-001", name: "M. Siddique", email: "siddique@center3.gov.pk", centers: ["LHR-003", "LHR-005"], role: "Center Admin" },
-    { id: "ADV-002", name: "Amna Ali", email: "amna@karachihub.gov.pk", centers: ["KHI-012"], role: "Center Admin" },
-    { id: "ADV-003", name: "Zubair Ahmed", email: "z.ahmed@isl.gov.pk", centers: ["ISL-001"], role: "Regional Lead" },
-];
-
 export function AdminAccountList() {
-    const [admins, setAdmins] = useState<Admin[]>(initialAdmins);
+    const { toast } = useToast();
+    const [admins, setAdmins] = useState<CenterAdmin[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Listen for new admin additions from localStorage
+    // Fetch center admins on component mount
     useEffect(() => {
-        const handleStorageChange = () => {
-            const savedAdmins = localStorage.getItem("centerAdmins");
-            if (savedAdmins) {
-                const parsedAdmins = JSON.parse(savedAdmins);
-                setAdmins([...initialAdmins, ...parsedAdmins]);
+        const fetchAdmins = async () => {
+            try {
+                const adminsData = await superAdminService.getCenterAdmins();
+                setAdmins(adminsData);
+            } catch (error: any) {
+                console.error("Failed to load center admins", error);
+
+                // Check if it's a 401 (token expired)
+                if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
+                    toast({
+                        title: "Session Expired",
+                        description: "Your session has expired. Please log in again.",
+                        variant: "destructive",
+                    });
+
+                    // Clear auth and redirect to login
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/auth/super-admin';
+                } else {
+                    toast({
+                        title: "Failed to Load Admins",
+                        description: error.message || "An error occurred while fetching center admins.",
+                        variant: "destructive",
+                    });
+                }
+            } finally {
+                setIsLoading(false);
             }
         };
 
-        // Initial load
-        handleStorageChange();
+        fetchAdmins();
+    }, [toast]);
 
-        // Listen for custom event
-        window.addEventListener("adminAdded", handleStorageChange);
-        
-        return () => {
-            window.removeEventListener("adminAdded", handleStorageChange);
-        };
-    }, []);
+    if (isLoading) {
+        return (
+            <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
+                <div className="flex items-center justify-center py-12">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                        <p className="text-sm text-muted-foreground">Loading administrators...</p>
+                    </div>
+                </div>
+            </Card>
+        );
+    }
+
+    if (admins.length === 0) {
+        return (
+            <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
+                <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                        <Shield className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+                        <p className="text-sm text-muted-foreground">No administrators found</p>
+                        <p className="text-xs text-muted-foreground mt-1">Create a center to automatically add an admin</p>
+                    </div>
+                </div>
+            </Card>
+        );
+    }
 
     return (
         <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
@@ -50,6 +96,7 @@ export function AdminAccountList() {
                         <tr className="bg-secondary/40 border-b border-border/40">
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Administrator</th>
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Assigned Centers</th>
+                            <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Status</th>
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Access Level</th>
                         </tr>
                     </thead>
@@ -64,7 +111,6 @@ export function AdminAccountList() {
                                         <div>
                                             <p className="alumni-sans-title text-lg font-semibold text-foreground flex items-center gap-1.5">
                                                 {admin.name}
-                                                {admin.role === "Regional Lead" && <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />}
                                             </p>
                                             <p className="text-xs text-muted-foreground flex items-center gap-1">
                                                 <Mail className="w-3 h-3" /> {admin.email}
@@ -74,19 +120,24 @@ export function AdminAccountList() {
                                 </td>
                                 <td className="p-4">
                                     <div className="flex flex-wrap gap-1.5">
-                                        {admin.centers.map(c => (
-                                            <Badge key={c} variant="outline" className="bg-white/50 text-[10px] font-mono border-border/60">
-                                                {c}
+                                        {admin.centers.map(center => (
+                                            <Badge key={center.id} variant="outline" className="bg-white/50 text-[10px] font-mono border-border/60">
+                                                {center.code}
                                             </Badge>
                                         ))}
-                                        <Button variant="ghost" size="sm" className="h-5 px-1.5 text-[10px] text-primary hover:bg-primary/10">
-                                            Manage
-                                        </Button>
                                     </div>
                                 </td>
                                 <td className="p-4">
+                                    <Badge
+                                        variant={admin.status === "ACTIVE" ? "default" : "secondary"}
+                                        className="px-2 py-0 text-[10px] uppercase font-bold tracking-tighter"
+                                    >
+                                        {admin.status}
+                                    </Badge>
+                                </td>
+                                <td className="p-4">
                                     <Badge variant="secondary" className="px-2 py-0 text-[10px] uppercase font-bold tracking-tighter">
-                                        {admin.role}
+                                        {admin.role.replace('_', ' ')}
                                     </Badge>
                                 </td>
                             </tr>

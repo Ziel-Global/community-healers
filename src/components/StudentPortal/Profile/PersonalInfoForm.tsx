@@ -3,34 +3,73 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon } from "lucide-react";
+import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon, Home } from "lucide-react";
+import { api } from "@/services/api";
+import { superAdminService } from "@/services/superAdminService";
 
 interface PersonalInfo {
-    fullName: string;
     fatherName: string;
     cnic: string;
     dob: string;
     phone: string;
     city: string;
+    address: string;
 }
 
-export function PersonalInfoForm() {
+interface PersonalInfoFormProps {
+    candidateData: any;
+}
+
+export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
     const [formData, setFormData] = useState<PersonalInfo>({
-        fullName: "",
         fatherName: "",
         cnic: "",
         dob: "",
-        phone: "03001234567",
+        phone: "",
         city: "",
+        address: "",
     });
 
-    // Load saved data from localStorage on mount
+    // Populate form with candidate data
     useEffect(() => {
-        const saved = localStorage.getItem("candidatePersonalInfo");
-        if (saved) {
-            setFormData(JSON.parse(saved));
+        if (candidateData) {
+            setFormData({
+                fatherName: candidateData.fatherName || "",
+                cnic: candidateData.cnic || "",
+                dob: candidateData.dob ? new Date(candidateData.dob).toISOString().split('T')[0] : "",
+                phone: candidateData.user?.phoneNumber || "",
+                city: candidateData.cityId || "",
+                address: candidateData.address || "",
+            });
         }
+    }, [candidateData]);
+
+    // Fetch cities from API
+    const [cities, setCities] = useState<Array<{ id: string; name: string }>>([]);
+    useEffect(() => {
+        const fetchCities = async () => {
+            try {
+                const citiesData = await superAdminService.getCities();
+                setCities(Array.isArray(citiesData) ? citiesData : []);
+            } catch (error) {
+                console.error('Failed to fetch cities', error);
+            }
+        };
+        fetchCities();
     }, []);
+
+    const handleChange = (field: keyof PersonalInfo, value: string) => {
+        const updated = { ...formData, [field]: value };
+        setFormData(updated);
+
+        // Sync to localStorage for wizard step compatibility
+        // Only if we want to support the wizard flow which reads from here
+        // We accumulate with existing localStorage data to avoid wiping other fields if any
+        const saved = localStorage.getItem("candidatePersonalInfo");
+        const parsed = saved ? JSON.parse(saved) : {};
+        const newStorage = { ...parsed, [field]: value };
+        localStorage.setItem("candidatePersonalInfo", JSON.stringify(newStorage));
+    };
 
     return (
         <Card className="border-border/40 shadow-sm">
@@ -47,29 +86,17 @@ export function PersonalInfoForm() {
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="fullName">Candidate Name</Label>
-                        <div className="relative">
-                            <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                            <Input 
-                                id="fullName" 
-                                placeholder="Muhammad Ahmed" 
-                                className="pl-10"
-                                value={formData.fullName}
-                                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                            />
-                        </div>
-                    </div>
+
                     <div className="space-y-2">
                         <Label htmlFor="fatherName">Father's Name</Label>
                         <div className="relative">
                             <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                            <Input 
-                                id="fatherName" 
-                                placeholder="Aslam Khan" 
+                            <Input
+                                id="fatherName"
+                                placeholder="Aslam Khan"
                                 className="pl-10"
                                 value={formData.fatherName}
-                                onChange={(e) => setFormData({ ...formData, fatherName: e.target.value })}
+                                onChange={(e) => handleChange("fatherName", e.target.value)}
                             />
                         </div>
                     </div>
@@ -77,12 +104,12 @@ export function PersonalInfoForm() {
                         <Label htmlFor="cnic">CNIC Number</Label>
                         <div className="relative">
                             <CreditCard className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                            <Input 
-                                id="cnic" 
-                                placeholder="42201-XXXXXXX-X" 
+                            <Input
+                                id="cnic"
+                                placeholder="42201-XXXXXXX-X"
                                 className="pl-10"
                                 value={formData.cnic}
-                                onChange={(e) => setFormData({ ...formData, cnic: e.target.value })}
+                                onChange={(e) => handleChange("cnic", e.target.value)}
                             />
                         </div>
                     </div>
@@ -90,12 +117,12 @@ export function PersonalInfoForm() {
                         <Label htmlFor="dob">Date of Birth</Label>
                         <div className="relative">
                             <CalendarIcon className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                            <Input 
-                                id="dob" 
-                                type="date" 
+                            <Input
+                                id="dob"
+                                type="date"
                                 className="pl-10"
                                 value={formData.dob}
-                                onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                                onChange={(e) => handleChange("dob", e.target.value)}
                             />
                         </div>
                     </div>
@@ -103,12 +130,12 @@ export function PersonalInfoForm() {
                         <Label htmlFor="phone">Contact Number</Label>
                         <div className="relative">
                             <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                            <Input 
-                                id="phone" 
-                                placeholder="03001234567" 
-                                className="pl-10" 
-                                disabled 
-                                value={formData.phone} 
+                            <Input
+                                id="phone"
+                                placeholder="03001234567"
+                                className="pl-10"
+                                disabled
+                                value={formData.phone}
                             />
                         </div>
                     </div>
@@ -116,21 +143,34 @@ export function PersonalInfoForm() {
                         <Label htmlFor="city">City / Area</Label>
                         <div className="relative">
                             <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                            <Select 
+                            <Select
                                 value={formData.city}
-                                onValueChange={(value) => setFormData({ ...formData, city: value })}
+                                onValueChange={(value) => handleChange("city", value)}
                             >
                                 <SelectTrigger id="city" className="pl-10">
                                     <SelectValue placeholder="Select your city" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="lahore">Lahore</SelectItem>
-                                    <SelectItem value="karachi">Karachi</SelectItem>
-                                    <SelectItem value="islamabad">Islamabad</SelectItem>
-                                    <SelectItem value="rawalpindi">Rawalpindi</SelectItem>
-                                    <SelectItem value="faisalabad">Faisalabad</SelectItem>
+                                    {cities.map((city) => (
+                                        <SelectItem key={city.id} value={city.id}>
+                                            {city.name}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
+                        </div>
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="address">Address</Label>
+                        <div className="relative">
+                            <Home className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                            <Input
+                                id="address"
+                                placeholder="House #, Street #, Sector/Area"
+                                className="pl-10"
+                                value={formData.address}
+                                onChange={(e) => handleChange("address", e.target.value)}
+                            />
                         </div>
                     </div>
                 </div>

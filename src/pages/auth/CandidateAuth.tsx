@@ -11,22 +11,83 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CandidateAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [loading, setLoading] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
+  const { loginCandidate, signup, verifyCandidate } = useAuth();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: ""
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSignUp) {
-      // Open OTP modal for sign up
-      setShowOtpModal(true);
-    } else {
-      // Direct login for sign in
-      navigate("/candidate");
+    setLoading(true);
+
+    try {
+      if (isSignUp) {
+        if (formData.password !== formData.confirmPassword) {
+          toast({
+            variant: "destructive",
+            title: "Password Mismatch",
+            description: "Passwords do not match.",
+          });
+          setLoading(false);
+          return;
+        }
+        // Register
+        await signup({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          password: formData.password
+        });
+        setShowOtpModal(true);
+        toast({
+          title: "Signup Successful",
+          description: "OTP sent to your phone number.",
+        });
+      } else {
+        // Login
+        await loginCandidate({
+          phoneNumber: formData.phoneNumber,
+          password: formData.password
+        });
+        navigate("/candidate");
+        toast({
+          title: "Welcome back!",
+          description: "Login successful.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: isSignUp ? "Signup Failed" : "Login Failed",
+        description: error.message || "An error occurred.",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,7 +95,7 @@ export default function CandidateAuth() {
     if (value.length > 1) {
       value = value.slice(-1);
     }
-    
+
     if (!/^\d*$/.test(value)) return;
 
     const newOtp = [...otp];
@@ -42,7 +103,7 @@ export default function CandidateAuth() {
     setOtp(newOtp);
 
     // Auto-focus next input
-    if (value && index < 4) {
+    if (value && index < 5) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -55,27 +116,45 @@ export default function CandidateAuth() {
 
   const handleOtpPaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 5);
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
     if (!/^\d+$/.test(pastedData)) return;
 
-    const newOtp = pastedData.split("").concat(Array(5 - pastedData.length).fill("")).slice(0, 5);
+    const newOtp = pastedData.split("").concat(Array(6 - pastedData.length).fill("")).slice(0, 6);
     setOtp(newOtp);
-    
+
     const nextEmptyIndex = newOtp.findIndex(val => !val);
     if (nextEmptyIndex !== -1) {
       otpRefs.current[nextEmptyIndex]?.focus();
     } else {
-      otpRefs.current[4]?.focus();
+      otpRefs.current[5]?.focus();
     }
   };
 
-  const handleOtpSubmit = (e: React.FormEvent) => {
+  const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Verify OTP and navigate to portal
     const otpValue = otp.join("");
-    if (otpValue.length === 5) {
+    if (otpValue.length !== 6) return;
+
+    setLoading(true);
+    try {
+      await verifyCandidate({
+        phoneNumber: formData.phoneNumber,
+        otp: otpValue
+      });
       setShowOtpModal(false);
       navigate("/candidate");
+      toast({
+        title: "Verification Successful",
+        description: "You are now logged in.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Verification Failed",
+        description: error.message || "Invalid OTP.",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,7 +169,7 @@ export default function CandidateAuth() {
             </div>
             <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
           </div>
-          
+
           <h1 className="text-4xl alumni-sans-title mb-4 text-white">
             Candidate Portal
           </h1>
@@ -154,6 +233,8 @@ export default function CandidateAuth() {
                         id="firstName"
                         placeholder="First name"
                         className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
                         required
                       />
                     </div>
@@ -167,6 +248,8 @@ export default function CandidateAuth() {
                         id="lastName"
                         placeholder="Last name"
                         className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
                         required
                       />
                     </div>
@@ -182,6 +265,8 @@ export default function CandidateAuth() {
                       type="email"
                       placeholder="your@email.com"
                       className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
@@ -194,10 +279,12 @@ export default function CandidateAuth() {
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
-                  id="phone"
+                  id="phoneNumber"
                   type="tel"
                   placeholder="+92 300 1234567"
                   className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
@@ -214,6 +301,8 @@ export default function CandidateAuth() {
                       type="password"
                       placeholder="Create a password"
                       className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      value={formData.password}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
@@ -228,6 +317,8 @@ export default function CandidateAuth() {
                       type="password"
                       placeholder="Confirm your password"
                       className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
@@ -245,6 +336,8 @@ export default function CandidateAuth() {
                     type="password"
                     placeholder="Enter your password"
                     className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                    value={formData.password}
+                    onChange={handleInputChange}
                     required
                   />
                 </div>
@@ -275,7 +368,7 @@ export default function CandidateAuth() {
           <DialogHeader>
             <DialogTitle className="text-2xl alumni-sans-title">Verify OTP</DialogTitle>
             <DialogDescription>
-              Enter the 5-digit OTP code sent to your phone number to complete your registration.
+              Enter the 6-digit OTP code sent to your phone number to complete your registration.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleOtpSubmit} className="space-y-6 mt-4">

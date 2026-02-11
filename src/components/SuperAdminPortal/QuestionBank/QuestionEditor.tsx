@@ -17,39 +17,22 @@ import {
     Trash2,
     Tag
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-
-interface Question {
-    id: number;
-    text: string;
-    category: string;
-    options?: string[];
-    correctAnswer?: string;
-}
-
-const initialQuestions: Question[] = [
-    { id: 1, text: "Which piece of safety equipment is mandatory when working with high-voltage?", category: "Safety" },
-    { id: 2, text: "What should you do first in case of a chemical spill?", category: "Safety" },
-    { id: 3, text: "Define the term 'CertifyPro Standard' in industrial context.", category: "General" },
-];
+import { superAdminService } from "@/services/superAdminService";
+import { Question, QuestionCategory, CreateQuestionRequest } from "@/types/superAdmin";
 
 export function QuestionEditor() {
     const { toast } = useToast();
     const [selectedCategory, setSelectedCategory] = useState("All");
-    const [questions, setQuestions] = useState<Question[]>(() => {
-        const saved = localStorage.getItem("examQuestions");
-        if (saved) {
-            return JSON.parse(saved);
-        }
-        return initialQuestions;
-    });
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         text: "",
-        category: "General",
+        category: "GENERAL",
         option1: "",
         option2: "",
         option3: "",
@@ -57,7 +40,43 @@ export function QuestionEditor() {
         correctAnswer: "",
     });
 
-    const handleSubmit = () => {
+    const fetchQuestions = async () => {
+        try {
+            const questionsData = await superAdminService.getQuestions();
+            setQuestions(questionsData);
+        } catch (error: any) {
+            console.error("Failed to load questions", error);
+
+            // Check if it's a 401 (token expired)
+            if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
+                toast({
+                    title: "Session Expired",
+                    description: "Your session has expired. Please log in again.",
+                    variant: "destructive",
+                });
+
+                // Clear auth and redirect to login
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/auth/super-admin';
+            } else {
+                toast({
+                    title: "Failed to Load Questions",
+                    description: error.message || "An error occurred while fetching questions.",
+                    variant: "destructive",
+                });
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Fetch questions on component mount
+    useEffect(() => {
+        fetchQuestions();
+    }, [toast]);
+
+    const handleSubmit = async () => {
         // Validate required fields
         if (!formData.text || !formData.option1 || !formData.option2 || !formData.option3 || !formData.option4 || !formData.correctAnswer) {
             toast({
@@ -70,29 +89,31 @@ export function QuestionEditor() {
 
         setIsSubmitting(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            const newQuestion: Question = {
-                id: questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1,
-                text: formData.text,
-                category: formData.category,
-                options: [formData.option1, formData.option2, formData.option3, formData.option4],
-                correctAnswer: formData.correctAnswer,
+        try {
+            const request: CreateQuestionRequest = {
+                questionText: formData.text,
+                category: formData.category as QuestionCategory,
+                option1: formData.option1,
+                option2: formData.option2,
+                option3: formData.option3,
+                option4: formData.option4,
+                correctAnswer: formData.correctAnswer === formData.option1 ? 1 :
+                    formData.correctAnswer === formData.option2 ? 2 :
+                        formData.correctAnswer === formData.option3 ? 3 : 4,
             };
 
-            const updatedQuestions = [...questions, newQuestion];
-            setQuestions(updatedQuestions);
-            
-            // Save to localStorage
-            localStorage.setItem("examQuestions", JSON.stringify(updatedQuestions));
+            await superAdminService.createQuestion(request);
 
-            setIsSubmitting(false);
+            toast({
+                title: "Question Added",
+                description: "The question has been successfully added to the question bank.",
+            });
+
             setIsDialogOpen(false);
-
             // Reset form
             setFormData({
                 text: "",
-                category: "General",
+                category: "GENERAL",
                 option1: "",
                 option2: "",
                 option3: "",
@@ -100,11 +121,17 @@ export function QuestionEditor() {
                 correctAnswer: "",
             });
 
+            // Refresh list
+            await fetchQuestions();
+        } catch (error: any) {
             toast({
-                title: "Question Added",
-                description: "The question has been successfully added to the question bank.",
+                title: "Failed to Add Question",
+                description: error.message || "An error occurred while adding the question.",
+                variant: "destructive",
             });
-        }, 1000);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -122,7 +149,7 @@ export function QuestionEditor() {
                         <Filter className="w-4 h-4 text-primary" />
                         Filter
                     </Button>
-                    <Button 
+                    <Button
                         onClick={() => setIsDialogOpen(true)}
                         className="gradient-primary text-white font-bold h-11 px-6 rounded-xl shadow-lg gap-2"
                     >
@@ -132,38 +159,55 @@ export function QuestionEditor() {
                 </div>
             </div>
 
-            <div className="grid gap-4">
-                {questions.map((q) => (
-                    <Card key={q.id} className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm group hover:border-primary/40 transition-all">
-                        <CardContent className="p-6">
-                            <div className="flex justify-between gap-6">
-                                <div className="flex gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                                        <HelpCircle className="w-5 h-5 text-primary" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="alumni-sans-title text-xl font-semibold text-foreground leading-snug">{q.text}</p>
-                                        <div className="flex flex-wrap gap-2">
-                                            <Badge variant="outline" className="bg-white/50 text-[10px] uppercase font-bold tracking-tighter">
-                                                <Tag className="w-3 h-3 mr-1" /> {q.category}
-                                            </Badge>
+            {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                        <p className="text-sm text-muted-foreground">Loading questions...</p>
+                    </div>
+                </div>
+            ) : questions.length === 0 ? (
+                <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                        <HelpCircle className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+                        <p className="text-sm text-muted-foreground">No questions found</p>
+                        <p className="text-xs text-muted-foreground mt-1">Click "Add Question" to create one</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="grid gap-4">
+                    {questions.map((q) => (
+                        <Card key={q.id} className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm group hover:border-primary/40 transition-all">
+                            <CardContent className="p-6">
+                                <div className="flex justify-between gap-6">
+                                    <div className="flex gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                            <HelpCircle className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="alumni-sans-title text-xl font-semibold text-foreground leading-snug">{q.questionText}</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                <Badge variant="outline" className="bg-white/50 text-[10px] uppercase font-bold tracking-tighter">
+                                                    <Tag className="w-3 h-3 mr-1" /> {q.category}
+                                                </Badge>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary">
-                                        <Edit3 className="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-destructive">
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary">
+                                            <Edit3 className="w-4 h-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-destructive">
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
 
             {/* Add Question Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -194,7 +238,7 @@ export function QuestionEditor() {
                         {/* Options */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Answer Options</h3>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="option1">Option 1 *</Label>
@@ -260,7 +304,7 @@ export function QuestionEditor() {
                         {/* Metadata */}
                         <div className="space-y-4 pt-4 border-t">
                             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Question Metadata</h3>
-                            
+
                             <div className="space-y-2">
                                 <Label htmlFor="category">Category *</Label>
                                 <Select
@@ -271,11 +315,11 @@ export function QuestionEditor() {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="General">General</SelectItem>
-                                        <SelectItem value="Safety">Safety</SelectItem>
-                                        <SelectItem value="Technical">Technical</SelectItem>
-                                        <SelectItem value="Procedures">Procedures</SelectItem>
-                                        <SelectItem value="Regulations">Regulations</SelectItem>
+                                        <SelectItem value="GENERAL">General</SelectItem>
+                                        <SelectItem value="SAFETY">Safety</SelectItem>
+                                        <SelectItem value="TECHNICAL">Technical</SelectItem>
+                                        <SelectItem value="PROCEDURES">Procedures</SelectItem>
+                                        <SelectItem value="REGULATIONS">Regulations</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

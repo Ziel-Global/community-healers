@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { CenterDetail } from "./CenterDetail";
+import { superAdminService } from "@/services/superAdminService";
 
 interface Center {
     id: string;
@@ -25,50 +26,92 @@ interface Center {
     established?: string;
 }
 
-const initialCenters: Center[] = [
-    { id: "LHR-003", name: "Lahore Training Center #3", location: "Lahore", capacity: 150, status: "Active", attendance: "92%" },
-    { id: "KHI-012", name: "Karachi Industrial Hub #1", location: "Karachi", capacity: 200, status: "Active", attendance: "78%" },
-    { id: "ISL-001", name: "Islamabad Sector F-7", location: "Islamabad", capacity: 80, status: "Inactive", attendance: "0%" },
-    { id: "MUL-005", name: "Multan Regional Center", location: "Multan", capacity: 120, status: "Active", attendance: "85%" },
-];
-
 export function CenterManager() {
     const { toast } = useToast();
-    const [centers, setCenters] = useState<Center[]>(() => {
-        // Load centers from localStorage on initial mount
-        const saved = localStorage.getItem("trainingCenters");
-        if (saved) {
-            return JSON.parse(saved);
-        }
-        return initialCenters;
-    });
+    const [centers, setCenters] = useState<Center[]>([]);
+    const [cities, setCities] = useState<Array<{ id: string; name: string }>>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
+    const [isLoadingCenters, setIsLoadingCenters] = useState(true);
     const [formData, setFormData] = useState({
         name: "",
-        location: "",
+        cityId: "",
         address: "",
         capacity: "",
-        contactPerson: "",
-        phone: "",
-        email: "",
-        status: "Active",
-        adminName: "",
+        adminFirstName: "",
+        adminLastName: "",
         adminEmail: "",
-        adminPhone: "",
+        adminPassword: "",
     });
+
+    // Fetch centers on component mount
+    useEffect(() => {
+        const fetchCenters = async () => {
+            try {
+                const centersData = await superAdminService.getCenters();
+                setCenters(centersData);
+            } catch (error: any) {
+                console.error("Failed to load centers", error);
+
+                // Check if it's a 401 (token expired)
+                if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
+                    toast({
+                        title: "Session Expired",
+                        description: "Your session has expired. Please log in again.",
+                        variant: "destructive",
+                    });
+
+                    // Clear auth and redirect to login
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/auth/super-admin';
+                }
+            } finally {
+                setIsLoadingCenters(false);
+            }
+        };
+
+        fetchCenters();
+    }, [toast]);
+
+    // Fetch cities on component mount
+    useEffect(() => {
+        const fetchCities = async () => {
+            try {
+                const citiesData = await superAdminService.getCities();
+                setCities(citiesData);
+            } catch (error: any) {
+                console.error("Failed to load cities", error);
+
+                // Check if it's a 401 (token expired)
+                if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
+                    toast({
+                        title: "Session Expired",
+                        description: "Your session has expired. Please log in again.",
+                        variant: "destructive",
+                    });
+
+                    // Clear auth and redirect to login
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/auth/super-admin';
+                }
+            }
+        };
+
+        fetchCities();
+    }, [toast]);
 
     // If a center is selected, show detail view
     if (selectedCenter) {
         return <CenterDetail center={selectedCenter} onBack={() => setSelectedCenter(null)} />;
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Validate required fields
-        if (!formData.name || !formData.location || !formData.address || !formData.capacity || 
-            !formData.contactPerson || !formData.phone || !formData.email || 
-            !formData.adminName || !formData.adminEmail || !formData.adminPhone) {
+        if (!formData.name || !formData.cityId || !formData.address || !formData.capacity ||
+            !formData.adminFirstName || !formData.adminLastName || !formData.adminEmail || !formData.adminPassword) {
             toast({
                 title: "Incomplete Information",
                 description: "Please fill in all required fields including center admin details.",
@@ -79,81 +122,52 @@ export function CenterManager() {
 
         setIsSubmitting(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            // Generate center ID
-            const cityPrefix = formData.location.substring(0, 3).toUpperCase();
-            const centerId = `${cityPrefix}-${String(centers.length + 1).padStart(3, '0')}`;
-
-            // Create new center
-            const currentDate = new Date().toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+        try {
+            // Call the API to create center
+            await superAdminService.createCenter({
+                name: formData.name,
+                cityId: formData.cityId,
+                address: formData.address,
+                capacity: parseInt(formData.capacity),
+                centerAdmin: {
+                    email: formData.adminEmail,
+                    password: formData.adminPassword,
+                    firstName: formData.adminFirstName,
+                    lastName: formData.adminLastName,
+                },
             });
 
-            const newCenter: Center = {
-                id: centerId,
-                name: formData.name,
-                location: formData.location,
-                capacity: parseInt(formData.capacity),
-                status: formData.status,
-                attendance: "0%",
-                address: formData.address,
-                contactPerson: formData.contactPerson,
-                phone: formData.phone,
-                email: formData.email,
-                established: currentDate,
-            };
+            toast({
+                title: "Center Established",
+                description: `${formData.name} has been successfully created.`,
+            });
 
-            // Add to centers list
-            const updatedCenters = [...centers, newCenter];
-            setCenters(updatedCenters);
-            
-            // Save to localStorage
-            localStorage.setItem("trainingCenters", JSON.stringify(updatedCenters));
-
-            // Generate admin ID and add to admin list
-            const existingAdmins = JSON.parse(localStorage.getItem("centerAdmins") || "[]");
-            const adminId = `ADV-${String(existingAdmins.length + 4).padStart(3, '0')}`;
-            
-            const newAdmin = {
-                id: adminId,
-                name: formData.adminName,
-                email: formData.adminEmail,
-                centers: [centerId],
-                role: "Center Admin",
-            };
-
-            const updatedAdmins = [...existingAdmins, newAdmin];
-            localStorage.setItem("centerAdmins", JSON.stringify(updatedAdmins));
-            
-            // Dispatch custom event to notify AdminAccountList
-            window.dispatchEvent(new Event("adminAdded"));
-
-            setIsSubmitting(false);
             setIsDialogOpen(false);
 
             // Reset form
             setFormData({
                 name: "",
-                location: "",
+                cityId: "",
                 address: "",
                 capacity: "",
-                contactPerson: "",
-                phone: "",
-                email: "",
-                status: "Active",
-                adminName: "",
+                adminFirstName: "",
+                adminLastName: "",
                 adminEmail: "",
-                adminPhone: "",
+                adminPassword: "",
             });
 
+            // Refresh centers list from API
+            const centersData = await superAdminService.getCenters();
+            setCenters(centersData);
+        } catch (error: any) {
             toast({
-                title: "Center Established",
-                description: `${formData.name} has been successfully added with admin ${formData.adminName}.`,
+                title: "Failed to Create Center",
+                description: error.message || "An error occurred while creating the center.",
+                variant: "destructive",
             });
-        }, 1500);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -166,7 +180,7 @@ export function CenterManager() {
                         className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
                     />
                 </div>
-                <Button 
+                <Button
                     onClick={() => setIsDialogOpen(true)}
                     className="gradient-primary text-white font-bold h-11 px-6 rounded-xl shadow-lg gap-2"
                 >
@@ -175,56 +189,73 @@ export function CenterManager() {
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {centers.map((center) => (
-                    <Card key={center.id} className="border-border/40 overflow-hidden group hover:border-primary/40 transition-all bg-card/60 backdrop-blur-sm">
-                        <CardContent className="p-0">
-                            <div className="p-5 border-b border-border/40 flex justify-between items-start">
-                                <div className="flex gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                                        <Building2 className="w-6 h-6 text-primary" />
+            {isLoadingCenters ? (
+                <div className="flex items-center justify-center py-12">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                        <p className="text-sm text-muted-foreground">Loading centers...</p>
+                    </div>
+                </div>
+            ) : centers.length === 0 ? (
+                <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                        <Building2 className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+                        <p className="text-sm text-muted-foreground">No centers found</p>
+                        <p className="text-xs text-muted-foreground mt-1">Click "Establish New Center" to add one</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {centers.map((center) => (
+                        <Card key={center.id} className="border-border/40 overflow-hidden group hover:border-primary/40 transition-all bg-card/60 backdrop-blur-sm">
+                            <CardContent className="p-0">
+                                <div className="p-5 border-b border-border/40 flex justify-between items-start">
+                                    <div className="flex gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                            <Building2 className="w-6 h-6 text-primary" />
+                                        </div>
+                                        <div>
+                                            <h4 className="alumni-sans-title text-lg text-foreground leading-tight">{center.name}</h4>
+                                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                                <MapPin className="w-3 h-3" /> {center.location} • ID: {center.id}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h4 className="alumni-sans-title text-lg text-foreground leading-tight">{center.name}</h4>
-                                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                                            <MapPin className="w-3 h-3" /> {center.location} • ID: {center.id}
-                                        </p>
+                                    <Badge variant={center.status === "Active" ? "success" : "secondary"}>
+                                        {center.status}
+                                    </Badge>
+                                </div>
+                                <div className="p-5 grid grid-cols-3 gap-4 bg-secondary/20">
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Daily Capacity</p>
+                                        <div className="flex items-center gap-2">
+                                            <Users className="w-3.5 h-3.5 text-primary" />
+                                            <span className="font-bold text-sm">{center.capacity}</span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Avg Attendance</p>
+                                        <div className="flex items-center gap-2">
+                                            <Activity className="w-3.5 h-3.5 text-emerald-500" />
+                                            <span className="font-bold text-sm">{center.attendance}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-end justify-end">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 rounded-lg"
+                                            onClick={() => setSelectedCenter(center)}
+                                        >
+                                            <MoreHorizontal className="w-4 h-4" />
+                                        </Button>
                                     </div>
                                 </div>
-                                <Badge variant={center.status === "Active" ? "success" : "secondary"}>
-                                    {center.status}
-                                </Badge>
-                            </div>
-                            <div className="p-5 grid grid-cols-3 gap-4 bg-secondary/20">
-                                <div className="space-y-1">
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Daily Capacity</p>
-                                    <div className="flex items-center gap-2">
-                                        <Users className="w-3.5 h-3.5 text-primary" />
-                                        <span className="font-bold text-sm">{center.capacity}</span>
-                                    </div>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Avg Attendance</p>
-                                    <div className="flex items-center gap-2">
-                                        <Activity className="w-3.5 h-3.5 text-emerald-500" />
-                                        <span className="font-bold text-sm">{center.attendance}</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-end justify-end">
-                                    <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        className="h-8 w-8 p-0 rounded-lg"
-                                        onClick={() => setSelectedCenter(center)}
-                                    >
-                                        <MoreHorizontal className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
 
             {/* Add New Center Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -243,7 +274,7 @@ export function CenterManager() {
                         {/* Center Information */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Center Information</h3>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="centerName">Center Name *</Label>
@@ -256,23 +287,26 @@ export function CenterManager() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="location">City / Location *</Label>
+                                    <Label htmlFor="cityId">City / Location *</Label>
                                     <Select
-                                        value={formData.location}
-                                        onValueChange={(value) => setFormData({ ...formData, location: value })}
+                                        value={formData.cityId}
+                                        onValueChange={(value) => setFormData({ ...formData, cityId: value })}
                                     >
-                                        <SelectTrigger id="location">
+                                        <SelectTrigger id="cityId">
                                             <SelectValue placeholder="Select city" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Lahore">Lahore</SelectItem>
-                                            <SelectItem value="Karachi">Karachi</SelectItem>
-                                            <SelectItem value="Islamabad">Islamabad</SelectItem>
-                                            <SelectItem value="Rawalpindi">Rawalpindi</SelectItem>
-                                            <SelectItem value="Faisalabad">Faisalabad</SelectItem>
-                                            <SelectItem value="Multan">Multan</SelectItem>
-                                            <SelectItem value="Peshawar">Peshawar</SelectItem>
-                                            <SelectItem value="Quetta">Quetta</SelectItem>
+                                            {cities.length > 0 ? (
+                                                cities.map((city) => (
+                                                    <SelectItem key={city.id} value={city.id}>
+                                                        {city.name}
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                                                    Loading cities...
+                                                </div>
+                                            )}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -289,86 +323,18 @@ export function CenterManager() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="capacity">Daily Capacity *</Label>
-                                    <div className="relative">
-                                        <Users className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                                        <Input
-                                            id="capacity"
-                                            type="number"
-                                            placeholder="e.g., 150"
-                                            className="pl-10"
-                                            value={formData.capacity}
-                                            onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="status">Status *</Label>
-                                    <Select
-                                        value={formData.status}
-                                        onValueChange={(value) => setFormData({ ...formData, status: value })}
-                                    >
-                                        <SelectTrigger id="status">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Active">Active</SelectItem>
-                                            <SelectItem value="Inactive">Inactive</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Contact Information */}
-                        <div className="space-y-4 pt-4 border-t">
-                            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Contact Information</h3>
-                            
                             <div className="space-y-2">
-                                <Label htmlFor="contactPerson">Contact Person Name *</Label>
+                                <Label htmlFor="capacity">Daily Capacity *</Label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                    <Users className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                     <Input
-                                        id="contactPerson"
-                                        placeholder="e.g., Muhammad Ahmed"
+                                        id="capacity"
+                                        type="number"
+                                        placeholder="e.g., 150"
                                         className="pl-10"
-                                        value={formData.contactPerson}
-                                        onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+                                        value={formData.capacity}
+                                        onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
                                     />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone">Phone Number *</Label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                                        <Input
-                                            id="phone"
-                                            placeholder="03001234567"
-                                            className="pl-10"
-                                            value={formData.phone}
-                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email Address *</Label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            placeholder="center@example.com"
-                                            className="pl-10"
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -376,18 +342,34 @@ export function CenterManager() {
                         {/* Center Admin Information */}
                         <div className="space-y-4 pt-4 border-t">
                             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Center Admin Account</h3>
-                            
-                            <div className="space-y-2">
-                                <Label htmlFor="adminName">Admin Full Name *</Label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                                    <Input
-                                        id="adminName"
-                                        placeholder="e.g., Aisha Khan"
-                                        className="pl-10"
-                                        value={formData.adminName}
-                                        onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
-                                    />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="adminFirstName">Admin First Name *</Label>
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                        <Input
+                                            id="adminFirstName"
+                                            placeholder="e.g., Shahmeer"
+                                            className="pl-10"
+                                            value={formData.adminFirstName}
+                                            onChange={(e) => setFormData({ ...formData, adminFirstName: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="adminLastName">Admin Last Name *</Label>
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                        <Input
+                                            id="adminLastName"
+                                            placeholder="e.g., Fawwad"
+                                            className="pl-10"
+                                            value={formData.adminLastName}
+                                            onChange={(e) => setFormData({ ...formData, adminLastName: e.target.value })}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -408,15 +390,16 @@ export function CenterManager() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="adminPhone">Admin Phone Number *</Label>
+                                    <Label htmlFor="adminPassword">Admin Password *</Label>
                                     <div className="relative">
-                                        <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                        <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                         <Input
-                                            id="adminPhone"
-                                            placeholder="03001234567"
+                                            id="adminPassword"
+                                            type="password"
+                                            placeholder="CenterAdmin@123"
                                             className="pl-10"
-                                            value={formData.adminPhone}
-                                            onChange={(e) => setFormData({ ...formData, adminPhone: e.target.value })}
+                                            value={formData.adminPassword}
+                                            onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
                                         />
                                     </div>
                                 </div>
@@ -424,7 +407,7 @@ export function CenterManager() {
 
                             <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
                                 <p className="text-xs text-blue-700">
-                                    This admin will be automatically added to the Admin Management list with access to this center.
+                                    This admin will be automatically created with access to this center.
                                 </p>
                             </div>
                         </div>

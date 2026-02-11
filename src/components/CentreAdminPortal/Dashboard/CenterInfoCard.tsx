@@ -2,13 +2,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Building2, MapPin, ShieldCheck, Mail } from "lucide-react";
 
 interface CenterInfoProps {
-    name: string;
-    id: string;
-    location: string;
-    adminName: string;
+    name?: string;
+    id?: string;
+    location?: string;
+    adminName?: string;
+    email?: string;
 }
 
-export function CenterInfoCard({ name, id, location, adminName }: CenterInfoProps) {
+export function CenterInfoCard({
+    name = "Lahore Training Center #3",
+    id = "LHR-003",
+    location = "Model Town, Lahore",
+    adminName = "M. Siddique",
+    email
+}: CenterInfoProps) {
+    const contactEmail = email || `support@${id.toLowerCase()}.gov.pk`;
+
     return (
         <Card className="border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden border-l-4 border-l-primary">
             <CardContent className="p-6">
@@ -47,7 +56,7 @@ export function CenterInfoCard({ name, id, location, adminName }: CenterInfoProp
                             </div>
                             <div>
                                 <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Center Contact</p>
-                                <p className="text-sm font-semibold text-foreground">support@{id.toLowerCase()}.gov.pk</p>
+                                <p className="text-sm font-semibold text-foreground">{contactEmail}</p>
                             </div>
                         </div>
                     </div>

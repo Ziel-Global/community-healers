@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Award, Clock, FileCheck, TrendingUp, ShieldCheck } from "lucide-react";
 
 export function MinistryStats() {

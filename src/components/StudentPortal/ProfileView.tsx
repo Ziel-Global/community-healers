@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X } from "lucide-react";
 import { format } from "date-fns";
+import { api } from "@/services/api";
 
 interface UploadedDocument {
   id: string;
@@ -16,6 +17,32 @@ interface UploadedDocument {
   fileData?: string;
   fileType?: string;
 }
+
+interface CandidateData {
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    role: string;
+    status: string;
+  };
+  userId: string;
+  cnic: string;
+  fatherName: string;
+  dob: string;
+  city: {
+    id: string;
+    name: string;
+  };
+  address: string;
+  has16YearsEducation: boolean;
+  certificateIssued: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface ProfileViewProps {
   isRegistrationComplete?: boolean;
   scheduledExamDate?: Date;
@@ -24,42 +51,88 @@ interface ProfileViewProps {
   certificateNumber?: string;
 }
 
-export function ProfileView({ 
-  isRegistrationComplete = false, 
+export function ProfileView({
+  isRegistrationComplete = false,
   scheduledExamDate,
-  examCompleted = false, 
-  examScore, 
-  certificateNumber 
+  examCompleted = false,
+  examScore,
+  certificateNumber
 }: ProfileViewProps) {
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
   const [previewDoc, setPreviewDoc] = useState<UploadedDocument | null>(null);
+  const [candidateData, setCandidateData] = useState<CandidateData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load documents from localStorage on mount
+  // Fetch candidate data from API
   useEffect(() => {
-    const saved = localStorage.getItem("candidateDocuments");
-    if (saved) {
-      setUploadedDocuments(JSON.parse(saved));
-    }
+    const fetchCandidateData = async () => {
+      try {
+        const response = await api.get('/candidates/me');
+        const data = response.data.data;
+        setCandidateData(data);
+
+        // Map API documents to UploadedDocument interface
+        if (data.documents && Array.isArray(data.documents)) {
+          const apiDocs: UploadedDocument[] = [];
+
+          // Define expected document types to ensure we display all required slots even if not uploaded
+          const expectedDocs = [
+            { id: "photo", name: "Candidate Photo", isMandatory: true },
+            { id: "cnicFront", name: "CNIC Front", isMandatory: true },
+            { id: "cnicBack", name: "CNIC Back", isMandatory: true },
+            { id: "policeClearance", name: "Police Clearance Certificate", isMandatory: true },
+            { id: "medicalCertificate", name: "Medical Certificate", isMandatory: true },
+            { id: "passport", name: "Passport", isMandatory: false },
+            { id: "degreeTranscript", name: "Degree/Transcript", isMandatory: false },
+          ];
+
+          expectedDocs.forEach(expected => {
+            const found = data.documents.find((d: any) => d.type === expected.id);
+            if (found) {
+              // CRITICAL FIX: Only consider it complete if fileUrl is present
+              const isComplete = !!found.fileUrl;
+
+              apiDocs.push({
+                id: found.id || expected.id,
+                name: expected.name,
+                type: found.type,
+                isMandatory: expected.isMandatory && !isComplete, // If not complete, it remains mandatory pending
+                status: isComplete ? "complete" : "pending",
+                fileName: found.fileUrl ? found.fileUrl.split('/').pop() : undefined,
+                fileData: found.fileUrl,
+                fileType: found.fileUrl?.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'
+              });
+            } else {
+              apiDocs.push({
+                id: expected.id,
+                name: expected.name,
+                type: "PDF/Image",
+                isMandatory: expected.isMandatory,
+                status: "pending"
+              });
+            }
+          });
+
+          setUploadedDocuments(apiDocs);
+        }
+
+      } catch (error) {
+        console.error('Failed to fetch candidate data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCandidateData();
   }, []);
 
   const completedDocs = uploadedDocuments.filter(doc => doc.status === "complete");
   const pendingDocs = uploadedDocuments.filter(doc => doc.status === "pending" && doc.isMandatory);
 
   const handleViewDocument = (doc: UploadedDocument) => {
-    if (doc.fileData) {
+    if (doc.fileData) { // fileData now holds the URL
       // Open PDFs in a new tab
-      if (isPdfFile(doc.fileType)) {
-        const newWindow = window.open();
-        if (newWindow) {
-          newWindow.document.write(`
-            <html>
-              <head><title>${doc.name}</title></head>
-              <body style="margin:0;padding:0;">
-                <iframe src="${doc.fileData}" style="width:100%;height:100vh;border:none;"></iframe>
-              </body>
-            </html>
-          `);
-        }
+      if (isPdfFile(doc.fileType || (doc.fileData.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'))) {
+        window.open(doc.fileData, '_blank');
       } else {
         // Show images in modal
         setPreviewDoc(doc);
@@ -68,12 +141,25 @@ export function ProfileView({
   };
 
   const isImageFile = (fileType?: string) => {
-    return fileType?.startsWith('image/');
+    return fileType?.startsWith('image/') || false;
   };
 
   const isPdfFile = (fileType?: string) => {
     return fileType === 'application/pdf';
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+        <Card className="border-border/40 shadow-sm">
+          <CardContent className="p-6 text-center">
+            <p className="text-muted-foreground">Loading profile...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       {/* Profile Header */}
@@ -86,26 +172,28 @@ export function ProfileView({
             <div className="flex-1 text-center sm:text-left w-full">
               <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-2 mb-2">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground">Muhammad Ahmed</h2>
-                  <p className="text-sm text-muted-foreground">Candidate ID: CA-2026-001234</p>
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground">
+                    {candidateData ? `${candidateData.user.firstName} ${candidateData.user.lastName}` : 'N/A'}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">Candidate ID: {candidateData?.userId || 'N/A'}</p>
                 </div>
                 <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
                   <CheckCircle2 className="w-3 h-3 mr-1" />
-                  Active
+                  {candidateData?.user.status || 'Active'}
                 </Badge>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mt-4">
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                   <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-foreground truncate">ahmed@example.com</span>
+                  <span className="text-foreground truncate">{candidateData?.user.email || 'N/A'}</span>
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                   <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-foreground">03001234567</span>
+                  <span className="text-foreground">{candidateData?.user.phoneNumber || 'N/A'}</span>
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-foreground">Lahore, Pakistan</span>
+                  <span className="text-foreground">{candidateData?.city?.name || 'N/A'}, Pakistan</span>
                 </div>
               </div>
             </div>
@@ -164,28 +252,32 @@ export function ProfileView({
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Full Name</p>
-              <p className="font-semibold text-foreground alumni-sans-subtitle">Muhammad Ahmed</p>
-            </div>
-            <div>
               <p className="text-xs text-muted-foreground mb-1">Father's Name</p>
-              <p className="font-semibold text-foreground">Aslam Khan</p>
+              <p className="font-semibold text-foreground">{candidateData?.fatherName || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">CNIC Number</p>
-              <p className="font-semibold text-foreground font-mono">42201-1234567-1</p>
+              <p className="font-semibold text-foreground font-mono">{candidateData?.cnic || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Date of Birth</p>
-              <p className="font-semibold text-foreground">January 15, 1998</p>
+              <p className="font-semibold text-foreground">
+                {candidateData?.dob ? format(new Date(candidateData.dob), 'MMMM dd, yyyy') : 'N/A'}
+              </p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">City</p>
-              <p className="font-semibold text-foreground">Lahore</p>
+              <p className="font-semibold text-foreground">{candidateData?.city?.name || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Address</p>
+              <p className="font-semibold text-foreground">{candidateData?.address || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Registration Date</p>
-              <p className="font-semibold text-foreground">January 10, 2026</p>
+              <p className="font-semibold text-foreground">
+                {candidateData?.createdAt ? format(new Date(candidateData.createdAt), 'MMMM dd, yyyy') : 'N/A'}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -226,8 +318,8 @@ export function ProfileView({
                 <p className="font-semibold text-foreground">Exam Status</p>
               </div>
               <p className="text-xs text-muted-foreground">
-                {examCompleted 
-                  ? `Passed - Score: ${examScore}%` 
+                {examCompleted
+                  ? `Passed - Score: ${examScore}%`
                   : isRegistrationComplete && scheduledExamDate
                     ? `Scheduled - ${format(scheduledExamDate, 'MMM d, yyyy')}`
                     : 'Pending Registration'
@@ -288,7 +380,7 @@ export function ProfileView({
                 <p className="font-bold text-foreground">January 21, 2029</p>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               <Button size="lg" className="flex-1 gap-2 shadow-lg">
                 <Download className="w-4 h-4" />
@@ -354,9 +446,9 @@ export function ProfileView({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-8 gap-1 text-muted-foreground hover:text-foreground"
                       onClick={() => handleViewDocument(doc)}
                     >
@@ -423,8 +515,8 @@ export function ProfileView({
             {previewDoc?.fileData && (
               <>
                 {isImageFile(previewDoc.fileType) && (
-                  <img 
-                    src={previewDoc.fileData} 
+                  <img
+                    src={previewDoc.fileData}
                     alt={previewDoc.name}
                     className="w-full h-auto object-contain"
                   />

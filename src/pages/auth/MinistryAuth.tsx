@@ -4,14 +4,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Landmark, ArrowLeft, Mail, Lock, KeyRound, Building, GraduationCap } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MinistryAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const { loginMinistry } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/ministry");
+    if (isSignUp) {
+      toast({
+        title: "Access Request Sent",
+        description: "Your official request has been logged.",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await loginMinistry({ email, password });
+      navigate("/ministry");
+      toast({
+        title: "Welcome back!",
+        description: "Secure login successful.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message || "Invalid credentials.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,7 +56,7 @@ export default function MinistryAuth() {
             </div>
             <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
           </div>
-          
+
           <h1 className="text-4xl alumni-sans-title mb-4 text-white">
             Ministry Portal
           </h1>
@@ -102,6 +133,8 @@ export default function MinistryAuth() {
                   type="email"
                   placeholder="official@ministry.gov.pk"
                   className="pl-10 h-12 border-2 focus:border-primary"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -126,6 +159,8 @@ export default function MinistryAuth() {
                   type="password"
                   placeholder="Enter your password"
                   className="pl-10 h-12 border-2 focus:border-primary"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>

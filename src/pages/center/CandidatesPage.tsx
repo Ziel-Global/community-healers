@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { format } from "date-fns";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { centerNavItems } from "../CenterAdminPortal";
 import { CandidateSearch } from "@/components/CentreAdminPortal/Candidates/CandidateSearch";
@@ -19,16 +20,19 @@ export default function CandidatesPage() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
                     <h3 className="text-lg sm:text-2xl font-bold text-foreground alumni-sans-title">Candidate Queue</h3>
                     <p className="text-xs sm:text-sm text-muted-foreground">
-                        {selectedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        {format(selectedDate, "MMMM dd, yyyy")}
                     </p>
                 </div>
-                <CandidateSearch 
-                    selectedDate={selectedDate} 
+                <CandidateSearch
+                    selectedDate={selectedDate}
                     onDateChange={(date) => date && setSelectedDate(date)}
                     statusFilter={statusFilter}
                     onStatusChange={setStatusFilter}
                 />
-                <CandidateTable statusFilter={statusFilter} />
+                <CandidateTable
+                    statusFilter={statusFilter}
+                    examDate={format(selectedDate, "yyyy-MM-dd")}
+                />
             </div>
         </DashboardLayout>
     );

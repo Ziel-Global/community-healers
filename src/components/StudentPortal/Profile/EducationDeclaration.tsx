@@ -1,14 +1,85 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { BookOpen, GraduationCap, Upload, FileCheck, Info } from "lucide-react";
+import { BookOpen, GraduationCap, Upload, FileCheck, Info, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { api } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
-export function EducationDeclaration() {
+interface EducationDeclarationProps {
+    candidateData: any;
+}
+
+export function EducationDeclaration({ candidateData }: EducationDeclarationProps) {
+    const { toast } = useToast();
     const [hasSixteenYears, setHasSixteenYears] = useState(false);
     const [isUploaded, setIsUploaded] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadedFileName, setUploadedFileName] = useState("");
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (candidateData) {
+            setHasSixteenYears(candidateData.has16YearsEducation || false);
+
+            //Check for degree document
+            const degreeDoc = candidateData.documents?.find((d: any) => d.type === 'degreeTranscript');
+            if (degreeDoc && degreeDoc.fileUrl) {
+                setIsUploaded(true);
+                setUploadedFileName(degreeDoc.fileUrl.split('/').pop() || "Uploaded");
+            }
+        } else {
+            // Fallback to local storage if needed, or just default to false
+            const saved = localStorage.getItem("has16YearsEducation") === "true";
+            setHasSixteenYears(saved);
+        }
+    }, [candidateData]);
+
+    const handleToggle = (value: boolean) => {
+        setHasSixteenYears(value);
+        localStorage.setItem("has16YearsEducation", String(value));
+    };
+
+    const handleFileSelect = async (file: File | null) => {
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast({
+                title: "File Too Large",
+                description: "File size must be less than 5MB.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', 'degreeTranscript');
+
+            await api.post('/candidates/me/documents', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            setIsUploaded(true);
+            setUploadedFileName(file.name);
+            toast({
+                title: "Upload Successful",
+                description: `${file.name} has been uploaded successfully.`,
+            });
+        } catch (error: any) {
+            toast({
+                title: "Upload Failed",
+                description: error.response?.data?.message || "Failed to upload degree transcript.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     return (
         <Card className="border-border/40 shadow-sm">
@@ -32,7 +103,7 @@ export function EducationDeclaration() {
                     <Switch
                         id="education-switch"
                         checked={hasSixteenYears}
-                        onCheckedChange={setHasSixteenYears}
+                        onCheckedChange={handleToggle}
                     />
                 </div>
 
@@ -49,16 +120,21 @@ export function EducationDeclaration() {
                                 isUploaded ? "bg-success/5 border-success/30" : "bg-secondary/10 border-border/60 hover:border-primary/40"
                             )}
                         >
-                            {isUploaded ? (
+                            {isUploading ? (
+                                <div className="flex flex-col items-center gap-2">
+                                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                    <p className="text-sm text-muted-foreground">Uploading...</p>
+                                </div>
+                            ) : isUploaded ? (
                                 <>
                                     <div className="w-12 h-12 rounded-full bg-success/20 text-success flex items-center justify-center">
                                         <FileCheck className="w-6 h-6" />
                                     </div>
                                     <div>
                                         <p className="font-semibold">Higher Education Degree Uploaded</p>
-                                        <p className="text-sm text-muted-foreground">bachelors_degree_final.pdf (2.4 MB)</p>
+                                        <p className="text-sm text-muted-foreground">{uploadedFileName}</p>
                                     </div>
-                                    <Button variant="outline" size="sm" onClick={() => setIsUploaded(false)}>Change File</Button>
+                                    <Button variant="outline" size="sm" onClick={() => { setIsUploaded(false); setUploadedFileName(""); }}>Change File</Button>
                                 </>
                             ) : (
                                 <>
@@ -69,7 +145,14 @@ export function EducationDeclaration() {
                                         <p className="font-semibold">Upload Degree Transcript / Certificate</p>
                                         <p className="text-sm text-muted-foreground">Drag and drop your degree or click to browse</p>
                                     </div>
-                                    <Button className="gradient-primary text-white" onClick={() => setIsUploaded(true)}>Select File</Button>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept="application/pdf,image/*"
+                                        onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
+                                    />
+                                    <Button className="gradient-primary text-white" onClick={() => fileInputRef.current?.click()}>Select File</Button>
                                 </>
                             )}
                         </div>

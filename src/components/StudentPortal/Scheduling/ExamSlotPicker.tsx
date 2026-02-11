@@ -1,13 +1,17 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import { AlertCircle, CalendarDays, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CalendarDays, CheckCircle2, Loader2 } from "lucide-react";
 
 interface ExamSlotPickerProps {
     selectedDate: Date | undefined;
     onDateSelect: (date: Date | undefined) => void;
+    onSchedule: () => void;
+    isScheduling: boolean;
+    isScheduled: boolean;
 }
 
-export function ExamSlotPicker({ selectedDate, onDateSelect }: ExamSlotPickerProps) {
+export function ExamSlotPicker({ selectedDate, onDateSelect, onSchedule, isScheduling, isScheduled }: ExamSlotPickerProps) {
 
     return (
         <Card className="border-border/40 shadow-sm overflow-hidden">
@@ -36,7 +40,7 @@ export function ExamSlotPicker({ selectedDate, onDateSelect }: ExamSlotPickerPro
                                     today.setHours(0, 0, 0, 0);
                                     const limit = new Date();
                                     limit.setDate(today.getDate() + 30);
-                                    return date < today || date > limit;
+                                    return date < today || date > limit || isScheduled;
                                 }}
                             />
                         </div>
@@ -48,24 +52,28 @@ export function ExamSlotPicker({ selectedDate, onDateSelect }: ExamSlotPickerPro
 
                     {selectedDate && (
                         <div className="flex-1 space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30">
+                            <div className={`p-4 sm:p-6 rounded-xl border ${isScheduled ? 'bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30' : 'bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30'}`}>
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
-                                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
+                                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 ${isScheduled ? 'bg-green-500/20' : 'bg-primary/20'}`}>
+                                        <CheckCircle2 className={`w-4 h-4 sm:w-5 sm:h-5 ${isScheduled ? 'text-green-600 dark:text-green-400' : 'text-primary'}`} />
                                     </div>
                                     <div className="min-w-0">
-                                        <h4 className="font-bold text-foreground text-sm sm:text-base">Date Selected</h4>
-                                        <p className="text-xs sm:text-sm text-muted-foreground">Your exam date has been set</p>
+                                        <h4 className="font-bold text-foreground text-sm sm:text-base">
+                                            {isScheduled ? "Exam Scheduled!" : "Date Selected"}
+                                        </h4>
+                                        <p className="text-xs sm:text-sm text-muted-foreground">
+                                            {isScheduled ? "Your exam has been confirmed" : "Confirm to schedule your exam"}
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="mt-4 p-3 sm:p-4 rounded-lg bg-card border border-border/40">
                                     <p className="text-xs text-muted-foreground mb-1">Exam Date</p>
                                     <p className="text-base sm:text-lg font-bold text-foreground">
-                                        {selectedDate.toLocaleDateString('en-US', { 
+                                        {selectedDate.toLocaleDateString('en-US', {
                                             weekday: 'long',
-                                            year: 'numeric', 
-                                            month: 'long', 
-                                            day: 'numeric' 
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
                                         })}
                                     </p>
                                 </div>
@@ -74,6 +82,24 @@ export function ExamSlotPicker({ selectedDate, onDateSelect }: ExamSlotPickerPro
                                         <strong>Note:</strong> Exam will be conducted at 10:00 AM at your assigned center. Please arrive 30 minutes early.
                                     </p>
                                 </div>
+
+                                {!isScheduled && (
+                                    <Button
+                                        className="w-full mt-4"
+                                        size="lg"
+                                        onClick={onSchedule}
+                                        disabled={isScheduling}
+                                    >
+                                        {isScheduling ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                Scheduling...
+                                            </>
+                                        ) : (
+                                            "Schedule Exam"
+                                        )}
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     )}

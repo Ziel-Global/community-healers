@@ -4,14 +4,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, ArrowLeft, Mail, Lock, User, Hash, GraduationCap } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CenterAdminAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const { loginCenterAdmin } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/center");
+    if (isSignUp) {
+      toast({
+        title: "Access Request Sent",
+        description: "Your request has been forwarded to the Super Admin for approval.",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await loginCenterAdmin({ email, password });
+      navigate("/center");
+      toast({
+        title: "Welcome back!",
+        description: "Login successful.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message || "Invalid credentials.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,7 +56,7 @@ export default function CenterAdminAuth() {
             </div>
             <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
           </div>
-          
+
           <h1 className="text-4xl alumni-sans-title mb-4 text-white">
             Center Admin
           </h1>
@@ -117,6 +148,8 @@ export default function CenterAdminAuth() {
                   type="email"
                   placeholder="admin@center.com"
                   className="pl-10 h-12 border-2 focus:border-primary"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -141,6 +174,8 @@ export default function CenterAdminAuth() {
                   type="password"
                   placeholder="Enter your password"
                   className="pl-10 h-12 border-2 focus:border-primary"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
