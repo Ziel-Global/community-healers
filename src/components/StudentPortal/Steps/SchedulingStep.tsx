@@ -7,6 +7,8 @@ import { useState } from "react";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
+import { format } from "date-fns";
+
 export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -18,7 +20,8 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
 
     setIsScheduling(true);
     try {
-      const examDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      // Use local date formatting to prevent timezone shifts
+      const examDate = format(selectedDate, 'yyyy-MM-dd');
       await api.post('/candidates/me/schedule', { examDate });
 
       setIsScheduled(true);
