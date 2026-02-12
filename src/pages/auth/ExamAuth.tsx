@@ -36,7 +36,7 @@ export default function ExamAuth() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex flex-col">
+        <div className="fixed inset-0 bg-gradient-to-br from-background via-background to-secondary/20 flex flex-col overflow-hidden">
             {/* Header */}
             <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm">
                 <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
