@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { CandidateWizard } from "@/components/StudentPortal/CandidateWizard";
@@ -9,6 +9,8 @@ import { PaymentStep } from "@/components/StudentPortal/Steps/PaymentStep";
 import { SchedulingStep } from "@/components/StudentPortal/Steps/SchedulingStep";
 import { Button } from "@/components/ui/button";
 import { User, FileText, Shield, LogOut } from "lucide-react";
+import { api } from "@/services/api";
+import { CertificateCard } from "@/components/StudentPortal/CertificateCard";
 
 export default function CandidatePortal() {
   const { logout, examScheduleInfo } = useAuth();
@@ -17,6 +19,25 @@ export default function CandidatePortal() {
   const [currentWizardStep, setCurrentWizardStep] = useState(0);
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
   const [scheduledExamDate, setScheduledExamDate] = useState<Date | undefined>(undefined);
+  const [certificate, setCertificate] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCandidateData = async () => {
+      try {
+        const response = await api.get('/candidates/me');
+        const data = response.data.data;
+        if (data?.certificate) {
+          setCertificate(data.certificate);
+        }
+      } catch (error) {
+        console.error('Failed to fetch candidate data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCandidateData();
+  }, []);
 
   const wizardSteps = [
     {
@@ -59,8 +80,49 @@ export default function CandidatePortal() {
       );
     }
 
-    // If exam is scheduled from API, don't show application tab
-    if (examScheduleInfo?.examScheduled) {
+    if (loading) {
+      return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+    }
+
+    // 0. If certificate exists, show Certificate Card (Highest Priority)
+    if (certificate) {
+      return (
+        <div className="max-w-3xl mx-auto">
+          <CertificateCard certificate={certificate} />
+        </div>
+      );
+    }
+
+    const { candidateStatus, examScheduled } = examScheduleInfo || {};
+
+    // 1. If exam is submitted (and no certificate yet), show success message
+    if (candidateStatus === "SUBMITTED") {
+      return (
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-6 text-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Shield className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h2 className="text-2xl font-semibold text-emerald-900 dark:text-emerald-100 mb-2">
+              Exam Submitted Successfully
+            </h2>
+            <p className="text-emerald-700 dark:text-emerald-300 mb-6">
+              You have successfully completed your exam. Your results are being processed.
+            </p>
+            <Button onClick={() => setActiveTab("profile")} variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-100">
+              View Profile
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    // 2. If status is ABSENT or REJECTED, allow re-registration (show wizard)
+    // implicitly handled by falling through to the wizard return at the end if we don't return early here.
+
+    // 3. If exam is scheduled (and not in above states), show "Already Scheduled" message
+    // Note: pending/verified statuses fall here
+    if (examScheduled && candidateStatus !== "ABSENT" && candidateStatus !== "REJECTED") {
       return (
         <div className="max-w-3xl mx-auto">
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
@@ -78,7 +140,7 @@ export default function CandidatePortal() {
       );
     }
 
-    // If registration complete, show completion screen with exam date
+    // If registration complete (local state), show completion screen
     if (isRegistrationComplete && scheduledExamDate) {
       return (
         <RegistrationCompleteScreen
@@ -90,7 +152,7 @@ export default function CandidatePortal() {
       );
     }
 
-    // Otherwise show the registration wizard
+    // Otherwise show the registration wizard (handles ABSENT/REJECTED or new users)
     return (
       <CandidateWizard
         steps={wizardSteps}

@@ -81,4 +81,5 @@ export interface ExamScheduledResponse {
     centerAddress?: string;
     cityName?: string;
     message?: string;
+    candidateStatus?: string;
 }
