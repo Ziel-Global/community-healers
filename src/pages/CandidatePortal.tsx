@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { User, FileText, Shield, LogOut } from "lucide-react";
 
 export default function CandidatePortal() {
-  const { logout } = useAuth();
+  const { logout, examScheduleInfo } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"profile" | "application">("application");
   const [currentWizardStep, setCurrentWizardStep] = useState(0);
@@ -56,6 +56,25 @@ export default function CandidatePortal() {
           isRegistrationComplete={isRegistrationComplete}
           scheduledExamDate={scheduledExamDate}
         />
+      );
+    }
+
+    // If exam is scheduled from API, don't show application tab
+    if (examScheduleInfo?.examScheduled) {
+      return (
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
+            <h2 className="text-2xl font-semibold text-blue-900 dark:text-blue-100 mb-2">
+              Exam Already Scheduled
+            </h2>
+            <p className="text-blue-700 dark:text-blue-300 mb-4">
+              Your exam has been scheduled. View your profile for exam details.
+            </p>
+            <Button onClick={() => setActiveTab("profile")} variant="default">
+              Go to Profile
+            </Button>
+          </div>
+        </div>
       );
     }
 

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials } from '../types/auth';
+import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 import { authService } from '../services/authService';
 import { parseJwt } from '../utils/jwt';
 
@@ -11,6 +11,8 @@ interface AuthContextType extends AuthState {
     signup: (credentials: SignupCredentials) => Promise<void>;
     verifyCandidate: (credentials: CandidateVerificationCredentials) => Promise<void>;
     logout: () => Promise<void>;
+    examScheduleInfo: ExamScheduledResponse | null;
+    checkExamSchedule: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,26 +38,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: null,
     });
 
+    const [examScheduleInfo, setExamScheduleInfo] = useState<ExamScheduledResponse | null>(null);
+
     // Check for existing token on mount
     useEffect(() => {
         const checkAuth = async () => {
             const storedToken = localStorage.getItem('token');
             const storedUser = localStorage.getItem('user');
+            const storedExamInfo = localStorage.getItem('examScheduleInfo');
 
             if (storedToken && storedUser && storedUser !== "undefined" && storedToken !== "undefined") {
                 try {
                     // Ideally, validate token with backend here
+                    const user = JSON.parse(storedUser);
                     setState({
-                        user: JSON.parse(storedUser),
+                        user,
                         token: storedToken,
                         isAuthenticated: true,
                         isLoading: false,
                         error: null,
                     });
+
+                    // Load exam schedule info for candidates
+                    if ((user.role === 'student' || user.role === 'CANDIDATE') && storedExamInfo && storedExamInfo !== "undefined") {
+                        try {
+                            setExamScheduleInfo(JSON.parse(storedExamInfo));
+                        } catch (e) {
+                            console.error('Failed to parse exam schedule info:', e);
+                        }
+                    }
                 } catch (error) {
                     console.error('Failed to parse user from local storage:', error);
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
+                    localStorage.removeItem('examScheduleInfo');
                     setState((prev) => ({ ...prev, isLoading: false }));
                 }
             } else {
@@ -63,6 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 if (storedUser === "undefined" || storedToken === "undefined") {
                     localStorage.removeItem('user');
                     localStorage.removeItem('token');
+                    localStorage.removeItem('examScheduleInfo');
                 }
                 setState((prev) => ({ ...prev, isLoading: false }));
             }
@@ -111,6 +128,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 isLoading: false,
                 error: null,
             });
+
+            // Check exam schedule after successful login for candidates
+            if (user.role === 'student' || user.role === 'CANDIDATE') {
+                try {
+                    const examInfo = await authService.checkExamScheduled();
+                    setExamScheduleInfo(examInfo);
+                    localStorage.setItem('examScheduleInfo', JSON.stringify(examInfo));
+                } catch (error) {
+                    console.error('Failed to check exam schedule:', error);
+                }
+            }
         } catch (error: any) {
             setState((prev) => ({
                 ...prev,
@@ -373,6 +401,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 isLoading: false,
                 error: null,
             });
+            setExamScheduleInfo(null);
+        }
+    };
+
+    const checkExamSchedule = async () => {
+        try {
+            const examInfo = await authService.checkExamScheduled();
+            setExamScheduleInfo(examInfo);
+            localStorage.setItem('examScheduleInfo', JSON.stringify(examInfo));
+        } catch (error) {
+            console.error('Failed to check exam schedule:', error);
         }
     };
 
@@ -385,6 +424,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         signup,
         verifyCandidate,
         logout,
+        examScheduleInfo,
+        checkExamSchedule,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

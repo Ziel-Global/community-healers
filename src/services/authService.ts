@@ -1,5 +1,5 @@
 import { api } from './api';
-import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, SignupCredentials, AuthResponse, CandidateVerificationCredentials } from '../types/auth';
+import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, SignupCredentials, AuthResponse, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 
 const loginCandidate = async (credentials: CandidateLoginCredentials): Promise<AuthResponse> => {
     try {
@@ -95,6 +95,20 @@ const logout = async (): Promise<void> => {
     }
 };
 
+const checkExamScheduled = async (): Promise<ExamScheduledResponse> => {
+    try {
+        const response = await api.get('/candidates/me/exam-scheduled');
+        return response.data.data;
+    } catch (error: any) {
+        console.error('Check exam scheduled error:', error);
+        // Return default value if API fails
+        return {
+            examScheduled: false,
+            message: 'Failed to check exam status'
+        };
+    }
+};
+
 export const authService = {
     loginCandidate,
     loginCenterAdmin,
@@ -103,4 +117,5 @@ export const authService = {
     signup,
     verifyCandidate,
     logout,
+    checkExamScheduled,
 };
