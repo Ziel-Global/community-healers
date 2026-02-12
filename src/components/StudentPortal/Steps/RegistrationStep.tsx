@@ -4,7 +4,7 @@ import { PersonalInfoForm } from "../Profile/PersonalInfoForm";
 import { DocumentUpload } from "../Profile/DocumentUpload";
 import { EducationDeclaration } from "../Profile/EducationDeclaration";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, FileCheck, Loader2 } from "lucide-react";
+import { ChevronRight, FileCheck, Loader2, AlertCircle } from "lucide-react";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,6 +12,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [candidateData, setCandidateData] = useState<any>(null);
+  const [missingDocuments, setMissingDocuments] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchCandidateData = async () => {
@@ -28,6 +29,34 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
+      // First, validate documents before proceeding
+      const validationResponse = await api.get('/candidates/me/validate-documents');
+      const validationData = validationResponse.data.data;
+
+      if (!validationData.canProceedToPayment) {
+        // Store missing documents for display
+        setMissingDocuments(validationData.missingDocuments);
+        
+        // Show error with missing documents
+        const missingDocsFormatted = validationData.missingDocuments
+          .map((doc: string) => {
+            // Convert camelCase to readable format
+            const formatted = doc.replace(/([A-Z])/g, ' $1').trim();
+            return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+          })
+          .join(', ');
+
+        toast({
+          title: "Documents Missing",
+          description: `Please upload the following required documents: ${missingDocsFormatted}`,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Clear missing documents if validation passed
+      setMissingDocuments([]);
       // Read personal info from localStorage - OR potentially use candidateData if we want to rely on what was pre-filled and edited
       // For now, the forms update local state/props, but they don't automatically bubble up changes to parent unless we pass callbacks.
       // However, the existing logic relies on localStorage. The PersonalInfoForm presumably updates its own state but DOES NOT update localStorage in the current code I saw.
@@ -114,6 +143,28 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
         <DocumentUpload candidateData={candidateData} />
         <EducationDeclaration candidateData={candidateData} />
       </div>
+
+      {/* Missing Documents Alert */}
+      {missingDocuments.length > 0 && (
+        <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-destructive mb-2">Missing Required Documents</h3>
+              <p className="text-sm text-destructive/90 mb-3">
+                Please upload the following documents before proceeding to payment:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm text-destructive/80">
+                {missingDocuments.map((doc) => {
+                  const formatted = doc.replace(/([A-Z])/g, ' $1').trim();
+                  const displayName = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+                  return <li key={doc}>{displayName}</li>;
+                })}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <div className="flex items-center justify-between pt-6 border-t border-border/60">
