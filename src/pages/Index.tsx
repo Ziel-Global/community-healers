@@ -14,6 +14,8 @@ import {
   BookOpen,
 } from "lucide-react";
 
+// Portals Interface is missing (Type Safety)
+// portals array should be in a separate file for example constants.ts file (Code Organization and best practices)
 const portals = [
   {
     title: "Candidate Portal",
@@ -142,12 +144,15 @@ export default function Index() {
 
           {/* Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mb-12 sm:mb-20">
+            {/* This Array should be in a separate file for example constants.ts file (Code Organization and best practices) */}
+          {/* Type safety is missing */}
             {[
               { value: "45,000+", label: "Certificates Issued" },
               { value: "86", label: "Training Centers" },
               { value: "99.9%", label: "System Uptime" },
               { value: "24/7", label: "Support Available" },
             ].map((stat, index) => (
+              // This shoud be a seperate component. for example StatCard.tsx
               <div
                 key={index}
                 className="text-center p-3 sm:p-5 rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-royal transition-all duration-300"
@@ -196,11 +201,12 @@ export default function Index() {
           </div>
         </div>
       </section>
-
+{/* Footer section should be a separate component */}
       {/* Footer */}
       <footer className="border-t border-border bg-card py-6 sm:py-8 px-4 sm:px-6">
         <div className="container mx-auto flex flex-col items-center gap-4 text-center sm:text-left sm:flex-row sm:justify-between">
           <p className="text-xs sm:text-sm text-muted-foreground">
+            {/* The year should be dynamic */}
             © 2024 Soft skill training. All rights reserved. Government Certified Platform.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">

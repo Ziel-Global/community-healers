@@ -178,6 +178,7 @@ export default function CandidateAuth() {
           </p>
 
           <div className="mt-12 space-y-4">
+            {/* Move this array to the constants.ts file (Code Organization and best practices) and also use Type Safety*/}
             {[
               { num: "1", text: "Complete registration & documents" },
               { num: "2", text: "Schedule your CBT exam" },
@@ -195,6 +196,7 @@ export default function CandidateAuth() {
       </div>
 
       {/* Right Panel - Auth Form */}
+      {/* Move the Right panel to a seperate file, just to reduce the size of this file or line of Code*/}
       <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-16 bg-white py-8 sm:py-12">
         <Link
           to="/"
@@ -363,6 +365,7 @@ export default function CandidateAuth() {
       </div>
 
       {/* OTP Modal */}
+      {/* Make a spererate component for this OTP Modal */}
       <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
