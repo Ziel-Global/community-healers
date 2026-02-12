@@ -46,7 +46,7 @@ export default function CenterAdminAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="fixed inset-0 bg-white flex overflow-hidden">
       {/* Left Panel - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{ backgroundColor: '#13452c' }}>
         <div className="relative z-10 flex flex-col justify-center px-12">

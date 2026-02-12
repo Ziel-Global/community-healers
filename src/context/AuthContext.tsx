@@ -130,7 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             });
 
             // Check exam schedule after successful login for candidates
-            if (user.role === 'student' || user.role === 'CANDIDATE') {
+            if (user.role === 'student' || (user.role as string) === 'CANDIDATE') {
                 try {
                     const examInfo = await authService.checkExamScheduled();
                     setExamScheduleInfo(examInfo);
