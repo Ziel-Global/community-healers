@@ -77,10 +77,7 @@ export default function CenterOversightPage() {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <Button variant="outline" className="h-11 px-6 rounded-xl border-border/60 bg-white shadow-sm gap-2 alumni-sans-subtitle">
-                        <Filter className="w-4 h-4" />
-                        Regional View
-                    </Button>
+
                 </div>
 
                 {isLoading ? (
@@ -124,7 +121,7 @@ export default function CenterOversightPage() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <Badge 
+                                        <Badge
                                             variant={center.status === 'ACTIVE' ? 'success' : 'secondary'}
                                             className="shrink-0"
                                         >

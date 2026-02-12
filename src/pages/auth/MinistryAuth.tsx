@@ -34,14 +34,14 @@ export default function MinistryAuth() {
         title: "Welcome back!",
         description: "Secure login successful.",
       });
+      // Loader persists until navigation completes
     } catch (error: any) {
+      setLoading(false); // Stop loading on error
       toast({
         variant: "destructive",
         title: "Login Failed",
         description: error.message || "Invalid credentials.",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -166,8 +166,15 @@ export default function MinistryAuth() {
               </div>
             </div>
 
-            <Button type="submit" variant="forest" className="w-full h-12 text-lg alumni-sans-subtitle">
-              {isSignUp ? "Submit Request" : "Secure Login"}
+            <Button type="submit" variant="forest" className="w-full h-12 text-lg alumni-sans-subtitle" disabled={loading}>
+              {loading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Please wait...
+                </>
+              ) : (
+                isSignUp ? "Submit Request" : "Secure Login"
+              )}
             </Button>
           </form>
 
@@ -178,6 +185,6 @@ export default function MinistryAuth() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

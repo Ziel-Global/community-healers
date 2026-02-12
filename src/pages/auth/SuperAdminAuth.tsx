@@ -34,14 +34,14 @@ export default function SuperAdminAuth() {
         title: "Welcome back, Admin!",
         description: "System administration access granted.",
       });
+      // Loader persists until navigation completes
     } catch (error: any) {
+      setLoading(false); // Stop loading on error
       toast({
         variant: "destructive",
         title: "Login Failed",
         description: error.message || "Invalid credentials.",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -152,8 +152,15 @@ export default function SuperAdminAuth() {
               </div>
             </div>
 
-            <Button type="submit" variant="forest" className="w-full h-12 text-lg alumni-sans-subtitle">
-              {isSignUp ? "Complete Setup" : "Secure Login"}
+            <Button type="submit" variant="forest" className="w-full h-12 text-lg alumni-sans-subtitle" disabled={loading}>
+              {loading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Please wait...
+                </>
+              ) : (
+                isSignUp ? "Complete Setup" : "Secure Login"
+              )}
             </Button>
           </form>
 

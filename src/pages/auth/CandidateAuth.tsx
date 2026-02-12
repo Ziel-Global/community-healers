@@ -64,6 +64,7 @@ export default function CandidateAuth() {
           password: formData.password
         });
         setShowOtpModal(true);
+        setLoading(false); // Stop loading to show OTP modal
         toast({
           title: "Signup Successful",
           description: "OTP sent to your phone number.",
@@ -79,15 +80,15 @@ export default function CandidateAuth() {
           title: "Welcome back!",
           description: "Login successful.",
         });
+        // Loader persists until navigation completes
       }
     } catch (error: any) {
+      setLoading(false); // Stop loading on error
       toast({
         variant: "destructive",
         title: isSignUp ? "Signup Failed" : "Login Failed",
         description: error.message || "An error occurred.",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -147,14 +148,14 @@ export default function CandidateAuth() {
         title: "Verification Successful",
         description: "You are now logged in.",
       });
+      // Loader persists until navigation completes
     } catch (error: any) {
+      setLoading(false); // Stop loading on error
       toast({
         variant: "destructive",
         title: "Verification Failed",
         description: error.message || "Invalid OTP.",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -346,8 +347,15 @@ export default function CandidateAuth() {
               </div>
             )}
 
-            <Button type="submit" variant="forest" className="w-full h-11 sm:h-12 text-base sm:text-lg alumni-sans-subtitle">
-              {isSignUp ? "Create Account" : "Sign In"}
+            <Button type="submit" variant="forest" className="w-full h-11 sm:h-12 text-base sm:text-lg alumni-sans-subtitle" disabled={loading}>
+              {loading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Please wait...
+                </>
+              ) : (
+                isSignUp ? "Create Account" : "Sign In"
+              )}
             </Button>
           </form>
 
@@ -412,8 +420,15 @@ export default function CandidateAuth() {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="forest" className="flex-1 h-11 alumni-sans-subtitle">
-                Verify & Continue
+              <Button type="submit" variant="forest" className="flex-1 h-11 alumni-sans-subtitle" disabled={loading}>
+                {loading ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Checking...
+                  </>
+                ) : (
+                  "Verify & Continue"
+                )}
               </Button>
             </div>
           </form>
