@@ -10,7 +10,7 @@ interface AuthContextType extends AuthState {
     loginSuperAdmin: (credentials: SuperAdminLoginCredentials) => Promise<void>;
     signup: (credentials: SignupCredentials) => Promise<void>;
     verifyCandidate: (credentials: CandidateVerificationCredentials) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

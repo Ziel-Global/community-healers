@@ -3,23 +3,66 @@ import { useNavigate } from "react-router-dom";
 import { CBTInterface } from "@/components/StudentPortal/Exam/CBTInterface";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Clock, FileText, Shield, LogOut, CheckCircle, Loader2, AlertCircle, XCircle } from "lucide-react";
+import { BookOpen, LogOut, Loader2, AlertCircle, Ban, CheckCircle, FileText, Clock } from "lucide-react";
+import { api } from "@/services/api";
+import { CandidateStatus, CandidateStatusResponse } from "@/types/auth";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ExamPortal() {
     const navigate = useNavigate();
-    const [examState, setExamState] = useState<"waiting" | "ready" | "countdown" | "in-progress" | "completed">("waiting");
+    const { logout } = useAuth();
+    const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress">("loading");
     const [countdown, setCountdown] = useState(3);
-    const [examResult, setExamResult] = useState<{ score: number; total: number; passed: boolean } | null>(null);
+    const [candidateStatus, setCandidateStatus] = useState<CandidateStatusResponse | null>(null);
+    const [questions, setQuestions] = useState<any[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
-    // Simulate center admin starting the exam after 5 seconds (demo)
+    // Fetch candidate status on component mount
     useEffect(() => {
-        if (examState === "waiting") {
-            const timer = setTimeout(() => {
-                setExamState("ready");
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [examState]);
+        const fetchCandidateStatus = async () => {
+            try {
+                console.log("Fetching candidate status...");
+                const response = await api.get('/candidates/me/status');
+                console.log("Candidate status response:", response.data);
+                const statusData: CandidateStatusResponse = response.data.data;
+                setCandidateStatus(statusData);
+                
+                // Set exam state based on candidate status
+                switch (statusData.candidateStatus) {
+                    case CandidateStatus.VERIFIED:
+                        console.log("Status: VERIFIED");
+                        setExamState("verified");
+                        break;
+                    case CandidateStatus.PENDING:
+                        console.log("Status: PENDING");
+                        setExamState("pending");
+                        break;
+                    case CandidateStatus.REJECTED:
+                        console.log("Status: REJECTED");
+                        setExamState("rejected");
+                        break;
+                    case CandidateStatus.ABSENT:
+                        console.log("Status: ABSENT");
+                        setExamState("absent");
+                        break;
+                    case CandidateStatus.SUBMITTED:
+                        console.log("Status: SUBMITTED");
+                        setExamState("submitted");
+                        break;
+                    default:
+                        console.log("Status: Unknown, defaulting to PENDING");
+                        setExamState("pending");
+                }
+            } catch (err: any) {
+                console.error("Failed to fetch candidate status:", err);
+                console.error("Error response:", err.response);
+                setError(err.response?.data?.message || "Failed to load exam status");
+                setExamState("pending");
+            }
+        };
+
+        fetchCandidateStatus();
+    }, []);
 
     // Countdown before exam starts
     useEffect(() => {
@@ -33,25 +76,49 @@ export default function ExamPortal() {
         }
     }, [examState, countdown]);
 
-    const handleStartExam = () => {
-        setExamState("countdown");
+    const handleStartExam = async () => {
+        try {
+            console.log("Fetching exam questions...");
+            const response = await api.get('/candidates/me/questions');
+            console.log("Questions response:", response.data);
+            const questionsData = response.data.data;
+            setQuestions(questionsData);
+            setExamState("countdown");
+        } catch (err: any) {
+            console.error("Failed to fetch questions:", err);
+            alert("Failed to load exam questions. Please try again.");
+        }
     };
 
     const handleExamComplete = () => {
-        // Simulate exam result (in real app, this would come from the CBT interface)
-        const score = Math.floor(Math.random() * 8) + 12; // Random score between 12-20
-        const total = 20;
-        const passed = score >= 12; // 60% passing
-        setExamResult({ score, total, passed });
-        setExamState("completed");
+        // Exam submission is handled by CBTInterface
+        // No need to show results here
     };
 
-    const handleLogout = () => {
-        navigate("/exam/auth");
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate("/exam/auth");
+        } catch (error) {
+            console.error("Logout failed:", error);
+            navigate("/exam/auth");
+        }
     };
 
-    // Waiting for exam to start
-    if (examState === "waiting") {
+    // Loading state
+    if (examState === "loading") {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
+                    <p className="text-muted-foreground">Loading exam details...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Pending state - waiting for center admin verification
+    if (examState === "pending") {
         return (
             <div className="min-h-screen bg-background flex flex-col">
                 {/* Header */}
@@ -90,10 +157,9 @@ export default function ExamPortal() {
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span className="text-sm">Waiting for exam to begin...</span>
-                            </div>
+                            <p className="text-sm text-muted-foreground text-center">
+                                Waiting for exam to begin...
+                            </p>
 
                             <div className="bg-secondary/30 rounded-lg p-4 text-left space-y-2">
                                 <p className="text-xs sm:text-sm font-medium text-foreground">While you wait:</p>
@@ -104,6 +170,179 @@ export default function ExamPortal() {
                                     <li>• Do not refresh or close this page</li>
                                 </ul>
                             </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
+    // Rejected state - center admin rejected the candidate
+    if (examState === "rejected") {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <header className="border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
+                                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+                                </div>
+                                <div>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Examination Portal</h1>
+                                    <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 sm:gap-2">
+                                <LogOut className="w-4 h-4" />
+                                <span className="hidden sm:inline">Logout</span>
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <Card className="w-full max-w-md border-destructive/40 shadow-royal text-center">
+                        <CardHeader className="space-y-4">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/20 flex items-center justify-center">
+                                <Ban className="w-8 h-8 text-destructive" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-xl sm:text-2xl font-display text-destructive">Application Rejected</CardTitle>
+                                <CardDescription className="mt-2">
+                                    Your application has been rejected by the center administrator
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="bg-destructive/10 rounded-lg p-4 text-left">
+                                <p className="text-sm text-foreground font-medium mb-2">What happens next?</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Please contact your examination center for more details about the rejection reason. 
+                                    You may need to reapply through the candidate portal.
+                                </p>
+                            </div>
+                            <Button onClick={handleLogout} variant="outline" className="w-full">
+                                <LogOut className="w-4 h-4 mr-2" />
+                                Return to Portal
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
+    // Absent state - candidate was marked absent
+    if (examState === "absent") {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <header className="border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
+                                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+                                </div>
+                                <div>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Examination Portal</h1>
+                                    <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 sm:gap-2">
+                                <LogOut className="w-4 h-4" />
+                                <span className="hidden sm:inline">Logout</span>
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <Card className="w-full max-w-md border-orange-500/40 shadow-royal text-center">
+                        <CardHeader className="space-y-4">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center">
+                                <AlertCircle className="w-8 h-8 text-orange-500" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-xl sm:text-2xl font-display text-orange-600">Exam Missed</CardTitle>
+                                <CardDescription className="mt-2">
+                                    You were marked absent for the scheduled examination
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="bg-orange-50 dark:bg-orange-950/20 rounded-lg p-4 text-left">
+                                <p className="text-sm text-foreground font-medium mb-2">What happens next?</p>
+                                <p className="text-xs text-muted-foreground">
+                                    You missed the scheduled exam. Don't worry - you will be allotted another exam date soon. 
+                                    Please check your candidate portal for updates on the rescheduled exam.
+                                </p>
+                            </div>
+                            <div className="bg-secondary/30 rounded-lg p-4 text-left">
+                                <p className="text-xs font-medium text-foreground mb-2">Important:</p>
+                                <ul className="text-xs text-muted-foreground space-y-1">
+                                    <li>• No additional fees required for rescheduling</li>
+                                    <li>• Check your email for notifications</li>
+                                    <li>• Contact support if you need assistance</li>
+                                </ul>
+                            </div>
+                            <Button onClick={handleLogout} variant="outline" className="w-full">
+                                <LogOut className="w-4 h-4 mr-2" />
+                                Return to Portal
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
+    // Submitted state - candidate has already submitted the exam
+    if (examState === "submitted") {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <header className="border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
+                                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+                                </div>
+                                <div>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Examination Portal</h1>
+                                    <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 sm:gap-2">
+                                <LogOut className="w-4 h-4" />
+                                <span className="hidden sm:inline">Logout</span>
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <Card className="w-full max-w-md border-primary/40 shadow-royal text-center">
+                        <CardHeader className="space-y-4">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                                <CheckCircle className="w-8 h-8 text-primary" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-xl sm:text-2xl font-display">Exam Already Submitted</CardTitle>
+                                <CardDescription className="mt-2">
+                                    You have already submitted your examination
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="bg-primary/5 rounded-lg p-4 text-left border border-primary/20">
+                                <p className="text-sm text-foreground font-medium mb-2">Next Steps:</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Please visit the Candidate Portal to check your exam results and certificate status. 
+                                    You will be notified once your results have been reviewed by the ministry.
+                                </p>
+                            </div>
+                            <Button onClick={handleLogout} variant="outline" className="w-full">
+                                <LogOut className="w-4 h-4 mr-2" />
+                                Return to Portal
+                            </Button>
                         </CardContent>
                     </Card>
                 </div>
@@ -150,96 +389,13 @@ export default function ExamPortal() {
                 </header>
 
                 <main className="max-w-6xl mx-auto p-4 sm:p-6">
-                    <CBTInterface onComplete={handleExamComplete} />
+                    <CBTInterface questions={questions} onComplete={handleExamComplete} />
                 </main>
             </div>
         );
     }
 
-    // Exam completed - show results
-    if (examState === "completed" && examResult) {
-        const percentage = Math.round((examResult.score / examResult.total) * 100);
-        
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center p-4">
-                <Card className="w-full max-w-md border-border/40 shadow-royal">
-                    <CardHeader className="text-center space-y-4">
-                        <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ${
-                            examResult.passed ? "bg-primary/20" : "bg-destructive/20"
-                        }`}>
-                            {examResult.passed ? (
-                                <CheckCircle className="w-12 h-12 text-primary" />
-                            ) : (
-                                <XCircle className="w-12 h-12 text-destructive" />
-                            )}
-                        </div>
-                        <div>
-                            <CardTitle className="text-2xl sm:text-3xl font-display">
-                                {examResult.passed ? "Congratulations!" : "Exam Completed"}
-                            </CardTitle>
-                            <CardDescription className="mt-2">
-                                {examResult.passed 
-                                    ? "You have successfully passed the examination" 
-                                    : "Unfortunately, you did not meet the passing criteria"}
-                            </CardDescription>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        {/* Score Display */}
-                        <div className="text-center py-6 bg-secondary/30 rounded-xl">
-                            <p className="text-5xl sm:text-6xl font-bold text-foreground">{percentage}%</p>
-                            <p className="text-muted-foreground mt-2">
-                                {examResult.score} out of {examResult.total} correct
-                            </p>
-                        </div>
-
-                        {/* Result Details */}
-                        <div className="bg-card border border-border/40 rounded-lg p-4 space-y-3">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Status</span>
-                                <span className={`font-semibold ${examResult.passed ? "text-primary" : "text-destructive"}`}>
-                                    {examResult.passed ? "PASSED" : "FAILED"}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Date</span>
-                                <span className="font-medium">{new Date().toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Passing Score</span>
-                                <span className="font-medium">60% (12/20)</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Your Score</span>
-                                <span className="font-medium">{percentage}% ({examResult.score}/{examResult.total})</span>
-                            </div>
-                        </div>
-
-                        {/* Next Steps */}
-                        <div className="bg-secondary/20 rounded-lg p-4">
-                            <p className="text-sm font-medium text-foreground mb-2">Next Steps:</p>
-                            {examResult.passed ? (
-                                <p className="text-xs text-muted-foreground">
-                                    Your result has been submitted for ministry review. Certificate will be issued after approval. Check your Candidate Portal for updates.
-                                </p>
-                            ) : (
-                                <p className="text-xs text-muted-foreground">
-                                    You can reschedule your exam through the Candidate Portal. No additional fee is required for reattempt.
-                                </p>
-                            )}
-                        </div>
-
-                        <Button onClick={handleLogout} className="w-full" variant="outline">
-                            <LogOut className="w-4 h-4 mr-2" />
-                            Exit Examination Portal
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-        );
-    }
-
-    // Ready state - show exam info and start button
+    // Verified state - candidate can begin exam
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
@@ -270,11 +426,11 @@ export default function ExamPortal() {
                     <CardHeader>
                         <div className="flex items-center gap-2 text-primary mb-2">
                             <CheckCircle className="w-5 h-5" />
-                            <span className="text-sm font-semibold uppercase tracking-wider">Exam Ready</span>
+                            <span className="text-sm font-semibold uppercase tracking-wider">Verified - Ready to Begin</span>
                         </div>
                         <CardTitle className="text-xl sm:text-2xl">Welcome, Candidate</CardTitle>
                         <CardDescription>
-                            The center administrator has started the examination. You may begin when ready.
+                            You have been verified by the center administrator. You may begin your examination when ready.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -295,6 +451,20 @@ export default function ExamPortal() {
                                 </div>
                             </div>
                         </div>
+
+                        {candidateStatus && (
+                            <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                                <p className="text-sm font-medium text-foreground mb-1">Exam Date</p>
+                                <p className="text-lg font-semibold text-primary">
+                                    {new Date(candidateStatus.examDate).toLocaleDateString('en-US', { 
+                                        weekday: 'long', 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    })}
+                                </p>
+                            </div>
+                        )}
 
                         {/* Instructions */}
                         <div className="space-y-3">

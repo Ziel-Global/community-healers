@@ -58,3 +58,17 @@ export interface AuthState {
     isLoading: boolean;
     error: string | null;
 }
+
+export enum CandidateStatus {
+    VERIFIED = 'VERIFIED',
+    PENDING = 'PENDING',
+    ABSENT = 'ABSENT',
+    REJECTED = 'REJECTED',
+    SUBMITTED = 'SUBMITTED',
+}
+
+export interface CandidateStatusResponse {
+    candidateStatus: CandidateStatus;
+    examDate: string;
+    examSessionId: string;
+}

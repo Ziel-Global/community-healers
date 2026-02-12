@@ -4,6 +4,9 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState } from "react";
 
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 interface NavItem {
   label: string;
   href: string;
@@ -40,7 +43,35 @@ export function DashboardLayout({
   navItems,
 }: DashboardLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const getLogoutRedirectPath = () => {
+    switch (portalType) {
+      case "candidate":
+        return "/candidate/auth";
+      case "center":
+        return "/center/auth";
+      case "ministry":
+        return "/ministry/auth";
+      case "admin":
+        return "/admin/auth";
+      default:
+        return "/";
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate(getLogoutRedirectPath());
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Still redirect even if logout fails
+      navigate(getLogoutRedirectPath());
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -99,14 +130,16 @@ export function DashboardLayout({
           </nav>
         </div>
 
-        {/* Logout */}
+        {/* Logout Section */}
         <div className="absolute bottom-6 left-6 right-6">
-          <Link to="/">
-            <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground">
-              <LogOut className="w-4 h-4" />
-              Back to Home
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
         </div>
       </aside>
 

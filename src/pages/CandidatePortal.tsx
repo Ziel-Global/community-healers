@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { CandidateWizard } from "@/components/StudentPortal/CandidateWizard";
 import { ProfileView } from "@/components/StudentPortal/ProfileView";
 import { RegistrationCompleteScreen } from "@/components/StudentPortal/RegistrationCompleteScreen";
@@ -9,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { User, FileText, Shield, LogOut } from "lucide-react";
 
 export default function CandidatePortal() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"profile" | "application">("application");
   const [currentWizardStep, setCurrentWizardStep] = useState(0);
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
@@ -37,18 +41,18 @@ export default function CandidatePortal() {
 
   const handleWizardComplete = () => {
     setIsRegistrationComplete(true);
-    
+
     // Set exam date to 2 days from now
     const examDate = new Date();
     examDate.setDate(examDate.getDate() + 2);
-    
+
     setScheduledExamDate(examDate);
   };
 
   const renderContent = () => {
     if (activeTab === "profile") {
       return (
-        <ProfileView 
+        <ProfileView
           isRegistrationComplete={isRegistrationComplete}
           scheduledExamDate={scheduledExamDate}
         />
@@ -58,7 +62,7 @@ export default function CandidatePortal() {
     // If registration complete, show completion screen with exam date
     if (isRegistrationComplete && scheduledExamDate) {
       return (
-        <RegistrationCompleteScreen 
+        <RegistrationCompleteScreen
           examDate={scheduledExamDate}
           centerName="Lahore Training Center #3"
           centerId="LHR-003"
@@ -69,8 +73,8 @@ export default function CandidatePortal() {
 
     // Otherwise show the registration wizard
     return (
-      <CandidateWizard 
-        steps={wizardSteps} 
+      <CandidateWizard
+        steps={wizardSteps}
         initialStep={currentWizardStep}
         onStepChange={setCurrentWizardStep}
         onComplete={handleWizardComplete}
@@ -78,11 +82,17 @@ export default function CandidatePortal() {
     );
   };
 
-  const handleLogout = () => {
-    // Add logout logic here (clear session, redirect to login, etc.)
-    console.log("Logging out...");
-    // In a real app: navigate to login page or call logout API
-    window.location.href = "/candidate/auth";
+  const handleLogout = async () => {
+    try {
+      // Call logout endpoint which clears cookies and logs the logout event
+      await logout();
+      // Redirect to candidate auth page after successful logout
+      navigate("/candidate/auth");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Still redirect even if logout fails to ensure user is logged out locally
+      navigate("/candidate/auth");
+    }
   };
 
   return (
@@ -124,7 +134,7 @@ export default function CandidatePortal() {
                   <span className="hidden sm:inline">Application</span>
                 </Button>
               </div>
-              
+
               {/* Logout Button */}
               <Button
                 variant="outline"

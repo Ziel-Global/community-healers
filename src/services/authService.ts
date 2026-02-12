@@ -80,7 +80,19 @@ const verifyCandidate = async (credentials: CandidateVerificationCredentials): P
 };
 
 const logout = async (): Promise<void> => {
-    return Promise.resolve();
+    try {
+        // Send logout request with authorization header and allow credentials (cookies)
+        await api.post('/auth/logout', {}, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            withCredentials: true, // This allows cookies to be sent and received
+        });
+    } catch (error: any) {
+        console.error('Logout error:', error);
+        // Log the error but don't throw - we still want to clear local session
+        // The endpoint automatically extracts session ID and user ID from JWT token
+    }
 };
 
 export const authService = {
