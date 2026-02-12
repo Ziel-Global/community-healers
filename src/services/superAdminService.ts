@@ -1,5 +1,5 @@
 import { api } from './api';
-import { ExamSettings, City, CreateCenterRequest, CenterAdmin, Question, CreateQuestionRequest } from '../types/superAdmin';
+import { ExamSettings, City, CreateCenterRequest, CenterAdmin, Question, CreateQuestionRequest, DashboardStats, AuditLog, AuditLogResponse } from '../types/superAdmin';
 
 export const updateExamSettings = async (settings: ExamSettings): Promise<void> => {
     try {
@@ -130,6 +130,36 @@ export const createQuestion = async (request: CreateQuestionRequest): Promise<vo
     }
 };
 
+export const getDashboardStats = async (): Promise<DashboardStats> => {
+    try {
+        const response = await api.get('/super-admin/dashboard-stats');
+        // Handle nested response
+        const nestedData = response.data?.data?.data || response.data?.data || response.data;
+        return nestedData;
+    } catch (error: any) {
+        console.error('Get Dashboard Stats error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        }
+        throw new Error('Failed to fetch dashboard statistics.');
+    }
+};
+
+export const getAuditLogs = async (): Promise<AuditLogResponse> => {
+    try {
+        const response = await api.get('/super-admin/audit-logs');
+        // Handle nested response: response.data.data.data
+        const nestedData = response.data?.data?.data || response.data?.data || response.data;
+        return nestedData;
+    } catch (error: any) {
+        console.error('Get Audit Logs error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        }
+        throw new Error('Failed to fetch audit logs.');
+    }
+};
+
 export const superAdminService = {
     updateExamSettings,
     getExamSettings,
@@ -140,4 +170,6 @@ export const superAdminService = {
     getCenterAdmins,
     getQuestions,
     createQuestion,
+    getDashboardStats,
+    getAuditLogs,
 };

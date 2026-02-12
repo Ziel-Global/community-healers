@@ -68,3 +68,31 @@ export interface CreateQuestionRequest {
     option4: string;
     correctAnswer: number;
 }
+
+export interface DashboardStats {
+    activeCenters: number;
+    totalQuestions: number;
+    totalCandidates: number;
+}
+
+export interface AuditLog {
+    id: string;
+    createdAt: string;
+    userId: string;
+    statusCode: number;
+    message: string;
+    path: string;
+    method: string;
+    apiVersion: string;
+}
+
+export interface AuditLogResponse {
+    type: string;
+    data: AuditLog[];
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}

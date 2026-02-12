@@ -39,7 +39,7 @@ const StatusBadge = ({ status }: { status: string }) => {
         case "Pending":
             return <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-700 border-amber-200"><Clock className="w-3 h-3" /> Pending</Badge>;
         case "Absent":
-            return <Badge variant="destructive" className="gap-1"><XCircle className="w-3 h-3" /> Absent</Badge>;
+            return <Badge variant="secondary" className="gap-1 bg-blue-100 text-blue-700 border-blue-200"><XCircle className="w-3 h-3" /> Absent</Badge>;
         case "Rejected":
             return <Badge variant="destructive" className="gap-1"><XCircle className="w-3 h-3" /> Rejected</Badge>;
         default:
@@ -50,9 +50,10 @@ const StatusBadge = ({ status }: { status: string }) => {
 interface CandidateTableProps {
     statusFilter?: string;
     examDate?: string;
+    refreshTrigger?: number;
 }
 
-export function CandidateTable({ statusFilter = "all", examDate }: CandidateTableProps) {
+export function CandidateTable({ statusFilter = "all", examDate, refreshTrigger = 0 }: CandidateTableProps) {
     const navigate = useNavigate();
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -103,7 +104,7 @@ export function CandidateTable({ statusFilter = "all", examDate }: CandidateTabl
         };
 
         fetchCandidates();
-    }, [examDate]);
+    }, [examDate, refreshTrigger]);
 
     const handleVerify = () => {
         // Navigate to verification page with candidate data

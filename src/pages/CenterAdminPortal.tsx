@@ -5,13 +5,16 @@ import { CenterInfoCard } from "@/components/CentreAdminPortal/Dashboard/CenterI
 import { CandidateTable } from "@/components/CentreAdminPortal/Candidates/CandidateTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, Filter, Lock } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
   FileText,
 } from "lucide-react";
 import { centerAdminService } from "@/services/centerAdminService";
+import { toast } from "sonner";
 
 export const centerNavItems = [
   {
@@ -34,6 +37,9 @@ export const centerNavItems = [
 export default function CenterAdminPortal() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [centerData, setCenterData] = useState<any>(null);
+  const [isCloseVerificationOpen, setIsCloseVerificationOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchCenterDetails = async () => {
@@ -46,6 +52,21 @@ export default function CenterAdminPortal() {
     };
     fetchCenterDetails();
   }, []);
+
+  const handleCloseVerification = async () => {
+    setIsClosing(true);
+    try {
+      await centerAdminService.closeVerification();
+      setIsCloseVerificationOpen(false);
+      toast.success("Verification closed successfully.");
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error("Failed to close verification", error);
+      toast.error("Failed to close verification. Please try again.");
+    } finally {
+      setIsClosing(false);
+    }
+  };
 
   return (
     <DashboardLayout
@@ -69,10 +90,21 @@ export default function CenterAdminPortal() {
 
         <div className="space-y-4 sm:space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <h3 className="text-lg sm:text-2xl font-bold text-foreground alumni-sans-title">Today's Candidates</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
+            <div>
+              <h3 className="text-lg sm:text-2xl font-bold text-foreground alumni-sans-title">Today's Candidates</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="gap-2"
+              onClick={() => setIsCloseVerificationOpen(true)}
+            >
+              <Lock className="w-4 h-4" />
+              Close Verification
+            </Button>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 bg-card/40 p-3 sm:p-4 rounded-2xl border border-border/40 backdrop-blur-sm">
             <div className="relative flex-1 group">
@@ -96,8 +128,25 @@ export default function CenterAdminPortal() {
               </SelectContent>
             </Select>
           </div>
-          <CandidateTable statusFilter={statusFilter} />
+          <CandidateTable statusFilter={statusFilter} refreshTrigger={refreshTrigger} />
         </div>
+
+        <Dialog open={isCloseVerificationOpen} onOpenChange={setIsCloseVerificationOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Close Verification?</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to close verification for today? This action cannot be undone and will mark all pending candidates as absent.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCloseVerificationOpen(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleCloseVerification} disabled={isClosing}>
+                {isClosing ? "Closing..." : "Close Verification"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
       </div>
     </DashboardLayout>

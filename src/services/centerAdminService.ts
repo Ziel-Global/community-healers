@@ -47,8 +47,43 @@ export const getCenterDetails = async (): Promise<any> => {
     }
 };
 
+export const getReports = async (): Promise<any[]> => {
+    try {
+        const response = await api.get('/center-admin/reports');
+        // Handle nesting: response.data (axios) -> data (api) -> data (array)
+        return response.data?.data?.data || [];
+    } catch (error: any) {
+        console.error('Error fetching reports:', error);
+        throw error;
+    }
+};
+
+export const closeVerification = async (): Promise<any> => {
+    try {
+        const response = await api.patch('/center-admin/mark-pending-absent');
+        return response.data;
+    } catch (error: any) {
+        console.error('Error closing verification:', error);
+        throw error;
+    }
+};
+
+export const getDashboardStats = async (): Promise<any> => {
+    try {
+        const response = await api.get('/center-admin/dashboard-stats');
+        // Handle nesting: response.data (axios) -> data (api) -> data (actual stats object)
+        return response.data?.data?.data || null;
+    } catch (error: any) {
+        console.error('Error fetching center dashboard stats:', error);
+        throw error;
+    }
+};
+
 export const centerAdminService = {
     getTodayCandidates,
     updateCandidateStatus,
     getCenterDetails,
+    getReports,
+    closeVerification,
+    getDashboardStats,
 };

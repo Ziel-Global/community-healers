@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { useQuery } from "@tanstack/react-query";
+import { superAdminService } from "@/services/superAdminService";
 import {
   Shield,
   Settings2,
@@ -121,6 +123,11 @@ const chartConfig = {
 export default function SuperAdminPortal() {
   const [timeFilter, setTimeFilter] = useState<"days" | "months" | "years">("months");
 
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: superAdminService.getDashboardStats,
+  });
+
   const getChartData = () => {
     switch (timeFilter) {
       case "days":
@@ -153,9 +160,24 @@ export default function SuperAdminPortal() {
       <div className="space-y-8 max-w-[1600px] mx-auto pb-12">
         {/* Global Summary Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard title="Total Registrations" value="12,405" icon={Users} desc="+4.2% this month" />
-          <StatCard title="Active Centers" value="42" icon={MapPin} desc="Across 12 regions" />
-          <StatCard title="Question Bank" value="850" icon={Database} desc="Vetted & categorized" />
+          <StatCard
+            title="Total Candidates"
+            value={isLoading ? "..." : stats?.totalCandidates?.toLocaleString() || "0"}
+            icon={Users}
+            desc="+4.2% this month"
+          />
+          <StatCard
+            title="Active Centers"
+            value={isLoading ? "..." : stats?.activeCenters?.toLocaleString() || "0"}
+            icon={MapPin}
+            desc="Across 12 regions"
+          />
+          <StatCard
+            title="Total Questions"
+            value={isLoading ? "..." : stats?.totalQuestions?.toLocaleString() || "0"}
+            icon={Database}
+            desc="Vetted & categorized"
+          />
         </div>
 
         {/* Exam Candidates Trend Graph */}
@@ -220,14 +242,14 @@ export default function SuperAdminPortal() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis 
-                    dataKey="period" 
+                  <XAxis
+                    dataKey="period"
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
-                  <YAxis 
+                  <YAxis
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                     tickLine={false}
@@ -249,7 +271,7 @@ export default function SuperAdminPortal() {
           </CardContent>
         </Card>
 
-       
+
       </div>
     </DashboardLayout>
   );

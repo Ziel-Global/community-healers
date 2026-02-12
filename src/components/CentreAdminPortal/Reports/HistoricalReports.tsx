@@ -1,13 +1,35 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, Calendar as CalendarIcon, Filter } from "lucide-react";
+import { FileText, Calendar as CalendarIcon, Filter, Loader2 } from "lucide-react";
+import { centerAdminService } from "@/services/centerAdminService";
 
 export function HistoricalReports() {
-    const reports = [
-        { date: "Jan 19, 2024", candidates: 50, passRate: "68%", status: "Ready" },
-        { date: "Jan 18, 2024", candidates: 48, passRate: "75%", status: "Ready" },
-        { date: "Jan 17, 2024", candidates: 45, passRate: "70%", status: "Ready" },
-    ];
+    const [reports, setReports] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchReports = async () => {
+            try {
+                const data = await centerAdminService.getReports();
+                setReports(data);
+            } catch (error) {
+                console.error("Failed to fetch reports:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReports();
+    }, []);
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    };
 
     return (
         <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
@@ -25,32 +47,43 @@ export function HistoricalReports() {
                         <tr className="bg-secondary/40 border-b border-border/40">
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Exam Date</th>
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Candidates</th>
-                            <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Pass Rate</th>
-                            <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Download</th>
+                            <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Pass Rate</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
-                        {reports.map((r) => (
-                            <tr key={r.date} className="hover:bg-primary/5 transition-colors">
-                                <td className="p-4">
-                                    <div className="flex items-center gap-2 text-lg alumni-sans-subtitle text-foreground">
-                                        <CalendarIcon className="w-3.5 h-3.5 text-primary" />
-                                        {r.date}
+                        {loading ? (
+                            <tr>
+                                <td colSpan={3} className="p-8 text-center">
+                                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                        <Loader2 className="w-6 h-6 animate-spin" />
+                                        <p className="text-sm">Loading reports...</p>
                                     </div>
                                 </td>
-                                <td className="p-4 text-center">
-                                    <p className="text-sm font-medium text-foreground">{r.candidates}</p>
-                                </td>
-                                <td className="p-4 text-center">
-                                    <p className="text-sm font-bold text-emerald-600">{r.passRate}</p>
-                                </td>
-                                <td className="p-4 text-right">
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all">
-                                        <Download className="w-4 h-4" />
-                                    </Button>
+                            </tr>
+                        ) : reports.length === 0 ? (
+                            <tr>
+                                <td colSpan={3} className="p-8 text-center text-muted-foreground">
+                                    No reports found.
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            reports.map((r, index) => (
+                                <tr key={index} className="hover:bg-primary/5 transition-colors">
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-2 text-lg alumni-sans-subtitle text-foreground">
+                                            <CalendarIcon className="w-3.5 h-3.5 text-primary" />
+                                            {formatDate(r.examDate)}
+                                        </div>
+                                    </td>
+                                    <td className="p-4 text-center">
+                                        <p className="text-sm font-medium text-foreground">{r.candidates}</p>
+                                    </td>
+                                    <td className="p-4 text-right">
+                                        <p className="text-sm font-bold text-emerald-600">{r.passRate}%</p>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
