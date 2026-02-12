@@ -73,6 +73,21 @@ export const getCenters = async (): Promise<any[]> => {
     }
 };
 
+export const getCenterDetails = async (centerId: string): Promise<any> => {
+    try {
+        const response = await api.get(`/super-admin/center/${centerId}/details`);
+        // Handle nested response
+        const nestedData = response.data?.data?.data || response.data?.data || response.data;
+        return nestedData;
+    } catch (error: any) {
+        console.error('Get Center Details error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        }
+        throw new Error('Failed to fetch center details.');
+    }
+};
+
 export const getCenterAdmins = async (): Promise<CenterAdmin[]> => {
     try {
         const response = await api.get('/super-admin/center-admins');
@@ -121,6 +136,7 @@ export const superAdminService = {
     getCities,
     createCenter,
     getCenters,
+    getCenterDetails,
     getCenterAdmins,
     getQuestions,
     createQuestion,

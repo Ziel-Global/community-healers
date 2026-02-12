@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +17,11 @@ import {
     User,
     Calendar,
     CheckCircle2,
-    Clock
+    Clock,
+    Loader2
 } from "lucide-react";
+import { superAdminService } from "@/services/superAdminService";
+import { useToast } from "@/hooks/use-toast";
 
 interface CenterDetailProps {
     center: {
@@ -86,12 +89,89 @@ const registeredStudents = [
 export function CenterDetail({ center, onBack }: CenterDetailProps) {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [open, setOpen] = useState(false);
+    const [centerDetails, setCenterDetails] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
+
+    // Fetch center details from API
+    useEffect(() => {
+        const fetchCenterDetails = async () => {
+            try {
+                setIsLoading(true);
+                const details = await superAdminService.getCenterDetails(center.id);
+                setCenterDetails(details);
+            } catch (error: any) {
+                console.error('Failed to fetch center details:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to load center details. Please try again.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (center.id) {
+            fetchCenterDetails();
+        }
+    }, [center.id, toast]);
 
     // Filter students by selected date
     const filteredStudents = registeredStudents.filter(dayData => {
         const dataDate = new Date(dayData.date);
         return dataDate.toDateString() === selectedDate.toDateString();
     });
+
+    if (isLoading) {
+        return (
+            <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center gap-4">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={onBack}
+                        className="rounded-xl"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                    </Button>
+                    <div className="flex-1">
+                        <h2 className="text-2xl alumni-sans-title text-foreground">{center.name}</h2>
+                    </div>
+                </div>
+                <div className="flex items-center justify-center py-12">
+                    <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        <p className="text-sm text-muted-foreground">Loading center details...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!centerDetails) {
+        return (
+            <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={onBack}
+                        className="rounded-xl"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                    </Button>
+                    <div className="flex-1">
+                        <h2 className="text-2xl alumni-sans-title text-foreground">{center.name}</h2>
+                    </div>
+                </div>
+                <div className="text-center py-12">
+                    <p className="text-muted-foreground">Failed to load center details</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -107,12 +187,12 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                 </Button>
                 <div className="flex-1">
                     <div className="flex items-center gap-3">
-                        <h2 className="text-2xl alumni-sans-title text-foreground">{center.name}</h2>
-                        <Badge variant={center.status === "Active" ? "success" : "secondary"}>
-                            {center.status}
+                        <h2 className="text-2xl alumni-sans-title text-foreground">{centerDetails.name}</h2>
+                        <Badge variant={centerDetails.status === "ACTIVE" ? "success" : "secondary"}>
+                            {centerDetails.status}
                         </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">Center ID: {center.id}</p>
+                    <p className="text-sm text-muted-foreground mt-1">Center ID: {centerDetails.id}</p>
                 </div>
             </div>
 
@@ -131,10 +211,10 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                                 <MapPin className="w-5 h-5 text-primary mt-0.5" />
                                 <div>
                                     <p className="text-xs text-muted-foreground font-semibold uppercase">Location</p>
-                                    <p className="text-sm font-medium">{center.location}</p>
-                                    {center.address && (
+                                    <p className="text-sm font-medium">{centerDetails.city?.name || 'N/A'}</p>
+                                    {centerDetails.address && (
                                         <p className="text-xs text-muted-foreground mt-1">
-                                            {center.address}
+                                            {centerDetails.address}
                                         </p>
                                     )}
                                 </div>
@@ -144,15 +224,23 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                                 <Users className="w-5 h-5 text-primary mt-0.5" />
                                 <div>
                                     <p className="text-xs text-muted-foreground font-semibold uppercase">Daily Capacity</p>
-                                    <p className="text-sm font-medium">{center.capacity} candidates</p>
+                                    <p className="text-sm font-medium">{centerDetails.capacity} candidates</p>
                                 </div>
                             </div>
 
                             <div className="flex items-start gap-3">
-                                <Activity className="w-5 h-5 text-primary mt-0.5" />
+                                <Calendar className="w-5 h-5 text-primary mt-0.5" />
                                 <div>
-                                    <p className="text-xs text-muted-foreground font-semibold uppercase">Average Attendance</p>
-                                    <p className="text-sm font-medium">{center.attendance}</p>
+                                    <p className="text-xs text-muted-foreground font-semibold uppercase">Established</p>
+                                    <p className="text-sm font-medium">
+                                        {centerDetails.createdAt 
+                                            ? new Date(centerDetails.createdAt).toLocaleDateString('en-US', { 
+                                                year: 'numeric', 
+                                                month: 'long', 
+                                                day: 'numeric' 
+                                            })
+                                            : "Not specified"}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -161,16 +249,12 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                             <div className="flex items-start gap-3">
                                 <User className="w-5 h-5 text-primary mt-0.5" />
                                 <div>
-                                    <p className="text-xs text-muted-foreground font-semibold uppercase">Contact Person</p>
-                                    <p className="text-sm font-medium">{center.contactPerson || "Not specified"}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start gap-3">
-                                <Phone className="w-5 h-5 text-primary mt-0.5" />
-                                <div>
-                                    <p className="text-xs text-muted-foreground font-semibold uppercase">Phone Number</p>
-                                    <p className="text-sm font-medium">{center.phone || "Not specified"}</p>
+                                    <p className="text-xs text-muted-foreground font-semibold uppercase">Primary Admin</p>
+                                    <p className="text-sm font-medium">
+                                        {centerDetails.primaryAdmin 
+                                            ? `${centerDetails.primaryAdmin.firstName} ${centerDetails.primaryAdmin.lastName}`
+                                            : "Not assigned"}
+                                    </p>
                                 </div>
                             </div>
 
@@ -178,15 +262,9 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                                 <Mail className="w-5 h-5 text-primary mt-0.5" />
                                 <div>
                                     <p className="text-xs text-muted-foreground font-semibold uppercase">Email Address</p>
-                                    <p className="text-sm font-medium">{center.email || `${center.id.toLowerCase()}@certifypro.gov.pk`}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start gap-3">
-                                <Calendar className="w-5 h-5 text-primary mt-0.5" />
-                                <div>
-                                    <p className="text-xs text-muted-foreground font-semibold uppercase">Established</p>
-                                    <p className="text-sm font-medium">{center.established || "Not specified"}</p>
+                                    <p className="text-sm font-medium">
+                                        {centerDetails.primaryAdmin?.email || "Not specified"}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -198,15 +276,17 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <StatCard 
                     title="Total Registrations" 
-                    value="1,247" 
+                    value={centerDetails.totalCandidates || 0} 
                     icon={Users} 
-                    desc="+12.3% this month" 
+                    desc="Registered candidates" 
                 />
                 <StatCard 
                     title="Total Candidates Appeared" 
-                    value="1,089" 
+                    value={centerDetails.verifiedCandidates || 0} 
                     icon={Activity} 
-                    desc="87.3% attendance rate" 
+                    desc={`${centerDetails.totalCandidates > 0 
+                        ? ((centerDetails.verifiedCandidates / centerDetails.totalCandidates) * 100).toFixed(1) 
+                        : 0}% attendance rate`} 
                 />
             </div>
 
