@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X } from "lucide-react";
 import { format } from "date-fns";
 import { api } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 
 interface UploadedDocument {
   id: string;
@@ -62,6 +63,7 @@ export function ProfileView({
   const [previewDoc, setPreviewDoc] = useState<UploadedDocument | null>(null);
   const [candidateData, setCandidateData] = useState<CandidateData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { examScheduleInfo } = useAuth();
 
   // Fetch candidate data from API
   useEffect(() => {
@@ -201,8 +203,62 @@ export function ProfileView({
         </CardContent>
       </Card>
 
-      {/* Scheduled Exam Card - Only show if registration complete and exam scheduled */}
-      {isRegistrationComplete && scheduledExamDate && !examCompleted && (
+      {/* Scheduled Exam Card from API - Show if exam is scheduled */}
+      {examScheduleInfo?.examScheduled && (
+        <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-xl alumni-sans-title">Exam Scheduled</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Your examination has been scheduled
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid sm:grid-cols-2 gap-4 mb-4">
+              <div className="p-4 rounded-xl bg-card border border-border/40">
+                <p className="text-xs text-muted-foreground mb-1">Exam Date</p>
+                <p className="font-bold text-foreground">
+                  {examScheduleInfo.examDate ? format(new Date(examScheduleInfo.examDate), 'MMMM d, yyyy') : 'N/A'}
+                </p>
+              </div>
+              <div className="p-4 rounded-xl bg-card border border-border/40">
+                <p className="text-xs text-muted-foreground mb-1">Exam Time</p>
+                <p className="font-bold text-foreground">
+                  {examScheduleInfo.examStartTime ? format(new Date(examScheduleInfo.examStartTime), 'h:mm a') : 'N/A'}
+                </p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="p-4 rounded-xl bg-card border border-border/40">
+                <p className="text-xs text-muted-foreground mb-1">Test Center</p>
+                <p className="font-bold text-foreground">{examScheduleInfo.centerName || 'N/A'}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-card border border-border/40">
+                <p className="text-xs text-muted-foreground mb-1">Center Address</p>
+                <p className="text-sm text-foreground whitespace-pre-line">{examScheduleInfo.centerAddress || 'N/A'}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-card border border-border/40">
+                <p className="text-xs text-muted-foreground mb-1">City</p>
+                <p className="font-bold text-foreground">{examScheduleInfo.cityName || 'N/A'}</p>
+              </div>
+            </div>
+            <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <p className="text-xs text-muted-foreground">
+                <strong className="text-foreground">Note:</strong> Please arrive at the test center 15 minutes before your scheduled time. Bring a valid ID and your exam confirmation.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Scheduled Exam Card - Only show if registration complete and exam scheduled (local state) */}
+      {isRegistrationComplete && scheduledExamDate && !examCompleted && !examScheduleInfo?.examScheduled && (
         <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">

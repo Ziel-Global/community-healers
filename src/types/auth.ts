@@ -72,3 +72,13 @@ export interface CandidateStatusResponse {
     examDate: string;
     examSessionId: string;
 }
+
+export interface ExamScheduledResponse {
+    examScheduled: boolean;
+    examDate?: string;
+    examStartTime?: string;
+    centerName?: string;
+    centerAddress?: string;
+    cityName?: string;
+    message?: string;
+}
