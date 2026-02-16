@@ -122,7 +122,7 @@ export default function Index() {
 
             <h1 className="text-3xl sm:text-4xl md:text-6xl alumni-sans-title text-foreground mb-4 sm:mb-6 leading-tight px-2">
               Digital Certification &{" "}
-              <span className="text-gradient">Examination</span> Platform
+              <span className="text-gradient">Training</span> Platform
             </h1>
 
             <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2">
@@ -145,7 +145,7 @@ export default function Index() {
           {/* Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mb-12 sm:mb-20">
             {/* This Array should be in a separate file for example constants.ts file (Code Organization and best practices) */}
-          {/* Type safety is missing */}
+            {/* Type safety is missing */}
             {[
               { value: "45,000+", label: "Certificates Issued" },
               { value: "86", label: "Training Centers" },
@@ -201,7 +201,7 @@ export default function Index() {
           </div>
         </div>
       </section>
-{/* Footer section should be a separate component */}
+      {/* Footer section should be a separate component */}
       {/* Footer */}
       <footer className="border-t border-border bg-card py-6 sm:py-8 px-4 sm:px-6">
         <div className="container mx-auto flex flex-col items-center gap-4 text-center sm:text-left sm:flex-row sm:justify-between">
