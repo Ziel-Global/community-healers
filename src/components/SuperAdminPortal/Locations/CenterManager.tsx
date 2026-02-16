@@ -31,9 +31,12 @@ export function CenterManager() {
     const [centers, setCenters] = useState<Center[]>([]);
     const [cities, setCities] = useState<Array<{ id: string; name: string }>>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isCityDialogOpen, setIsCityDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmittingCity, setIsSubmittingCity] = useState(false);
     const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
     const [isLoadingCenters, setIsLoadingCenters] = useState(true);
+    const [newCityName, setNewCityName] = useState("");
     const [formData, setFormData] = useState({
         name: "",
         cityId: "",
@@ -76,30 +79,30 @@ export function CenterManager() {
     }, [toast]);
 
     // Fetch cities on component mount
-    useEffect(() => {
-        const fetchCities = async () => {
-            try {
-                const citiesData = await superAdminService.getCities();
-                setCities(citiesData);
-            } catch (error: any) {
-                console.error("Failed to load cities", error);
+    const fetchCities = async () => {
+        try {
+            const citiesData = await superAdminService.getCities();
+            setCities(citiesData);
+        } catch (error: any) {
+            console.error("Failed to load cities", error);
 
-                // Check if it's a 401 (token expired)
-                if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
-                    toast({
-                        title: "Session Expired",
-                        description: "Your session has expired. Please log in again.",
-                        variant: "destructive",
-                    });
+            // Check if it's a 401 (token expired)
+            if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
+                toast({
+                    title: "Session Expired",
+                    description: "Your session has expired. Please log in again.",
+                    variant: "destructive",
+                });
 
-                    // Clear auth and redirect to login
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = '/auth/super-admin';
-                }
+                // Clear auth and redirect to login
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/auth/super-admin';
             }
-        };
+        }
+    };
 
+    useEffect(() => {
         fetchCities();
     }, [toast]);
 
@@ -170,6 +173,41 @@ export function CenterManager() {
         }
     };
 
+    const handleCitySubmit = async () => {
+        if (!newCityName) {
+            toast({
+                title: "Invalid Input",
+                description: "Please enter a city name.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsSubmittingCity(true);
+
+        try {
+            await superAdminService.createCity(newCityName);
+            toast({
+                title: "City Added",
+                description: `${newCityName} has been successfully added.`,
+            });
+
+            setIsCityDialogOpen(false);
+            setNewCityName("");
+
+            // Refresh cities list
+            fetchCities();
+        } catch (error: any) {
+            toast({
+                title: "Failed to Add City",
+                description: error.message || "An error occurred while adding the city.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmittingCity(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -180,13 +218,23 @@ export function CenterManager() {
                         className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
                     />
                 </div>
-                <Button
-                    onClick={() => setIsDialogOpen(true)}
-                    className="gradient-primary text-white font-bold h-11 px-6 rounded-xl shadow-lg gap-2"
-                >
-                    <Plus className="w-4 h-4" />
-                    Establish New Center
-                </Button>
+                <div className="flex gap-2 w-full md:w-auto">
+                    <Button
+                        onClick={() => setIsCityDialogOpen(true)}
+                        variant="outline"
+                        className="border-primary/20 hover:border-primary/40 h-11 px-6 rounded-xl gap-2 flex-1 md:flex-none"
+                    >
+                        <MapPin className="w-4 h-4 text-primary" />
+                        Add New City
+                    </Button>
+                    <Button
+                        onClick={() => setIsDialogOpen(true)}
+                        className="gradient-primary text-white font-bold h-11 px-6 rounded-xl shadow-lg gap-2 flex-1 md:flex-none"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Establish New Center
+                    </Button>
+                </div>
             </div>
 
             {isLoadingCenters ? (
@@ -435,6 +483,62 @@ export function CenterManager() {
                                 <>
                                     <Plus className="w-4 h-4" />
                                     Publish Center
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Add New City Dialog */}
+            <Dialog open={isCityDialogOpen} onOpenChange={setIsCityDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                            <MapPin className="w-6 h-6 text-primary" />
+                            Add New City
+                        </DialogTitle>
+                        <DialogDescription>
+                            Enter the name of the new city to add to the system.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="cityName">City Name *</Label>
+                            <Input
+                                id="cityName"
+                                placeholder="e.g., Islamabad"
+                                value={newCityName}
+                                onChange={(e) => setNewCityName(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsCityDialogOpen(false)}
+                            disabled={isSubmittingCity}
+                            className="flex-1"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleCitySubmit}
+                            disabled={isSubmittingCity}
+                            className="gradient-primary text-white gap-2 flex-1"
+                        >
+                            {isSubmittingCity ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Adding...
+                                </>
+                            ) : (
+                                <>
+                                    <Plus className="w-4 h-4" />
+                                    Add City
                                 </>
                             )}
                         </Button>

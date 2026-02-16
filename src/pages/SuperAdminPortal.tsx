@@ -29,7 +29,7 @@ export const superAdminNavItems = [
     icon: <Globe className="w-4 h-4" />,
   },
   {
-    label: "Exam Config",
+    label: "Training Config",
     href: "/admin/config",
     icon: <Settings2 className="w-4 h-4" />,
   },

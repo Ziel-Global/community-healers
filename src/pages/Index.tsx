@@ -29,7 +29,7 @@ const portals = [
     ],
   },
   {
-    title: "Examination Portal",
+    title: "Training Portal",
     description:
       "Login with your candidate credentials to take your scheduled CBT examination.",
     icon: BookOpen,

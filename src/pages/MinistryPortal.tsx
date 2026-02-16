@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { MinistryStats } from "@/components/MinistryPortal/Dashboard/MinistryStats";
+import { ministryService, IssuanceTrendResponse } from "@/services/ministryService";
 import {
   ShieldCheck,
   History,
   LayoutDashboard,
   Users,
   Building2,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,40 +45,6 @@ export const ministryNavItems = [
   },
 ];
 
-const dailyData = [
-  { period: "Mon", certificates: 42 },
-  { period: "Tue", certificates: 58 },
-  { period: "Wed", certificates: 51 },
-  { period: "Thu", certificates: 67 },
-  { period: "Fri", certificates: 73 },
-  { period: "Sat", certificates: 45 },
-  { period: "Sun", certificates: 38 },
-];
-
-const monthlyData = [
-  { period: "Jan", certificates: 520 },
-  { period: "Feb", certificates: 610 },
-  { period: "Mar", certificates: 780 },
-  { period: "Apr", certificates: 690 },
-  { period: "May", certificates: 850 },
-  { period: "Jun", certificates: 920 },
-  { period: "Jul", certificates: 880 },
-  { period: "Aug", certificates: 1050 },
-  { period: "Sep", certificates: 1180 },
-  { period: "Oct", certificates: 1090 },
-  { period: "Nov", certificates: 1250 },
-  { period: "Dec", certificates: 1420 },
-];
-
-const yearlyData = [
-  { period: "2020", certificates: 2800 },
-  { period: "2021", certificates: 4500 },
-  { period: "2022", certificates: 6200 },
-  { period: "2023", certificates: 7400 },
-  { period: "2024", certificates: 8420 },
-  { period: "2025", certificates: 9800 },
-];
-
 const chartConfig = {
   certificates: {
     label: "Certificates",
@@ -86,27 +54,36 @@ const chartConfig = {
 
 export default function MinistryPortal() {
   const [timeFilter, setTimeFilter] = useState<"days" | "months" | "years">("months");
+  const [trendData, setTrendData] = useState<any[]>([]);
+  const [growthPercentage, setGrowthPercentage] = useState<number>(0);
+  const [isLoadingTrend, setIsLoadingTrend] = useState(true);
 
-  const getChartData = () => {
-    switch (timeFilter) {
-      case "days":
-        return dailyData;
-      case "years":
-        return yearlyData;
-      default:
-        return monthlyData;
-    }
-  };
+  useEffect(() => {
+    const fetchTrend = async () => {
+      setIsLoadingTrend(true);
+      try {
+        const response = await ministryService.getIssuanceTrend();
+        if (response && response.data) {
+          // Map API data { label, value } to chart data { period, certificates }
+          const mappedData = response.data.map(item => ({
+            period: item.label,
+            certificates: item.value
+          }));
+          setTrendData(mappedData);
+          setGrowthPercentage(response.growthPercentage);
+        }
+      } catch (error) {
+        console.error("Failed to fetch issuance trend:", error);
+      } finally {
+        setIsLoadingTrend(false);
+      }
+    };
+
+    fetchTrend();
+  }, [timeFilter]);
 
   const getGrowthText = () => {
-    switch (timeFilter) {
-      case "days":
-        return "+6.8% this week";
-      case "years":
-        return "+16.4% this year";
-      default:
-        return "+12% growth";
-    }
+    return `${growthPercentage >= 0 ? "+" : ""}${growthPercentage}% growth`;
   };
 
   return (
@@ -172,42 +149,48 @@ export default function MinistryPortal() {
             </div>
           </CardHeader>
           <CardContent className="p-2 sm:p-6">
-            <ChartContainer config={chartConfig} className="h-[250px] sm:h-[400px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={getChartData()} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorCertificates" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis
-                    dataKey="period"
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `${value}`}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area
-                    type="monotone"
-                    dataKey="certificates"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fill="url(#colorCertificates)"
-                    fillOpacity={1}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+            {isLoadingTrend ? (
+              <div className="h-[250px] sm:h-[400px] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <ChartContainer config={chartConfig} className="h-[250px] sm:h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorCertificates" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                    <XAxis
+                      dataKey="period"
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${value}`}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Area
+                      type="monotone"
+                      dataKey="certificates"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      fill="url(#colorCertificates)"
+                      fillOpacity={1}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            )}
           </CardContent>
         </Card>
       </div>

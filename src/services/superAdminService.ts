@@ -43,6 +43,21 @@ export const getCities = async (): Promise<City[]> => {
     }
 };
 
+export const createCity = async (name: string): Promise<City> => {
+    try {
+        const response = await api.post('/super-admin/city', { name });
+        // Handle nested response
+        const nestedData = response.data?.data?.data || response.data?.data || response.data;
+        return nestedData;
+    } catch (error: any) {
+        console.error('Create City error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        }
+        throw new Error('Failed to create city.');
+    }
+};
+
 export const createCenter = async (centerData: CreateCenterRequest): Promise<any> => {
     try {
         const response = await api.post('/super-admin/center', centerData);
@@ -164,6 +179,7 @@ export const superAdminService = {
     updateExamSettings,
     getExamSettings,
     getCities,
+    createCity,
     createCenter,
     getCenters,
     getCenterDetails,

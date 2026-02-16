@@ -65,9 +65,9 @@ export function ExamRulesForm() {
                     <div>
                         <CardTitle className="text-2xl font-bold alumni-sans-title flex items-center gap-2">
                             <Settings2 className="w-5 h-5 text-primary" />
-                            Global Exam Configuration
+                            Global Training Configuration
                         </CardTitle>
-                        <CardDescription>Define system-wide rules for CBT examinations</CardDescription>
+                        <CardDescription>Define system-wide rules for CBT Tests</CardDescription>
                     </div>
                     <Badge variant="outline" className="bg-white/50">Version 2.4.0</Badge>
                 </div>
@@ -76,7 +76,7 @@ export function ExamRulesForm() {
                 <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="duration" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Exam Duration (Minutes)</Label>
+                            <Label htmlFor="duration" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Test Duration (Minutes)</Label>
                             <Input
                                 id="duration"
                                 type="number"

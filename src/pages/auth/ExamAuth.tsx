@@ -50,7 +50,7 @@ export default function ExamAuth() {
                         </div>
                         <div className="flex flex-col">
                             <span className="text-sm sm:text-xl alumni-sans-title text-foreground leading-tight">
-                                Examination Portal
+                                Training Portal
                             </span>
                             <span className="text-[8px] sm:text-xs text-muted-foreground uppercase tracking-wider hidden sm:block">
                                 Computer Based Testing

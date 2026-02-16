@@ -14,7 +14,7 @@ export function Header() {
               Soft skill training
             </span>
             <span className="text-[8px] sm:text-sm alumni-sans-subtitle text-muted-foreground uppercase tracking-wider font-medium hidden sm:block">
-              Examination Portal
+              Training Portal
             </span>
           </div>
         </Link>

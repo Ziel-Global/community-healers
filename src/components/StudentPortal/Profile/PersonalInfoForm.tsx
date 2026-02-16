@@ -3,7 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon, Home } from "lucide-react";
+import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon, Home, AlertCircle } from "lucide-react";
+import { differenceInYears, parseISO, isValid } from "date-fns";
 import { api } from "@/services/api";
 import { superAdminService } from "@/services/superAdminService";
 
@@ -30,17 +31,38 @@ export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
         address: "",
     });
 
+    const [dobError, setDobError] = useState<string | null>(null);
+
+    const validateAge = (dobString: string) => {
+        if (!dobString) return null;
+
+        const birthDate = parseISO(dobString);
+        if (!isValid(birthDate)) return "Invalid date format";
+
+        const age = differenceInYears(new Date(), birthDate);
+        if (age < 16) {
+            return "You must be at least 16 years old to register.";
+        }
+        return null;
+    };
+
     // Populate form with candidate data
     useEffect(() => {
         if (candidateData) {
+            const dob = candidateData.dob ? new Date(candidateData.dob).toISOString().split('T')[0] : "";
             setFormData({
                 fatherName: candidateData.fatherName || "",
                 cnic: candidateData.cnic || "",
-                dob: candidateData.dob ? new Date(candidateData.dob).toISOString().split('T')[0] : "",
+                dob: dob,
                 phone: candidateData.user?.phoneNumber || "",
                 city: candidateData.cityId || "",
                 address: candidateData.address || "",
             });
+
+            // Set initial validation error if any
+            if (dob) {
+                setDobError(validateAge(dob));
+            }
         }
     }, [candidateData]);
 
@@ -61,6 +83,10 @@ export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
     const handleChange = (field: keyof PersonalInfo, value: string) => {
         const updated = { ...formData, [field]: value };
         setFormData(updated);
+
+        if (field === "dob") {
+            setDobError(validateAge(value));
+        }
 
         // Sync to localStorage for wizard step compatibility
         // Only if we want to support the wizard flow which reads from here
@@ -120,11 +146,17 @@ export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
                             <Input
                                 id="dob"
                                 type="date"
-                                className="pl-10"
+                                className={`pl-10 ${dobError ? "border-destructive focus-visible:ring-destructive" : ""}`}
                                 value={formData.dob}
                                 onChange={(e) => handleChange("dob", e.target.value)}
                             />
                         </div>
+                        {dobError && (
+                            <div className="flex items-center gap-1.5 text-destructive text-xs mt-1 animate-in fade-in slide-in-from-top-1">
+                                <AlertCircle className="w-3.5 h-3.5" />
+                                <span>{dobError}</span>
+                            </div>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="phone">Contact Number</Label>

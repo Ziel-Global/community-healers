@@ -36,7 +36,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       if (!validationData.canProceedToPayment) {
         // Store missing documents for display
         setMissingDocuments(validationData.missingDocuments);
-        
+
         // Show error with missing documents
         const missingDocsFormatted = validationData.missingDocuments
           .map((doc: string) => {
@@ -54,7 +54,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
         setIsLoading(false);
         return;
       }
-      
+
       // Clear missing documents if validation passed
       setMissingDocuments([]);
       // Read personal info from localStorage - OR potentially use candidateData if we want to rely on what was pre-filled and edited
@@ -88,6 +88,24 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
 
       const saved = localStorage.getItem("candidatePersonalInfo");
       const personalInfo = saved ? JSON.parse(saved) : {};
+
+      const dob = personalInfo.dob || candidateData?.dob;
+      if (dob) {
+        const { differenceInYears, parseISO, isValid } = await import("date-fns");
+        const birthDate = parseISO(dob);
+        if (isValid(birthDate)) {
+          const age = differenceInYears(new Date(), birthDate);
+          if (age < 16) {
+            toast({
+              title: "Age Requirement Not Met",
+              description: "You must be at least 16 years old to proceed.",
+              variant: "destructive",
+            });
+            setIsLoading(false);
+            return;
+          }
+        }
+      }
 
       const profilePayload = {
         fatherName: personalInfo.fatherName || candidateData?.fatherName || "", // Fallback to candidateData?
