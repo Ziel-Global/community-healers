@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { api } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { CertificateCard } from "./CertificateCard";
@@ -236,13 +236,51 @@ export function ProfileView({
               <div className="p-4 rounded-xl bg-card border border-border/40">
                 <p className="text-xs text-muted-foreground mb-1">Exam Date</p>
                 <p className="font-bold text-foreground">
-                  {examScheduleInfo.examDate ? format(new Date(examScheduleInfo.examDate), 'MMMM d, yyyy') : 'N/A'}
+                  {(() => {
+                    try {
+                      if (!examScheduleInfo.examDate) return 'N/A';
+                      // Extract only the date part YYYY-MM-DD to avoid time conflicts
+                      const datePart = examScheduleInfo.examDate.split('T')[0];
+                      return format(parseISO(datePart), 'MMMM d, yyyy');
+                    } catch (e) {
+                      console.error('Date parsing error:', e);
+                      return 'N/A';
+                    }
+                  })()}
                 </p>
               </div>
               <div className="p-4 rounded-xl bg-card border border-border/40">
                 <p className="text-xs text-muted-foreground mb-1">Exam Time</p>
                 <p className="font-bold text-foreground">
-                  {examScheduleInfo.examStartTime ? format(new Date(examScheduleInfo.examStartTime), 'h:mm a') : 'N/A'}
+                  {(() => {
+                    try {
+                      const startTime = examScheduleInfo.examStartTime;
+                      if (!startTime) return '10:00 AM';
+
+                      // If it already looks like a formatted time (e.g. "10:00 AM"), just return it
+                      if (startTime.includes('AM') || startTime.includes('PM')) {
+                        return startTime;
+                      }
+
+                      // If it's a full ISO string
+                      if (startTime.includes('T')) {
+                        return format(parseISO(startTime), 'h:mm a');
+                      }
+
+                      const datePart = (examScheduleInfo.examDate || new Date().toISOString()).split('T')[0];
+                      const combined = `${datePart}T${startTime}`;
+                      const parsed = parseISO(combined);
+
+                      if (isNaN(parsed.getTime())) {
+                        return startTime; // Fallback to raw string if parsing fails
+                      }
+
+                      return format(parsed, 'h:mm a');
+                    } catch (e) {
+                      // Silently return fallback or raw string to avoid console noise
+                      return examScheduleInfo.examStartTime || '10:00 AM';
+                    }
+                  })()}
                 </p>
               </div>
             </div>
@@ -361,9 +399,9 @@ export function ProfileView({
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
-            <div className={`p-4 rounded-xl ${isRegistrationComplete ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
+            <div className={`p-4 rounded-xl ${isRegistrationComplete || examScheduleInfo?.examScheduled ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
               <div className="flex items-center gap-2 mb-2">
-                {isRegistrationComplete ? (
+                {isRegistrationComplete || examScheduleInfo?.examScheduled ? (
                   <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                 ) : (
                   <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -371,14 +409,14 @@ export function ProfileView({
                 <p className="font-semibold text-foreground">Registration</p>
               </div>
               <p className="text-xs text-muted-foreground">
-                {isRegistrationComplete ? 'Completed & Verified' : 'In Progress'}
+                {isRegistrationComplete || examScheduleInfo?.examScheduled ? 'Completed & Verified' : 'In Progress'}
               </p>
             </div>
-            <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-green-500/10 border-green-500/30' : isRegistrationComplete ? 'bg-blue-500/10 border-blue-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+            <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-green-500/10 border-green-500/30' : (isRegistrationComplete || examScheduleInfo?.examScheduled) ? 'bg-blue-500/10 border-blue-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
               <div className="flex items-center gap-2 mb-2">
                 {hasCertificate ? (
                   <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                ) : isRegistrationComplete ? (
+                ) : (isRegistrationComplete || examScheduleInfo?.examScheduled) ? (
                   <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 ) : (
                   <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
@@ -388,8 +426,15 @@ export function ProfileView({
               <p className="text-xs text-muted-foreground">
                 {hasCertificate
                   ? `Passed - Score: ${candidateData?.certificate?.score}%`
-                  : isRegistrationComplete && scheduledExamDate
-                    ? `Scheduled - ${format(scheduledExamDate, 'MMM d, yyyy')}`
+                  : (isRegistrationComplete || examScheduleInfo?.examScheduled)
+                    ? (() => {
+                      try {
+                        const dateObj = examScheduleInfo?.examDate ? parseISO(examScheduleInfo.examDate) : (scheduledExamDate || new Date());
+                        return `Scheduled - ${format(dateObj, 'MMM d, yyyy')}`;
+                      } catch (e) {
+                        return 'Scheduled';
+                      }
+                    })()
                     : 'Pending Registration'
                 }
               </p>

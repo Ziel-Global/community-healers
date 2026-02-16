@@ -9,11 +9,12 @@ import { PaymentStep } from "@/components/StudentPortal/Steps/PaymentStep";
 import { SchedulingStep } from "@/components/StudentPortal/Steps/SchedulingStep";
 import { Button } from "@/components/ui/button";
 import { User, FileText, Shield, LogOut } from "lucide-react";
+import { parseISO } from "date-fns";
 import { api } from "@/services/api";
 import { CertificateCard } from "@/components/StudentPortal/CertificateCard";
 
 export default function CandidatePortal() {
-  const { logout, examScheduleInfo } = useAuth();
+  const { logout, examScheduleInfo, checkExamSchedule } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"profile" | "application">("application");
   const [currentWizardStep, setCurrentWizardStep] = useState(0);
@@ -60,14 +61,10 @@ export default function CandidatePortal() {
     },
   ];
 
-  const handleWizardComplete = () => {
+  const handleWizardComplete = async () => {
     setIsRegistrationComplete(true);
-
-    // Set exam date to 2 days from now
-    const examDate = new Date();
-    examDate.setDate(examDate.getDate() + 2);
-
-    setScheduledExamDate(examDate);
+    // Fetch the actual confirmed exam schedule from the backend
+    await checkExamSchedule();
   };
 
   const renderContent = () => {
@@ -120,8 +117,26 @@ export default function CandidatePortal() {
     // 2. If status is ABSENT or REJECTED, allow re-registration (show wizard)
     // implicitly handled by falling through to the wizard return at the end if we don't return early here.
 
-    // 3. If exam is scheduled (and not in above states), show "Already Scheduled" message
-    // Note: pending/verified statuses fall here
+    // 3. Success Screen (Registration Complete) - Highest priority immediately after scheduling
+    // This shows the confetti and the central success message
+    if (isRegistrationComplete && !certificate && candidateStatus !== "SUBMITTED" && candidateStatus !== "ABSENT" && candidateStatus !== "REJECTED") {
+      const examDateStr = examScheduleInfo?.examDate;
+      const displayDate = examDateStr ? parseISO(examDateStr) : (scheduledExamDate || new Date());
+
+      return (
+        <RegistrationCompleteScreen
+          examDate={displayDate}
+          centerName={examScheduleInfo?.centerName || "Your Assigned Center"}
+          centerId={examScheduleInfo?.centerName?.split(' ').map(w => w[0]).join('') || "CENTER"}
+          onGoToProfile={() => {
+            setIsRegistrationComplete(false); // Clear the local success state when moving away
+            setActiveTab("profile");
+          }}
+        />
+      );
+    }
+
+    // 4. "Already Scheduled" View - Shown after user has moved off the success screen
     if (examScheduled && candidateStatus !== "ABSENT" && candidateStatus !== "REJECTED") {
       return (
         <div className="max-w-3xl mx-auto">
@@ -137,18 +152,6 @@ export default function CandidatePortal() {
             </Button>
           </div>
         </div>
-      );
-    }
-
-    // If registration complete (local state), show completion screen
-    if (isRegistrationComplete && scheduledExamDate) {
-      return (
-        <RegistrationCompleteScreen
-          examDate={scheduledExamDate}
-          centerName="Lahore Training Center #3"
-          centerId="LHR-003"
-          onGoToProfile={() => setActiveTab("profile")}
-        />
       );
     }
 

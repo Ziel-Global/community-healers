@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CBTInterface } from "@/components/StudentPortal/Exam/CBTInterface";
 import { Button } from "@/components/ui/button";
+import { parseISO, format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, LogOut, Loader2, AlertCircle, Ban, CheckCircle, FileText, Clock } from "lucide-react";
 import { api } from "@/services/api";
@@ -26,7 +27,7 @@ export default function ExamPortal() {
                 console.log("Candidate status response:", response.data);
                 const statusData: CandidateStatusResponse = response.data.data;
                 setCandidateStatus(statusData);
-                
+
                 // Set exam state based on candidate status
                 switch (statusData.candidateStatus) {
                     case CandidateStatus.VERIFIED:
@@ -217,7 +218,7 @@ export default function ExamPortal() {
                             <div className="bg-destructive/10 rounded-lg p-4 text-left">
                                 <p className="text-sm text-foreground font-medium mb-2">What happens next?</p>
                                 <p className="text-xs text-muted-foreground">
-                                    Please contact your examination center for more details about the rejection reason. 
+                                    Please contact your examination center for more details about the rejection reason.
                                     You may need to reapply through the candidate portal.
                                 </p>
                             </div>
@@ -272,7 +273,7 @@ export default function ExamPortal() {
                             <div className="bg-orange-50 dark:bg-orange-950/20 rounded-lg p-4 text-left">
                                 <p className="text-sm text-foreground font-medium mb-2">What happens next?</p>
                                 <p className="text-xs text-muted-foreground">
-                                    You missed the scheduled exam. Don't worry - you will be allotted another exam date soon. 
+                                    You missed the scheduled exam. Don't worry - you will be allotted another exam date soon.
                                     Please check your candidate portal for updates on the rescheduled exam.
                                 </p>
                             </div>
@@ -335,7 +336,7 @@ export default function ExamPortal() {
                             <div className="bg-primary/5 rounded-lg p-4 text-left border border-primary/20">
                                 <p className="text-sm text-foreground font-medium mb-2">Next Steps:</p>
                                 <p className="text-xs text-muted-foreground">
-                                    Please visit the Candidate Portal to check your exam results and certificate status. 
+                                    Please visit the Candidate Portal to check your exam results and certificate status.
                                     You will be notified once your results have been reviewed by the ministry.
                                 </p>
                             </div>
@@ -456,12 +457,16 @@ export default function ExamPortal() {
                             <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
                                 <p className="text-sm font-medium text-foreground mb-1">Exam Date</p>
                                 <p className="text-lg font-semibold text-primary">
-                                    {new Date(candidateStatus.examDate).toLocaleDateString('en-US', { 
-                                        weekday: 'long', 
-                                        year: 'numeric', 
-                                        month: 'long', 
-                                        day: 'numeric' 
-                                    })}
+                                    {(() => {
+                                        if (!candidateStatus?.examDate) return 'N/A';
+                                        try {
+                                            const parsed = parseISO(candidateStatus.examDate);
+                                            if (isNaN(parsed.getTime())) return candidateStatus.examDate;
+                                            return format(parsed, 'EEEE, MMMM d, yyyy');
+                                        } catch (e) {
+                                            return candidateStatus.examDate;
+                                        }
+                                    })()}
                                 </p>
                             </div>
                         )}
@@ -495,8 +500,8 @@ export default function ExamPortal() {
 
                         {/* Start Button */}
                         <div className="pt-4">
-                            <Button 
-                                onClick={handleStartExam} 
+                            <Button
+                                onClick={handleStartExam}
                                 className="w-full h-12 sm:h-14 text-base sm:text-lg gradient-primary text-white font-semibold"
                             >
                                 Begin Examination

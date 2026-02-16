@@ -2,16 +2,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Calendar, MapPin, Clock, PartyPopper, FileText, Shield, AlertCircle, User } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 interface RegistrationCompleteScreenProps {
-  examDate: Date;
+  examDate: Date | string;
   centerName: string;
   centerId: string;
   onGoToProfile: () => void;
 }
 
 export function RegistrationCompleteScreen({ examDate, centerName, centerId, onGoToProfile }: RegistrationCompleteScreenProps) {
+  const dateObj = (() => {
+    try {
+      if (!examDate) return new Date();
+      return typeof examDate === 'string' ? parseISO(examDate) : examDate;
+    } catch (e) {
+      return new Date();
+    }
+  })();
+
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-2">
       <div className="max-w-2xl w-full space-y-4 sm:space-y-6">
@@ -44,13 +53,13 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
                   <p className="text-xs text-muted-foreground">Your scheduled examination details</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
                   <Calendar className="w-5 h-5 text-primary mx-auto mb-2" />
                   <p className="text-xs text-muted-foreground mb-1">Date</p>
                   <p className="font-bold text-foreground text-sm sm:text-base">
-                    {format(examDate, 'MMMM d, yyyy')}
+                    {format(dateObj, 'MMMM d, yyyy')}
                   </p>
                 </div>
                 <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
@@ -125,10 +134,10 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
             </div>
 
             {/* Go to Profile Button */}
-            <Button 
-              onClick={onGoToProfile} 
-              variant="outline" 
-              size="lg" 
+            <Button
+              onClick={onGoToProfile}
+              variant="outline"
+              size="lg"
               className="w-full gap-2"
             >
               <User className="w-4 h-4" />

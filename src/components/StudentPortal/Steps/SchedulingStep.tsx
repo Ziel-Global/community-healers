@@ -19,22 +19,23 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
 
     setIsScheduling(true);
     try {
-      // Use local date formatting to prevent timezone shifts
+      // Standard format YYYY-MM-DD for backend
       const examDate = format(selectedDate, 'yyyy-MM-dd');
       await api.post('/candidates/me/schedule', { examDate });
 
       setIsScheduled(true);
       toast({
         title: "Exam Scheduled",
-        description: `Your exam has been scheduled for ${selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`,
+        description: `Your exam has been scheduled for ${format(selectedDate, 'EEEE, MMMM d, yyyy')}.`,
       });
 
       onNext();
     } catch (error: any) {
-      console.error("Scheduling error:", error);
+      console.error("Scheduling error details:", error.response?.data);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || "Failed to schedule exam. Please try again.";
       toast({
         title: "Scheduling Failed",
-        description: error.response?.data?.message || "Failed to schedule exam. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
