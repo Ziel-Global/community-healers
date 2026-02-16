@@ -28,6 +28,7 @@ export function QuestionEditor() {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
@@ -142,13 +143,11 @@ export function QuestionEditor() {
                     <Input
                         placeholder="Search questions by text or keyword..."
                         className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
-                    <Button variant="outline" className="h-11 px-4 border-border/60 gap-2 bg-white/50">
-                        <Filter className="w-4 h-4 text-primary" />
-                        Filter
-                    </Button>
                     <Button
                         onClick={() => setIsDialogOpen(true)}
                         className="gradient-primary text-white font-bold h-11 px-6 rounded-xl shadow-lg gap-2"
@@ -176,36 +175,38 @@ export function QuestionEditor() {
                 </div>
             ) : (
                 <div className="grid gap-4">
-                    {questions.map((q) => (
-                        <Card key={q.id} className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm group hover:border-primary/40 transition-all">
-                            <CardContent className="p-6">
-                                <div className="flex justify-between gap-6">
-                                    <div className="flex gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                                            <HelpCircle className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="alumni-sans-title text-xl font-semibold text-foreground leading-snug">{q.questionText}</p>
-                                            <div className="flex flex-wrap gap-2">
-                                                <Badge variant="outline" className="bg-white/50 text-[10px] uppercase font-bold tracking-tighter">
-                                                    <Tag className="w-3 h-3 mr-1" /> {q.category}
-                                                </Badge>
+                    {questions
+                        .filter(q => q.questionText.toLowerCase().includes(searchQuery.toLowerCase()))
+                        .map((q) => (
+                            <Card key={q.id} className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm group hover:border-primary/40 transition-all">
+                                <CardContent className="p-6">
+                                    <div className="flex justify-between gap-6">
+                                        <div className="flex gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                                <HelpCircle className="w-5 h-5 text-primary" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <p className="alumni-sans-title text-xl font-semibold text-foreground leading-snug">{q.questionText}</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                    <Badge variant="outline" className="bg-white/50 text-[10px] uppercase font-bold tracking-tighter">
+                                                        <Tag className="w-3 h-3 mr-1" /> {q.category}
+                                                    </Badge>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary">
-                                            <Edit3 className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-destructive">
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                        <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary">
+                                                <Edit3 className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-destructive">
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                </CardContent>
+                            </Card>
+                        ))}
                 </div>
             )}
 
