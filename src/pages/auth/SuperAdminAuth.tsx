@@ -83,22 +83,24 @@ export default function SuperAdminAuth() {
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex flex-col justify-center px-6 lg:px-16 bg-white">
-        <Link
-          to="/"
-          className="absolute top-6 left-6 lg:left-auto lg:right-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Home
-        </Link>
-
-        <div className="max-w-md mx-auto w-full">
-          <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-md">
-              <ShieldCheck className="w-6 h-6 text-primary-foreground" />
+      <div className="flex-1 flex flex-col px-6 lg:px-16 bg-white">
+        <div className="sticky top-0 z-10 bg-white pt-4 pb-2 flex items-center justify-between lg:justify-end">
+          <div className="lg:hidden flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+              <ShieldCheck className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-xl alumni-sans-title">Super Admin</span>
+            <span className="text-sm font-display font-bold">Super Admin</span>
           </div>
+          <Link
+            to="/"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back to Home</span>
+          </Link>
+        </div>
+
+        <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center py-6 sm:py-12">
 
           <h2 className="text-3xl alumni-sans-title text-foreground mb-2">
             {isSignUp ? "Admin Setup" : "Secure Login"}
