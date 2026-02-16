@@ -77,11 +77,6 @@ export function ExamSlotPicker({ selectedDate, onDateSelect, onSchedule, isSched
                                         })}
                                     </p>
                                 </div>
-                                <div className="mt-4 p-3 sm:p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                                    <p className="text-xs text-blue-700 dark:text-blue-400">
-                                        <strong>Note:</strong> Exam will be conducted at 10:00 AM at your assigned center. Please arrive 30 minutes early.
-                                    </p>
-                                </div>
 
                                 {!isScheduled && (
                                     <Button

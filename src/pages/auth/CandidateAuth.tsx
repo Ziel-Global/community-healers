@@ -46,6 +46,15 @@ export default function CandidateAuth() {
 
     try {
       if (isSignUp) {
+        if (formData.password.length < 6) {
+          toast({
+            variant: "destructive",
+            title: "Password Too Short",
+            description: "Password must be at least 6 characters long.",
+          });
+          setLoading(false);
+          return;
+        }
         if (formData.password !== formData.confirmPassword) {
           toast({
             variant: "destructive",
@@ -305,12 +314,18 @@ export default function CandidateAuth() {
                       id="password"
                       type="password"
                       placeholder="Create a password"
-                      className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${formData.password && formData.password.length < 6 ? "border-destructive focus:border-destructive" : ""
+                        }`}
                       value={formData.password}
                       onChange={handleInputChange}
                       required
                     />
                   </div>
+                  {formData.password && formData.password.length < 6 && (
+                    <p className="text-xs text-destructive mt-1 animate-in fade-in slide-in-from-top-1">
+                      Password must be at least 6 characters
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2">

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 import { authService } from '../services/authService';
-import { parseJwt } from '../utils/jwt';
+import { parseJwt, isTokenExpired } from '../utils/jwt';
 
 interface AuthContextType extends AuthState {
     loginCandidate: (credentials: CandidateLoginCredentials) => Promise<void>;
@@ -48,6 +48,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const storedExamInfo = localStorage.getItem('examScheduleInfo');
 
             if (storedToken && storedUser && storedUser !== "undefined" && storedToken !== "undefined") {
+                // Check if token is expired before restoring auth state
+                if (isTokenExpired(storedToken)) {
+                    console.warn('Stored JWT token is expired — clearing session.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('examScheduleInfo');
+                    setState((prev) => ({ ...prev, isLoading: false }));
+                    return;
+                }
+
                 try {
                     // Ideally, validate token with backend here
                     const user = JSON.parse(storedUser);

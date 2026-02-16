@@ -1,5 +1,4 @@
 import { WizardStepProps } from "../CandidateWizard";
-import { CenterAssignmentStatus } from "../Scheduling/CenterAssignmentStatus";
 import { ExamSlotPicker } from "../Scheduling/ExamSlotPicker";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Calendar, Loader2 } from "lucide-react";
@@ -66,11 +65,6 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
 
       {/* Content */}
       <div className="space-y-8">
-        <CenterAssignmentStatus
-          centerName="Lahore Training Center #3"
-          centerId="LHR-003"
-          location="Model Town, Lahore"
-        />
         <ExamSlotPicker
           selectedDate={selectedDate}
           onDateSelect={setSelectedDate}

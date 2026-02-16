@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import CandidatePortal from "./pages/CandidatePortal";
 import RegistrationPage from "./pages/candidate/RegistrationPage";
@@ -49,40 +50,43 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            {/* Auth Routes */}
+            {/* Auth Routes (public) */}
             <Route path="/candidate/auth" element={<CandidateAuth />} />
             <Route path="/center/auth" element={<CenterAdminAuth />} />
             <Route path="/admin/auth" element={<SuperAdminAuth />} />
             <Route path="/ministry/auth" element={<MinistryAuth />} />
             <Route path="/exam/auth" element={<ExamAuth />} />
-            {/* Examination Portal */}
-            <Route path="/exam/start" element={<ExamPortal />} />
-            {/* Portal Routes */}
-            <Route path="/candidate" element={<CandidatePortal />} />
-            <Route path="/candidate/registration" element={<RegistrationPage />} />
-            <Route path="/candidate/schedule" element={<SchedulingPage />} />
-            <Route path="/candidate/training" element={<TrainingPage />} />
-            <Route path="/candidate/certificates" element={<CertificatesPage />} />
-            <Route path="/candidate/notifications" element={<NotificationsPage />} />
-            <Route path="/candidate/profile" element={<ProfilePage />} />
-            <Route path="/center" element={<CenterAdminPortal />} />
-            <Route path="/center/candidates" element={<CandidatesPage />} />
-            <Route path="/center/verification" element={<VerificationPage />} />
-            <Route path="/center/monitoring" element={<MonitoringPage />} />
-            <Route path="/center/results" element={<ResultsPage />} />
-            <Route path="/center/reports" element={<ReportsPage />} />
-            <Route path="/admin" element={<SuperAdminPortal />} />
-            <Route path="/admin/config" element={<ConfigPage />} />
-            <Route path="/admin/centers" element={<CentersPage />} />
-            <Route path="/admin/users" element={<UsersPage />} />
-            <Route path="/admin/questions" element={<QuestionsPage />} />
-            <Route path="/admin/content" element={<AcademyPage />} />
-            <Route path="/admin/audit" element={<AuditPage />} />
-            <Route path="/ministry" element={<MinistryPortal />} />
-            <Route path="/ministry/review" element={<ReviewPage />} />
-            <Route path="/ministry/registry" element={<RegistryPage />} />
-            <Route path="/ministry/logs" element={<LogsPage />} />
-            <Route path="/ministry/centers" element={<CenterOversightPage />} />
+            {/* Examination Portal (protected) */}
+            <Route path="/exam/start" element={<ProtectedRoute portalType="exam"><ExamPortal /></ProtectedRoute>} />
+            {/* Candidate Portal Routes (protected) */}
+            <Route path="/candidate" element={<ProtectedRoute portalType="candidate"><CandidatePortal /></ProtectedRoute>} />
+            <Route path="/candidate/registration" element={<ProtectedRoute portalType="candidate"><RegistrationPage /></ProtectedRoute>} />
+            <Route path="/candidate/schedule" element={<ProtectedRoute portalType="candidate"><SchedulingPage /></ProtectedRoute>} />
+            <Route path="/candidate/training" element={<ProtectedRoute portalType="candidate"><TrainingPage /></ProtectedRoute>} />
+            <Route path="/candidate/certificates" element={<ProtectedRoute portalType="candidate"><CertificatesPage /></ProtectedRoute>} />
+            <Route path="/candidate/notifications" element={<ProtectedRoute portalType="candidate"><NotificationsPage /></ProtectedRoute>} />
+            <Route path="/candidate/profile" element={<ProtectedRoute portalType="candidate"><ProfilePage /></ProtectedRoute>} />
+            {/* Center Admin Portal Routes (protected) */}
+            <Route path="/center" element={<ProtectedRoute portalType="center"><CenterAdminPortal /></ProtectedRoute>} />
+            <Route path="/center/candidates" element={<ProtectedRoute portalType="center"><CandidatesPage /></ProtectedRoute>} />
+            <Route path="/center/verification" element={<ProtectedRoute portalType="center"><VerificationPage /></ProtectedRoute>} />
+            <Route path="/center/monitoring" element={<ProtectedRoute portalType="center"><MonitoringPage /></ProtectedRoute>} />
+            <Route path="/center/results" element={<ProtectedRoute portalType="center"><ResultsPage /></ProtectedRoute>} />
+            <Route path="/center/reports" element={<ProtectedRoute portalType="center"><ReportsPage /></ProtectedRoute>} />
+            {/* Super Admin Portal Routes (protected) */}
+            <Route path="/admin" element={<ProtectedRoute portalType="admin"><SuperAdminPortal /></ProtectedRoute>} />
+            <Route path="/admin/config" element={<ProtectedRoute portalType="admin"><ConfigPage /></ProtectedRoute>} />
+            <Route path="/admin/centers" element={<ProtectedRoute portalType="admin"><CentersPage /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute portalType="admin"><UsersPage /></ProtectedRoute>} />
+            <Route path="/admin/questions" element={<ProtectedRoute portalType="admin"><QuestionsPage /></ProtectedRoute>} />
+            <Route path="/admin/content" element={<ProtectedRoute portalType="admin"><AcademyPage /></ProtectedRoute>} />
+            <Route path="/admin/audit" element={<ProtectedRoute portalType="admin"><AuditPage /></ProtectedRoute>} />
+            {/* Ministry Portal Routes (protected) */}
+            <Route path="/ministry" element={<ProtectedRoute portalType="ministry"><MinistryPortal /></ProtectedRoute>} />
+            <Route path="/ministry/review" element={<ProtectedRoute portalType="ministry"><ReviewPage /></ProtectedRoute>} />
+            <Route path="/ministry/registry" element={<ProtectedRoute portalType="ministry"><RegistryPage /></ProtectedRoute>} />
+            <Route path="/ministry/logs" element={<ProtectedRoute portalType="ministry"><LogsPage /></ProtectedRoute>} />
+            <Route path="/ministry/centers" element={<ProtectedRoute portalType="ministry"><CenterOversightPage /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

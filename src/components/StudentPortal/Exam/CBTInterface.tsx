@@ -255,8 +255,8 @@ export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterf
     ];
 
     const totalQuestions = questions.length;
-    const progress = ((currentQuestion + 1) / totalQuestions) * 100;
     const answeredCount = Object.keys(answers).length;
+    const progress = (answeredCount / totalQuestions) * 100;
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
@@ -274,10 +274,10 @@ export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterf
             });
 
             console.log("Exam submission response:", response.data);
-            
+
             setIsSubmitting(false);
             setIsSubmitted(true);
-            
+
             // Call onComplete if provided
             if (onComplete) {
                 onComplete();
@@ -365,8 +365,8 @@ export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterf
                                 onValueChange={(optionId) => {
                                     const selectedOption = questions[currentQuestion].options.find(opt => opt.id === optionId);
                                     if (selectedOption) {
-                                        setAnswers({ 
-                                            ...answers, 
+                                        setAnswers({
+                                            ...answers,
                                             [currentQuestion]: {
                                                 questionId: questions[currentQuestion].id,
                                                 optionId: selectedOption.id,
@@ -387,8 +387,8 @@ export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterf
                                                 : "border-transparent bg-secondary/20 hover:bg-secondary/40 hover:border-border/60"
                                         )}
                                         onClick={() => {
-                                            setAnswers({ 
-                                                ...answers, 
+                                            setAnswers({
+                                                ...answers,
                                                 [currentQuestion]: {
                                                     questionId: questions[currentQuestion].id,
                                                     optionId: option.id,
@@ -462,7 +462,7 @@ export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterf
                                     </button>
                                 ))}
                             </div>
-                            <Button 
+                            <Button
                                 onClick={handleSubmit}
                                 className="w-full font-bold gap-2 shadow-lg"
                                 disabled={answeredCount < totalQuestions}
