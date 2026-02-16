@@ -198,7 +198,7 @@ export default function CandidateAuth() {
 
       {/* Right Panel - Auth Form */}
       {/* Move the Right panel to a seperate file, just to reduce the size of this file or line of Code*/}
-      <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-16 bg-white py-8 sm:py-12">
+      <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-16 bg-white py-8 sm:py-12 overflow-y-auto">
         <Link
           to="/"
           className="absolute top-4 sm:top-6 left-4 sm:left-6 lg:left-auto lg:right-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
