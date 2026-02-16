@@ -144,9 +144,9 @@ export function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 flex flex-col h-screen">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 h-14 sm:h-16 bg-card/90 backdrop-blur-xl border-b border-border flex items-center justify-between px-3 sm:px-6">
+        <header className="sticky top-0 z-30 h-14 sm:h-16 bg-card/90 backdrop-blur-xl border-b border-border flex items-center justify-between px-3 sm:px-6 flex-shrink-0">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -179,7 +179,7 @@ export function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="p-3 sm:p-6 bg-background min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)]">{children}</main>
+        <main className="p-3 sm:p-6 bg-background flex-1 overflow-y-auto">{children}</main>
       </div>
 
       {/* Mobile close button */}
