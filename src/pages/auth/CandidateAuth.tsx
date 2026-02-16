@@ -198,22 +198,24 @@ export default function CandidateAuth() {
 
       {/* Right Panel - Auth Form */}
       {/* Move the Right panel to a seperate file, just to reduce the size of this file or line of Code*/}
-      <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-16 bg-white py-8 sm:py-12 overflow-y-auto">
-        <Link
-          to="/"
-          className="absolute top-4 sm:top-6 left-4 sm:left-6 lg:left-auto lg:right-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Back to Home</span>
-        </Link>
-
-        <div className="max-w-md mx-auto w-full mt-8 sm:mt-0">
-          <div className="lg:hidden flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary flex items-center justify-center shadow-md">
-              <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+      <div className="flex-1 flex flex-col px-4 sm:px-6 lg:px-16 bg-white overflow-y-auto">
+        <div className="sticky top-0 z-10 bg-white pt-4 pb-2 flex items-center justify-between lg:justify-end">
+          <div className="lg:hidden flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+              <GraduationCap className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-lg sm:text-xl font-display font-bold">Candidate Portal</span>
+            <span className="text-sm font-display font-bold">Candidate Portal</span>
           </div>
+          <Link
+            to="/"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back to Home</span>
+          </Link>
+        </div>
+
+        <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center py-6 sm:py-12">
 
           <h2 className="text-3xl sm:text-4xl alumni-sans-title text-foreground mb-2">
             {isSignUp ? "Create Account" : "Welcome Back"}
