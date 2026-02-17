@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ interface EducationDeclarationProps {
 }
 
 export function EducationDeclaration({ candidateData }: EducationDeclarationProps) {
+    const { t } = useTranslation();
     const { toast } = useToast();
     const [hasSixteenYears, setHasSixteenYears] = useState(false);
     const [isUploaded, setIsUploaded] = useState(false);
@@ -24,14 +26,12 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
         if (candidateData) {
             setHasSixteenYears(candidateData.has16YearsEducation || false);
 
-            //Check for degree document
             const degreeDoc = candidateData.documents?.find((d: any) => d.type === 'degreeTranscript');
             if (degreeDoc && degreeDoc.fileUrl) {
                 setIsUploaded(true);
                 setUploadedFileName(degreeDoc.fileUrl.split('/').pop() || "Uploaded");
             }
         } else {
-            // Fallback to local storage if needed, or just default to false
             const saved = localStorage.getItem("has16YearsEducation") === "true";
             setHasSixteenYears(saved);
         }
@@ -47,8 +47,8 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
 
         if (file.size > 5 * 1024 * 1024) {
             toast({
-                title: "File Too Large",
-                description: "File size must be less than 5MB.",
+                title: t('documents.uploadFailed'),
+                description: t('documents.maxSize'),
                 variant: "destructive",
             });
             return;
@@ -67,13 +67,13 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
             setIsUploaded(true);
             setUploadedFileName(file.name);
             toast({
-                title: "Upload Successful",
-                description: `${file.name} has been uploaded successfully.`,
+                title: t('documents.uploadSuccess'),
+                description: `${file.name}`,
             });
         } catch (error: any) {
             toast({
-                title: "Upload Failed",
-                description: error.response?.data?.message || "Failed to upload degree transcript.",
+                title: t('documents.uploadFailed'),
+                description: error.response?.data?.message || t('documents.uploadFailed'),
                 variant: "destructive",
             });
         } finally {
@@ -89,16 +89,16 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                         <BookOpen className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <CardTitle className="alumni-sans-title">Education Declaration</CardTitle>
-                        <CardDescription>Declare your educational background</CardDescription>
+                        <CardTitle className="alumni-sans-title">{t('education.title')}</CardTitle>
+                        <CardDescription>{t('education.description')}</CardDescription>
                     </div>
                 </div>
             </CardHeader>
             <CardContent className="space-y-8">
                 <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 border border-border/40">
                     <div className="space-y-1">
-                        <Label htmlFor="education-switch" className="text-base font-semibold">16 Years of Education</Label>
-                        <p className="text-sm text-muted-foreground">Do you have a Bachelor's degree or equivalent (16 years)?</p>
+                        <Label htmlFor="education-switch" className="text-base font-semibold">{t('education.has16Years')}</Label>
+                        <p className="text-sm text-muted-foreground">{t('education.description')}</p>
                     </div>
                     <Switch
                         id="education-switch"
@@ -111,7 +111,7 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                     <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
                         <div className="flex items-center gap-2 text-primary">
                             <GraduationCap className="w-5 h-5" />
-                            <h4 className="font-semibold">Degree Verification Required</h4>
+                            <h4 className="font-semibold">{t('education.transcriptTitle')}</h4>
                         </div>
 
                         <div
@@ -123,7 +123,7 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                             {isUploading ? (
                                 <div className="flex flex-col items-center gap-2">
                                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                                    <p className="text-sm text-muted-foreground">Uploading...</p>
+                                    <p className="text-sm text-muted-foreground">{t('education.uploading')}</p>
                                 </div>
                             ) : isUploaded ? (
                                 <>
@@ -131,10 +131,10 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                                         <FileCheck className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <p className="font-semibold">Higher Education Degree Uploaded</p>
+                                        <p className="font-semibold">{t('education.transcriptTitle')}</p>
                                         <p className="text-sm text-muted-foreground">{uploadedFileName}</p>
                                     </div>
-                                    <Button variant="outline" size="sm" onClick={() => { setIsUploaded(false); setUploadedFileName(""); }}>Change File</Button>
+                                    <Button variant="outline" size="sm" onClick={() => { setIsUploaded(false); setUploadedFileName(""); }}>{t('documents.removeFile')}</Button>
                                 </>
                             ) : (
                                 <>
@@ -142,8 +142,8 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                                         <Upload className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <p className="font-semibold">Upload Degree Transcript / Certificate</p>
-                                        <p className="text-sm text-muted-foreground">Drag and drop your degree or click to browse</p>
+                                        <p className="font-semibold">{t('education.uploadTranscript')}</p>
+                                        <p className="text-sm text-muted-foreground">{t('education.transcriptDesc')}</p>
                                     </div>
                                     <input
                                         type="file"
@@ -152,7 +152,7 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                                         accept="application/pdf,image/*"
                                         onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
                                     />
-                                    <Button className="gradient-primary text-white" onClick={() => fileInputRef.current?.click()}>Select File</Button>
+                                    <Button className="gradient-primary text-white" onClick={() => fileInputRef.current?.click()}>{t('documents.uploadButton')}</Button>
                                 </>
                             )}
                         </div>
@@ -162,7 +162,7 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                 <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 flex gap-3">
                     <Info className="w-5 h-5 text-primary shrink-0" />
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                        Minimum education requirement is 10 years (Matric) for this certification. Candidates with 16 years of education are eligible for advanced modules.
+                        {t('education.description')}
                     </p>
                 </div>
             </CardContent>

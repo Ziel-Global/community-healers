@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { WizardStepProps } from "../CandidateWizard";
 import { FeePaymentCard } from "../Payments/FeePaymentCard";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { ChevronLeft, ChevronRight, Wallet, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 
 export function PaymentStep({ onNext, onBack }: WizardStepProps) {
+  const { t } = useTranslation();
   const [isPaid, setIsPaid] = useState(false);
 
   const handlePayment = () => {
@@ -28,10 +30,10 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
           </div>
           <div>
             <h2 className="font-display font-bold text-xl text-foreground">
-              Registration Payment
+              {t('payment.title')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Complete the payment to activate your candidate profile
+              {t('payment.description')}
             </p>
           </div>
         </div>
@@ -53,8 +55,8 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
           <div className="flex items-center gap-3">
             <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
             <div>
-              <p className="font-semibold text-foreground">Payment Successful!</p>
-              <p className="text-sm text-muted-foreground">You can now proceed to schedule your exam</p>
+              <p className="font-semibold text-foreground">{t('payment.successful')}</p>
+              <p className="text-sm text-muted-foreground">{t('payment.successDesc')}</p>
             </div>
           </div>
         </div>
@@ -64,7 +66,7 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
       {!isPaid && (
         <div className="max-w-md mx-auto bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
           <p className="text-sm text-amber-700 dark:text-amber-400">
-            ⚠️ Please complete the payment to proceed to exam scheduling
+            {t('payment.warning')}
           </p>
         </div>
       )}
@@ -73,19 +75,19 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
       <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-border/60">
         <Button onClick={onBack} variant="outline" size="lg" className="group w-full sm:w-auto">
           <ChevronLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-          Back to Registration
+          {t('payment.backToRegistration')}
         </Button>
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
           <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-            Step 2 of 3 • Payment
+            {t('payment.stepInfo')}
           </div>
-          <Button 
-            onClick={handleNext} 
-            size="lg" 
+          <Button
+            onClick={handleNext}
+            size="lg"
             disabled={!isPaid}
             className="group w-full sm:w-auto order-1 sm:order-2"
           >
-            Continue to Scheduling
+            {t('payment.continueToScheduling')}
             <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>

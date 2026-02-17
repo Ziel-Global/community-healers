@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,53 +19,33 @@ interface PersonalInfo {
 }
 
 interface PersonalInfoFormProps {
-    candidateData: any;
+    data: PersonalInfo;
+    onUpdate: (field: keyof PersonalInfo, value: string) => void;
 }
 
-export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
-    const [formData, setFormData] = useState<PersonalInfo>({
-        fatherName: "",
-        cnic: "",
-        dob: "",
-        phone: "",
-        city: "",
-        address: "",
-    });
-
+export function PersonalInfoForm({ data, onUpdate }: PersonalInfoFormProps) {
+    const { t } = useTranslation();
     const [dobError, setDobError] = useState<string | null>(null);
 
     const validateAge = (dobString: string) => {
         if (!dobString) return null;
 
         const birthDate = parseISO(dobString);
-        if (!isValid(birthDate)) return "Invalid date format";
+        if (!isValid(birthDate)) return null;
 
         const age = differenceInYears(new Date(), birthDate);
         if (age < 16) {
-            return "You must be at least 16 years old to register.";
+            return t('personalInfo.ageWarning');
         }
         return null;
     };
 
-    // Populate form with candidate data
+    // Validate DOB whenever it changes in props
     useEffect(() => {
-        if (candidateData) {
-            const dob = candidateData.dob ? new Date(candidateData.dob).toISOString().split('T')[0] : "";
-            setFormData({
-                fatherName: candidateData.fatherName || "",
-                cnic: candidateData.cnic || "",
-                dob: dob,
-                phone: candidateData.user?.phoneNumber || "",
-                city: candidateData.cityId || "",
-                address: candidateData.address || "",
-            });
-
-            // Set initial validation error if any
-            if (dob) {
-                setDobError(validateAge(dob));
-            }
+        if (data.dob) {
+            setDobError(validateAge(data.dob));
         }
-    }, [candidateData]);
+    }, [data.dob, t]);
 
     // Fetch cities from API
     const [cities, setCities] = useState<Array<{ id: string; name: string }>>([]);
@@ -81,20 +62,7 @@ export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
     }, []);
 
     const handleChange = (field: keyof PersonalInfo, value: string) => {
-        const updated = { ...formData, [field]: value };
-        setFormData(updated);
-
-        if (field === "dob") {
-            setDobError(validateAge(value));
-        }
-
-        // Sync to localStorage for wizard step compatibility
-        // Only if we want to support the wizard flow which reads from here
-        // We accumulate with existing localStorage data to avoid wiping other fields if any
-        const saved = localStorage.getItem("candidatePersonalInfo");
-        const parsed = saved ? JSON.parse(saved) : {};
-        const newStorage = { ...parsed, [field]: value };
-        localStorage.setItem("candidatePersonalInfo", JSON.stringify(newStorage));
+        onUpdate(field, value);
     };
 
     return (
@@ -105,8 +73,8 @@ export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
                         <User className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <CardTitle className="alumni-sans-title">Personal Information</CardTitle>
-                        <CardDescription>Enter your official details as per CNIC</CardDescription>
+                        <CardTitle className="alumni-sans-title">{t('personalInfo.title')}</CardTitle>
+                        <CardDescription>{t('personalInfo.description')}</CardDescription>
                     </div>
                 </div>
             </CardHeader>
@@ -114,40 +82,40 @@ export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <div className="space-y-2">
-                        <Label htmlFor="fatherName">Father's Name</Label>
+                        <Label htmlFor="fatherName">{t('personalInfo.fatherName')}</Label>
                         <div className="relative">
                             <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
                                 id="fatherName"
-                                placeholder="Aslam Khan"
+                                placeholder={t('personalInfo.fatherNamePlaceholder')}
                                 className="pl-10"
-                                value={formData.fatherName}
+                                value={data.fatherName}
                                 onChange={(e) => handleChange("fatherName", e.target.value)}
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="cnic">CNIC Number</Label>
+                        <Label htmlFor="cnic">{t('personalInfo.cnic')}</Label>
                         <div className="relative">
                             <CreditCard className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
                                 id="cnic"
-                                placeholder="42201-XXXXXXX-X"
+                                placeholder={t('personalInfo.cnicPlaceholder')}
                                 className="pl-10"
-                                value={formData.cnic}
+                                value={data.cnic}
                                 onChange={(e) => handleChange("cnic", e.target.value)}
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="dob">Date of Birth</Label>
+                        <Label htmlFor="dob">{t('personalInfo.dob')}</Label>
                         <div className="relative">
                             <CalendarIcon className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
                                 id="dob"
                                 type="date"
                                 className={`pl-10 ${dobError ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                                value={formData.dob}
+                                value={data.dob}
                                 onChange={(e) => handleChange("dob", e.target.value)}
                             />
                         </div>
@@ -159,7 +127,7 @@ export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
                         )}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="phone">Contact Number</Label>
+                        <Label htmlFor="phone">{t('personalInfo.phone')}</Label>
                         <div className="relative">
                             <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -167,20 +135,20 @@ export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
                                 placeholder="03001234567"
                                 className="pl-10"
                                 disabled
-                                value={formData.phone}
+                                value={data.phone}
                             />
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="city">City / Area</Label>
+                        <Label htmlFor="city">{t('personalInfo.city')}</Label>
                         <div className="relative">
                             <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Select
-                                value={formData.city}
+                                value={data.city}
                                 onValueChange={(value) => handleChange("city", value)}
                             >
                                 <SelectTrigger id="city" className="pl-10">
-                                    <SelectValue placeholder="Select your city" />
+                                    <SelectValue placeholder={t('personalInfo.selectCity')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {cities.map((city) => (
@@ -193,14 +161,14 @@ export function PersonalInfoForm({ candidateData }: PersonalInfoFormProps) {
                         </div>
                     </div>
                     <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="address">Address</Label>
+                        <Label htmlFor="address">{t('personalInfo.address')}</Label>
                         <div className="relative">
                             <Home className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
                                 id="address"
-                                placeholder="House #, Street #, Sector/Area"
+                                placeholder={t('personalInfo.addressPlaceholder')}
                                 className="pl-10"
-                                value={formData.address}
+                                value={data.address}
                                 onChange={(e) => handleChange("address", e.target.value)}
                             />
                         </div>

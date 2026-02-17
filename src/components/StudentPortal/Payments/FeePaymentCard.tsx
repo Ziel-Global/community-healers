@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreditCard, Wallet, Landmark, ArrowRight, CheckCircle2 } from "lucide-react";
@@ -11,10 +12,11 @@ interface FeePaymentCardProps {
 }
 
 export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePaymentCardProps) {
-    const title = type === "registration" ? "Registration Fee" : "Exam Fee";
+    const { t } = useTranslation();
+    const title = type === "registration" ? t('payment.registrationFee') : t('payment.examFee');
     const description = type === "registration"
-        ? "One-time registration fee to activate your candidate profile"
-        : "Fee for scheduling your CBT certification exam";
+        ? t('payment.registrationFeeDesc')
+        : t('payment.examFeeDesc');
 
     return (
         <Card className={cn(
@@ -34,7 +36,7 @@ export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePayme
                     {isPaid && (
                         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 border border-success/20 text-success text-xs font-bold uppercase tracking-wider">
                             <CheckCircle2 className="w-3.5 h-3.5" />
-                            Paid
+                            {t('payment.paid')}
                         </div>
                     )}
                 </div>
@@ -42,7 +44,7 @@ export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePayme
             <CardContent className="space-y-6">
                 <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold">PKR {amount.toLocaleString()}</span>
-                    <span className="text-muted-foreground text-sm font-medium">Included Taxes</span>
+                    <span className="text-muted-foreground text-sm font-medium">{t('payment.includedTaxes')}</span>
                 </div>
 
                 {!isPaid ? (
@@ -52,18 +54,18 @@ export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePayme
                                 <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                                     <CreditCard className="w-5 h-5 text-primary" />
                                 </div>
-                                <span className="text-xs font-semibold">Credit/Debit</span>
+                                <span className="text-xs font-semibold">{t('payment.creditDebit')}</span>
                             </button>
                             <button className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/50 hover:border-primary/30 transition-all gap-2 group">
                                 <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                                     <Wallet className="w-5 h-5 text-primary" />
                                 </div>
-                                <span className="text-xs font-semibold">Mobile Wallet</span>
+                                <span className="text-xs font-semibold">{t('payment.mobileWallet')}</span>
                             </button>
                         </div>
 
                         <Button onClick={onPay} className="w-full h-12 gradient-white font-semibold text-white shadow-royal hover:opacity-90">
-                            Pay Now & Proceed
+                            {t('payment.payNow')}
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
                     </div>
@@ -71,21 +73,21 @@ export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePayme
                     <div className="space-y-4">
                         <div className="p-4 rounded-xl bg-secondary/20 border border-border/40 space-y-2">
                             <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Transaction ID</span>
+                                <span className="text-muted-foreground">{t('payment.transactionId')}</span>
                                 <span className="font-mono font-medium">#CP-98124712</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Payment Date</span>
+                                <span className="text-muted-foreground">{t('payment.paymentDate')}</span>
                                 <span className="font-medium">Jan 20, 2024</span>
                             </div>
                             <div className="flex justify-between text-sm text-success pt-2 border-t border-border/20">
-                                <span className="font-semibold">Status</span>
-                                <span className="font-bold">Success</span>
+                                <span className="font-semibold">{t('payment.status')}</span>
+                                <span className="font-bold">{t('payment.success')}</span>
                             </div>
                         </div>
                         <Button variant="outline" className="w-full h-10 gap-2">
                             <Landmark className="w-4 h-4" />
-                            Download Receipt
+                            {t('payment.downloadReceipt')}
                         </Button>
                     </div>
                 )}

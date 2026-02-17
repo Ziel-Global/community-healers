@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +25,7 @@ interface CandidateWizardProps {
 }
 
 export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComplete }: CandidateWizardProps) {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
@@ -57,14 +59,14 @@ export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComple
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
           <div>
             <h2 className="font-bold text-xl sm:text-3xl text-foreground alumni-sans-title">
-              Application Progress
+              {t('wizard.applicationProgress')}
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Complete all steps to receive your certification
+              {t('wizard.completeAllSteps')}
             </p>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-xs sm:text-sm text-muted-foreground">Current Step</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">{t('wizard.currentStep')}</p>
             <p className="text-xl sm:text-2xl font-bold text-primary">
               {currentStep + 1}/{steps.length}
             </p>
@@ -96,13 +98,12 @@ export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComple
                 style={{ width: `${100 / steps.length}%` }}
               >
                 <div
-                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                    isCompleted || isPast
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isCompleted || isPast
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
                       : isCurrent
-                      ? "bg-primary/20 border-2 border-primary text-primary animate-pulse"
-                      : "bg-secondary border-2 border-border text-muted-foreground"
-                  }`}
+                        ? "bg-primary/20 border-2 border-primary text-primary animate-pulse"
+                        : "bg-secondary border-2 border-border text-muted-foreground"
+                    }`}
                 >
                   {isCompleted || isPast ? (
                     <Check className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -112,13 +113,12 @@ export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComple
                 </div>
                 <div className="text-center px-1">
                   <p
-                    className={`text-[10px] sm:text-xs font-medium ${
-                      isCurrent
+                    className={`text-[10px] sm:text-xs font-medium ${isCurrent
                         ? "text-primary font-semibold"
                         : isCompleted || isPast
-                        ? "text-foreground"
-                        : "text-muted-foreground"
-                    }`}
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                      }`}
                   >
                     {step.title}
                   </p>

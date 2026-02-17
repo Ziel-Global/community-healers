@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect, ReactNode } from
 import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 import { authService } from '../services/authService';
 import { parseJwt, isTokenExpired } from '../utils/jwt';
+import i18n from '../i18n';
 
 interface AuthContextType extends AuthState {
     loginCandidate: (credentials: CandidateLoginCredentials) => Promise<void>;
@@ -403,6 +404,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } finally {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+
+            // Reset language to English (LTR) on logout
+            i18n.changeLanguage('en');
 
             setState({
                 user: null,

@@ -13,6 +13,7 @@ import {
 import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 export default function CandidateAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -23,6 +24,7 @@ export default function CandidateAuth() {
   const navigate = useNavigate();
   const { loginCandidate, signup, verifyCandidate } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -49,8 +51,8 @@ export default function CandidateAuth() {
         if (formData.password.length < 6) {
           toast({
             variant: "destructive",
-            title: "Password Too Short",
-            description: "Password must be at least 6 characters long.",
+            title: t("candidateAuth.passwordTooShort"),
+            description: t("candidateAuth.passwordTooShortDesc"),
           });
           setLoading(false);
           return;
@@ -58,8 +60,8 @@ export default function CandidateAuth() {
         if (formData.password !== formData.confirmPassword) {
           toast({
             variant: "destructive",
-            title: "Password Mismatch",
-            description: "Passwords do not match.",
+            title: t("candidateAuth.passwordMismatch"),
+            description: t("candidateAuth.passwordMismatchDesc"),
           });
           setLoading(false);
           return;
@@ -75,8 +77,8 @@ export default function CandidateAuth() {
         setShowOtpModal(true);
         setLoading(false); // Stop loading to show OTP modal
         toast({
-          title: "Signup Successful",
-          description: "OTP sent to your phone number.",
+          title: t("candidateAuth.signupSuccessful"),
+          description: t("candidateAuth.otpSent"),
         });
       } else {
         // Login
@@ -86,8 +88,8 @@ export default function CandidateAuth() {
         });
         navigate("/candidate");
         toast({
-          title: "Welcome back!",
-          description: "Login successful.",
+          title: t("candidateAuth.welcomeBack"),
+          description: t("candidateAuth.loginSuccessful"),
         });
         // Loader persists until navigation completes
       }
@@ -95,8 +97,8 @@ export default function CandidateAuth() {
       setLoading(false); // Stop loading on error
       toast({
         variant: "destructive",
-        title: isSignUp ? "Signup Failed" : "Login Failed",
-        description: error.message || "An error occurred.",
+        title: isSignUp ? t("candidateAuth.signupFailed") : t("candidateAuth.loginFailed"),
+        description: error.message || t("common.error"),
       });
     }
   };
@@ -154,16 +156,16 @@ export default function CandidateAuth() {
       setShowOtpModal(false);
       navigate("/candidate");
       toast({
-        title: "Verification Successful",
-        description: "You are now logged in.",
+        title: t("candidateAuth.verificationSuccessful"),
+        description: t("candidateAuth.nowLoggedIn"),
       });
       // Loader persists until navigation completes
     } catch (error: any) {
       setLoading(false); // Stop loading on error
       toast({
         variant: "destructive",
-        title: "Verification Failed",
-        description: error.message || "Invalid OTP.",
+        title: t("candidateAuth.verificationFailed"),
+        description: error.message || t("candidateAuth.invalidOtp"),
       });
     }
   };
@@ -177,22 +179,21 @@ export default function CandidateAuth() {
             <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-lg">
               <GraduationCap className="w-8 h-8 text-primary" />
             </div>
-            <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
+            <span className="text-3xl alumni-sans-title text-white">{t("candidateAuth.brandTitle")}</span>
           </div>
 
           <h1 className="text-4xl alumni-sans-title mb-4 text-white">
-            Candidate Portal
+            {t("candidateAuth.candidatePortal")}
           </h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-md">
-            Register for certification exams, track your progress, complete CBT tests, and download your official government certificates.
+            {t("candidateAuth.brandDescription")}
           </p>
 
           <div className="mt-12 space-y-4">
-            {/* Move this array to the constants.ts file (Code Organization and best practices) and also use Type Safety*/}
             {[
-              { num: "1", text: "Complete registration & documents" },
-              { num: "2", text: "Schedule your CBT exam" },
-              { num: "3", text: "Download your certificate" },
+              { num: "1", text: t("candidateAuth.step1") },
+              { num: "2", text: t("candidateAuth.step2") },
+              { num: "3", text: t("candidateAuth.step3") },
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-md">
@@ -206,33 +207,32 @@ export default function CandidateAuth() {
       </div>
 
       {/* Right Panel - Auth Form */}
-      {/* Move the Right panel to a seperate file, just to reduce the size of this file or line of Code*/}
       <div className="flex-1 flex flex-col px-4 sm:px-6 lg:px-16 bg-white overflow-y-auto">
         <div className="sticky top-0 z-10 bg-white pt-4 pb-2 flex items-center justify-between lg:justify-end">
           <div className="lg:hidden flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
               <GraduationCap className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-sm font-display font-bold">Candidate Portal</span>
+            <span className="text-sm font-display font-bold">{t("candidateAuth.candidatePortal")}</span>
           </div>
           <Link
             to="/"
             className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Home</span>
+            <span className="hidden sm:inline">{t("candidateAuth.backToHome")}</span>
           </Link>
         </div>
 
         <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center py-6 sm:py-12">
 
           <h2 className="text-3xl sm:text-4xl alumni-sans-title text-foreground mb-2">
-            {isSignUp ? "Create Account" : "Welcome Back"}
+            {isSignUp ? t("candidateAuth.signupTitle") : t("candidateAuth.loginTitle")}
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
             {isSignUp
-              ? "Register to begin your certification journey"
-              : "Sign in to access your candidate dashboard"}
+              ? t("candidateAuth.signupDesc")
+              : t("candidateAuth.loginDesc")}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
@@ -240,12 +240,12 @@ export default function CandidateAuth() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5 sm:space-y-2">
-                    <Label htmlFor="firstName" className="text-sm">First Name</Label>
+                    <Label htmlFor="firstName" className="text-sm">{t("candidateAuth.firstName")}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       <Input
                         id="firstName"
-                        placeholder="First name"
+                        placeholder={t("candidateAuth.firstNamePlaceholder")}
                         className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                         value={formData.firstName}
                         onChange={handleInputChange}
@@ -255,12 +255,12 @@ export default function CandidateAuth() {
                   </div>
 
                   <div className="space-y-1.5 sm:space-y-2">
-                    <Label htmlFor="lastName" className="text-sm">Last Name</Label>
+                    <Label htmlFor="lastName" className="text-sm">{t("candidateAuth.lastName")}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       <Input
                         id="lastName"
-                        placeholder="Last name"
+                        placeholder={t("candidateAuth.lastNamePlaceholder")}
                         className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                         value={formData.lastName}
                         onChange={handleInputChange}
@@ -271,13 +271,13 @@ export default function CandidateAuth() {
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="email" className="text-sm">Email Address</Label>
+                  <Label htmlFor="email" className="text-sm">{t("candidateAuth.email")}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="your@email.com"
+                      placeholder={t("candidateAuth.emailPlaceholder")}
                       className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                       value={formData.email}
                       onChange={handleInputChange}
@@ -289,13 +289,13 @@ export default function CandidateAuth() {
             )}
 
             <div className="space-y-1.5 sm:space-y-2">
-              <Label htmlFor="phone" className="text-sm">Phone Number</Label>
+              <Label htmlFor="phone" className="text-sm">{t("candidateAuth.phone")}</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
                   id="phoneNumber"
                   type="tel"
-                  placeholder="+92 300 1234567"
+                  placeholder={t("candidateAuth.phonePlaceholder")}
                   className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
@@ -307,13 +307,13 @@ export default function CandidateAuth() {
             {isSignUp && (
               <>
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="password" className="text-sm">Password</Label>
+                  <Label htmlFor="password" className="text-sm">{t("candidateAuth.password")}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     <Input
                       id="password"
                       type="password"
-                      placeholder="Create a password"
+                      placeholder={t("candidateAuth.createPassword")}
                       className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${formData.password && formData.password.length < 6 ? "border-destructive focus:border-destructive" : ""
                         }`}
                       value={formData.password}
@@ -323,19 +323,19 @@ export default function CandidateAuth() {
                   </div>
                   {formData.password && formData.password.length < 6 && (
                     <p className="text-xs text-destructive mt-1 animate-in fade-in slide-in-from-top-1">
-                      Password must be at least 6 characters
+                      {t("candidateAuth.passwordMinChars")}
                     </p>
                   )}
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-sm">{t("candidateAuth.confirmPassword")}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     <Input
                       id="confirmPassword"
                       type="password"
-                      placeholder="Confirm your password"
+                      placeholder={t("candidateAuth.confirmPasswordPlaceholder")}
                       className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
@@ -348,13 +348,13 @@ export default function CandidateAuth() {
 
             {!isSignUp && (
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="password" className="text-sm">Password</Label>
+                <Label htmlFor="password" className="text-sm">{t("candidateAuth.password")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder={t("candidateAuth.passwordPlaceholder")}
                     className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                     value={formData.password}
                     onChange={handleInputChange}
@@ -368,40 +368,39 @@ export default function CandidateAuth() {
               {loading ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Please wait...
+                  {t("candidateAuth.loggingIn")}
                 </>
               ) : (
-                isSignUp ? "Create Account" : "Sign In"
+                isSignUp ? t("candidateAuth.signupButton") : t("candidateAuth.loginButton")
               )}
             </Button>
           </form>
 
           <p className="mt-4 sm:mt-6 text-center text-sm text-muted-foreground">
-            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+            {isSignUp ? t("candidateAuth.haveAccount") : t("candidateAuth.noAccount")}{" "}
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
               className="text-primary font-semibold hover:text-primary/80 transition-colors"
             >
-              {isSignUp ? "Sign In" : "Create Account"}
+              {isSignUp ? t("candidateAuth.signInLink") : t("candidateAuth.signUpLink")}
             </button>
           </p>
         </div>
       </div>
 
       {/* OTP Modal */}
-      {/* Make a spererate component for this OTP Modal */}
       <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl alumni-sans-title">Verify OTP</DialogTitle>
+            <DialogTitle className="text-2xl alumni-sans-title">{t("candidateAuth.otpTitle")}</DialogTitle>
             <DialogDescription>
-              Enter the 6-digit OTP code sent to your phone number to complete your registration.
+              {t("candidateAuth.otpDesc")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleOtpSubmit} className="space-y-6 mt-4">
             <div className="space-y-4">
-              <Label className="text-sm">OTP Code</Label>
+              <Label className="text-sm">{t("candidateAuth.otpCode")}</Label>
               <div className="flex justify-center gap-2 sm:gap-3">
                 {otp.map((digit, index) => (
                   <Input
@@ -424,7 +423,7 @@ export default function CandidateAuth() {
                 type="button"
                 className="text-sm text-primary hover:text-primary/80 font-medium w-full text-center"
               >
-                Resend OTP
+                {t("candidateAuth.resendOtp")}
               </button>
             </div>
 
@@ -435,16 +434,16 @@ export default function CandidateAuth() {
                 onClick={() => setShowOtpModal(false)}
                 className="flex-1 h-11"
               >
-                Cancel
+                {t("candidateAuth.cancelOtp")}
               </Button>
               <Button type="submit" variant="forest" className="flex-1 h-11 alumni-sans-subtitle" disabled={loading}>
                 {loading ? (
                   <>
                     <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    Checking...
+                    {t("candidateAuth.verifying")}
                   </>
                 ) : (
-                  "Verify & Continue"
+                  t("candidateAuth.verifyOtp")
                 )}
               </Button>
             </div>

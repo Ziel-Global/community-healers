@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Award, CheckCircle2, Download, Share2 } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 interface CertificateData {
     certificate_number: string;
@@ -17,6 +18,8 @@ interface CertificateCardProps {
 }
 
 export function CertificateCard({ certificate }: CertificateCardProps) {
+    const { t } = useTranslation();
+
     return (
         <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-green-500/5 to-emerald-500/5">
             <CardHeader className="border-b border-border/40 bg-gradient-to-r from-primary/5 to-primary/10">
@@ -26,38 +29,38 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
                             <Award className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                            <CardTitle className="text-xl">Your Certificate is Ready!</CardTitle>
+                            <CardTitle className="text-xl">{t('certificate.ready')}</CardTitle>
                             <p className="text-sm text-muted-foreground mt-1">
-                                Congratulations on passing your certification exam
+                                {t('certificate.congratsExam')}
                             </p>
                         </div>
                     </div>
                     <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/40 text-sm px-3 py-1">
                         <CheckCircle2 className="w-4 h-4 mr-1" />
-                        Certified
+                        {t('certificate.certified')}
                     </Badge>
                 </div>
             </CardHeader>
             <CardContent className="p-6">
                 <div className="grid md:grid-cols-2 gap-6 mb-6">
                     <div className="p-4 rounded-xl bg-card border border-border/40">
-                        <p className="text-xs text-muted-foreground mb-1">Certificate Number</p>
+                        <p className="text-xs text-muted-foreground mb-1">{t('certificate.certificateNumber')}</p>
                         <p className="font-bold text-foreground font-mono text-lg">{certificate.certificate_number}</p>
                     </div>
                     <div className="p-4 rounded-xl bg-card border border-border/40">
-                        <p className="text-xs text-muted-foreground mb-1">Exam Score</p>
-                        <p className="font-bold text-green-600 dark:text-green-400 text-lg">{certificate.score}% - PASSED</p>
+                        <p className="text-xs text-muted-foreground mb-1">{t('certificate.examScore')}</p>
+                        <p className="font-bold text-green-600 dark:text-green-400 text-lg">{certificate.score}% - {t('certificate.passed')}</p>
                     </div>
                     <div className="p-4 rounded-xl bg-card border border-border/40">
-                        <p className="text-xs text-muted-foreground mb-1">Issue Date</p>
+                        <p className="text-xs text-muted-foreground mb-1">{t('certificate.issueDate')}</p>
                         <p className="font-bold text-foreground">
                             {format(new Date(certificate.issuedDate), 'MMMM d, yyyy')}
                         </p>
                     </div>
                     <div className="p-4 rounded-xl bg-card border border-border/40">
-                        <p className="text-xs text-muted-foreground mb-1">Valid Until</p>
+                        <p className="text-xs text-muted-foreground mb-1">{t('certificate.validUntil')}</p>
                         <p className="font-bold text-foreground">
-                            {certificate.expiryDate ? format(new Date(certificate.expiryDate), 'MMMM d, yyyy') : 'Indefinite'}
+                            {certificate.expiryDate ? format(new Date(certificate.expiryDate), 'MMMM d, yyyy') : t('certificate.indefinite')}
                         </p>
                     </div>
                 </div>
@@ -65,17 +68,17 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
                 <div className="flex flex-wrap gap-3">
                     <Button size="lg" className="flex-1 gap-2 shadow-lg" disabled={!certificate.downloadUrl}>
                         <Download className="w-4 h-4" />
-                        Download Certificate (PDF)
+                        {t('certificate.downloadPDF')}
                     </Button>
                     <Button variant="outline" size="lg" className="gap-2">
                         <Share2 className="w-4 h-4" />
-                        Share Certificate
+                        {t('certificate.share')}
                     </Button>
                 </div>
 
                 <div className="mt-4 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
                     <p className="text-xs text-muted-foreground">
-                        <strong className="text-foreground">Note:</strong> Your certificate is registered in the national database and can be verified online using the certificate number.
+                        <strong className="text-foreground">{t('common.note')}</strong> {t('certificate.note')}
                     </p>
                 </div>
             </CardContent>

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Calendar, MapPin, Clock, PartyPopper, FileText, Shield, AlertCircle, User } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 interface RegistrationCompleteScreenProps {
   examDate: Date | string;
@@ -12,6 +13,7 @@ interface RegistrationCompleteScreenProps {
 }
 
 export function RegistrationCompleteScreen({ examDate, centerName, centerId, onGoToProfile }: RegistrationCompleteScreenProps) {
+  const { t } = useTranslation();
   const dateObj = (() => {
     try {
       if (!examDate) return new Date();
@@ -32,13 +34,13 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
             </div>
             <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/40 text-sm px-4 py-1.5 mx-auto mb-3">
               <CheckCircle2 className="w-4 h-4 mr-1.5" />
-              Registration Complete
+              {t('complete.registrationComplete')}
             </Badge>
             <CardTitle className="text-2xl sm:text-3xl font-bold alumni-sans-title text-foreground">
-              Congratulations! 🎉
+              {t('complete.congratulations')}
             </CardTitle>
             <p className="text-sm sm:text-base text-muted-foreground mt-2">
-              Your registration has been completed and your exam has been scheduled successfully
+              {t('complete.successMessage')}
             </p>
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
@@ -49,27 +51,27 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
                   <Calendar className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-foreground">Exam Schedule</h3>
-                  <p className="text-xs text-muted-foreground">Your scheduled examination details</p>
+                  <h3 className="font-bold text-lg text-foreground">{t('complete.examSchedule')}</h3>
+                  <p className="text-xs text-muted-foreground">{t('complete.scheduledDetails')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
                   <Calendar className="w-5 h-5 text-primary mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground mb-1">Date</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t('complete.date')}</p>
                   <p className="font-bold text-foreground text-sm sm:text-base">
                     {format(dateObj, 'MMMM d, yyyy')}
                   </p>
                 </div>
                 <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
                   <Clock className="w-5 h-5 text-primary mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground mb-1">Time</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t('complete.time')}</p>
                   <p className="font-bold text-foreground text-sm sm:text-base">10:00 AM</p>
                 </div>
                 <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
                   <MapPin className="w-5 h-5 text-primary mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground mb-1">Center</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t('complete.center')}</p>
                   <p className="font-bold text-foreground text-sm sm:text-base">{centerId}</p>
                 </div>
               </div>
@@ -81,7 +83,7 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
                 <MapPin className="w-5 h-5 text-primary mt-0.5" />
                 <div>
                   <p className="font-semibold text-foreground">{centerName}</p>
-                  <p className="text-sm text-muted-foreground">Your assigned examination center</p>
+                  <p className="text-sm text-muted-foreground">{t('complete.assignedCenter')}</p>
                 </div>
               </div>
             </div>
@@ -91,23 +93,23 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-muted-foreground space-y-2">
-                  <p className="font-semibold text-foreground text-base">What's Next?</p>
+                  <p className="font-semibold text-foreground text-base">{t('complete.whatsNext')}</p>
                   <ul className="space-y-1.5">
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                      <span>Visit your assigned center on the scheduled date</span>
+                      <span>{t('complete.visitCenter')}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <FileText className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>Bring your original CNIC for identity verification</span>
+                      <span>{t('complete.bringCNIC')}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Shield className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>The center admin will initiate your exam</span>
+                      <span>{t('complete.centerAdminExam')}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Clock className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>20 questions in 20 minutes - be prepared!</span>
+                      <span>{t('complete.questionsTime')}</span>
                     </li>
                   </ul>
                 </div>
@@ -118,18 +120,18 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-center">
                 <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 mx-auto mb-1" />
-                <p className="text-xs font-medium text-foreground">Registration</p>
-                <p className="text-[10px] text-green-600 dark:text-green-400">Complete</p>
+                <p className="text-xs font-medium text-foreground">{t('complete.registrationLabel')}</p>
+                <p className="text-[10px] text-green-600 dark:text-green-400">{t('complete.complete')}</p>
               </div>
               <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-center">
                 <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 mx-auto mb-1" />
-                <p className="text-xs font-medium text-foreground">Payment</p>
-                <p className="text-[10px] text-green-600 dark:text-green-400">Received</p>
+                <p className="text-xs font-medium text-foreground">{t('complete.paymentLabel')}</p>
+                <p className="text-[10px] text-green-600 dark:text-green-400">{t('complete.received')}</p>
               </div>
               <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-center">
                 <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 mx-auto mb-1" />
-                <p className="text-xs font-medium text-foreground">Exam</p>
-                <p className="text-[10px] text-green-600 dark:text-green-400">Scheduled</p>
+                <p className="text-xs font-medium text-foreground">{t('complete.examLabel')}</p>
+                <p className="text-[10px] text-green-600 dark:text-green-400">{t('complete.scheduledLabel')}</p>
               </div>
             </div>
 
@@ -141,7 +143,7 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
               className="w-full gap-2"
             >
               <User className="w-4 h-4" />
-              Go to Profile
+              {t('complete.goToProfile')}
             </Button>
           </CardContent>
         </Card>

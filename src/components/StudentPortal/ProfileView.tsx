@@ -8,6 +8,7 @@ import { format, parseISO } from "date-fns";
 import { api } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { CertificateCard } from "./CertificateCard";
+import { useTranslation } from "react-i18next";
 
 interface UploadedDocument {
   id: string;
@@ -74,6 +75,7 @@ export function ProfileView({
   const [candidateData, setCandidateData] = useState<CandidateData | null>(null);
   const [loading, setLoading] = useState(true);
   const { examScheduleInfo } = useAuth();
+  const { t } = useTranslation();
 
   // Fetch candidate data from API
   useEffect(() => {
@@ -89,13 +91,13 @@ export function ProfileView({
 
           // Define expected document types to ensure we display all required slots even if not uploaded
           const expectedDocs = [
-            { id: "photo", name: "Candidate Photo", isMandatory: true },
-            { id: "cnicFront", name: "CNIC Front", isMandatory: true },
-            { id: "cnicBack", name: "CNIC Back", isMandatory: true },
-            { id: "policeClearance", name: "Police Clearance Certificate", isMandatory: true },
-            { id: "medicalCertificate", name: "Medical Certificate", isMandatory: true },
-            { id: "passport", name: "Passport", isMandatory: false },
-            { id: "degreeTranscript", name: "Degree/Transcript", isMandatory: false },
+            { id: "photo", nameKey: "profile.candidatePhoto", isMandatory: true },
+            { id: "cnicFront", nameKey: "profile.cnicFront", isMandatory: true },
+            { id: "cnicBack", nameKey: "profile.cnicBack", isMandatory: true },
+            { id: "policeClearance", nameKey: "profile.policeClearance", isMandatory: true },
+            { id: "medicalCertificate", nameKey: "profile.medicalCertificate", isMandatory: true },
+            { id: "passport", nameKey: "profile.passport", isMandatory: false },
+            { id: "degreeTranscript", nameKey: "profile.degreeTranscript", isMandatory: false },
           ];
 
           expectedDocs.forEach(expected => {
@@ -106,7 +108,7 @@ export function ProfileView({
 
               apiDocs.push({
                 id: found.id || expected.id,
-                name: expected.name,
+                name: t(expected.nameKey),
                 type: found.type,
                 isMandatory: expected.isMandatory && !isComplete, // If not complete, it remains mandatory pending
                 status: isComplete ? "complete" : "pending",
@@ -117,7 +119,7 @@ export function ProfileView({
             } else {
               apiDocs.push({
                 id: expected.id,
-                name: expected.name,
+                name: t(expected.nameKey),
                 type: "PDF/Image",
                 isMandatory: expected.isMandatory,
                 status: "pending"
@@ -135,7 +137,7 @@ export function ProfileView({
       }
     };
     fetchCandidateData();
-  }, []);
+  }, [t]);
 
   const completedDocs = uploadedDocuments.filter(doc => doc.status === "complete");
   const pendingDocs = uploadedDocuments.filter(doc => doc.status === "pending" && doc.isMandatory);
@@ -167,7 +169,7 @@ export function ProfileView({
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         <Card className="border-border/40 shadow-sm">
           <CardContent className="p-6 text-center">
-            <p className="text-muted-foreground">Loading profile...</p>
+            <p className="text-muted-foreground">{t("profile.loading")}</p>
           </CardContent>
         </Card>
       </div>
@@ -187,9 +189,9 @@ export function ProfileView({
               <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-2 mb-2">
                 <div>
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground">
-                    {candidateData ? `${candidateData.user.firstName} ${candidateData.user.lastName}` : 'N/A'}
+                    {candidateData ? `${candidateData.user.firstName} ${candidateData.user.lastName}` : t("common.na")}
                   </h2>
-                  <p className="text-sm text-muted-foreground">Candidate ID: {candidateData?.userId || 'N/A'}</p>
+                  <p className="text-sm text-muted-foreground">{t("profile.candidateId")}: {candidateData?.userId || t("common.na")}</p>
                 </div>
                 <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
                   <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -199,15 +201,15 @@ export function ProfileView({
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mt-4">
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                   <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-foreground truncate">{candidateData?.user.email || 'N/A'}</span>
+                  <span className="text-foreground truncate">{candidateData?.user.email || t("common.na")}</span>
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                   <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-foreground">{candidateData?.user.phoneNumber || 'N/A'}</span>
+                  <span className="text-foreground">{candidateData?.user.phoneNumber || t("common.na")}</span>
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-foreground">{candidateData?.city?.name || 'N/A'}, Pakistan</span>
+                  <span className="text-foreground">{candidateData?.city?.name || t("common.na")}, {t("common.pakistan")}</span>
                 </div>
               </div>
             </div>
@@ -224,9 +226,9 @@ export function ProfileView({
                 <Calendar className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-xl alumni-sans-title">Exam Scheduled</CardTitle>
+                <CardTitle className="text-xl alumni-sans-title">{t("profile.examScheduled")}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Your examination has been scheduled
+                  {t("profile.examScheduledDesc")}
                 </p>
               </div>
             </div>
@@ -234,23 +236,23 @@ export function ProfileView({
           <CardContent>
             <div className="grid sm:grid-cols-2 gap-4 mb-4">
               <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">Exam Date</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profile.examDate")}</p>
                 <p className="font-bold text-foreground">
                   {(() => {
                     try {
-                      if (!examScheduleInfo.examDate) return 'N/A';
+                      if (!examScheduleInfo.examDate) return t("common.na");
                       // Extract only the date part YYYY-MM-DD to avoid time conflicts
                       const datePart = examScheduleInfo.examDate.split('T')[0];
                       return format(parseISO(datePart), 'MMMM d, yyyy');
                     } catch (e) {
                       console.error('Date parsing error:', e);
-                      return 'N/A';
+                      return t("common.na");
                     }
                   })()}
                 </p>
               </div>
               <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">Exam Time</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profile.examTime")}</p>
                 <p className="font-bold text-foreground">
                   {(() => {
                     try {
@@ -286,21 +288,21 @@ export function ProfileView({
             </div>
             <div className="space-y-3">
               <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">Test Center</p>
-                <p className="font-bold text-foreground">{examScheduleInfo.centerName || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profile.testCenter")}</p>
+                <p className="font-bold text-foreground">{examScheduleInfo.centerName || t("common.na")}</p>
               </div>
               <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">Center Address</p>
-                <p className="text-sm text-foreground whitespace-pre-line">{examScheduleInfo.centerAddress || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profile.centerAddress")}</p>
+                <p className="text-sm text-foreground whitespace-pre-line">{examScheduleInfo.centerAddress || t("common.na")}</p>
               </div>
               <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">City</p>
-                <p className="font-bold text-foreground">{examScheduleInfo.cityName || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profile.city")}</p>
+                <p className="font-bold text-foreground">{examScheduleInfo.cityName || t("common.na")}</p>
               </div>
             </div>
             <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <p className="text-xs text-muted-foreground">
-                <strong className="text-foreground">Note:</strong> Please arrive at the test center 15 minutes before your scheduled time. Bring a valid ID and your exam confirmation.
+                <strong className="text-foreground">{t("common.note")}</strong> {t("profile.examNote")}
               </p>
             </div>
           </CardContent>
@@ -316,9 +318,9 @@ export function ProfileView({
                 <Calendar className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-xl alumni-sans-title">Exam Scheduled</CardTitle>
+                <CardTitle className="text-xl alumni-sans-title">{t("profile.examScheduled")}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Your examination has been scheduled
+                  {t("profile.examScheduledDesc")}
                 </p>
               </div>
             </div>
@@ -326,21 +328,21 @@ export function ProfileView({
           <CardContent>
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">Date</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profile.date")}</p>
                 <p className="font-bold text-foreground">{format(scheduledExamDate, 'MMMM d, yyyy')}</p>
               </div>
               <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">Time</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profile.time")}</p>
                 <p className="font-bold text-foreground">10:00 AM</p>
               </div>
               <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">Center</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("profile.center")}</p>
                 <p className="font-bold text-foreground">LHR-003</p>
               </div>
             </div>
             <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <p className="text-xs text-muted-foreground">
-                <strong className="text-foreground">Note:</strong> Please visit your assigned center on the scheduled date. The center admin will initiate your exam.
+                <strong className="text-foreground">{t("common.note")}</strong> {t("profile.localExamNote")}
               </p>
             </div>
           </CardContent>
@@ -352,37 +354,37 @@ export function ProfileView({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 alumni-sans-title">
             <User className="w-5 h-5 text-primary" />
-            Personal Information
+            {t("profile.personalInfo")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Father's Name</p>
-              <p className="font-semibold text-foreground">{candidateData?.fatherName || 'N/A'}</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("profile.fatherName")}</p>
+              <p className="font-semibold text-foreground">{candidateData?.fatherName || t("common.na")}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">CNIC Number</p>
-              <p className="font-semibold text-foreground font-mono">{candidateData?.cnic || 'N/A'}</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("profile.cnicNumber")}</p>
+              <p className="font-semibold text-foreground font-mono">{candidateData?.cnic || t("common.na")}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Date of Birth</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("profile.dateOfBirth")}</p>
               <p className="font-semibold text-foreground">
-                {candidateData?.dob ? format(new Date(candidateData.dob), 'MMMM dd, yyyy') : 'N/A'}
+                {candidateData?.dob ? format(new Date(candidateData.dob), 'MMMM dd, yyyy') : t("common.na")}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">City</p>
-              <p className="font-semibold text-foreground">{candidateData?.city?.name || 'N/A'}</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("profile.city")}</p>
+              <p className="font-semibold text-foreground">{candidateData?.city?.name || t("common.na")}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Address</p>
-              <p className="font-semibold text-foreground">{candidateData?.address || 'N/A'}</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("profile.address")}</p>
+              <p className="font-semibold text-foreground">{candidateData?.address || t("common.na")}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Registration Date</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("profile.registrationDate")}</p>
               <p className="font-semibold text-foreground">
-                {candidateData?.createdAt ? format(new Date(candidateData.createdAt), 'MMMM dd, yyyy') : 'N/A'}
+                {candidateData?.createdAt ? format(new Date(candidateData.createdAt), 'MMMM dd, yyyy') : t("common.na")}
               </p>
             </div>
           </div>
@@ -394,7 +396,7 @@ export function ProfileView({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 alumni-sans-title">
             <Award className="w-5 h-5 text-primary" />
-            Application Status
+            {t("profile.applicationStatus")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -406,10 +408,10 @@ export function ProfileView({
                 ) : (
                   <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 )}
-                <p className="font-semibold text-foreground">Registration</p>
+                <p className="font-semibold text-foreground">{t("profile.registration")}</p>
               </div>
               <p className="text-xs text-muted-foreground">
-                {isRegistrationComplete || examScheduleInfo?.examScheduled ? 'Completed & Verified' : 'In Progress'}
+                {isRegistrationComplete || examScheduleInfo?.examScheduled ? t("profile.completedVerified") : t("profile.inProgress")}
               </p>
             </div>
             <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-green-500/10 border-green-500/30' : (isRegistrationComplete || examScheduleInfo?.examScheduled) ? 'bg-blue-500/10 border-blue-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
@@ -421,31 +423,31 @@ export function ProfileView({
                 ) : (
                   <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 )}
-                <p className="font-semibold text-foreground">Exam Status</p>
+                <p className="font-semibold text-foreground">{t("profile.examStatus")}</p>
               </div>
               <p className="text-xs text-muted-foreground">
                 {hasCertificate
-                  ? `Passed - Score: ${candidateData?.certificate?.score}%`
+                  ? `${t("certificate.passed")} - ${t("certificate.examScore")}: ${candidateData?.certificate?.score}%`
                   : (isRegistrationComplete || examScheduleInfo?.examScheduled)
                     ? (() => {
                       try {
                         const dateObj = examScheduleInfo?.examDate ? parseISO(examScheduleInfo.examDate) : (scheduledExamDate || new Date());
-                        return `Scheduled - ${format(dateObj, 'MMM d, yyyy')}`;
+                        return `${t("profile.scheduled")} - ${format(dateObj, 'MMM d, yyyy')}`;
                       } catch (e) {
-                        return 'Scheduled';
+                        return t("profile.scheduled");
                       }
                     })()
-                    : 'Pending Registration'
+                    : t("profile.pendingRegistration")
                 }
               </p>
             </div>
             <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-green-500/10 border-green-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
               <div className="flex items-center gap-2 mb-2">
                 <Award className={`w-5 h-5 ${hasCertificate ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`} />
-                <p className="font-semibold text-foreground">Certificate</p>
+                <p className="font-semibold text-foreground">{t("profile.certificate")}</p>
               </div>
               <p className="text-xs text-muted-foreground">
-                {hasCertificate ? 'Issued & Available' : 'Pending Exam'}
+                {hasCertificate ? t("profile.issuedAvailable") : t("profile.pendingExam")}
               </p>
             </div>
           </div>
@@ -463,10 +465,10 @@ export function ProfileView({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 alumni-sans-title">
               <FileText className="w-5 h-5 text-primary" />
-              Uploaded Documents
+              {t("profile.uploadedDocuments")}
             </CardTitle>
             <Badge variant="outline" className="text-xs">
-              {completedDocs.length} of {uploadedDocuments.length} uploaded
+              {completedDocs.length} {t("profile.of")} {uploadedDocuments.length} {t("profile.uploaded")}
             </Badge>
           </div>
         </CardHeader>
@@ -476,8 +478,8 @@ export function ProfileView({
               <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                 <FileText className="w-6 h-6 text-muted-foreground" />
               </div>
-              <p className="text-sm text-muted-foreground">No documents uploaded yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Complete your registration to upload documents</p>
+              <p className="text-sm text-muted-foreground">{t("profile.noDocsYet")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("profile.completeRegToDocs")}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -495,7 +497,7 @@ export function ProfileView({
                       <div className="flex items-center gap-2">
                         <p className="font-medium text-foreground">{doc.name}</p>
                         {doc.isMandatory && (
-                          <span className="text-[10px] font-bold text-primary uppercase">Required</span>
+                          <span className="text-[10px] font-bold text-primary uppercase">{t("profile.required")}</span>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">{doc.fileName}</p>
@@ -509,11 +511,11 @@ export function ProfileView({
                       onClick={() => handleViewDocument(doc)}
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">View</span>
+                      <span className="hidden sm:inline">{t("profile.view")}</span>
                     </Button>
                     <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
                       <CheckCircle2 className="w-3 h-3 mr-1" />
-                      Uploaded
+                      {t("profile.uploaded")}
                     </Badge>
                   </div>
                 </div>
@@ -525,7 +527,7 @@ export function ProfileView({
                   <div className="pt-2 pb-1">
                     <p className="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
-                      Missing Required Documents
+                      {t("profile.missingRequired")}
                     </p>
                   </div>
                   {pendingDocs.map((doc) => (
@@ -540,14 +542,14 @@ export function ProfileView({
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="font-medium text-foreground">{doc.name}</p>
-                            <span className="text-[10px] font-bold text-destructive uppercase">Required</span>
+                            <span className="text-[10px] font-bold text-destructive uppercase">{t("profile.required")}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground">Format: {doc.type}</p>
+                          <p className="text-xs text-muted-foreground">{t("profile.format")}: {doc.type}</p>
                         </div>
                       </div>
                       <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30">
                         <Clock className="w-3 h-3 mr-1" />
-                        Pending
+                        {t("profile.pending")}
                       </Badge>
                     </div>
                   ))}
@@ -581,7 +583,7 @@ export function ProfileView({
                   <div className="p-8 text-center">
                     <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                     <p className="text-sm text-muted-foreground">
-                      PDF opened in a new tab
+                      {t("profile.pdfInNewTab")}
                     </p>
                   </div>
                 )}
@@ -589,7 +591,7 @@ export function ProfileView({
                   <div className="p-8 text-center">
                     <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                     <p className="text-sm text-muted-foreground">
-                      Preview not available for this file type
+                      {t("profile.previewNotAvailable")}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">{previewDoc.fileName}</p>
                   </div>
@@ -599,7 +601,7 @@ export function ProfileView({
           </div>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setPreviewDoc(null)}>
-              Close
+              {t("profile.close")}
             </Button>
           </div>
         </DialogContent>

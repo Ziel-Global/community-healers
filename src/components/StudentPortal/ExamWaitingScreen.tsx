@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, Calendar, MapPin, AlertCircle, CheckCircle2, PlayCircle } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ExamWaitingScreenProps {
   examDate: Date;
@@ -9,6 +10,7 @@ interface ExamWaitingScreenProps {
 }
 
 export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenProps) {
+  const { t } = useTranslation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [canStartExam, setCanStartExam] = useState(false);
 
@@ -21,11 +23,11 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
     const timer = setInterval(() => {
       const now = new Date();
       setCurrentTime(now);
-      
+
       // Check if exam time has arrived (exam date at 10:00 AM)
       const examDateTime = new Date(examDate);
       examDateTime.setHours(10, 0, 0, 0);
-      
+
       setCanStartExam(now >= examDateTime);
     }, 1000);
 
@@ -40,7 +42,7 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
 
   const getTimeRemaining = () => {
     const diff = examDateTime.getTime() - currentTime.getTime();
-    
+
     if (diff <= 0) return null;
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -67,12 +69,12 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
               )}
             </div>
             <CardTitle className="text-2xl sm:text-3xl font-bold alumni-sans-title">
-              {canStartExam ? "Exam is Ready!" : "Exam Not Started Yet"}
+              {canStartExam ? t('examWaiting.examReady') : t('examWaiting.examNotStarted')}
             </CardTitle>
             <p className="text-sm sm:text-base text-muted-foreground mt-2">
-              {canStartExam 
-                ? "You can now begin your certification exam"
-                : "Your exam will be available at the scheduled time"
+              {canStartExam
+                ? t('examWaiting.canBegin')
+                : t('examWaiting.availableAtTime')
               }
             </p>
           </CardHeader>
@@ -81,19 +83,19 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
             <div className="grid grid-cols-3 gap-2 sm:gap-4">
               <div className="p-3 sm:p-4 rounded-xl bg-secondary/30 border border-border/40 text-center">
                 <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1 sm:mb-2" />
-                <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">Date</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">{t('examWaiting.date')}</p>
                 <p className="font-bold text-foreground text-xs sm:text-base">
                   {examDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
               <div className="p-3 sm:p-4 rounded-xl bg-secondary/30 border border-border/40 text-center">
                 <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1 sm:mb-2" />
-                <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">Time</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">{t('examWaiting.time')}</p>
                 <p className="font-bold text-foreground text-xs sm:text-base">10:00 AM</p>
               </div>
               <div className="p-3 sm:p-4 rounded-xl bg-secondary/30 border border-border/40 text-center">
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1 sm:mb-2" />
-                <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">Center</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1">{t('examWaiting.center')}</p>
                 <p className="font-bold text-foreground text-xs sm:text-base">LHR-003</p>
               </div>
             </div>
@@ -101,23 +103,23 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
             {/* Countdown Timer or Ready Status */}
             {!canStartExam && timeRemaining ? (
               <div className="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
-                <p className="text-center text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">Time until exam starts</p>
+                <p className="text-center text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">{t('examWaiting.timeUntilExam')}</p>
                 <div className="grid grid-cols-4 gap-2 sm:gap-4">
                   <div className="text-center">
                     <div className="text-xl sm:text-3xl font-bold text-primary">{timeRemaining.days}</div>
-                    <div className="text-[9px] sm:text-xs text-muted-foreground uppercase">Days</div>
+                    <div className="text-[9px] sm:text-xs text-muted-foreground uppercase">{t('examWaiting.days')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-xl sm:text-3xl font-bold text-primary">{timeRemaining.hours}</div>
-                    <div className="text-[9px] sm:text-xs text-muted-foreground uppercase">Hours</div>
+                    <div className="text-[9px] sm:text-xs text-muted-foreground uppercase">{t('examWaiting.hours')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-xl sm:text-3xl font-bold text-primary">{timeRemaining.minutes}</div>
-                    <div className="text-[9px] sm:text-xs text-muted-foreground uppercase">Min</div>
+                    <div className="text-[9px] sm:text-xs text-muted-foreground uppercase">{t('examWaiting.min')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-xl sm:text-3xl font-bold text-primary">{timeRemaining.seconds}</div>
-                    <div className="text-[9px] sm:text-xs text-muted-foreground uppercase">Sec</div>
+                    <div className="text-[9px] sm:text-xs text-muted-foreground uppercase">{t('examWaiting.sec')}</div>
                   </div>
                 </div>
               </div>
@@ -125,15 +127,15 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
               <div className="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30">
                 <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                   <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
-                  <p className="font-bold text-foreground text-base sm:text-lg">Exam Window is Open</p>
+                  <p className="font-bold text-foreground text-base sm:text-lg">{t('examWaiting.examWindowOpen')}</p>
                 </div>
-                <Button 
+                <Button
                   onClick={onStartExam}
                   size="lg"
                   className="w-full font-bold text-base sm:text-lg h-12 sm:h-14 shadow-lg"
                 >
                   <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                  Start Exam Now
+                  {t('examWaiting.startExamNow')}
                 </Button>
               </div>
             ) : null}
@@ -143,12 +145,12 @@ export function ExamWaitingScreen({ examDate, onStartExam }: ExamWaitingScreenPr
               <div className="flex items-start gap-2 sm:gap-3">
                 <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                 <div className="text-xs sm:text-sm text-muted-foreground space-y-1 sm:space-y-2">
-                  <p className="font-semibold text-foreground">Important Instructions:</p>
+                  <p className="font-semibold text-foreground">{t('examWaiting.importantInstructions')}</p>
                   <ul className="space-y-0.5 sm:space-y-1">
-                    <li>• Ensure stable internet connection</li>
-                    <li>• 20 minutes, 20 questions</li>
-                    <li>• Cannot be paused once started</li>
-                    <li>• Complete in one sitting</li>
+                    <li>• {t('examWaiting.stableInternet')}</li>
+                    <li>• {t('examWaiting.twentyQuestions')}</li>
+                    <li>• {t('examWaiting.cannotPause')}</li>
+                    <li>• {t('examWaiting.completeInOneSitting')}</li>
                   </ul>
                 </div>
               </div>

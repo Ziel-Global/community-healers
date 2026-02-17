@@ -6,30 +6,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, Smartphone, Lock, ArrowRight, Loader2, BookOpen, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export default function ExamAuth() {
     const navigate = useNavigate();
     const { loginCandidate } = useAuth();
+    const { t } = useTranslation();
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
         if (phone.length < 10) {
-            toast.error("Please enter a valid phone number");
+            toast.error(t("examAuth.validPhone"));
             return;
         }
         if (password.length < 4) {
-            toast.error("Please enter your password");
+            toast.error(t("examAuth.enterPassword"));
             return;
         }
         setLoading(true);
         try {
             await loginCandidate({ phoneNumber: phone, password });
-            toast.success("Login successful!");
+            toast.success(t("examAuth.loginSuccess"));
             navigate("/exam/start");
         } catch (error: any) {
-            toast.error(error.message || "Login failed. Please check your credentials.");
+            toast.error(error.message || t("examAuth.loginFailed"));
         } finally {
             setLoading(false);
         }
@@ -42,7 +44,7 @@ export default function ExamAuth() {
                 <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
                         <ArrowLeft className="w-4 h-4" />
-                        <span className="text-sm hidden sm:inline">Back to Home</span>
+                        <span className="text-sm hidden sm:inline">{t("examAuth.backToHome")}</span>
                     </Link>
                     <div className="flex items-center gap-2 sm:gap-3">
                         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
@@ -50,10 +52,10 @@ export default function ExamAuth() {
                         </div>
                         <div className="flex flex-col">
                             <span className="text-sm sm:text-xl alumni-sans-title text-foreground leading-tight">
-                                Training Portal
+                                {t("examAuth.trainingPortal")}
                             </span>
                             <span className="text-[8px] sm:text-xs text-muted-foreground uppercase tracking-wider hidden sm:block">
-                                Computer Based Testing
+                                {t("examAuth.cbt")}
                             </span>
                         </div>
                     </div>
@@ -69,9 +71,9 @@ export default function ExamAuth() {
                             <Shield className="w-6 h-6 text-primary-foreground" />
                         </div>
                         <div>
-                            <CardTitle className="text-xl sm:text-2xl font-display font-bold">Candidate Login</CardTitle>
+                            <CardTitle className="text-xl sm:text-2xl font-display font-bold">{t("examAuth.candidateLogin")}</CardTitle>
                             <CardDescription className="text-sm">
-                                Enter your registered credentials to access the exam
+                                {t("examAuth.enterCredentials")}
                             </CardDescription>
                         </div>
                     </CardHeader>
@@ -81,7 +83,7 @@ export default function ExamAuth() {
                                 <div className="relative">
                                     <Smartphone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                     <Input
-                                        placeholder="Mobile Number (e.g. 03001234567)"
+                                        placeholder={t("examAuth.mobilePlaceholder")}
                                         className="pl-10 h-11 sm:h-12"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
@@ -93,7 +95,7 @@ export default function ExamAuth() {
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                     <Input
-                                        placeholder="Password"
+                                        placeholder={t("examAuth.passwordPlaceholder")}
                                         className="pl-10 h-11 sm:h-12"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
@@ -106,22 +108,22 @@ export default function ExamAuth() {
                                 className="w-full h-11 sm:h-12 gradient-primary text-white font-medium"
                                 disabled={loading}
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Login to Exam"}
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : t("examAuth.loginToExam")}
                                 {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
                             </Button>
                         </div>
 
                         <div className="bg-secondary/30 rounded-lg p-3 sm:p-4 space-y-2">
-                            <p className="text-xs sm:text-sm font-medium text-foreground">Before you begin:</p>
+                            <p className="text-xs sm:text-sm font-medium text-foreground">{t("examAuth.beforeYouBegin")}</p>
                             <ul className="text-xs text-muted-foreground space-y-1">
-                                <li>• Ensure stable internet connection</li>
-                                <li>• Use a laptop/desktop for best experience</li>
-                                <li>• Wait for the center admin to start the exam</li>
+                                <li>• {t("examAuth.stableInternet")}</li>
+                                <li>• {t("examAuth.useLaptop")}</li>
+                                <li>• {t("examAuth.waitForAdmin")}</li>
                             </ul>
                         </div>
 
                         <p className="text-center text-xs text-muted-foreground">
-                            By continuing, you agree to examination rules and policies.
+                            {t("examAuth.agreeToRules")}
                         </p>
                     </CardContent>
                 </Card>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { WizardStepProps } from "../CandidateWizard";
 import { ExamSlotPicker } from "../Scheduling/ExamSlotPicker";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isScheduling, setIsScheduling] = useState(false);
@@ -25,16 +27,16 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
 
       setIsScheduled(true);
       toast({
-        title: "Exam Scheduled",
-        description: `Your exam has been scheduled for ${format(selectedDate, 'EEEE, MMMM d, yyyy')}.`,
+        title: t('scheduling.examScheduledTitle'),
+        description: t('scheduling.examScheduledDesc', { date: format(selectedDate, 'EEEE, MMMM d, yyyy') }),
       });
 
       onNext();
     } catch (error: any) {
       console.error("Scheduling error details:", error.response?.data);
-      const errorMessage = error.response?.data?.message || error.response?.data?.error || "Failed to schedule exam. Please try again.";
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || t('scheduling.failedToSchedule');
       toast({
-        title: "Scheduling Failed",
+        title: t('scheduling.schedulingFailed'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -55,10 +57,10 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
           </div>
           <div>
             <h2 className="font-bold text-3xl text-foreground alumni-sans-title">
-              Schedule Your Exam
+              {t('scheduling.title')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Select your preferred exam date and complete the payment
+              {t('scheduling.description')}
             </p>
           </div>
         </div>
@@ -79,7 +81,7 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
       {!canProceed && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
           <p className="text-sm text-amber-700 dark:text-amber-400">
-            ⚠️ Please select an exam date to complete your scheduling
+            {t('scheduling.warning')}
           </p>
         </div>
       )}
@@ -88,11 +90,11 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
       <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-border/60">
         <Button onClick={onBack} variant="outline" size="lg" className="group w-full sm:w-auto">
           <ChevronLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-          Back to Payment
+          {t('scheduling.backToPayment')}
         </Button>
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
           <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-            Step 3 of 3 • Scheduling
+            {t('scheduling.stepInfo')}
           </div>
           <Button
             onClick={handleNext}
@@ -103,11 +105,11 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
             {isScheduling ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Scheduling...
+                {t('scheduling.scheduling')}
               </>
             ) : (
               <>
-                Complete Registration
+                {t('scheduling.completeRegistration')}
                 <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </>
             )}

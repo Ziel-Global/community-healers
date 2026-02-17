@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -123,6 +123,41 @@
     font-family: 'Inter', sans-serif;
   }
 
+  /* Apply Jameel Noori Nastaleeq when language is Urdu */
+  html[lang="ur"] body {
+    /* Use local font first, fall back to Noto Nastaliq Urdu */
+    font-family: 'Jameel Noori Nastaleeq', 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', 'Inter', sans-serif;
+    /* Adjust line height for better Urdu readability */
+    line-height: 2.2 !important;
+    /* Slightly reduce font size as Nastaliq can appear larger */
+    font-size: 0.9em;
+  }
+
+  /* Additional Urdu specific adjustments */
+  html[lang="ur"] h1,
+  html[lang="ur"] h2,
+  html[lang="ur"] h3,
+  html[lang="ur"] h4,
+  html[lang="ur"] h5,
+  html[lang="ur"] h6,
+  html[lang="ur"] .font-display,
+  html[lang="ur"] .alumni-sans-title,
+  html[lang="ur"] .alumni-sans-subtitle {
+    font-family: 'Jameel Noori Nastaleeq', 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif !important;
+    line-height: 2.4 !important;
+    padding-bottom: 0.5rem;
+    /* Give breathing room for descenders */
+  }
+
+  /* Fix vertical alignment for Urdu buttons */
+  html[lang="ur"] button,
+  html[lang="ur"] .button {
+    line-height: 2;
+    padding-bottom: 2px;
+    /* Visual centering adjustment */
+    font-size: 0.9em;
+  }
+
   h1,
   h2,
   h3 {
@@ -221,6 +256,12 @@
     font-optical-sizing: auto;
     font-weight: 600;
     font-style: normal;
+  }
+
+  /* Font Family Utility for Urdu */
+  .font-urdu {
+    font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif !important;
+    line-height: 2.2;
   }
 }
 

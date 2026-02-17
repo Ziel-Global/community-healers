@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { CandidateWizard } from "@/components/StudentPortal/CandidateWizard";
 import { ProfileView } from "@/components/StudentPortal/ProfileView";
@@ -12,8 +13,10 @@ import { User, FileText, Shield, LogOut } from "lucide-react";
 import { parseISO } from "date-fns";
 import { api } from "@/services/api";
 import { CertificateCard } from "@/components/StudentPortal/CertificateCard";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function CandidatePortal() {
+  const { t } = useTranslation();
   const { logout, examScheduleInfo, checkExamSchedule } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"profile" | "application">("application");
@@ -43,20 +46,20 @@ export default function CandidatePortal() {
   const wizardSteps = [
     {
       id: 1,
-      title: "Registration",
-      description: "Complete profile",
+      title: t('wizard.registration'),
+      description: t('wizard.completeProfile'),
       component: RegistrationStep,
     },
     {
       id: 2,
-      title: "Payment",
-      description: "Pay PKR 3000",
+      title: t('wizard.payment'),
+      description: t('wizard.payPKR'),
       component: PaymentStep,
     },
     {
       id: 3,
-      title: "Schedule Exam",
-      description: "Pick exam date",
+      title: t('wizard.scheduleExam'),
+      description: t('wizard.pickExamDate'),
       component: SchedulingStep,
     },
   ];
@@ -78,7 +81,7 @@ export default function CandidatePortal() {
     }
 
     if (loading) {
-      return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+      return <div className="p-8 text-center text-muted-foreground">{t('candidatePortal.loading')}</div>;
     }
 
     // 0. If certificate exists, show Certificate Card (Highest Priority)
@@ -101,13 +104,13 @@ export default function CandidatePortal() {
               <Shield className="w-8 h-8 text-emerald-600" />
             </div>
             <h2 className="text-2xl font-semibold text-emerald-900 dark:text-emerald-100 mb-2">
-              Exam Submitted Successfully
+              {t('candidatePortal.examSubmittedTitle')}
             </h2>
             <p className="text-emerald-700 dark:text-emerald-300 mb-6">
-              You have successfully completed your exam. Your results are being processed.
+              {t('candidatePortal.examSubmittedDesc')}
             </p>
             <Button onClick={() => setActiveTab("profile")} variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-100">
-              View Profile
+              {t('candidatePortal.viewProfile')}
             </Button>
           </div>
         </div>
@@ -126,7 +129,7 @@ export default function CandidatePortal() {
       return (
         <RegistrationCompleteScreen
           examDate={displayDate}
-          centerName={examScheduleInfo?.centerName || "Your Assigned Center"}
+          centerName={examScheduleInfo?.centerName || t('candidatePortal.yourAssignedCenter')}
           centerId={examScheduleInfo?.centerName?.split(' ').map(w => w[0]).join('') || "CENTER"}
           onGoToProfile={() => {
             setIsRegistrationComplete(false); // Clear the local success state when moving away
@@ -142,13 +145,13 @@ export default function CandidatePortal() {
         <div className="max-w-3xl mx-auto">
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
             <h2 className="text-2xl font-semibold text-blue-900 dark:text-blue-100 mb-2">
-              Exam Already Scheduled
+              {t('candidatePortal.examAlreadyScheduled')}
             </h2>
             <p className="text-blue-700 dark:text-blue-300 mb-4">
-              Your exam has been scheduled. View your profile for exam details.
+              {t('candidatePortal.examAlreadyScheduledDesc')}
             </p>
             <Button onClick={() => setActiveTab("profile")} variant="default">
-              Go to Profile
+              {t('candidatePortal.goToProfile')}
             </Button>
           </div>
         </div>
@@ -191,12 +194,12 @@ export default function CandidatePortal() {
                 <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="alumni-sans-title text-xl text-foreground">Soft skill training</h1>
-                <p className="alumni-sans-subtitle text-sm text-muted-foreground">Candidate Portal</p>
+                <h1 className="alumni-sans-title text-xl text-foreground">{t('nav.title')}</h1>
+                <p className="alumni-sans-subtitle text-sm text-muted-foreground">{t('nav.subtitle')}</p>
               </div>
             </div>
 
-            {/* Navigation Tabs & Logout */}
+            {/* Navigation Tabs & Actions */}
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="flex items-center gap-1 sm:gap-2 p-1 rounded-xl bg-secondary/40 border border-border/40">
                 <Button
@@ -206,7 +209,7 @@ export default function CandidatePortal() {
                   className={`px-2 sm:px-3 ${activeTab === "profile" ? "shadow-md" : ""}`}
                 >
                   <User className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Profile</span>
+                  <span className="hidden sm:inline">{t('nav.profile')}</span>
                 </Button>
                 <Button
                   variant={activeTab === "application" ? "default" : "ghost"}
@@ -215,9 +218,12 @@ export default function CandidatePortal() {
                   className={`px-2 sm:px-3 ${activeTab === "application" ? "shadow-md" : ""}`}
                 >
                   <FileText className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Application</span>
+                  <span className="hidden sm:inline">{t('nav.application')}</span>
                 </Button>
               </div>
+
+              {/* Language Switcher */}
+              <LanguageSwitcher />
 
               {/* Logout Button */}
               <Button
@@ -227,7 +233,7 @@ export default function CandidatePortal() {
                 className="gap-1 sm:gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive px-2 sm:px-3"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span className="hidden sm:inline">{t('nav.logout')}</span>
               </Button>
             </div>
           </div>
@@ -241,4 +247,3 @@ export default function CandidatePortal() {
     </div>
   );
 }
-

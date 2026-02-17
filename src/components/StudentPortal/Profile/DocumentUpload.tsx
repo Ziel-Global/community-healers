@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, FileCheck, X, AlertCircle, FileText } from "lucide-react";
@@ -8,22 +9,22 @@ import { api } from "@/services/api";
 
 interface Document {
     id: string;
-    name: string;
+    nameKey: string;
     type: string;
     isMandatory: boolean;
     status: "pending" | "uploading" | "complete" | "error";
     fileName?: string;
-    fileType?: string; // MIME type
+    fileType?: string;
     fileUrl?: string;
 }
 
 const initialDocuments: Document[] = [
-    { id: "photo", name: "Candidate Photo", type: "Image", isMandatory: true, status: "pending" },
-    { id: "cnicFront", name: "CNIC Front", type: "Image/PDF", isMandatory: true, status: "pending" },
-    { id: "cnicBack", name: "CNIC Back", type: "Image/PDF", isMandatory: true, status: "pending" },
-    { id: "policeClearance", name: "Police Clearance Certificate", type: "PDF", isMandatory: true, status: "pending" },
-    { id: "medicalCertificate", name: "Medical Certificate", type: "PDF", isMandatory: true, status: "pending" },
-    { id: "passport", name: "Passport", type: "PDF", isMandatory: false, status: "pending" },
+    { id: "photo", nameKey: "documents.candidatePhoto", type: "Image", isMandatory: true, status: "pending" },
+    { id: "cnicFront", nameKey: "documents.cnicFront", type: "Image/PDF", isMandatory: true, status: "pending" },
+    { id: "cnicBack", nameKey: "documents.cnicBack", type: "Image/PDF", isMandatory: true, status: "pending" },
+    { id: "policeClearance", nameKey: "documents.policeClearance", type: "PDF", isMandatory: true, status: "pending" },
+    { id: "medicalCertificate", nameKey: "documents.medicalCertificate", type: "PDF", isMandatory: true, status: "pending" },
+    { id: "passport", nameKey: "documents.passport", type: "PDF", isMandatory: false, status: "pending" },
 ];
 
 interface DocumentUploadProps {
@@ -31,6 +32,7 @@ interface DocumentUploadProps {
 }
 
 export function DocumentUpload({ candidateData }: DocumentUploadProps) {
+    const { t } = useTranslation();
     const { toast } = useToast();
     const [documents, setDocuments] = useState<Document[]>(initialDocuments);
     const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -43,7 +45,6 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                 const uploadedDoc = apiDocs.find((d: any) => d.type === doc.id);
 
                 if (uploadedDoc) {
-                    // Check if fileUrl exists
                     const isComplete = !!uploadedDoc.fileUrl;
 
                     return {
@@ -61,17 +62,15 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
     const handleFileSelect = async (docId: string, file: File | null) => {
         if (!file) return;
 
-        // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
             toast({
-                title: "File Too Large",
-                description: "File size must be less than 5MB.",
+                title: t('documents.uploadFailed'),
+                description: t('documents.maxSize'),
                 variant: "destructive",
             });
             return;
         }
 
-        // Update document status to uploading
         setDocuments(prev => prev.map(doc =>
             doc.id === docId
                 ? { ...doc, status: "uploading" as const }
@@ -79,7 +78,6 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
         ));
 
         try {
-            // Upload document via API
             const formData = new FormData();
             formData.append('file', file);
             formData.append('type', docId);
@@ -88,12 +86,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
-            // If API returns the created document object in response, use it. 
-            // Otherwise, construct it optimistically or trigger a page refresh.
-            // Assuming response.data.data is the document object or similar.
-            // For safety/simplicity in this refactor without changing parent, we can just set it as complete with the file details we have + URL from response if available.
-
-            const uploadedDoc = response.data.data; // Adjust based on actual API response if known, else use pessimistic reload or optimistic update
+            const uploadedDoc = response.data.data;
 
             setDocuments(prev => prev.map(doc =>
                 doc.id === docId
@@ -102,18 +95,14 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                         status: "complete" as const,
                         fileName: file.name,
                         fileType: file.type,
-                        fileUrl: uploadedDoc?.fileUrl // Capture URL if returned
+                        fileUrl: uploadedDoc?.fileUrl
                     }
                     : doc
             ));
 
-            // Optional: Reload page or notify parent to refetch if needed to persist across components immediately
-            // window.location.reload(); // Too aggressive
-            // For now, this local update satisfies the UI feedback requirement.
-
             toast({
-                title: "Upload Successful",
-                description: `${file.name} has been uploaded successfully.`,
+                title: t('documents.uploadSuccess'),
+                description: `${file.name}`,
             });
         } catch (error: any) {
             setDocuments(prev => prev.map(doc =>
@@ -123,17 +112,14 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
             ));
 
             toast({
-                title: "Upload Failed",
-                description: error.response?.data?.message || "Failed to upload document. Please try again.",
+                title: t('documents.uploadFailed'),
+                description: error.response?.data?.message || t('documents.uploadFailed'),
                 variant: "destructive",
             });
         }
     };
 
     const handleRemoveFile = (docId: string) => {
-        // ideally we should also call API to delete, but for now just update local state
-        // or re-fetch to see if it was actually removed (if the user requested deletion logic)
-        // given the current scope, I'll just reset the status
         const updatedDocs = documents.map(doc =>
             doc.id === docId
                 ? { ...doc, status: "pending" as const, fileName: undefined, fileUrl: undefined }
@@ -142,8 +128,8 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
         setDocuments(updatedDocs);
 
         toast({
-            title: "Document Removed",
-            description: "Document has been removed from view. (Note: This does not delete from server yet)",
+            title: t('documents.removeFailed'),
+            description: t('documents.removeFailed'),
         });
     };
 
@@ -155,8 +141,8 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                         <Upload className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                        <CardTitle className="alumni-sans-title">Document Upload</CardTitle>
-                        <CardDescription>Upload high-quality scans of your original documents</CardDescription>
+                        <CardTitle className="alumni-sans-title">{t('documents.title')}</CardTitle>
+                        <CardDescription>{t('documents.description')}</CardDescription>
                     </div>
                 </div>
             </CardHeader>
@@ -189,13 +175,13 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm font-semibold text-foreground">{doc.name}</p>
-                                        {doc.isMandatory && <span className="text-[10px] font-bold text-destructive uppercase">Mandatory</span>}
+                                        <p className="text-sm font-semibold text-foreground">{t(doc.nameKey)}</p>
+                                        {doc.isMandatory && <span className="text-[10px] font-bold text-destructive uppercase">{t('documents.mandatoryLabel')}</span>}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
                                         {doc.status === "complete" ? doc.fileName :
-                                            doc.status === "uploading" ? "Uploading..." :
-                                                `Format: ${doc.type}`}
+                                            doc.status === "uploading" ? t('documents.uploading') :
+                                                `${t('profile.format')}: ${doc.type}`}
                                     </p>
                                 </div>
                             </div>
@@ -227,7 +213,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                             disabled={doc.status === "uploading"}
                                         >
                                             <Upload className="w-3.5 h-3.5" />
-                                            {doc.status === "uploading" ? "Uploading..." : "Upload"}
+                                            {doc.status === "uploading" ? t('documents.uploading') : t('documents.uploadButton')}
                                         </Button>
                                     </>
                                 )}
@@ -239,7 +225,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                 <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex gap-3 mt-6">
                     <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
                     <p className="text-xs text-amber-700 leading-relaxed">
-                        Please ensure all documents are clearly legible. Blurry or incorrect documents may lead to registration rejection. Max file size: 5MB.
+                        {t('documents.dragDrop')}. {t('documents.maxSize')}.
                     </p>
                 </div>
             </CardContent>

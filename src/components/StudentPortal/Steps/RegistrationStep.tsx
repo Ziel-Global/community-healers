@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { WizardStepProps } from "../CandidateWizard";
 import { PersonalInfoForm } from "../Profile/PersonalInfoForm";
 import { DocumentUpload } from "../Profile/DocumentUpload";
@@ -8,23 +9,68 @@ import { ChevronRight, FileCheck, Loader2, AlertCircle } from "lucide-react";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
+interface PersonalInfo {
+  fatherName: string;
+  cnic: string;
+  dob: string;
+  phone: string;
+  city: string;
+  address: string;
+}
+
 export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [candidateData, setCandidateData] = useState<any>(null);
   const [missingDocuments, setMissingDocuments] = useState<string[]>([]);
 
+  // Lifted state for PersonalInfoForm
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    fatherName: "",
+    cnic: "",
+    dob: "",
+    phone: "",
+    city: "",
+    address: "",
+  });
+
   useEffect(() => {
     const fetchCandidateData = async () => {
       try {
         const response = await api.get('/candidates/me');
-        setCandidateData(response.data.data);
+        const data = response.data.data;
+        setCandidateData(data);
+
+        // Initialize personal info state from API data
+        // Also check localStorage for any unsaved drafts if needed, but per request we strictly respect input/API flow
+        // The user request was "what ever that we get from api that fills the input... the body should be made from that"
+        // So we initialize with API data.
+
+        const dob = data.dob ? new Date(data.dob).toISOString().split('T')[0] : "";
+
+        setPersonalInfo({
+          fatherName: data.fatherName || "",
+          cnic: data.cnic || "",
+          dob: dob,
+          phone: data.user?.phoneNumber || "",
+          city: data.cityId || "",
+          address: data.address || "",
+        });
+
       } catch (error) {
         console.error('Failed to fetch candidate data', error);
       }
     };
     fetchCandidateData();
   }, []);
+
+  const handlePersonalInfoUpdate = (field: keyof PersonalInfo, value: string) => {
+    setPersonalInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -47,8 +93,8 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           .join(', ');
 
         toast({
-          title: "Documents Missing",
-          description: `Please upload the following required documents: ${missingDocsFormatted}`,
+          title: t('registration.documentsMissing'),
+          description: `${t('registration.missingDocumentsDescription')} ${missingDocsFormatted}`,
           variant: "destructive",
         });
         setIsLoading(false);
@@ -57,48 +103,17 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
 
       // Clear missing documents if validation passed
       setMissingDocuments([]);
-      // Read personal info from localStorage - OR potentially use candidateData if we want to rely on what was pre-filled and edited
-      // For now, the forms update local state/props, but they don't automatically bubble up changes to parent unless we pass callbacks.
-      // However, the existing logic relies on localStorage. The PersonalInfoForm presumably updates its own state but DOES NOT update localStorage in the current code I saw.
-      // Wait, PersonalInfoForm DOES NOT update localStorage in the code I saw earlier (lines 70-73 just update local state).
-      // The original code in RegistrationStep reads from localStorage("candidatePersonalInfo").
-      // This suggests there's a disconnect. If PersonalInfoForm doesn't save to localStorage, RegistrationStep won't find updated data there.
-      // **Correction**: I checked PersonalInfoForm.tsx earlier (step 120), and `handleChange` only updates `formData` state. It does NOT save to localStorage.
-      // This means the existing `handleSubmit` in `RegistrationStep` (step 135) which reads from `localStorage` might be broken or relying on code I haven't seen / modified.
-      // BUT, checking `RegistrationStep.tsx` again (step 135), it imports `PersonalInfoForm`. If `PersonalInfoForm` is used inside `RegistrationStep`, and `RegistrationStep` handles the submit by reading localStorage, then `PersonalInfoForm` MUST populate localStorage.
-      // Let me re-read `PersonalInfoForm`... in step 120/73, it does NOT write to localStorage.
-      // This implies the previous implementation might have been incomplete or I missed something.
-      // PROPOSAL: Since I cannot easily rewrite the whole form state lifting right now without risking regressions in other places properly, 
-      // I will assume the user wants the *display* fixed first (reading FROM api).
-      // Saving TO api is handled by `handleSubmit`.
-      // If `PersonalInfoForm` doesn't write to localStorage, `handleSubmit` reading from it will send empty/old data.
-      // I should probably assume `PersonalInfoForm` *should* function as it did.
-      // Wait, if I look at `RegistrationStep.tsx` (step 135), lines 18-20:
-      // `const saved = localStorage.getItem("candidatePersonalInfo");`
-      // `const personalInfo = saved ? JSON.parse(saved) : {};`
-      // This strongly implies `PersonalInfoForm` WAS writing to localStorage.
-      // But my `view_file` of `PersonalInfoForm` (step 120) showed NO localStorage writing.
-      // It's possible I removed it or it wasn't there.
-      // Actually, looking at `EducationDeclaration` (step 121), it DOES write to localStorage.
-      // `PersonalInfoForm` (step 120) does NOT.
-      // This is seemingly a bug in the existing code or a mismatch.
-      // However, my task is "make sure in the regstration page the data from this api is displayed on exact fields".
-      // I will focus on the DISPLAY part (passing `candidateData`).
-      // I will NOT touch the `handleSubmit` logic for now unless explicitly broken, to avoid scope creep, but I'll add the data fetching.
 
-      const saved = localStorage.getItem("candidatePersonalInfo");
-      const personalInfo = saved ? JSON.parse(saved) : {};
-
-      const dob = personalInfo.dob || candidateData?.dob;
-      if (dob) {
+      // Validate Age
+      if (personalInfo.dob) {
         const { differenceInYears, parseISO, isValid } = await import("date-fns");
-        const birthDate = parseISO(dob);
+        const birthDate = parseISO(personalInfo.dob);
         if (isValid(birthDate)) {
           const age = differenceInYears(new Date(), birthDate);
           if (age < 16) {
             toast({
-              title: "Age Requirement Not Met",
-              description: "You must be at least 16 years old to proceed.",
+              title: t('registration.ageRequirementTitle'),
+              description: t('registration.ageRequirementDesc'),
               variant: "destructive",
             });
             setIsLoading(false);
@@ -107,28 +122,29 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
         }
       }
 
+      // Construct payload directly from the controlled state
       const profilePayload = {
-        fatherName: personalInfo.fatherName || candidateData?.fatherName || "", // Fallback to candidateData?
-        cnic: personalInfo.cnic || candidateData?.cnic || "",
-        dob: personalInfo.dob || candidateData?.dob || "",
-        address: personalInfo.address || candidateData?.address || "",
-        city: personalInfo.city || candidateData?.cityId || "",
+        fatherName: personalInfo.fatherName,
+        cnic: personalInfo.cnic,
+        dob: personalInfo.dob,
+        address: personalInfo.address,
+        city: personalInfo.city,
         has16YearsEducation: localStorage.getItem("has16YearsEducation") === "true",
       };
 
       await api.put('/candidates/me', profilePayload);
 
       toast({
-        title: "Registration Saved",
-        description: "Your information has been saved successfully.",
+        title: t('registration.registrationSaved'),
+        description: t('registration.registrationSavedDesc'),
       });
 
       onNext();
     } catch (error: any) {
       console.error("Registration error:", error);
       toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to save registration details. Please try again.",
+        title: t('registration.error'),
+        description: error.response?.data?.message || t('registration.failedToSave'),
         variant: "destructive",
       });
     } finally {
@@ -146,10 +162,10 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           </div>
           <div>
             <h2 className="font-bold text-3xl text-foreground alumni-sans-title">
-              Complete Your Registration
+              {t('registration.title')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Fill in your personal information, upload required documents, and declare your education
+              {t('registration.description')}
             </p>
           </div>
         </div>
@@ -157,7 +173,10 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
 
       {/* Forms */}
       <div className="grid gap-8">
-        <PersonalInfoForm candidateData={candidateData} />
+        <PersonalInfoForm
+          data={personalInfo}
+          onUpdate={handlePersonalInfoUpdate}
+        />
         <DocumentUpload candidateData={candidateData} />
         <EducationDeclaration candidateData={candidateData} />
       </div>
@@ -168,9 +187,9 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h3 className="font-semibold text-destructive mb-2">Missing Required Documents</h3>
+              <h3 className="font-semibold text-destructive mb-2">{t('registration.missingDocumentsTitle')}</h3>
               <p className="text-sm text-destructive/90 mb-3">
-                Please upload the following documents before proceeding to payment:
+                {t('registration.missingDocumentsDescription')}
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm text-destructive/80">
                 {missingDocuments.map((doc) => {
@@ -187,7 +206,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       {/* Navigation */}
       <div className="flex items-center justify-between pt-6 border-t border-border/60">
         <div className="text-sm text-muted-foreground">
-          Step 1 of 4 • Registration
+          {t('registration.stepInfo')}
         </div>
         <Button
           onClick={handleSubmit}
@@ -198,11 +217,11 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           {isLoading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Saving...
+              {t('registration.saving')}
             </>
           ) : (
             <>
-              Continue to Payment
+              {t('registration.continueToPayment')}
               <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </>
           )}

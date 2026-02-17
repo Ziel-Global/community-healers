@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,6 +13,7 @@ interface ExamSlotPickerProps {
 }
 
 export function ExamSlotPicker({ selectedDate, onDateSelect, onSchedule, isScheduling, isScheduled }: ExamSlotPickerProps) {
+    const { t } = useTranslation();
 
     return (
         <Card className="border-border/40 shadow-sm overflow-hidden">
@@ -21,8 +23,8 @@ export function ExamSlotPicker({ selectedDate, onDateSelect, onSchedule, isSched
                         <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
                     <div className="min-w-0">
-                        <CardTitle className="text-lg sm:text-2xl font-bold alumni-sans-title">Select Exam Date</CardTitle>
-                        <CardDescription className="text-xs sm:text-sm">Choose your preferred exam date</CardDescription>
+                        <CardTitle className="text-lg sm:text-2xl font-bold alumni-sans-title">{t('scheduling.selectExamDate')}</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm">{t('scheduling.choosePreferredDate')}</CardDescription>
                     </div>
                 </div>
             </CardHeader>
@@ -40,14 +42,13 @@ export function ExamSlotPicker({ selectedDate, onDateSelect, onSchedule, isSched
                                     today.setHours(0, 0, 0, 0);
                                     const limit = new Date();
                                     limit.setDate(today.getDate() + 30);
-                                    // Disable today and past dates
                                     return date <= today || date > limit || isScheduled;
                                 }}
                             />
                         </div>
                         <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
                             <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
-                            <span>Select any date within the next 30 days</span>
+                            <span>{t('scheduling.selectWithin30Days')}</span>
                         </div>
                     </div>
 
@@ -60,15 +61,15 @@ export function ExamSlotPicker({ selectedDate, onDateSelect, onSchedule, isSched
                                     </div>
                                     <div className="min-w-0">
                                         <h4 className="font-bold text-foreground text-sm sm:text-base">
-                                            {isScheduled ? "Exam Scheduled!" : "Date Selected"}
+                                            {isScheduled ? t('scheduling.examScheduled') : t('scheduling.dateSelected')}
                                         </h4>
                                         <p className="text-xs sm:text-sm text-muted-foreground">
-                                            {isScheduled ? "Your exam has been confirmed" : "Confirm to schedule your exam"}
+                                            {isScheduled ? t('scheduling.examConfirmed') : t('scheduling.confirmToSchedule')}
                                         </p>
                                     </div>
                                 </div>
                                 <div className="mt-4 p-3 sm:p-4 rounded-lg bg-card border border-border/40">
-                                    <p className="text-xs text-muted-foreground mb-1">Exam Date</p>
+                                    <p className="text-xs text-muted-foreground mb-1">{t('scheduling.examDate')}</p>
                                     <p className="text-base sm:text-lg font-bold text-foreground">
                                         {selectedDate.toLocaleDateString('en-US', {
                                             weekday: 'long',
@@ -89,10 +90,10 @@ export function ExamSlotPicker({ selectedDate, onDateSelect, onSchedule, isSched
                                         {isScheduling ? (
                                             <>
                                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                Scheduling...
+                                                {t('scheduling.scheduling')}
                                             </>
                                         ) : (
-                                            "Schedule Exam"
+                                            t('scheduling.scheduleExam')
                                         )}
                                     </Button>
                                 )}

@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,59 +43,79 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            {/* Auth Routes (public) */}
-            <Route path="/candidate/auth" element={<CandidateAuth />} />
-            <Route path="/center/auth" element={<CenterAdminAuth />} />
-            <Route path="/admin/auth" element={<SuperAdminAuth />} />
-            <Route path="/ministry/auth" element={<MinistryAuth />} />
-            <Route path="/exam/auth" element={<ExamAuth />} />
-            {/* Examination Portal (protected) */}
-            <Route path="/exam/start" element={<ProtectedRoute portalType="exam"><ExamPortal /></ProtectedRoute>} />
-            {/* Candidate Portal Routes (protected) */}
-            <Route path="/candidate" element={<ProtectedRoute portalType="candidate"><CandidatePortal /></ProtectedRoute>} />
-            <Route path="/candidate/registration" element={<ProtectedRoute portalType="candidate"><RegistrationPage /></ProtectedRoute>} />
-            <Route path="/candidate/schedule" element={<ProtectedRoute portalType="candidate"><SchedulingPage /></ProtectedRoute>} />
-            <Route path="/candidate/training" element={<ProtectedRoute portalType="candidate"><TrainingPage /></ProtectedRoute>} />
-            <Route path="/candidate/certificates" element={<ProtectedRoute portalType="candidate"><CertificatesPage /></ProtectedRoute>} />
-            <Route path="/candidate/notifications" element={<ProtectedRoute portalType="candidate"><NotificationsPage /></ProtectedRoute>} />
-            <Route path="/candidate/profile" element={<ProtectedRoute portalType="candidate"><ProfilePage /></ProtectedRoute>} />
-            {/* Center Admin Portal Routes (protected) */}
-            <Route path="/center" element={<ProtectedRoute portalType="center"><CenterAdminPortal /></ProtectedRoute>} />
-            <Route path="/center/candidates" element={<ProtectedRoute portalType="center"><CandidatesPage /></ProtectedRoute>} />
-            <Route path="/center/verification" element={<ProtectedRoute portalType="center"><VerificationPage /></ProtectedRoute>} />
-            <Route path="/center/monitoring" element={<ProtectedRoute portalType="center"><MonitoringPage /></ProtectedRoute>} />
-            <Route path="/center/results" element={<ProtectedRoute portalType="center"><ResultsPage /></ProtectedRoute>} />
-            <Route path="/center/reports" element={<ProtectedRoute portalType="center"><ReportsPage /></ProtectedRoute>} />
-            {/* Super Admin Portal Routes (protected) */}
-            <Route path="/admin" element={<ProtectedRoute portalType="admin"><SuperAdminPortal /></ProtectedRoute>} />
-            <Route path="/admin/config" element={<ProtectedRoute portalType="admin"><ConfigPage /></ProtectedRoute>} />
-            <Route path="/admin/centers" element={<ProtectedRoute portalType="admin"><CentersPage /></ProtectedRoute>} />
-            <Route path="/admin/users" element={<ProtectedRoute portalType="admin"><UsersPage /></ProtectedRoute>} />
-            <Route path="/admin/questions" element={<ProtectedRoute portalType="admin"><QuestionsPage /></ProtectedRoute>} />
-            <Route path="/admin/content" element={<ProtectedRoute portalType="admin"><AcademyPage /></ProtectedRoute>} />
-            <Route path="/admin/audit" element={<ProtectedRoute portalType="admin"><AuditPage /></ProtectedRoute>} />
-            {/* Ministry Portal Routes (protected) */}
-            <Route path="/ministry" element={<ProtectedRoute portalType="ministry"><MinistryPortal /></ProtectedRoute>} />
-            <Route path="/ministry/review" element={<ProtectedRoute portalType="ministry"><ReviewPage /></ProtectedRoute>} />
-            <Route path="/ministry/registry" element={<ProtectedRoute portalType="ministry"><RegistryPage /></ProtectedRoute>} />
-            <Route path="/ministry/logs" element={<ProtectedRoute portalType="ministry"><LogsPage /></ProtectedRoute>} />
-            <Route path="/ministry/centers" element={<ProtectedRoute portalType="ministry"><CenterOversightPage /></ProtectedRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    const dir = i18n.language === 'ur' ? 'rtl' : 'ltr';
+    document.documentElement.dir = dir;
+    document.documentElement.lang = i18n.language;
+
+    const handleLangChange = (lng: string) => {
+      document.documentElement.dir = lng === 'ur' ? 'rtl' : 'ltr';
+      document.documentElement.lang = lng;
+    };
+
+    i18n.on('languageChanged', handleLangChange);
+    return () => {
+      i18n.off('languageChanged', handleLangChange);
+    };
+  }, [i18n]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              {/* Auth Routes (public) */}
+              <Route path="/candidate/auth" element={<CandidateAuth />} />
+              <Route path="/center/auth" element={<CenterAdminAuth />} />
+              <Route path="/admin/auth" element={<SuperAdminAuth />} />
+              <Route path="/ministry/auth" element={<MinistryAuth />} />
+              <Route path="/exam/auth" element={<ExamAuth />} />
+              {/* Examination Portal (protected) */}
+              <Route path="/exam/start" element={<ProtectedRoute portalType="exam"><ExamPortal /></ProtectedRoute>} />
+              {/* Candidate Portal Routes (protected) */}
+              <Route path="/candidate" element={<ProtectedRoute portalType="candidate"><CandidatePortal /></ProtectedRoute>} />
+              <Route path="/candidate/registration" element={<ProtectedRoute portalType="candidate"><RegistrationPage /></ProtectedRoute>} />
+              <Route path="/candidate/schedule" element={<ProtectedRoute portalType="candidate"><SchedulingPage /></ProtectedRoute>} />
+              <Route path="/candidate/training" element={<ProtectedRoute portalType="candidate"><TrainingPage /></ProtectedRoute>} />
+              <Route path="/candidate/certificates" element={<ProtectedRoute portalType="candidate"><CertificatesPage /></ProtectedRoute>} />
+              <Route path="/candidate/notifications" element={<ProtectedRoute portalType="candidate"><NotificationsPage /></ProtectedRoute>} />
+              <Route path="/candidate/profile" element={<ProtectedRoute portalType="candidate"><ProfilePage /></ProtectedRoute>} />
+              {/* Center Admin Portal Routes (protected) */}
+              <Route path="/center" element={<ProtectedRoute portalType="center"><CenterAdminPortal /></ProtectedRoute>} />
+              <Route path="/center/candidates" element={<ProtectedRoute portalType="center"><CandidatesPage /></ProtectedRoute>} />
+              <Route path="/center/verification" element={<ProtectedRoute portalType="center"><VerificationPage /></ProtectedRoute>} />
+              <Route path="/center/monitoring" element={<ProtectedRoute portalType="center"><MonitoringPage /></ProtectedRoute>} />
+              <Route path="/center/results" element={<ProtectedRoute portalType="center"><ResultsPage /></ProtectedRoute>} />
+              <Route path="/center/reports" element={<ProtectedRoute portalType="center"><ReportsPage /></ProtectedRoute>} />
+              {/* Super Admin Portal Routes (protected) */}
+              <Route path="/admin" element={<ProtectedRoute portalType="admin"><SuperAdminPortal /></ProtectedRoute>} />
+              <Route path="/admin/config" element={<ProtectedRoute portalType="admin"><ConfigPage /></ProtectedRoute>} />
+              <Route path="/admin/centers" element={<ProtectedRoute portalType="admin"><CentersPage /></ProtectedRoute>} />
+              <Route path="/admin/users" element={<ProtectedRoute portalType="admin"><UsersPage /></ProtectedRoute>} />
+              <Route path="/admin/questions" element={<ProtectedRoute portalType="admin"><QuestionsPage /></ProtectedRoute>} />
+              <Route path="/admin/content" element={<ProtectedRoute portalType="admin"><AcademyPage /></ProtectedRoute>} />
+              <Route path="/admin/audit" element={<ProtectedRoute portalType="admin"><AuditPage /></ProtectedRoute>} />
+              {/* Ministry Portal Routes (protected) */}
+              <Route path="/ministry" element={<ProtectedRoute portalType="ministry"><MinistryPortal /></ProtectedRoute>} />
+              <Route path="/ministry/review" element={<ProtectedRoute portalType="ministry"><ReviewPage /></ProtectedRoute>} />
+              <Route path="/ministry/registry" element={<ProtectedRoute portalType="ministry"><RegistryPage /></ProtectedRoute>} />
+              <Route path="/ministry/logs" element={<ProtectedRoute portalType="ministry"><LogsPage /></ProtectedRoute>} />
+              <Route path="/ministry/centers" element={<ProtectedRoute portalType="ministry"><CenterOversightPage /></ProtectedRoute>} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
