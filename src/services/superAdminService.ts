@@ -1,5 +1,5 @@
 import { api } from './api';
-import { ExamSettings, City, CreateCenterRequest, CenterAdmin, Question, CreateQuestionRequest, DashboardStats, AuditLog, AuditLogResponse } from '../types/superAdmin';
+import { ExamSettings, City, CreateCenterRequest, CenterAdmin, Question, CreateQuestionRequest, DashboardStats, AuditLog, AuditLogResponse, ExamParticipationTrend, CenterRegisteredCandidatesResponse } from '../types/superAdmin';
 
 export const updateExamSettings = async (settings: ExamSettings): Promise<void> => {
     try {
@@ -175,6 +175,40 @@ export const getAuditLogs = async (): Promise<AuditLogResponse> => {
     }
 };
 
+export const getExamParticipationTrend = async (period: string = 'months'): Promise<ExamParticipationTrend> => {
+    try {
+        const response = await api.get('/super-admin/exam-participation-trend', {
+            params: { period }
+        });
+        // Handle nested response
+        const nestedData = response.data?.data?.data || response.data?.data || response.data;
+        return nestedData;
+    } catch (error: any) {
+        console.error('Get Exam Participation Trend error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        }
+        throw new Error('Failed to fetch exam participation trend.');
+    }
+};
+
+export const getCenterRegisteredCandidates = async (centerId: string, date: string): Promise<CenterRegisteredCandidatesResponse> => {
+    try {
+        const response = await api.get('/super-admin/center/registered-candidates', {
+            params: { centerId, date }
+        });
+        // Handle nested response
+        const nestedData = response.data?.data?.data || response.data?.data || response.data;
+        return nestedData;
+    } catch (error: any) {
+        console.error('Get Center Registered Candidates error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        }
+        throw new Error('Failed to fetch registered candidates.');
+    }
+};
+
 export const superAdminService = {
     updateExamSettings,
     getExamSettings,
@@ -188,4 +222,6 @@ export const superAdminService = {
     createQuestion,
     getDashboardStats,
     getAuditLogs,
+    getExamParticipationTrend,
+    getCenterRegisteredCandidates,
 };

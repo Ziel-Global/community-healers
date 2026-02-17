@@ -79,42 +79,8 @@ const StatCard = ({ title, value, icon: Icon, desc }: any) => (
   </Card>
 );
 
-const dailyData = [
-  { period: "Mon", candidates: 125 },
-  { period: "Tue", candidates: 142 },
-  { period: "Wed", candidates: 138 },
-  { period: "Thu", candidates: 155 },
-  { period: "Fri", candidates: 148 },
-  { period: "Sat", candidates: 163 },
-  { period: "Sun", candidates: 121 },
-];
-
-const monthlyData = [
-  { period: "Jan", candidates: 850 },
-  { period: "Feb", candidates: 920 },
-  { period: "Mar", candidates: 1150 },
-  { period: "Apr", candidates: 1050 },
-  { period: "May", candidates: 1280 },
-  { period: "Jun", candidates: 1420 },
-  { period: "Jul", candidates: 1350 },
-  { period: "Aug", candidates: 1580 },
-  { period: "Sep", candidates: 1720 },
-  { period: "Oct", candidates: 1650 },
-  { period: "Nov", candidates: 1890 },
-  { period: "Dec", candidates: 2100 },
-];
-
-const yearlyData = [
-  { period: "2020", candidates: 4200 },
-  { period: "2021", candidates: 6800 },
-  { period: "2022", candidates: 9500 },
-  { period: "2023", candidates: 11200 },
-  { period: "2024", candidates: 14800 },
-  { period: "2025", candidates: 18400 },
-];
-
 const chartConfig = {
-  candidates: {
+  value: {
     label: "Candidates",
     color: "hsl(var(--primary))",
   },
@@ -128,26 +94,14 @@ export default function SuperAdminPortal() {
     queryFn: superAdminService.getDashboardStats,
   });
 
-  const getChartData = () => {
-    switch (timeFilter) {
-      case "days":
-        return dailyData;
-      case "years":
-        return yearlyData;
-      default:
-        return monthlyData;
-    }
-  };
+  const { data: trendData, isLoading: isTrendLoading } = useQuery({
+    queryKey: ["exam-participation-trend", timeFilter],
+    queryFn: () => superAdminService.getExamParticipationTrend(timeFilter),
+  });
 
   const getGrowthText = () => {
-    switch (timeFilter) {
-      case "days":
-        return "+8.2% this week";
-      case "years":
-        return "+24.3% this year";
-      default:
-        return "+24.5% growth";
-    }
+    if (isTrendLoading || !trendData) return "Loading...";
+    return `${trendData.growthPercentage >= 0 ? '+' : ''}${trendData.growthPercentage}% growth`;
   };
 
   return (
@@ -234,7 +188,7 @@ export default function SuperAdminPortal() {
           <CardContent className="p-2 sm:p-6">
             <ChartContainer config={chartConfig} className="h-[250px] sm:h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={getChartData()} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <AreaChart data={trendData?.data || []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorCandidates" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -243,7 +197,7 @@ export default function SuperAdminPortal() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                   <XAxis
-                    dataKey="period"
+                    dataKey="label"
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                     tickLine={false}
@@ -259,7 +213,7 @@ export default function SuperAdminPortal() {
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Area
                     type="monotone"
-                    dataKey="candidates"
+                    dataKey="value"
                     stroke="hsl(var(--primary))"
                     strokeWidth={2}
                     fill="url(#colorCandidates)"

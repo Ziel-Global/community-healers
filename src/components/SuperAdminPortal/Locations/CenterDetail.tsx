@@ -6,14 +6,14 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { 
-    Building2, 
-    MapPin, 
-    Users, 
-    Activity, 
-    ArrowLeft, 
-    Phone, 
-    Mail, 
+import {
+    Building2,
+    MapPin,
+    Users,
+    Activity,
+    ArrowLeft,
+    Phone,
+    Mail,
     User,
     Calendar,
     CheckCircle2,
@@ -59,43 +59,18 @@ const StatCard = ({ title, value, icon: Icon, desc }: any) => (
     </Card>
 );
 
-const registeredStudents = [
-    { 
-        date: "January 20, 2026",
-        students: [
-            { id: "CND-1245", name: "Muhammad Ahmed", phone: "0300-1234567", status: "Confirmed", time: "09:00 AM" },
-            { id: "CND-1246", name: "Aisha Khan", phone: "0321-9876543", status: "Confirmed", time: "09:00 AM" },
-            { id: "CND-1247", name: "Ali Hassan", phone: "0333-5551234", status: "Pending", time: "10:00 AM" },
-        ]
-    },
-    { 
-        date: "January 21, 2026",
-        students: [
-            { id: "CND-1248", name: "Fatima Noor", phone: "0345-7778888", status: "Confirmed", time: "09:00 AM" },
-            { id: "CND-1249", name: "Usman Malik", phone: "0301-4445555", status: "Confirmed", time: "09:00 AM" },
-            { id: "CND-1250", name: "Sara Iqbal", phone: "0322-6667777", status: "Confirmed", time: "11:00 AM" },
-            { id: "CND-1251", name: "Bilal Ahmed", phone: "0334-8889999", status: "Pending", time: "11:00 AM" },
-        ]
-    },
-    { 
-        date: "January 22, 2026",
-        students: [
-            { id: "CND-1252", name: "Zainab Ali", phone: "0346-1112222", status: "Confirmed", time: "09:00 AM" },
-            { id: "CND-1253", name: "Hassan Raza", phone: "0302-3334444", status: "Confirmed", time: "10:00 AM" },
-        ]
-    },
-];
-
 export function CenterDetail({ center, onBack }: CenterDetailProps) {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [open, setOpen] = useState(false);
     const [centerDetails, setCenterDetails] = useState<any>(null);
+    const [registeredData, setRegisteredData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCandidatesLoading, setIsCandidatesLoading] = useState(false);
     const { toast } = useToast();
 
-    // Fetch center details from API
+    // Fetch center details and registered candidates
     useEffect(() => {
-        const fetchCenterDetails = async () => {
+        const fetchData = async () => {
             try {
                 setIsLoading(true);
                 const details = await superAdminService.getCenterDetails(center.id);
@@ -113,15 +88,34 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
         };
 
         if (center.id) {
-            fetchCenterDetails();
+            fetchData();
         }
     }, [center.id, toast]);
 
-    // Filter students by selected date
-    const filteredStudents = registeredStudents.filter(dayData => {
-        const dataDate = new Date(dayData.date);
-        return dataDate.toDateString() === selectedDate.toDateString();
-    });
+    // Fetch candidates when date changes
+    useEffect(() => {
+        const fetchCandidates = async () => {
+            try {
+                setIsCandidatesLoading(true);
+                const dateStr = format(selectedDate, "yyyy-MM-dd");
+                const data = await superAdminService.getCenterRegisteredCandidates(center.id, dateStr);
+                setRegisteredData(data);
+            } catch (error: any) {
+                console.error('Failed to fetch registered candidates:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to load registered candidates for the selected date.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsCandidatesLoading(false);
+            }
+        };
+
+        if (center.id && selectedDate) {
+            fetchCandidates();
+        }
+    }, [center.id, selectedDate, toast]);
 
     if (isLoading) {
         return (
@@ -233,11 +227,11 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                                 <div>
                                     <p className="text-xs text-muted-foreground font-semibold uppercase">Established</p>
                                     <p className="text-sm font-medium">
-                                        {centerDetails.createdAt 
-                                            ? new Date(centerDetails.createdAt).toLocaleDateString('en-US', { 
-                                                year: 'numeric', 
-                                                month: 'long', 
-                                                day: 'numeric' 
+                                        {centerDetails.createdAt
+                                            ? new Date(centerDetails.createdAt).toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
                                             })
                                             : "Not specified"}
                                     </p>
@@ -251,7 +245,7 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                                 <div>
                                     <p className="text-xs text-muted-foreground font-semibold uppercase">Primary Admin</p>
                                     <p className="text-sm font-medium">
-                                        {centerDetails.primaryAdmin 
+                                        {centerDetails.primaryAdmin
                                             ? `${centerDetails.primaryAdmin.firstName} ${centerDetails.primaryAdmin.lastName}`
                                             : "Not assigned"}
                                     </p>
@@ -274,19 +268,19 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <StatCard 
-                    title="Total Registrations" 
-                    value={centerDetails.totalCandidates || 0} 
-                    icon={Users} 
-                    desc="Registered candidates" 
+                <StatCard
+                    title="Total Registrations"
+                    value={centerDetails.totalCandidates || 0}
+                    icon={Users}
+                    desc="Overall registered candidates"
                 />
-                <StatCard 
-                    title="Total Candidates Appeared" 
-                    value={centerDetails.verifiedCandidates || 0} 
-                    icon={Activity} 
-                    desc={`${centerDetails.totalCandidates > 0 
-                        ? ((centerDetails.verifiedCandidates / centerDetails.totalCandidates) * 100).toFixed(1) 
-                        : 0}% attendance rate`} 
+                <StatCard
+                    title="Total Candidates Appeared"
+                    value={centerDetails.verifiedCandidates || 0}
+                    icon={Activity}
+                    desc={`${centerDetails.totalCandidates > 0
+                        ? ((centerDetails.verifiedCandidates / centerDetails.totalCandidates) * 100).toFixed(1)
+                        : 0}% overall attendance rate`}
                 />
             </div>
 
@@ -328,58 +322,63 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {filteredStudents.length > 0 ? (
-                        filteredStudents.map((dayData, index) => (
-                            <div key={index} className="space-y-3">
-                                <div className="flex items-center gap-2 pb-2 border-b border-border/40">
-                                    <Calendar className="w-4 h-4 text-primary" />
-                                    <h3 className="font-bold text-foreground">{dayData.date}</h3>
-                                    <Badge variant="outline" className="ml-auto">
-                                        {dayData.students.length} students
-                                    </Badge>
-                                </div>
+                    {isCandidatesLoading ? (
+                        <div className="flex flex-col items-center justify-center py-12 gap-3">
+                            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                            <p className="text-sm text-muted-foreground">Updating candidate list...</p>
+                        </div>
+                    ) : registeredData?.registeredCandidates?.length > 0 ? (
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2 pb-2 border-b border-border/40">
+                                <Calendar className="w-4 h-4 text-primary" />
+                                <h3 className="font-bold text-foreground">{format(selectedDate, "MMMM dd, yyyy")}</h3>
+                                <Badge variant="outline" className="ml-auto">
+                                    {registeredData.registeredCandidates.length} students
+                                </Badge>
+                            </div>
 
-                                <div className="space-y-2">
-                                    {dayData.students.map((student) => (
-                                        <div 
-                                            key={student.id}
-                                            className="flex items-center justify-between p-4 rounded-lg border border-border/40 bg-card/30 hover:bg-card/60 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                                    <User className="w-5 h-5 text-primary" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-semibold text-foreground">{student.name}</p>
-                                                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                                                        <span className="font-mono">{student.id}</span>
-                                                        <span>•</span>
-                                                        <span className="flex items-center gap-1">
-                                                            <Phone className="w-3 h-3" />
-                                                            {student.phone}
-                                                        </span>
-                                                    </div>
-                                                </div>
+                            <div className="space-y-2">
+                                {registeredData.registeredCandidates.map((student: any) => (
+                                    <div
+                                        key={student.userId}
+                                        className="flex items-center justify-between p-4 rounded-lg border border-border/40 bg-card/30 hover:bg-card/60 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                                <User className="w-5 h-5 text-primary" />
                                             </div>
-
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                                    <Clock className="w-4 h-4" />
-                                                    <span className="font-medium">{student.time}</span>
+                                            <div>
+                                                <p className="font-semibold text-foreground">{student.firstName} {student.lastName}</p>
+                                                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                                                    <span className="font-mono">{student.cnic}</span>
+                                                    <span>•</span>
+                                                    <span className="flex items-center gap-1">
+                                                        <Phone className="w-3 h-3" />
+                                                        {student.phoneNumber}
+                                                    </span>
                                                 </div>
-                                                <Badge 
-                                                    variant={student.status === "Confirmed" ? "success" : "secondary"}
-                                                    className="px-3 py-1"
-                                                >
-                                                    {student.status === "Confirmed" && <CheckCircle2 className="w-3 h-3 mr-1" />}
-                                                    {student.status}
-                                                </Badge>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
+
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                                <Clock className="w-4 h-4" />
+                                                <span className="font-medium">
+                                                    {new Date(student.examStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                            <Badge
+                                                variant={student.candidateStatus === "SUBMITTED" ? "success" : "secondary"}
+                                                className="px-3 py-1"
+                                            >
+                                                {student.candidateStatus === "SUBMITTED" && <CheckCircle2 className="w-3 h-3 mr-1" />}
+                                                {student.candidateStatus}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        ))
+                        </div>
                     ) : (
                         <div className="text-center py-12">
                             <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />

@@ -75,6 +75,18 @@ export interface DashboardStats {
     totalCandidates: number;
 }
 
+export interface TrendDataPoint {
+    label: string;
+    value: number;
+}
+
+export interface ExamParticipationTrend {
+    period: string;
+    year: number;
+    growthPercentage: number;
+    data: TrendDataPoint[];
+}
+
 export interface AuditLog {
     id: string;
     createdAt: string;
@@ -95,4 +107,42 @@ export interface AuditLogResponse {
         limit: number;
         totalPages: number;
     };
+}
+
+export interface RegisteredCandidate {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    cnic: string;
+    fatherName: string | null;
+    city: string;
+    address: string | null;
+    candidateStatus: string;
+    examStartTime: string;
+    examDate: string;
+}
+
+export interface CenterRegisteredCandidatesResponse {
+    centerInfo: {
+        id: string;
+        name: string;
+        licenseNumber: string | null;
+        location: string;
+        address: string;
+        dailyCapacity: number;
+        established: string;
+        primaryAdmin: {
+            name: string;
+            email: string;
+        };
+    };
+    statistics: {
+        totalRegistrations: number;
+        totalAppeared: number;
+        attendanceRate: number;
+    };
+    date: string;
+    registeredCandidates: RegisteredCandidate[];
 }
