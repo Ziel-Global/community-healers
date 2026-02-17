@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { CandidateWizard } from "@/components/StudentPortal/CandidateWizard";
@@ -16,11 +16,28 @@ import { CertificateCard } from "@/components/StudentPortal/CertificateCard";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function CandidatePortal() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { logout, examScheduleInfo, checkExamSchedule } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"profile" | "application">("application");
-  const [currentWizardStep, setCurrentWizardStep] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = (searchParams.get("tab") as "profile" | "application") || "application";
+  const currentWizardStep = parseInt(searchParams.get("step") || "0", 10);
+
+  const setActiveTab = (tab: "profile" | "application") => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("tab", tab);
+      return newParams;
+    });
+  };
+
+  const setCurrentWizardStep = (step: number) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("step", step.toString());
+      return newParams;
+    });
+  };
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
   const [scheduledExamDate, setScheduledExamDate] = useState<Date | undefined>(undefined);
   const [certificate, setCertificate] = useState<any | null>(null);
@@ -41,6 +58,13 @@ export default function CandidatePortal() {
       }
     };
     fetchCandidateData();
+
+    // RTL Cleanup on unmount
+    return () => {
+      if (i18n.language === 'ur') {
+        i18n.changeLanguage('en');
+      }
+    };
   }, []);
 
   const wizardSteps = [
@@ -232,7 +256,7 @@ export default function CandidatePortal() {
                 onClick={handleLogout}
                 className="gap-1 sm:gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive px-2 sm:px-3"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4 rtl:-scale-x-100" />
                 <span className="hidden sm:inline">{t('nav.logout')}</span>
               </Button>
             </div>

@@ -404,6 +404,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } finally {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            localStorage.removeItem('examScheduleInfo');
 
             // Reset language to English (LTR) on logout
             i18n.changeLanguage('en');

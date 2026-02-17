@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,10 @@ export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComple
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    setCurrentStep(initialStep);
+  }, [initialStep]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -99,10 +103,10 @@ export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComple
               >
                 <div
                   className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isCompleted || isPast
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                      : isCurrent
-                        ? "bg-primary/20 border-2 border-primary text-primary animate-pulse"
-                        : "bg-secondary border-2 border-border text-muted-foreground"
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                    : isCurrent
+                      ? "bg-primary/20 border-2 border-primary text-primary animate-pulse"
+                      : "bg-secondary border-2 border-border text-muted-foreground"
                     }`}
                 >
                   {isCompleted || isPast ? (
@@ -114,10 +118,10 @@ export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComple
                 <div className="text-center px-1">
                   <p
                     className={`text-[10px] sm:text-xs font-medium ${isCurrent
-                        ? "text-primary font-semibold"
-                        : isCompleted || isPast
-                          ? "text-foreground"
-                          : "text-muted-foreground"
+                      ? "text-primary font-semibold"
+                      : isCompleted || isPast
+                        ? "text-foreground"
+                        : "text-muted-foreground"
                       }`}
                   >
                     {step.title}

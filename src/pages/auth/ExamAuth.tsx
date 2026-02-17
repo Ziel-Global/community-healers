@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,18 @@ import { useTranslation } from "react-i18next";
 
 export default function ExamAuth() {
     const navigate = useNavigate();
-    const { loginCandidate } = useAuth();
+    const { loginCandidate, logout, isAuthenticated } = useAuth();
     const { t } = useTranslation();
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // Auto logout when navigating back to auth page
+    useEffect(() => {
+        if (isAuthenticated) {
+            logout();
+        }
+    }, []);
 
     const handleLogin = async () => {
         if (phone.length < 10) {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,18 @@ import { useToast } from "@/hooks/use-toast";
 export default function SuperAdminAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
-  const { loginSuperAdmin } = useAuth();
+  const { loginSuperAdmin, logout, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Auto logout when navigating back to auth page
+  useEffect(() => {
+    if (isAuthenticated) {
+      logout();
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

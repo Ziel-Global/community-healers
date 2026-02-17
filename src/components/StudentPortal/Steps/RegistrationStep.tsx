@@ -222,7 +222,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           ) : (
             <>
               {t('registration.continueToPayment')}
-              <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight className="w-4 h-4 ms-2 rtl:-scale-x-100 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
             </>
           )}
         </Button>

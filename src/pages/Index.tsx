@@ -20,7 +20,7 @@ const portals = [
   {
     title: "Candidate Portal",
     description:
-      "Register, schedule exams, complete training, and track your certification progress.",
+      "Register, schedule training, complete training, and track your certification progress.",
     icon: GraduationCap,
     href: "/candidate/auth",
     stats: [
@@ -35,14 +35,14 @@ const portals = [
     icon: BookOpen,
     href: "/exam/auth",
     stats: [
-      { label: "Exams Today", value: "342" },
+      { label: "Trainings Today", value: "342" },
       { label: "Pass Rate", value: "78%" },
     ],
   },
   {
     title: "Center Admin",
     description:
-      "Manage exam day operations, verify candidate identity, and monitor examination progress.",
+      "Manage training day operations, verify candidate identity, and monitor examination progress.",
     icon: Building2,
     href: "/center/auth",
     stats: [
@@ -64,7 +64,7 @@ const portals = [
   {
     title: "Ministry Portal",
     description:
-      "Review exam results, approve certifications, and issue official government certificates.",
+      "Review training results, approve certifications, and issue official government certificates.",
     icon: Landmark,
     href: "/ministry/auth",
     stats: [
@@ -82,7 +82,7 @@ const features = [
   },
   {
     icon: Clock,
-    title: "Secure CBT Exams",
+    title: "Secure CBT Trainings",
     description: "20 randomized questions with 20-minute time limit",
   },
   {
@@ -128,7 +128,7 @@ export default function Index() {
             <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2">
               End-to-end digital solution managing candidate journeys from
               registration to government certificate issuance, with secure CBT
-              exams and full compliance.
+              Trainings and full compliance.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">

@@ -193,10 +193,6 @@ export function ProfileView({
                   </h2>
                   <p className="text-sm text-muted-foreground">{t("profile.candidateId")}: {candidateData?.userId || t("common.na")}</p>
                 </div>
-                <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  {candidateData?.user.status || 'Active'}
-                </Badge>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mt-4">
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
@@ -218,136 +214,140 @@ export function ProfileView({
       </Card>
 
       {/* Scheduled Exam Card from API - Show if exam is scheduled AND no certificate issued */}
-      {examScheduleInfo?.examScheduled && !hasCertificate && (
-        <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-primary" />
+      {
+        examScheduleInfo?.examScheduled && !hasCertificate && (
+          <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl alumni-sans-title">{t("profile.examScheduled")}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t("profile.examScheduledDesc")}
+                  </p>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-xl alumni-sans-title">{t("profile.examScheduled")}</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {t("profile.examScheduledDesc")}
+            </CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                <div className="p-4 rounded-xl bg-card border border-border/40">
+                  <p className="text-xs text-muted-foreground mb-1">{t("profile.examDate")}</p>
+                  <p className="font-bold text-foreground">
+                    {(() => {
+                      try {
+                        if (!examScheduleInfo.examDate) return t("common.na");
+                        // Extract only the date part YYYY-MM-DD to avoid time conflicts
+                        const datePart = examScheduleInfo.examDate.split('T')[0];
+                        return format(parseISO(datePart), 'MMMM d, yyyy');
+                      } catch (e) {
+                        console.error('Date parsing error:', e);
+                        return t("common.na");
+                      }
+                    })()}
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-card border border-border/40">
+                  <p className="text-xs text-muted-foreground mb-1">{t("profile.examTime")}</p>
+                  <p className="font-bold text-foreground">
+                    {(() => {
+                      try {
+                        const startTime = examScheduleInfo.examStartTime;
+                        if (!startTime) return '10:00 AM';
+
+                        // If it already looks like a formatted time (e.g. "10:00 AM"), just return it
+                        if (startTime.includes('AM') || startTime.includes('PM')) {
+                          return startTime;
+                        }
+
+                        // If it's a full ISO string
+                        if (startTime.includes('T')) {
+                          return format(parseISO(startTime), 'h:mm a');
+                        }
+
+                        const datePart = (examScheduleInfo.examDate || new Date().toISOString()).split('T')[0];
+                        const combined = `${datePart}T${startTime}`;
+                        const parsed = parseISO(combined);
+
+                        if (isNaN(parsed.getTime())) {
+                          return startTime; // Fallback to raw string if parsing fails
+                        }
+
+                        return format(parsed, 'h:mm a');
+                      } catch (e) {
+                        // Silently return fallback or raw string to avoid console noise
+                        return examScheduleInfo.examStartTime || '10:00 AM';
+                      }
+                    })()}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="p-4 rounded-xl bg-card border border-border/40">
+                  <p className="text-xs text-muted-foreground mb-1">{t("profile.testCenter")}</p>
+                  <p className="font-bold text-foreground">{examScheduleInfo.centerName || t("common.na")}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-card border border-border/40">
+                  <p className="text-xs text-muted-foreground mb-1">{t("profile.centerAddress")}</p>
+                  <p className="text-sm text-foreground whitespace-pre-line">{examScheduleInfo.centerAddress || t("common.na")}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-card border border-border/40">
+                  <p className="text-xs text-muted-foreground mb-1">{t("profile.city")}</p>
+                  <p className="font-bold text-foreground">{examScheduleInfo.cityName || t("common.na")}</p>
+                </div>
+              </div>
+              <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                <p className="text-xs text-muted-foreground">
+                  <strong className="text-foreground">{t("common.note")}</strong> {t("profile.examNote")}
                 </p>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid sm:grid-cols-2 gap-4 mb-4">
-              <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">{t("profile.examDate")}</p>
-                <p className="font-bold text-foreground">
-                  {(() => {
-                    try {
-                      if (!examScheduleInfo.examDate) return t("common.na");
-                      // Extract only the date part YYYY-MM-DD to avoid time conflicts
-                      const datePart = examScheduleInfo.examDate.split('T')[0];
-                      return format(parseISO(datePart), 'MMMM d, yyyy');
-                    } catch (e) {
-                      console.error('Date parsing error:', e);
-                      return t("common.na");
-                    }
-                  })()}
-                </p>
-              </div>
-              <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">{t("profile.examTime")}</p>
-                <p className="font-bold text-foreground">
-                  {(() => {
-                    try {
-                      const startTime = examScheduleInfo.examStartTime;
-                      if (!startTime) return '10:00 AM';
-
-                      // If it already looks like a formatted time (e.g. "10:00 AM"), just return it
-                      if (startTime.includes('AM') || startTime.includes('PM')) {
-                        return startTime;
-                      }
-
-                      // If it's a full ISO string
-                      if (startTime.includes('T')) {
-                        return format(parseISO(startTime), 'h:mm a');
-                      }
-
-                      const datePart = (examScheduleInfo.examDate || new Date().toISOString()).split('T')[0];
-                      const combined = `${datePart}T${startTime}`;
-                      const parsed = parseISO(combined);
-
-                      if (isNaN(parsed.getTime())) {
-                        return startTime; // Fallback to raw string if parsing fails
-                      }
-
-                      return format(parsed, 'h:mm a');
-                    } catch (e) {
-                      // Silently return fallback or raw string to avoid console noise
-                      return examScheduleInfo.examStartTime || '10:00 AM';
-                    }
-                  })()}
-                </p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">{t("profile.testCenter")}</p>
-                <p className="font-bold text-foreground">{examScheduleInfo.centerName || t("common.na")}</p>
-              </div>
-              <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">{t("profile.centerAddress")}</p>
-                <p className="text-sm text-foreground whitespace-pre-line">{examScheduleInfo.centerAddress || t("common.na")}</p>
-              </div>
-              <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">{t("profile.city")}</p>
-                <p className="font-bold text-foreground">{examScheduleInfo.cityName || t("common.na")}</p>
-              </div>
-            </div>
-            <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <p className="text-xs text-muted-foreground">
-                <strong className="text-foreground">{t("common.note")}</strong> {t("profile.examNote")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )
+      }
 
       {/* Scheduled Exam Card - Only show if registration complete and exam scheduled (local state) AND no certificate */}
-      {isRegistrationComplete && scheduledExamDate && !examCompleted && !examScheduleInfo?.examScheduled && !hasCertificate && (
-        <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-primary" />
+      {
+        isRegistrationComplete && scheduledExamDate && !examCompleted && !examScheduleInfo?.examScheduled && !hasCertificate && (
+          <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl alumni-sans-title">{t("profile.examScheduled")}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t("profile.examScheduledDesc")}
+                  </p>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-xl alumni-sans-title">{t("profile.examScheduled")}</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {t("profile.examScheduledDesc")}
+            </CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-card border border-border/40">
+                  <p className="text-xs text-muted-foreground mb-1">{t("profile.date")}</p>
+                  <p className="font-bold text-foreground">{format(scheduledExamDate, 'MMMM d, yyyy')}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-card border border-border/40">
+                  <p className="text-xs text-muted-foreground mb-1">{t("profile.time")}</p>
+                  <p className="font-bold text-foreground">10:00 AM</p>
+                </div>
+                <div className="p-4 rounded-xl bg-card border border-border/40">
+                  <p className="text-xs text-muted-foreground mb-1">{t("profile.center")}</p>
+                  <p className="font-bold text-foreground">LHR-003</p>
+                </div>
+              </div>
+              <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                <p className="text-xs text-muted-foreground">
+                  <strong className="text-foreground">{t("common.note")}</strong> {t("profile.localExamNote")}
                 </p>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">{t("profile.date")}</p>
-                <p className="font-bold text-foreground">{format(scheduledExamDate, 'MMMM d, yyyy')}</p>
-              </div>
-              <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">{t("profile.time")}</p>
-                <p className="font-bold text-foreground">10:00 AM</p>
-              </div>
-              <div className="p-4 rounded-xl bg-card border border-border/40">
-                <p className="text-xs text-muted-foreground mb-1">{t("profile.center")}</p>
-                <p className="font-bold text-foreground">LHR-003</p>
-              </div>
-            </div>
-            <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <p className="text-xs text-muted-foreground">
-                <strong className="text-foreground">{t("common.note")}</strong> {t("profile.localExamNote")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )
+      }
 
       {/* Personal Information */}
       <Card className="border-border/40 shadow-sm">
@@ -455,9 +455,11 @@ export function ProfileView({
       </Card>
 
       {/* Certificate Download Section - Show if certificate exists from API */}
-      {candidateData?.certificate && (
-        <CertificateCard certificate={candidateData.certificate} />
-      )}
+      {
+        candidateData?.certificate && (
+          <CertificateCard certificate={candidateData.certificate} />
+        )
+      }
 
       {/* Documents */}
       <Card className="border-border/40 shadow-sm">
@@ -606,6 +608,6 @@ export function ProfileView({
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }
