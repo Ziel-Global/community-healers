@@ -276,10 +276,10 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                 />
                 <StatCard
                     title="Total Candidates Appeared"
-                    value={centerDetails.verifiedCandidates || 0}
+                    value={centerDetails.appearedCandidates || 0}
                     icon={Activity}
                     desc={`${centerDetails.totalCandidates > 0
-                        ? ((centerDetails.verifiedCandidates / centerDetails.totalCandidates) * 100).toFixed(1)
+                        ? ((centerDetails.appearedCandidates / centerDetails.totalCandidates) * 100).toFixed(1)
                         : 0}% overall attendance rate`}
                 />
             </div>
