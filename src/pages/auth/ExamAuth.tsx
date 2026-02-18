@@ -36,7 +36,7 @@ export default function ExamAuth() {
         try {
             await loginCandidate({ phoneNumber: phone, password });
             toast.success(t("examAuth.loginSuccess"));
-            navigate("/exam/start");
+            navigate("/training/start");
         } catch (error: any) {
             toast.error(error.message || t("examAuth.loginFailed"));
         } finally {

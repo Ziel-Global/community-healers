@@ -76,9 +76,9 @@ const App = () => {
               <Route path="/center/auth" element={<CenterAdminAuth />} />
               <Route path="/admin/auth" element={<SuperAdminAuth />} />
               <Route path="/ministry/auth" element={<MinistryAuth />} />
-              <Route path="/exam/auth" element={<ExamAuth />} />
-              {/* Examination Portal (protected) */}
-              <Route path="/exam/start" element={<ProtectedRoute portalType="exam"><ExamPortal /></ProtectedRoute>} />
+              <Route path="/training/auth" element={<ExamAuth />} />
+              {/* Training Portal (protected) */}
+              <Route path="/training/start" element={<ProtectedRoute portalType="exam"><ExamPortal /></ProtectedRoute>} />
               {/* Candidate Portal Routes (protected) */}
               <Route path="/candidate" element={<ProtectedRoute portalType="candidate"><CandidatePortal /></ProtectedRoute>} />
               <Route path="/candidate/registration" element={<ProtectedRoute portalType="candidate"><RegistrationPage /></ProtectedRoute>} />

@@ -123,10 +123,10 @@ export default function ExamPortal() {
                 i18n.changeLanguage('en');
             }
             await logout();
-            navigate("/exam/auth");
+            navigate("/training/auth");
         } catch (error) {
             console.error("Logout failed:", error);
-            navigate("/exam/auth");
+            navigate("/training/auth");
         }
     };
 

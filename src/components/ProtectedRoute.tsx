@@ -11,7 +11,7 @@ const authPaths: Record<string, string> = {
     center: '/center/auth',
     admin: '/admin/auth',
     ministry: '/ministry/auth',
-    exam: '/exam/auth',
+    exam: '/training/auth',
 };
 
 export function ProtectedRoute({ children, portalType }: ProtectedRouteProps) {

@@ -306,7 +306,7 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
                             <h3 className="font-display font-bold text-2xl text-foreground mb-2">Exam Submitted Successfully</h3>
                             <p className="text-muted-foreground">You will be notified about the result via Candidate Portal.</p>
                         </div>
-                        <Button onClick={() => navigate("/exam/auth")} className="w-full font-bold gap-2">
+                        <Button onClick={() => navigate("/training/auth")} className="w-full font-bold gap-2">
                             Return to Login
                         </Button>
                     </CardContent>

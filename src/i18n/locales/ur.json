@@ -14,8 +14,8 @@
     "completeProfile": "پروفائل مکمل کریں",
     "payment": "ادائیگی",
     "payPKR": "3000 روپے ادا کریں",
-    "scheduleExam": "امتحان شیڈول کریں",
-    "pickExamDate": "امتحان کی تاریخ منتخب کریں"
+    "scheduleExam": "تربیت شیڈول کریں",
+    "pickExamDate": "تربیت کی تاریخ منتخب کریں"
   },
   "registration": {
     "title": "اپنی رجسٹریشن مکمل کریں",
@@ -150,16 +150,16 @@
     "complete": "مکمل",
     "paymentLabel": "ادائیگی",
     "received": "موصول",
-    "examLabel": "امتحان",
+    "examLabel": "تربیت",
     "scheduledLabel": "شیڈول شدہ",
     "goToProfile": "پروفائل پر جائیں"
   },
   "certificate": {
     "ready": "!آپ کا سرٹیفکیٹ تیار ہے",
-    "congratsExam": "سرٹیفکیشن امتحان پاس کرنے پر مبارکباد",
+    "congratsExam": "سرٹیفکیشن تربیت پاس کرنے پر مبارکباد",
     "certified": "تصدیق شدہ",
     "certificateNumber": "سرٹیفکیٹ نمبر",
-    "examScore": "امتحان کا سکور",
+    "examScore": "تربیت کا سکور",
     "passed": "پاس",
     "issueDate": "جاری کرنے کی تاریخ",
     "validUntil": "تک درست",

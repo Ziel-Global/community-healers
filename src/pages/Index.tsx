@@ -33,7 +33,7 @@ const portals = [
     description:
       "Login with your candidate credentials to take your scheduled CBT training.",
     icon: BookOpen,
-    href: "/exam/auth",
+    href: "/training/auth",
     stats: [
       { label: "Trainings Today", value: "342" },
       { label: "Pass Rate", value: "78%" },

@@ -205,7 +205,7 @@ export default function CandidateAuth() {
             {[
               { num: "1", text: "Complete your registration" },
               { num: "2", text: "Pay training fee" },
-              { num: "3", text: "Schedule your exam date" },
+              { num: "3", text: "Schedule your training date" },
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-md">
@@ -243,7 +243,7 @@ export default function CandidateAuth() {
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
             {isSignUp
-              ? "Register to start your certification journey"
+              ? "Register to start your training journey"
               : "Sign in to access your candidate portal"}
           </p>
 
