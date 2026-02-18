@@ -51,9 +51,15 @@ interface CandidateTableProps {
     statusFilter?: string;
     examDate?: string;
     refreshTrigger?: number;
+    canVerify?: boolean;
 }
 
-export function CandidateTable({ statusFilter = "all", examDate, refreshTrigger = 0 }: CandidateTableProps) {
+export function CandidateTable({
+    statusFilter = "all",
+    examDate,
+    refreshTrigger = 0,
+    canVerify = false
+}: CandidateTableProps) {
     const navigate = useNavigate();
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -355,12 +361,14 @@ export function CandidateTable({ statusFilter = "all", examDate, refreshTrigger 
                                 <Button variant="outline" onClick={() => setSelectedCandidate(null)}>
                                     Close
                                 </Button>
-                                <Button
-                                    onClick={handleVerify}
-                                    className="gradient-primary text-white"
-                                >
-                                    Verify Candidate
-                                </Button>
+                                {canVerify && selectedCandidate.status === "Pending" && (
+                                    <Button
+                                        onClick={handleVerify}
+                                        className="gradient-primary text-white"
+                                    >
+                                        Verify Candidate
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     )}

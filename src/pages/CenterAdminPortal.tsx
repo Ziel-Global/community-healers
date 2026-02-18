@@ -128,7 +128,7 @@ export default function CenterAdminPortal() {
               </SelectContent>
             </Select>
           </div>
-          <CandidateTable statusFilter={statusFilter} refreshTrigger={refreshTrigger} />
+          <CandidateTable statusFilter={statusFilter} refreshTrigger={refreshTrigger} canVerify={true} />
         </div>
 
         <Dialog open={isCloseVerificationOpen} onOpenChange={setIsCloseVerificationOpen}>

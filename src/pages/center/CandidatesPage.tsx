@@ -32,6 +32,7 @@ export default function CandidatesPage() {
                 <CandidateTable
                     statusFilter={statusFilter}
                     examDate={format(selectedDate, "yyyy-MM-dd")}
+                    canVerify={false}
                 />
             </div>
         </DashboardLayout>
