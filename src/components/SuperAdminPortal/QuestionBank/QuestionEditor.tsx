@@ -33,11 +33,16 @@ export function QuestionEditor() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         text: "",
+        textUrdu: "",
         category: "GENERAL",
         option1: "",
+        option1Urdu: "",
         option2: "",
+        option2Urdu: "",
         option3: "",
+        option3Urdu: "",
         option4: "",
+        option4Urdu: "",
         correctAnswer: "",
     });
 
@@ -79,7 +84,12 @@ export function QuestionEditor() {
 
     const handleSubmit = async () => {
         // Validate required fields
-        if (!formData.text || !formData.option1 || !formData.option2 || !formData.option3 || !formData.option4 || !formData.correctAnswer) {
+        if (!formData.text || !formData.textUrdu ||
+            !formData.option1 || !formData.option1Urdu ||
+            !formData.option2 || !formData.option2Urdu ||
+            !formData.option3 || !formData.option3Urdu ||
+            !formData.option4 || !formData.option4Urdu ||
+            !formData.correctAnswer) {
             toast({
                 title: "Incomplete Information",
                 description: "Please fill in all required fields.",
@@ -93,11 +103,16 @@ export function QuestionEditor() {
         try {
             const request: CreateQuestionRequest = {
                 questionText: formData.text,
+                questionTextUrdu: formData.textUrdu,
                 category: formData.category as QuestionCategory,
                 option1: formData.option1,
+                option1Urdu: formData.option1Urdu,
                 option2: formData.option2,
+                option2Urdu: formData.option2Urdu,
                 option3: formData.option3,
+                option3Urdu: formData.option3Urdu,
                 option4: formData.option4,
+                option4Urdu: formData.option4Urdu,
                 correctAnswer: formData.correctAnswer === formData.option1 ? 1 :
                     formData.correctAnswer === formData.option2 ? 2 :
                         formData.correctAnswer === formData.option3 ? 3 : 4,
@@ -114,11 +129,16 @@ export function QuestionEditor() {
             // Reset form
             setFormData({
                 text: "",
+                textUrdu: "",
                 category: "GENERAL",
                 option1: "",
+                option1Urdu: "",
                 option2: "",
+                option2Urdu: "",
                 option3: "",
+                option3Urdu: "",
                 option4: "",
+                option4Urdu: "",
                 correctAnswer: "",
             });
 
@@ -233,6 +253,23 @@ export function QuestionEditor() {
                                 value={formData.text}
                                 onChange={(e) => setFormData({ ...formData, text: e.target.value })}
                                 rows={3}
+                                className="border-gray-400"
+                            />
+                        </div>
+
+                        {/* Question Text Urdu */}
+                        <div className="space-y-2">
+                            <Label htmlFor="questionTextUrdu" className="flex justify-between">
+                                <span>Question Text (Urdu) *</span>
+                            </Label>
+                            <Textarea
+                                id="questionTextUrdu"
+                                placeholder="اردو میں سوال لکھیں..."
+                                value={formData.textUrdu}
+                                onChange={(e) => setFormData({ ...formData, textUrdu: e.target.value })}
+                                rows={3}
+                                className="text-right border-gray-400"
+                                dir="rtl"
                             />
                         </div>
 
@@ -240,44 +277,102 @@ export function QuestionEditor() {
                         <div className="space-y-4">
                             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Answer Options</h3>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Option 1 - English and Urdu aligned horizontally */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                                 <div className="space-y-2">
-                                    <Label htmlFor="option1">Option 1 *</Label>
+                                    <Label htmlFor="option1" className="block min-h-[20px]">Option 1 (English) *</Label>
                                     <Input
                                         id="option1"
                                         placeholder="First option"
                                         value={formData.option1}
                                         onChange={(e) => setFormData({ ...formData, option1: e.target.value })}
+                                        className="border-gray-400 text-base"
                                     />
                                 </div>
-
                                 <div className="space-y-2">
-                                    <Label htmlFor="option2">Option 2 *</Label>
+                                    <Label htmlFor="option1Urdu" className="text-right block min-h-[20px]">Option 1 (Urdu) *</Label>
+                                    <Input
+                                        id="option1Urdu"
+                                        placeholder="پہلا آپشن"
+                                        value={formData.option1Urdu}
+                                        onChange={(e) => setFormData({ ...formData, option1Urdu: e.target.value })}
+                                        className="text-right border-gray-400 text-base"
+                                        dir="rtl"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Option 2 - English and Urdu aligned horizontally */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <div className="space-y-2">
+                                    <Label htmlFor="option2" className="block min-h-[20px]">Option 2 (English) *</Label>
                                     <Input
                                         id="option2"
                                         placeholder="Second option"
                                         value={formData.option2}
                                         onChange={(e) => setFormData({ ...formData, option2: e.target.value })}
+                                        className="border-gray-400 text-base"
                                     />
                                 </div>
-
                                 <div className="space-y-2">
-                                    <Label htmlFor="option3">Option 3 *</Label>
+                                    <Label htmlFor="option2Urdu" className="text-right block min-h-[20px]">Option 2 (Urdu) *</Label>
+                                    <Input
+                                        id="option2Urdu"
+                                        placeholder="دوسرا آپشن"
+                                        value={formData.option2Urdu}
+                                        onChange={(e) => setFormData({ ...formData, option2Urdu: e.target.value })}
+                                        className="text-right border-gray-400 text-base"
+                                        dir="rtl"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Option 3 - English and Urdu aligned horizontally */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <div className="space-y-2">
+                                    <Label htmlFor="option3" className="block min-h-[20px]">Option 3 (English) *</Label>
                                     <Input
                                         id="option3"
                                         placeholder="Third option"
                                         value={formData.option3}
                                         onChange={(e) => setFormData({ ...formData, option3: e.target.value })}
+                                        className="border-gray-400 text-base"
                                     />
                                 </div>
-
                                 <div className="space-y-2">
-                                    <Label htmlFor="option4">Option 4 *</Label>
+                                    <Label htmlFor="option3Urdu" className="text-right block min-h-[20px]">Option 3 (Urdu) *</Label>
+                                    <Input
+                                        id="option3Urdu"
+                                        placeholder="تیسرا آپشن"
+                                        value={formData.option3Urdu}
+                                        onChange={(e) => setFormData({ ...formData, option3Urdu: e.target.value })}
+                                        className="text-right border-gray-400 text-base"
+                                        dir="rtl"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Option 4 - English and Urdu aligned horizontally */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                                <div className="space-y-2">
+                                    <Label htmlFor="option4" className="block min-h-[20px]">Option 4 (English) *</Label>
                                     <Input
                                         id="option4"
                                         placeholder="Fourth option"
                                         value={formData.option4}
                                         onChange={(e) => setFormData({ ...formData, option4: e.target.value })}
+                                        className="border-gray-400 text-base"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="option4Urdu" className="text-right block min-h-[20px]">Option 4 (Urdu) *</Label>
+                                    <Input
+                                        id="option4Urdu"
+                                        placeholder="چوتھا آپشن"
+                                        value={formData.option4Urdu}
+                                        onChange={(e) => setFormData({ ...formData, option4Urdu: e.target.value })}
+                                        className="text-right border-gray-400 text-base"
+                                        dir="rtl"
                                     />
                                 </div>
                             </div>
@@ -290,7 +385,7 @@ export function QuestionEditor() {
                                 value={formData.correctAnswer}
                                 onValueChange={(value) => setFormData({ ...formData, correctAnswer: value })}
                             >
-                                <SelectTrigger id="correctAnswer">
+                                <SelectTrigger id="correctAnswer" className="border-gray-400">
                                     <SelectValue placeholder="Select the correct answer" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -312,7 +407,7 @@ export function QuestionEditor() {
                                     value={formData.category}
                                     onValueChange={(value) => setFormData({ ...formData, category: value })}
                                 >
-                                    <SelectTrigger id="category">
+                                    <SelectTrigger id="category" className="border-gray-400">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>

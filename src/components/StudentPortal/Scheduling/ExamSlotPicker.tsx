@@ -42,7 +42,7 @@ export function ExamSlotPicker({ selectedDate, onDateSelect, onSchedule, isSched
                                     today.setHours(0, 0, 0, 0);
                                     const limit = new Date();
                                     limit.setDate(today.getDate() + 30);
-                                    return date <= today || date > limit || isScheduled;
+                                    return date < today || date > limit || isScheduled;
                                 }}
                             />
                         </div>

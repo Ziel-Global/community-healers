@@ -44,9 +44,14 @@ export interface QuestionOption {
 export interface Question {
     id: string;
     questionText: string;
+    questionTextUrdu?: string;
     category: string;
     correctAnswer: number;
     options: QuestionOption[];
+    option1Urdu?: string;
+    option2Urdu?: string;
+    option3Urdu?: string;
+    option4Urdu?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -61,11 +66,16 @@ export enum QuestionCategory {
 
 export interface CreateQuestionRequest {
     questionText: string;
+    questionTextUrdu?: string;
     category: QuestionCategory;
     option1: string;
+    option1Urdu?: string;
     option2: string;
+    option2Urdu?: string;
     option3: string;
+    option3Urdu?: string;
     option4: string;
+    option4Urdu?: string;
     correctAnswer: number;
 }
 

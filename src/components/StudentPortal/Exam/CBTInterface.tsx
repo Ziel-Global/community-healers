@@ -5,33 +5,38 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Clock, ChevronLeft, ChevronRight, Send, AlertTriangle, BookOpen } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight, Send, AlertTriangle, BookOpen, Languages } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/services/api";
 
 interface Question {
     id: string;
     questionText: string;
+    questionTextUrdu?: string;
     options: {
         id: string;
         optionNumber: number;
         optionText: string;
+        optionTextUrdu?: string;
     }[];
 }
 
 interface CBTInterfaceProps {
     questions?: Question[];
     onComplete?: () => void;
+    durationMinutes?: number;
 }
 
-export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterfaceProps) {
+export function CBTInterface({ questions: propQuestions, onComplete, durationMinutes = 20 }: CBTInterfaceProps) {
     const navigate = useNavigate();
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(20 * 60); // 20 minutes in seconds
+    const [timeLeft, setTimeLeft] = useState(durationMinutes * 60); // duration in seconds
     // Store answers as { questionIndex: { questionId, optionId, optionNumber } }
     const [answers, setAnswers] = useState<Record<number, { questionId: string; optionId: string; optionNumber: number }>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [language, setLanguage] = useState<"en" | "ur">("en");
+    const isUrdu = language === "ur";
 
     useEffect(() => {
         if (timeLeft <= 0) {
@@ -335,12 +340,24 @@ export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterf
                     </div>
                     <Progress value={progress} className="h-2" />
                 </div>
-                <div className={cn(
-                    "px-6 py-3 rounded-xl border flex items-center gap-3 transition-colors",
-                    timeLeft < 300 ? "bg-destructive/10 border-destructive/20 text-destructive animate-pulse" : "bg-card border-border/60"
-                )}>
-                    <Clock className="w-5 h-5" />
-                    <span className="text-2xl font-mono font-bold">{formatTime(timeLeft)}</span>
+                <div className="flex items-center gap-3">
+                    {/* Language Toggle */}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLanguage(language === "en" ? "ur" : "en")}
+                        className="gap-1.5 px-3 border-border/60 hover:bg-secondary/60 font-medium"
+                    >
+                        <Languages className="w-4 h-4" />
+                        <span className="text-xs sm:text-sm">{isUrdu ? 'EN' : 'اردو'}</span>
+                    </Button>
+                    <div className={cn(
+                        "px-6 py-3 rounded-xl border flex items-center gap-3 transition-colors",
+                        timeLeft < 300 ? "bg-destructive/10 border-destructive/20 text-destructive animate-pulse" : "bg-card border-border/60"
+                    )}>
+                        <Clock className="w-5 h-5" />
+                        <span className="text-2xl font-mono font-bold">{formatTime(timeLeft)}</span>
+                    </div>
                 </div>
             </div>
 
@@ -355,8 +372,13 @@ export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterf
                                 </div>
                                 <span className="text-sm font-bold text-muted-foreground">Question {currentQuestion + 1}</span>
                             </div>
-                            <CardTitle className="text-xl sm:text-2xl leading-relaxed alumni-sans-title">
-                                {questions[currentQuestion].questionText}
+                            <CardTitle className={cn(
+                                "text-xl sm:text-2xl leading-relaxed",
+                                isUrdu ? "text-right font-urdu" : "alumni-sans-title"
+                            )} dir={isUrdu ? "rtl" : "ltr"}>
+                                {isUrdu && questions[currentQuestion].questionTextUrdu
+                                    ? questions[currentQuestion].questionTextUrdu
+                                    : questions[currentQuestion].questionText}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 p-4 sm:p-8">
@@ -381,11 +403,13 @@ export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterf
                                     <div
                                         key={option.id}
                                         className={cn(
-                                            "flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer",
+                                            "flex items-center p-4 rounded-xl border-2 transition-all cursor-pointer",
+                                            isUrdu ? "flex-row-reverse space-x-reverse space-x-3" : "space-x-3",
                                             answers[currentQuestion]?.optionId === option.id
                                                 ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                                                 : "border-transparent bg-secondary/20 hover:bg-secondary/40 hover:border-border/60"
                                         )}
+                                        dir={isUrdu ? "rtl" : "ltr"}
                                         onClick={() => {
                                             setAnswers({
                                                 ...answers,
@@ -404,8 +428,13 @@ export function CBTInterface({ questions: propQuestions, onComplete }: CBTInterf
                                         )}>
                                             {answers[currentQuestion]?.optionId === option.id && <div className="w-2 h-2 rounded-full bg-white" />}
                                         </div>
-                                        <Label htmlFor={`option-${option.id}`} className="flex-1 font-medium cursor-pointer text-base">
-                                            {option.optionText}
+                                        <Label htmlFor={`option-${option.id}`} className={cn(
+                                            "flex-1 font-medium cursor-pointer text-base",
+                                            isUrdu && "text-right font-urdu"
+                                        )}>
+                                            {isUrdu && option.optionTextUrdu
+                                                ? option.optionTextUrdu
+                                                : option.optionText}
                                         </Label>
                                     </div>
                                 ))}

@@ -65,7 +65,11 @@ export function CandidateSearch({ selectedDate, onDateChange, statusFilter, onSt
                                 setOpen(false);
                             }
                         }}
-                        disabled={false}
+                        disabled={(date) => {
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            return date > today;
+                        }}
                     />
                 </PopoverContent>
             </Popover>

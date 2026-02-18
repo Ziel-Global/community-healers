@@ -1,21 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { CBTInterface } from "@/components/StudentPortal/Exam/CBTInterface";
 import { Button } from "@/components/ui/button";
 import { parseISO, format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, LogOut, Loader2, AlertCircle, Ban, CheckCircle, FileText, Clock } from "lucide-react";
 import { api } from "@/services/api";
-import { CandidateStatus, CandidateStatusResponse } from "@/types/auth";
+import { CandidateStatus, CandidateStatusResponse, ExamScheduledResponse } from "@/types/auth";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ExamPortal() {
     const navigate = useNavigate();
+    const { i18n } = useTranslation();
     const { logout } = useAuth();
     const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress">("loading");
     const [countdown, setCountdown] = useState(3);
     const [candidateStatus, setCandidateStatus] = useState<CandidateStatusResponse | null>(null);
     const [questions, setQuestions] = useState<any[]>([]);
+    const [scheduledExam, setScheduledExam] = useState<ExamScheduledResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     // Fetch candidate status on component mount
@@ -54,6 +57,16 @@ export default function ExamPortal() {
                         console.log("Status: Unknown, defaulting to PENDING");
                         setExamState("pending");
                 }
+
+                // Also fetch full scheduled exam details for duration/question count
+                try {
+                    const scheduledResponse = await api.get('/candidates/me/exam-scheduled');
+                    if (scheduledResponse.data.data) {
+                        setScheduledExam(scheduledResponse.data.data);
+                    }
+                } catch (schedErr) {
+                    console.error("Failed to fetch scheduled exam details:", schedErr);
+                }
             } catch (err: any) {
                 console.error("Failed to fetch candidate status:", err);
                 console.error("Error response:", err.response);
@@ -63,6 +76,13 @@ export default function ExamPortal() {
         };
 
         fetchCandidateStatus();
+
+        // RTL Cleanup on unmount
+        return () => {
+            if (i18n.language === 'ur') {
+                i18n.changeLanguage('en');
+            }
+        };
     }, []);
 
     // Countdown before exam starts
@@ -82,7 +102,7 @@ export default function ExamPortal() {
             console.log("Fetching exam questions...");
             const response = await api.get('/candidates/me/questions');
             console.log("Questions response:", response.data);
-            const questionsData = response.data.data;
+            const questionsData = response.data.data.questions;
             setQuestions(questionsData);
             setExamState("countdown");
         } catch (err: any) {
@@ -98,6 +118,10 @@ export default function ExamPortal() {
 
     const handleLogout = async () => {
         try {
+            // Reset language to English before leaving
+            if (i18n.language === 'ur') {
+                i18n.changeLanguage('en');
+            }
             await logout();
             navigate("/exam/auth");
         } catch (error) {
@@ -390,7 +414,11 @@ export default function ExamPortal() {
                 </header>
 
                 <main className="max-w-6xl mx-auto p-4 sm:p-6">
-                    <CBTInterface questions={questions} onComplete={handleExamComplete} />
+                    <CBTInterface
+                        questions={questions}
+                        onComplete={handleExamComplete}
+                        durationMinutes={scheduledExam?.durationMinutes || 20}
+                    />
                 </main>
             </div>
         );
@@ -441,14 +469,14 @@ export default function ExamPortal() {
                                 <FileText className="w-5 h-5 text-primary" />
                                 <div>
                                     <p className="text-xs text-muted-foreground">Questions</p>
-                                    <p className="font-semibold">20 MCQs</p>
+                                    <p className="font-semibold">{scheduledExam?.numberOfQuestions || 20} MCQs</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
                                 <Clock className="w-5 h-5 text-primary" />
                                 <div>
                                     <p className="text-xs text-muted-foreground">Duration</p>
-                                    <p className="font-semibold">20 Minutes</p>
+                                    <p className="font-semibold">{scheduledExam?.durationMinutes || 20} Minutes</p>
                                 </div>
                             </div>
                         </div>

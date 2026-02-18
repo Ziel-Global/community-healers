@@ -80,6 +80,8 @@ export interface ExamScheduledResponse {
     centerName?: string;
     centerAddress?: string;
     cityName?: string;
+    durationMinutes?: number;
+    numberOfQuestions?: number;
     message?: string;
     candidateStatus?: string;
 }
