@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { parseJwt } from '../utils/jwt';
+import i18n from '../i18n';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || '';
 
@@ -54,6 +55,11 @@ api.interceptors.response.use(
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             localStorage.removeItem('examScheduleInfo');
+
+            // Reset language to English (LTR) on session expiry
+            i18n.changeLanguage('en');
+            document.documentElement.dir = 'ltr';
+            document.documentElement.lang = 'en';
 
             // Hard redirect to login page (avoids React state issues)
             window.location.href = redirectPath;

@@ -24,7 +24,7 @@ const initialDocuments: Document[] = [
     { id: "cnicBack", nameKey: "documents.cnicBack", type: "Image/PDF", isMandatory: true, status: "pending" },
     { id: "policeClearance", nameKey: "documents.policeClearance", type: "PDF", isMandatory: true, status: "pending" },
     { id: "medicalCertificate", nameKey: "documents.medicalCertificate", type: "PDF", isMandatory: true, status: "pending" },
-    { id: "passport", nameKey: "documents.passport", type: "PDF", isMandatory: false, status: "pending" },
+    { id: "passport", nameKey: "documents.passport", type: "PDF", isMandatory: true, status: "pending" },
 ];
 
 interface DocumentUploadProps {

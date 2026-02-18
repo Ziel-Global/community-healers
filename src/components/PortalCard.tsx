@@ -56,7 +56,7 @@ export function PortalCard({
         <div className="relative mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-border/50 grid grid-cols-2 gap-3 sm:gap-4">
           {stats.map((stat, index) => (
             <div key={index}>
-              <p className="text-lg sm:text-2xl font-bold text-gradient">{stat.value}</p>
+              <p className="text-base sm:text-lg font-bold text-gradient">{stat.value}</p>
               <p className="text-[10px] sm:text-xs text-muted-foreground">{stat.label}</p>
             </div>
           ))}

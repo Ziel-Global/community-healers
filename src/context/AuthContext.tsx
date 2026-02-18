@@ -408,6 +408,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
             // Reset language to English (LTR) on logout
             i18n.changeLanguage('en');
+            document.documentElement.dir = 'ltr';
+            document.documentElement.lang = 'en';
 
             setState({
                 user: null,
