@@ -184,11 +184,11 @@ export const getExamParticipationTrend = async (period: string = 'months'): Prom
         const nestedData = response.data?.data?.data || response.data?.data || response.data;
         return nestedData;
     } catch (error: any) {
-        console.error('Get Exam Participation Trend error:', error);
+        console.error('Get Training Participation Trend error:', error);
         if (error.response && error.response.data && error.response.data.message) {
             throw new Error(error.response.data.message);
         }
-        throw new Error('Failed to fetch exam participation trend.');
+        throw new Error('Failed to fetch training participation trend.');
     }
 };
 

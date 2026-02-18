@@ -14,7 +14,8 @@ import {
   Globe,
   Database,
   BarChart3,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -139,8 +140,8 @@ export default function SuperAdminPortal() {
           <CardHeader className="pb-2 sm:pb-6">
             <div className="flex flex-col gap-4">
               <div>
-                <CardTitle className="text-xl sm:text-2xl alumni-sans-title">Exam Participation Trend</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Number of candidates appearing in exams over time</CardDescription>
+                <CardTitle className="text-xl sm:text-2xl alumni-sans-title">Training Participation Trend</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Number of candidates appearing in training over time</CardDescription>
               </div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -185,43 +186,50 @@ export default function SuperAdminPortal() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-2 sm:p-6">
-            <ChartContainer config={chartConfig} className="h-[250px] sm:h-[400px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trendData?.data || []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorCandidates" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis
-                    dataKey="label"
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `${value}`}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fill="url(#colorCandidates)"
-                    fillOpacity={1}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+          <CardContent className="p-2 sm:p-6 min-h-[250px] sm:min-h-[400px] flex flex-col items-center justify-center">
+            {isTrendLoading ? (
+              <div className="flex flex-col items-center gap-3 py-12">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <p className="text-sm text-muted-foreground animate-pulse">Fetching participation trend...</p>
+              </div>
+            ) : (
+              <ChartContainer config={chartConfig} className="h-[250px] sm:h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={trendData?.data || []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorCandidates" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                    <XAxis
+                      dataKey="label"
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${value}`}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      fill="url(#colorCandidates)"
+                      fillOpacity={1}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            )}
           </CardContent>
         </Card>
 
