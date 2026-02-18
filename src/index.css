@@ -123,14 +123,11 @@
     font-family: 'Inter', sans-serif;
   }
 
-  /* Apply Jameel Noori Nastaleeq when language is Urdu */
+  /* Apply Noto Sans Arabic when language is Urdu */
   html[lang="ur"] body {
-    /* Use local font first, fall back to Noto Nastaliq Urdu */
-    font-family: 'Jameel Noori Nastaleeq', 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', 'Inter', sans-serif;
+    font-family: 'Noto Sans Arabic', 'Inter', sans-serif;
     /* Adjust line height for better Urdu readability */
-    line-height: 2.2 !important;
-    /* Slightly reduce font size as Nastaliq can appear larger */
-    font-size: 0.9em;
+    line-height: 1.8 !important;
   }
 
   /* Additional Urdu specific adjustments */
@@ -143,7 +140,7 @@
   html[lang="ur"] .font-display,
   html[lang="ur"] .alumni-sans-title,
   html[lang="ur"] .alumni-sans-subtitle {
-    font-family: 'Jameel Noori Nastaleeq', 'Jameel Noori Nastaleeq Regular', 'Noto Nastaliq Urdu', serif !important;
+    font-family: 'Noto Sans Arabic', sans-serif !important;
     line-height: 2.4 !important;
     padding-bottom: 0.5rem;
     /* Give breathing room for descenders */
