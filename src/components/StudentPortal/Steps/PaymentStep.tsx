@@ -8,6 +8,11 @@ import { useState } from "react";
 export function PaymentStep({ onNext, onBack }: WizardStepProps) {
   const { t } = useTranslation();
   const [isPaid, setIsPaid] = useState(false);
+  const [isQRGenerated, setIsQRGenerated] = useState(false);
+
+  const handleGenerateQR = () => {
+    setIsQRGenerated(true);
+  };
 
   const handlePayment = () => {
     // Payment logic would go here
@@ -45,7 +50,9 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
           type="registration"
           amount={3000}
           isPaid={isPaid}
+          isQRGenerated={isQRGenerated}
           onPay={handlePayment}
+          onGenerateQR={handleGenerateQR}
         />
       </div>
 

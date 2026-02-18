@@ -31,7 +31,7 @@ export default function CandidateAuth() {
     i18n.changeLanguage('en');
     document.documentElement.dir = 'ltr';
     document.documentElement.lang = 'en';
-    
+
     // Auto logout when navigating back to auth page
     if (isAuthenticated) {
       logout();
@@ -204,7 +204,7 @@ export default function CandidateAuth() {
           <div className="mt-12 space-y-4">
             {[
               { num: "1", text: "Complete your registration" },
-              { num: "2", text: "Pay examination fee" },
+              { num: "2", text: "Pay training fee" },
               { num: "3", text: "Schedule your exam date" },
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-3">

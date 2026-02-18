@@ -8,10 +8,19 @@ interface FeePaymentCardProps {
     type: "registration" | "exam";
     amount: number;
     isPaid?: boolean;
+    isQRGenerated?: boolean;
     onPay?: () => void;
+    onGenerateQR?: () => void;
 }
 
-export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePaymentCardProps) {
+export function FeePaymentCard({
+    type,
+    amount,
+    isPaid = false,
+    isQRGenerated = false,
+    onPay,
+    onGenerateQR
+}: FeePaymentCardProps) {
     const { t } = useTranslation();
     const title = type === "registration" ? t('payment.registrationFee') : t('payment.examFee');
     const description = type === "registration"
@@ -48,8 +57,8 @@ export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePayme
                 </div>
 
                 {!isPaid ? (
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-4 text-center">
+                        <div className="grid grid-cols-2 gap-3 text-left">
                             <button className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/50 hover:border-primary/30 transition-all gap-2 group">
                                 <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                                     <CreditCard className="w-5 h-5 text-primary" />
@@ -64,10 +73,27 @@ export function FeePaymentCard({ type, amount, isPaid = false, onPay }: FeePayme
                             </button>
                         </div>
 
-                        <Button onClick={onPay} className="w-full h-12 gradient-white font-semibold text-white shadow-royal hover:opacity-90">
-                            {t('payment.payNow')}
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                        </Button>
+                        {!isQRGenerated ? (
+                            <Button onClick={onGenerateQR} className="w-full h-12 gradient-white font-semibold text-white shadow-royal hover:opacity-90">
+                                Generate QR
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                            </Button>
+                        ) : (
+                            <div className="space-y-4 animate-in fade-in zoom-in duration-300">
+                                <div className="bg-white p-4 rounded-xl inline-block border-2 border-primary/20 shadow-sm mx-auto">
+                                    <img
+                                        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=GovernCertWisePayment"
+                                        alt="Payment QR Code"
+                                        className="w-40 h-40 mx-auto"
+                                    />
+                                </div>
+                                <p className="text-sm text-muted-foreground">Scan the QR code to pay PKR {amount.toLocaleString()}</p>
+                                <Button onClick={onPay} className="w-full h-12 bg-black text-white font-semibold shadow-lg hover:bg-black/90">
+                                    Confirm Payment
+                                    <ArrowRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="space-y-4">

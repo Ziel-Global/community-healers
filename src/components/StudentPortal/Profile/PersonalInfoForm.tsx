@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon, Home, AlertCircle } from "lucide-react";
 import { differenceInYears, parseISO, isValid } from "date-fns";
+import { cn } from "@/lib/utils";
 import { api } from "@/services/api";
 import { superAdminService } from "@/services/superAdminService";
 
@@ -21,9 +22,10 @@ interface PersonalInfo {
 interface PersonalInfoFormProps {
     data: PersonalInfo;
     onUpdate: (field: keyof PersonalInfo, value: string) => void;
+    errors?: Record<string, boolean>;
 }
 
-export function PersonalInfoForm({ data, onUpdate }: PersonalInfoFormProps) {
+export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFormProps) {
     const { t } = useTranslation();
     const [dobError, setDobError] = useState<string | null>(null);
 
@@ -88,7 +90,7 @@ export function PersonalInfoForm({ data, onUpdate }: PersonalInfoFormProps) {
                             <Input
                                 id="fatherName"
                                 placeholder={t('personalInfo.fatherNamePlaceholder')}
-                                className="pl-10"
+                                className={cn("pl-10", errors.fatherName && "border-destructive focus-visible:ring-destructive")}
                                 value={data.fatherName}
                                 onChange={(e) => handleChange("fatherName", e.target.value)}
                             />
@@ -101,7 +103,7 @@ export function PersonalInfoForm({ data, onUpdate }: PersonalInfoFormProps) {
                             <Input
                                 id="cnic"
                                 placeholder={t('personalInfo.cnicPlaceholder')}
-                                className="pl-10"
+                                className={cn("pl-10", errors.cnic && "border-destructive focus-visible:ring-destructive")}
                                 value={data.cnic}
                                 onChange={(e) => handleChange("cnic", e.target.value)}
                             />
@@ -114,7 +116,10 @@ export function PersonalInfoForm({ data, onUpdate }: PersonalInfoFormProps) {
                             <Input
                                 id="dob"
                                 type="date"
-                                className={`pl-10 ${dobError ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                                className={cn(
+                                    "pl-10",
+                                    (dobError || errors.dob) && "border-destructive focus-visible:ring-destructive"
+                                )}
                                 value={data.dob}
                                 onChange={(e) => handleChange("dob", e.target.value)}
                             />
@@ -147,7 +152,7 @@ export function PersonalInfoForm({ data, onUpdate }: PersonalInfoFormProps) {
                                 value={data.city}
                                 onValueChange={(value) => handleChange("city", value)}
                             >
-                                <SelectTrigger id="city" className="pl-10">
+                                <SelectTrigger id="city" className={cn("pl-10", errors.city && "border-destructive focus-visible:ring-destructive")}>
                                     <SelectValue placeholder={t('personalInfo.selectCity')} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -167,7 +172,7 @@ export function PersonalInfoForm({ data, onUpdate }: PersonalInfoFormProps) {
                             <Input
                                 id="address"
                                 placeholder={t('personalInfo.addressPlaceholder')}
-                                className="pl-10"
+                                className={cn("pl-10", errors.address && "border-destructive focus-visible:ring-destructive")}
                                 value={data.address}
                                 onChange={(e) => handleChange("address", e.target.value)}
                             />

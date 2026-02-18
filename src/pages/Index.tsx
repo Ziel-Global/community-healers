@@ -31,7 +31,7 @@ const portals = [
   {
     title: "Training Portal",
     description:
-      "Login with your candidate credentials to take your scheduled CBT examination.",
+      "Login with your candidate credentials to take your scheduled CBT training.",
     icon: BookOpen,
     href: "/exam/auth",
     stats: [
@@ -42,7 +42,7 @@ const portals = [
   {
     title: "Center Admin",
     description:
-      "Manage training day operations, verify candidate identity, and monitor examination progress.",
+      "Manage training day operations, verify candidate identity, and monitor training progress.",
     icon: Building2,
     href: "/center/auth",
     stats: [

@@ -24,6 +24,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [candidateData, setCandidateData] = useState<any>(null);
   const [missingDocuments, setMissingDocuments] = useState<string[]>([]);
+  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
 
   // Lifted state for PersonalInfoForm
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
@@ -75,7 +76,43 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      // First, validate documents before proceeding
+      // 1. Validate Personal Info Fields FIRST
+      const requiredFields: (keyof PersonalInfo)[] = ["fatherName", "cnic", "dob", "city", "address"];
+      const newErrors: Record<string, boolean> = {};
+      const missingFieldLabels: string[] = [];
+
+      requiredFields.forEach(field => {
+        if (!personalInfo[field] || personalInfo[field].trim() === "") {
+          newErrors[field] = true;
+          // Map field keys to readable labels for the toast message
+          const labelMap: Record<string, string> = {
+            fatherName: t('personalInfo.fatherName'),
+            cnic: t('personalInfo.cnic'),
+            dob: t('personalInfo.dob'),
+            city: t('personalInfo.city'),
+            address: t('personalInfo.address')
+          };
+          missingFieldLabels.push(labelMap[field] || field);
+        }
+      });
+
+      if (missingFieldLabels.length > 0) {
+        setFormErrors(newErrors);
+        toast({
+          title: t('registration.fieldsRequired'),
+          description: `${t('registration.followingFieldsRequired')}: ${missingFieldLabels.join(", ")}`,
+          variant: "destructive",
+        });
+        // Scroll to top to show missing fields
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setIsLoading(false);
+        return;
+      }
+
+      // Clear form errors if validation passed
+      setFormErrors({});
+
+      // 2. Validate documents SECOND
       const validationResponse = await api.get('/candidates/me/validate-documents');
       const validationData = validationResponse.data.data;
 
@@ -104,7 +141,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       // Clear missing documents if validation passed
       setMissingDocuments([]);
 
-      // Validate Age
+      // 3. Validate Age THIRD
       if (personalInfo.dob) {
         const { differenceInYears, parseISO, isValid } = await import("date-fns");
         const birthDate = parseISO(personalInfo.dob);
@@ -176,6 +213,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
         <PersonalInfoForm
           data={personalInfo}
           onUpdate={handlePersonalInfoUpdate}
+          errors={formErrors}
         />
         <DocumentUpload candidateData={candidateData} />
         <EducationDeclaration candidateData={candidateData} />
