@@ -51,9 +51,9 @@ export function MinistryStats() {
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Total Issued</p>
-                            <h3 className="text-2xl font-sans font-bold text-foreground">{stats.totalIssued.toLocaleString()}</h3>
+                            <h3 className="text-2xl font-sans font-bold text-foreground">{(stats.totalIssued ?? 0).toLocaleString()}</h3>
                             <p className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
-                                <TrendingUp className="w-3 h-3" /> +{stats.totalIssuedPercentageChange}% this month
+                                <TrendingUp className="w-3 h-3" /> +{stats.totalIssuedPercentageChange ?? 0}% this month
                             </p>
                         </div>
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -68,7 +68,7 @@ export function MinistryStats() {
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Pending Review</p>
-                            <h3 className="text-2xl font-sans font-bold text-foreground">{stats.pendingReview.toLocaleString()}</h3>
+                            <h3 className="text-2xl font-sans font-bold text-foreground">{(stats.pendingReview ?? 0).toLocaleString()}</h3>
                             <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
                                 <Clock className="w-3 h-3" /> Awaiting authority action
                             </p>
@@ -85,7 +85,7 @@ export function MinistryStats() {
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Verified Today</p>
-                            <h3 className="text-2xl font-sans font-bold text-foreground">{stats.verifiedToday.toLocaleString()}</h3>
+                            <h3 className="text-2xl font-sans font-bold text-foreground">{(stats.verifiedToday ?? 0).toLocaleString()}</h3>
                             <p className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
                                 <ShieldCheck className="w-3 h-3" /> Normal volume
                             </p>

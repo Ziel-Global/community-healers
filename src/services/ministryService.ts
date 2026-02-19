@@ -1,10 +1,10 @@
 import { api } from './api';
 
 export interface DashboardStats {
-    totalIssued: number;
-    totalIssuedPercentageChange: number;
-    pendingReview: number;
-    verifiedToday: number;
+    totalIssued?: number;
+    totalIssuedPercentageChange?: number;
+    pendingReview?: number;
+    verifiedToday?: number;
 }
 
 export interface IssuanceTrendData {
