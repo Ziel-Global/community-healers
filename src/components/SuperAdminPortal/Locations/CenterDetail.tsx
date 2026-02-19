@@ -18,7 +18,8 @@ import {
     Calendar,
     CheckCircle2,
     Clock,
-    Loader2
+    Loader2,
+    Shield
 } from "lucide-react";
 import { superAdminService } from "@/services/superAdminService";
 import { useToast } from "@/hooks/use-toast";
@@ -258,6 +259,16 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                                     <p className="text-xs text-muted-foreground font-semibold uppercase">Email Address</p>
                                     <p className="text-sm font-medium">
                                         {centerDetails.primaryAdmin?.email || "Not specified"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                                <Shield className="w-5 h-5 text-primary mt-0.5" />
+                                <div>
+                                    <p className="text-xs text-muted-foreground font-semibold uppercase">License Number</p>
+                                    <p className="text-sm font-medium">
+                                        {centerDetails.licenseNumber || registeredData?.centerInfo?.licenseNumber || "N/A"}
                                     </p>
                                 </div>
                             </div>

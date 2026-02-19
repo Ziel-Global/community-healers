@@ -207,7 +207,7 @@ export default function CandidatePortal() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background candidate-portal" data-portal="candidate">
       {/* Top Navigation Bar */}
       <div className="sticky top-0 z-50 border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">

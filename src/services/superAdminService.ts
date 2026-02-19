@@ -145,6 +145,18 @@ export const createQuestion = async (request: CreateQuestionRequest): Promise<vo
     }
 };
 
+export const deleteQuestion = async (id: string): Promise<void> => {
+    try {
+        await api.delete(`/super-admin/question/${id}`);
+    } catch (error: any) {
+        console.error('Delete Question error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        }
+        throw new Error('Failed to delete question.');
+    }
+};
+
 export const getDashboardStats = async (): Promise<DashboardStats> => {
     try {
         const response = await api.get('/super-admin/dashboard-stats');
@@ -220,6 +232,7 @@ export const superAdminService = {
     getCenterAdmins,
     getQuestions,
     createQuestion,
+    deleteQuestion,
     getDashboardStats,
     getAuditLogs,
     getExamParticipationTrend,

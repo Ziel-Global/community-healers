@@ -286,7 +286,14 @@ export function ProfileView({
               <div className="space-y-3">
                 <div className="p-4 rounded-xl bg-card border border-border/40">
                   <p className="text-xs text-muted-foreground mb-1">{t("profile.testCenter")}</p>
-                  <p className="font-bold text-foreground">{examScheduleInfo.centerName || t("common.na")}</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between">
+                    <p className="font-bold text-foreground">{examScheduleInfo.centerName || t("common.na")}</p>
+                    {examScheduleInfo.centerLicenseNumber && (
+                      <Badge variant="secondary" className="text-[10px] w-fit">
+                        {examScheduleInfo.centerLicenseNumber}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <div className="p-4 rounded-xl bg-card border border-border/40">
                   <p className="text-xs text-muted-foreground mb-1">{t("profile.centerAddress")}</p>

@@ -79,6 +79,7 @@ export interface ExamScheduledResponse {
     examStartTime?: string;
     centerName?: string;
     centerAddress?: string;
+    centerLicenseNumber?: string | null;
     cityName?: string;
     durationMinutes?: number;
     numberOfQuestions?: number;

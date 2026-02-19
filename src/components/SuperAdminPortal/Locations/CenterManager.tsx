@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, Users, Activity, Plus, Search, MoreHorizontal, Phone, Mail, User } from "lucide-react";
+import { Building2, MapPin, Users, Activity, Plus, Search, MoreHorizontal, Phone, Mail, User, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -41,11 +41,13 @@ export function CenterManager() {
         name: "",
         cityId: "",
         address: "",
+        licenseNumber: "",
         capacity: "",
         adminFirstName: "",
         adminLastName: "",
         adminEmail: "",
         adminPassword: "",
+        adminConfirmPassword: "",
     });
 
     // Fetch centers on component mount
@@ -113,11 +115,31 @@ export function CenterManager() {
 
     const handleSubmit = async () => {
         // Validate required fields
-        if (!formData.name || !formData.cityId || !formData.address || !formData.capacity ||
-            !formData.adminFirstName || !formData.adminLastName || !formData.adminEmail || !formData.adminPassword) {
+        if (!formData.name || !formData.cityId || !formData.licenseNumber || !formData.address || !formData.capacity ||
+            !formData.adminFirstName || !formData.adminLastName || !formData.adminEmail || !formData.adminPassword || !formData.adminConfirmPassword) {
             toast({
                 title: "Incomplete Information",
                 description: "Please fill in all required fields including center admin details.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        // Validate password confirmation
+        if (formData.adminPassword !== formData.adminConfirmPassword) {
+            toast({
+                title: "Passwords Mismatch",
+                description: "Center admin password and confirmation do not match.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        // Validate capacity
+        if (parseInt(formData.capacity) < 1) {
+            toast({
+                title: "Invalid Capacity",
+                description: "Daily capacity must be at least 1.",
                 variant: "destructive",
             });
             return;
@@ -130,6 +152,7 @@ export function CenterManager() {
             await superAdminService.createCenter({
                 name: formData.name,
                 cityId: formData.cityId,
+                licenseNumber: formData.licenseNumber,
                 address: formData.address,
                 capacity: parseInt(formData.capacity),
                 centerAdmin: {
@@ -152,11 +175,13 @@ export function CenterManager() {
                 name: "",
                 cityId: "",
                 address: "",
+                licenseNumber: "",
                 capacity: "",
                 adminFirstName: "",
                 adminLastName: "",
                 adminEmail: "",
                 adminPassword: "",
+                adminConfirmPassword: "",
             });
 
             // Refresh centers list from API
@@ -335,6 +360,18 @@ export function CenterManager() {
                                 </div>
 
                                 <div className="space-y-2">
+                                    <Label htmlFor="licenseNumber">Center License Number *</Label>
+                                    <Input
+                                        id="licenseNumber"
+                                        placeholder="e.g., LIC-2024-001"
+                                        value={formData.licenseNumber}
+                                        onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
                                     <Label htmlFor="cityId">City / Location *</Label>
                                     <Select
                                         value={formData.cityId}
@@ -358,6 +395,32 @@ export function CenterManager() {
                                         </SelectContent>
                                     </Select>
                                 </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="capacity">Daily Capacity *</Label>
+                                    <div className="relative">
+                                        <Users className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                        <Input
+                                            id="capacity"
+                                            type="number"
+                                            min="1"
+                                            placeholder="e.g., 150"
+                                            className="pl-10"
+                                            value={formData.capacity}
+                                            onKeyDown={(e) => {
+                                                if (['-', 'e', '.', '+'].includes(e.key)) {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (value === "" || parseInt(value) >= 0) {
+                                                    setFormData({ ...formData, capacity: value });
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="space-y-2">
@@ -369,21 +432,6 @@ export function CenterManager() {
                                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                     rows={3}
                                 />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="capacity">Daily Capacity *</Label>
-                                <div className="relative">
-                                    <Users className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                                    <Input
-                                        id="capacity"
-                                        type="number"
-                                        placeholder="e.g., 150"
-                                        className="pl-10"
-                                        value={formData.capacity}
-                                        onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                                    />
-                                </div>
                             </div>
                         </div>
 
@@ -421,33 +469,48 @@ export function CenterManager() {
                                 </div>
                             </div>
 
+                            <div className="space-y-2">
+                                <Label htmlFor="adminEmail">Admin Email Address *</Label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                    <Input
+                                        id="adminEmail"
+                                        type="email"
+                                        placeholder="admin@center.gov.pk"
+                                        className="pl-10"
+                                        value={formData.adminEmail}
+                                        onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="adminEmail">Admin Email Address *</Label>
+                                    <Label htmlFor="adminPassword">Admin Password *</Label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                        <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                         <Input
-                                            id="adminEmail"
-                                            type="email"
-                                            placeholder="admin@center.gov.pk"
+                                            id="adminPassword"
+                                            type="password"
+                                            placeholder="••••••••"
                                             className="pl-10"
-                                            value={formData.adminEmail}
-                                            onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                                            value={formData.adminPassword}
+                                            onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="adminPassword">Admin Password *</Label>
+                                    <Label htmlFor="adminConfirmPassword">Confirm Admin Password *</Label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                        <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                         <Input
-                                            id="adminPassword"
+                                            id="adminConfirmPassword"
                                             type="password"
-                                            placeholder="CenterAdmin@123"
+                                            placeholder="••••••••"
                                             className="pl-10"
-                                            value={formData.adminPassword}
-                                            onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                                            value={formData.adminConfirmPassword}
+                                            onChange={(e) => setFormData({ ...formData, adminConfirmPassword: e.target.value })}
                                         />
                                     </div>
                                 </div>

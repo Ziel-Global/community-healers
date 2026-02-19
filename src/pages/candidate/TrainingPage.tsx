@@ -10,7 +10,7 @@ export default function TrainingPage() {
             portalType="candidate"
             navItems={candidateNavItems}
         >
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto training-portal" data-portal="training">
                 <TrainingVideoList />
             </div>
         </DashboardLayout>

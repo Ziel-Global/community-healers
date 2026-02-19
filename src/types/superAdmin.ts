@@ -11,6 +11,7 @@ export interface City {
 export interface CreateCenterRequest {
     name: string;
     cityId: string;
+    licenseNumber: string;
     address: string;
     capacity: number;
     centerAdmin: {
