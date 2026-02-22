@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Shield, LogOut, Menu, X } from "lucide-react";
+import { Shield, LogOut, Menu, X, Loader2 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState } from "react";
@@ -46,6 +46,7 @@ export function DashboardLayout({
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const getLogoutRedirectPath = () => {
     switch (portalType) {
@@ -64,12 +65,15 @@ export function DashboardLayout({
 
   const handleLogout = async () => {
     try {
+      setIsLoggingOut(true);
       await logout();
       navigate(getLogoutRedirectPath());
     } catch (error) {
       console.error("Logout failed:", error);
       // Still redirect even if logout fails
       navigate(getLogoutRedirectPath());
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -93,7 +97,7 @@ export function DashboardLayout({
       >
         <div className="p-6">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 mb-8">
+          <Link to={getLogoutRedirectPath()} className="flex items-center gap-3 mb-8">
             <div
               className={cn(
                 "w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md",
@@ -136,9 +140,14 @@ export function DashboardLayout({
             variant="ghost"
             className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"
             onClick={handleLogout}
+            disabled={isLoggingOut}
           >
-            <LogOut className="w-4 h-4" />
-            Logout
+            {isLoggingOut ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <LogOut className="w-4 h-4" />
+            )}
+            {isLoggingOut ? "Logging out..." : "Logout"}
           </Button>
         </div>
       </aside>

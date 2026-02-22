@@ -16,6 +16,7 @@ export default function ExamPortal() {
     const { logout } = useAuth();
     const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress">("loading");
     const [countdown, setCountdown] = useState(3);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [candidateStatus, setCandidateStatus] = useState<CandidateStatusResponse | null>(null);
     const [questions, setQuestions] = useState<any[]>([]);
     const [scheduledExam, setScheduledExam] = useState<ExamScheduledResponse | null>(null);
@@ -118,6 +119,7 @@ export default function ExamPortal() {
 
     const handleLogout = async () => {
         try {
+            setIsLoggingOut(true);
             // Reset language to English before leaving
             if (i18n.language === 'ur') {
                 i18n.changeLanguage('en');
@@ -127,6 +129,8 @@ export default function ExamPortal() {
         } catch (error) {
             console.error("Logout failed:", error);
             navigate("/training/auth");
+        } finally {
+            setIsLoggingOut(false);
         }
     };
 
@@ -136,7 +140,7 @@ export default function ExamPortal() {
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center space-y-4">
                     <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
-                    <p className="text-muted-foreground">Loading exam details...</p>
+                    <p className="text-muted-foreground">Loading training details...</p>
                 </div>
             </div>
         );
@@ -155,13 +159,13 @@ export default function ExamPortal() {
                                     <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
                                 </div>
                                 <div>
-                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Examination Portal</h1>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Training Portal</h1>
                                     <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
                                 </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 sm:gap-2">
-                                <LogOut className="w-4 h-4" />
-                                <span className="hidden sm:inline">Logout</span>
+                            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut} className="gap-1 sm:gap-2">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
                             </Button>
                         </div>
                     </div>
@@ -175,15 +179,15 @@ export default function ExamPortal() {
                                 <AlertCircle className="w-8 h-8 text-muted-foreground" />
                             </div>
                             <div>
-                                <CardTitle className="text-xl sm:text-2xl font-display">Exam Not Started Yet</CardTitle>
+                                <CardTitle className="text-xl sm:text-2xl font-display">Test Not Started Yet</CardTitle>
                                 <CardDescription className="mt-2">
-                                    Please wait for the center administrator to initiate the examination
+                                    Please wait for the center administrator to initiate the test
                                 </CardDescription>
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <p className="text-sm text-muted-foreground text-center">
-                                Waiting for exam to begin...
+                                Waiting for test to begin...
                             </p>
 
                             <div className="bg-secondary/30 rounded-lg p-4 text-left space-y-2">
@@ -218,9 +222,9 @@ export default function ExamPortal() {
                                     <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
                                 </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 sm:gap-2">
-                                <LogOut className="w-4 h-4" />
-                                <span className="hidden sm:inline">Logout</span>
+                            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut} className="gap-1 sm:gap-2">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
                             </Button>
                         </div>
                     </div>
@@ -246,9 +250,9 @@ export default function ExamPortal() {
                                     You may need to reapply through the candidate portal.
                                 </p>
                             </div>
-                            <Button onClick={handleLogout} variant="outline" className="w-full">
-                                <LogOut className="w-4 h-4 mr-2" />
-                                Return to Portal
+                            <Button onClick={handleLogout} variant="outline" disabled={isLoggingOut} className="w-full">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <LogOut className="w-4 h-4 mr-2" />}
+                                {isLoggingOut ? "Logging out..." : "Return to Portal"}
                             </Button>
                         </CardContent>
                     </Card>
@@ -269,13 +273,13 @@ export default function ExamPortal() {
                                     <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
                                 </div>
                                 <div>
-                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Examination Portal</h1>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Training Portal</h1>
                                     <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
                                 </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 sm:gap-2">
-                                <LogOut className="w-4 h-4" />
-                                <span className="hidden sm:inline">Logout</span>
+                            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut} className="gap-1 sm:gap-2">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
                             </Button>
                         </div>
                     </div>
@@ -287,9 +291,9 @@ export default function ExamPortal() {
                                 <AlertCircle className="w-8 h-8 text-orange-500" />
                             </div>
                             <div>
-                                <CardTitle className="text-xl sm:text-2xl font-display text-orange-600">Exam Missed</CardTitle>
+                                <CardTitle className="text-xl sm:text-2xl font-display text-orange-600">Training Missed</CardTitle>
                                 <CardDescription className="mt-2">
-                                    You were marked absent for the scheduled examination
+                                    You were marked absent for the scheduled training
                                 </CardDescription>
                             </div>
                         </CardHeader>
@@ -297,8 +301,8 @@ export default function ExamPortal() {
                             <div className="bg-orange-50 dark:bg-orange-950/20 rounded-lg p-4 text-left">
                                 <p className="text-sm text-foreground font-medium mb-2">What happens next?</p>
                                 <p className="text-xs text-muted-foreground">
-                                    You missed the scheduled exam. Don't worry - you will be allotted another exam date soon.
-                                    Please check your candidate portal for updates on the rescheduled exam.
+                                    You missed the scheduled training. Don't worry - you will be allotted another training date soon.
+                                    Please check your candidate portal for updates on the rescheduled training.
                                 </p>
                             </div>
                             <div className="bg-secondary/30 rounded-lg p-4 text-left">
@@ -309,9 +313,9 @@ export default function ExamPortal() {
                                     <li>• Contact support if you need assistance</li>
                                 </ul>
                             </div>
-                            <Button onClick={handleLogout} variant="outline" className="w-full">
-                                <LogOut className="w-4 h-4 mr-2" />
-                                Return to Portal
+                            <Button onClick={handleLogout} variant="outline" disabled={isLoggingOut} className="w-full">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <LogOut className="w-4 h-4 mr-2" />}
+                                {isLoggingOut ? "Logging out..." : "Return to Portal"}
                             </Button>
                         </CardContent>
                     </Card>
@@ -332,13 +336,13 @@ export default function ExamPortal() {
                                     <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
                                 </div>
                                 <div>
-                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Examination Portal</h1>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Training Portal</h1>
                                     <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
                                 </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 sm:gap-2">
-                                <LogOut className="w-4 h-4" />
-                                <span className="hidden sm:inline">Logout</span>
+                            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut} className="gap-1 sm:gap-2">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
                             </Button>
                         </div>
                     </div>
@@ -350,9 +354,9 @@ export default function ExamPortal() {
                                 <CheckCircle className="w-8 h-8 text-primary" />
                             </div>
                             <div>
-                                <CardTitle className="text-xl sm:text-2xl font-display">Exam Already Submitted</CardTitle>
+                                <CardTitle className="text-xl sm:text-2xl font-display">Test Already Submitted</CardTitle>
                                 <CardDescription className="mt-2">
-                                    You have already submitted your examination
+                                    You have already submitted your test
                                 </CardDescription>
                             </div>
                         </CardHeader>
@@ -360,13 +364,13 @@ export default function ExamPortal() {
                             <div className="bg-primary/5 rounded-lg p-4 text-left border border-primary/20">
                                 <p className="text-sm text-foreground font-medium mb-2">Next Steps:</p>
                                 <p className="text-xs text-muted-foreground">
-                                    Please visit the Candidate Portal to check your exam results and certificate status.
+                                    Please visit the Candidate Portal to check your test results and certificate status.
                                     You will be notified once your results have been reviewed by the ministry.
                                 </p>
                             </div>
-                            <Button onClick={handleLogout} variant="outline" className="w-full">
-                                <LogOut className="w-4 h-4 mr-2" />
-                                Return to Portal
+                            <Button onClick={handleLogout} variant="outline" disabled={isLoggingOut} className="w-full">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <LogOut className="w-4 h-4 mr-2" />}
+                                {isLoggingOut ? "Logging out..." : "Return to Portal"}
                             </Button>
                         </CardContent>
                     </Card>
@@ -383,7 +387,7 @@ export default function ExamPortal() {
                     <div className="w-32 h-32 rounded-full gradient-primary flex items-center justify-center mx-auto shadow-xl">
                         <span className="text-6xl font-bold text-primary-foreground">{countdown}</span>
                     </div>
-                    <p className="text-xl text-muted-foreground">Exam starting in...</p>
+                    <p className="text-xl text-muted-foreground">Test starting in...</p>
                 </div>
             </div>
         );
@@ -403,10 +407,10 @@ export default function ExamPortal() {
                                 </div>
                                 <div className="hidden sm:block">
                                     <h1 className="alumni-sans-title text-xl text-foreground">Soft Skill Training CBT</h1>
-                                    <p className="text-xs text-muted-foreground">Examination in Progress</p>
+                                    <p className="text-xs text-muted-foreground">Training in Progress</p>
                                 </div>
                                 <div className="sm:hidden">
-                                    <h1 className="alumni-sans-title text-sm text-foreground">CBT Exam</h1>
+                                    <h1 className="alumni-sans-title text-sm text-foreground">CBT Training</h1>
                                 </div>
                             </div>
                         </div>
@@ -436,13 +440,13 @@ export default function ExamPortal() {
                                 <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
                             </div>
                             <div>
-                                <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Examination Portal</h1>
+                                <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Training Portal</h1>
                                 <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
                             </div>
                         </div>
-                        <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 sm:gap-2">
-                            <LogOut className="w-4 h-4" />
-                            <span className="hidden sm:inline">Logout</span>
+                        <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut} className="gap-1 sm:gap-2">
+                            {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                            <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
                         </Button>
                     </div>
                 </div>
@@ -459,7 +463,7 @@ export default function ExamPortal() {
                         </div>
                         <CardTitle className="text-xl sm:text-2xl">Welcome, Candidate</CardTitle>
                         <CardDescription>
-                            You have been verified by the center administrator. You may begin your examination when ready.
+                            You have been verified by the center administrator. You may begin your test when ready.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -483,7 +487,7 @@ export default function ExamPortal() {
 
                         {candidateStatus && (
                             <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
-                                <p className="text-sm font-medium text-foreground mb-1">Exam Date</p>
+                                <p className="text-sm font-medium text-foreground mb-1">Training Date</p>
                                 <p className="text-lg font-semibold text-primary">
                                     {(() => {
                                         if (!candidateStatus?.examDate) return 'N/A';
@@ -501,15 +505,15 @@ export default function ExamPortal() {
 
                         {/* Instructions */}
                         <div className="space-y-3">
-                            <h3 className="font-semibold text-foreground">Examination Rules:</h3>
+                            <h3 className="font-semibold text-foreground">Training Rules:</h3>
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li className="flex items-start gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
-                                    <span>Once started, the exam cannot be paused or restarted</span>
+                                    <span>Once started, the training cannot be paused or restarted</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
-                                    <span>The timer will start immediately after clicking "Begin Exam"</span>
+                                    <span>The timer will start immediately after clicking "Begin Test"</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
@@ -517,11 +521,11 @@ export default function ExamPortal() {
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
-                                    <span>Do not refresh or close the browser during the exam</span>
+                                    <span>Do not refresh or close the browser during the test</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
-                                    <span>The exam will auto-submit when the timer reaches zero</span>
+                                    <span>The test will auto-submit when the timer reaches zero</span>
                                 </li>
                             </ul>
                         </div>

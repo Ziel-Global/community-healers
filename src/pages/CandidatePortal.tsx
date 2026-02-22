@@ -9,7 +9,7 @@ import { RegistrationStep } from "@/components/StudentPortal/Steps/RegistrationS
 import { PaymentStep } from "@/components/StudentPortal/Steps/PaymentStep";
 import { SchedulingStep } from "@/components/StudentPortal/Steps/SchedulingStep";
 import { Button } from "@/components/ui/button";
-import { User, FileText, Shield, LogOut } from "lucide-react";
+import { User, FileText, Shield, LogOut, Loader2 } from "lucide-react";
 import { parseISO } from "date-fns";
 import { api } from "@/services/api";
 import { CertificateCard } from "@/components/StudentPortal/CertificateCard";
@@ -42,6 +42,7 @@ export default function CandidatePortal() {
   const [scheduledExamDate, setScheduledExamDate] = useState<Date | undefined>(undefined);
   const [certificate, setCertificate] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     const fetchCandidateData = async () => {
@@ -195,6 +196,7 @@ export default function CandidatePortal() {
 
   const handleLogout = async () => {
     try {
+      setIsLoggingOut(true);
       // Call logout endpoint which clears cookies and logs the logout event
       await logout();
       // Redirect to candidate auth page after successful logout
@@ -203,6 +205,8 @@ export default function CandidatePortal() {
       console.error("Logout failed:", error);
       // Still redirect even if logout fails to ensure user is logged out locally
       navigate("/candidate/auth");
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -254,10 +258,17 @@ export default function CandidatePortal() {
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
+                disabled={isLoggingOut}
                 className="gap-1 sm:gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive px-2 sm:px-3"
               >
-                <LogOut className="w-4 h-4 rtl:-scale-x-100" />
-                <span className="hidden sm:inline">{t('nav.logout')}</span>
+                {isLoggingOut ? (
+                  <Loader2 className="w-4 h-4 animate-spin rtl:-scale-x-100" />
+                ) : (
+                  <LogOut className="w-4 h-4 rtl:-scale-x-100" />
+                )}
+                <span className="hidden sm:inline">
+                  {isLoggingOut ? t('nav.loggingOut', 'Logging out...') : t('nav.logout')}
+                </span>
               </Button>
             </div>
           </div>

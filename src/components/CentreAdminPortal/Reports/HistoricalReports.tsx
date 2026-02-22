@@ -37,15 +37,15 @@ export function HistoricalReports() {
                 <h4 className="text-lg alumni-sans-title text-foreground uppercase tracking-widest flex items-center gap-2">
                     <FileText className="w-4 h-4 text-primary" /> Past Reports
                 </h4>
-                <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
+                {/* <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
                     <Filter className="w-3 h-3" /> Filter
-                </Button>
+                </Button> */}
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-secondary/40 border-b border-border/40">
-                            <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Exam Date</th>
+                            <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Training Date</th>
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Candidates</th>
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Pass Rate</th>
                         </tr>

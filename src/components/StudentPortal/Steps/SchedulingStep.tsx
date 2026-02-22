@@ -89,7 +89,7 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
       {/* Navigation */}
       <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-border/60">
         <Button onClick={onBack} variant="outline" size="lg" className="group w-full sm:w-auto">
-          <ChevronLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+          <ChevronLeft className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 rtl:-scale-x-100 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
           {t('scheduling.backToPayment')}
         </Button>
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
@@ -110,7 +110,7 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
             ) : (
               <>
                 {t('scheduling.completeRegistration')}
-                <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 rtl:-scale-x-100 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
               </>
             )}
           </Button>

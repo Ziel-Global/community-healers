@@ -334,6 +334,55 @@
     padding-bottom: 2px;
     font-size: 1.05em !important;
   }
+
+  /* Scale up Tailwind text utilities for Urdu in portals so they increase proportionally */
+  html[lang="ur"] .training-portal .text-xs,
+  html[lang="ur"] .candidate-portal .text-xs,
+  html[lang="ur"] [data-portal="training"] .text-xs,
+  html[lang="ur"] [data-portal="candidate"] .text-xs {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+  }
+
+  html[lang="ur"] .training-portal .text-sm,
+  html[lang="ur"] .candidate-portal .text-sm,
+  html[lang="ur"] [data-portal="training"] .text-sm,
+  html[lang="ur"] [data-portal="candidate"] .text-sm {
+    font-size: 1.15rem !important;
+    line-height: 1.8 !important;
+  }
+
+  html[lang="ur"] .training-portal .text-base,
+  html[lang="ur"] .candidate-portal .text-base,
+  html[lang="ur"] [data-portal="training"] .text-base,
+  html[lang="ur"] [data-portal="candidate"] .text-base {
+    font-size: 1.3rem !important;
+    line-height: 2 !important;
+  }
+
+  html[lang="ur"] .training-portal .text-lg,
+  html[lang="ur"] .candidate-portal .text-lg,
+  html[lang="ur"] [data-portal="training"] .text-lg,
+  html[lang="ur"] [data-portal="candidate"] .text-lg {
+    font-size: 1.4rem !important;
+    line-height: 2.2 !important;
+  }
+
+  html[lang="ur"] .training-portal .text-xl,
+  html[lang="ur"] .candidate-portal .text-xl,
+  html[lang="ur"] [data-portal="training"] .text-xl,
+  html[lang="ur"] [data-portal="candidate"] .text-xl {
+    font-size: 1.6rem !important;
+    line-height: 2.4 !important;
+  }
+
+  html[lang="ur"] .training-portal .text-2xl,
+  html[lang="ur"] .candidate-portal .text-2xl,
+  html[lang="ur"] [data-portal="training"] .text-2xl,
+  html[lang="ur"] [data-portal="candidate"] .text-2xl {
+    font-size: 1.9rem !important;
+    line-height: 2.6 !important;
+  }
 }
 
 @keyframes float {

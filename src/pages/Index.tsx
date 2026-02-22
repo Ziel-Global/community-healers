@@ -207,7 +207,7 @@ export default function Index() {
         <div className="container mx-auto flex flex-col items-center gap-4 text-center sm:text-left sm:flex-row sm:justify-between">
           <p className="text-xs sm:text-sm text-muted-foreground">
             {/* The year should be dynamic */}
-            © 2024 Soft skill training. All rights reserved. Government Certified Platform.
+            © {new Date().getFullYear()} Soft skill training. All rights reserved. Government Certified Platform.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
             <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors font-medium">

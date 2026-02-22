@@ -68,13 +68,13 @@ export default function CenterAdminAuth() {
             Center Admin
           </h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-md">
-            Manage your training center operations, verify candidates, and oversee examinations.
+            Manage your training center operations, verify candidates, and oversee training.
           </p>
 
           <div className="mt-12 space-y-4">
             {[
               { icon: "👤", text: "Verify candidate identity" },
-              { icon: "📋", text: "Monitor exam progress" },
+              { icon: "📋", text: "Monitor training progress" },
               { icon: "📊", text: "Generate daily reports" },
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-3">

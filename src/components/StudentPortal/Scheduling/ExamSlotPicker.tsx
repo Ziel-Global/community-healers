@@ -31,7 +31,7 @@ export function ExamSlotPicker({ selectedDate, onDateSelect, onSchedule, isSched
             <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col lg:flex-row gap-6">
                     <div className="flex-1 min-w-0">
-                        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0" dir="ltr">
                             <Calendar
                                 mode="single"
                                 selected={selectedDate}

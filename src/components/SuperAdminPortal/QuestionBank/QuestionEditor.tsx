@@ -239,7 +239,7 @@ export function QuestionEditor() {
                             Add New Question
                         </DialogTitle>
                         <DialogDescription>
-                            Create a new question for the exam question bank.
+                            Create a new question for the training question bank.
                         </DialogDescription>
                     </DialogHeader>
 

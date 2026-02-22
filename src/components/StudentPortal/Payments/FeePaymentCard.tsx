@@ -58,20 +58,7 @@ export function FeePaymentCard({
 
                 {!isPaid ? (
                     <div className="space-y-4 text-center">
-                        <div className="grid grid-cols-2 gap-3 text-left">
-                            <button className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/50 hover:border-primary/30 transition-all gap-2 group">
-                                <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                    <CreditCard className="w-5 h-5 text-primary" />
-                                </div>
-                                <span className="text-xs font-semibold">{t('payment.creditDebit')}</span>
-                            </button>
-                            <button className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/60 bg-secondary/30 hover:bg-secondary/50 hover:border-primary/30 transition-all gap-2 group">
-                                <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                    <Wallet className="w-5 h-5 text-primary" />
-                                </div>
-                                <span className="text-xs font-semibold">{t('payment.mobileWallet')}</span>
-                            </button>
-                        </div>
+
 
                         {!isQRGenerated ? (
                             <Button onClick={onGenerateQR} className="w-full h-12 gradient-white font-semibold text-white shadow-royal hover:opacity-90">

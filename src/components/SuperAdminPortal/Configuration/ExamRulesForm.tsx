@@ -84,7 +84,7 @@ export function ExamRulesForm() {
                                 onChange={(e) => setDuration(Number(e.target.value))}
                                 className="h-11 bg-white/50 border-border/60"
                             />
-                            <p className="text-[10px] text-muted-foreground italic">Default duration for all standard certification exams.</p>
+                            <p className="text-[10px] text-muted-foreground italic">Default duration for all standard certification trainings.</p>
                         </div>
 
                         <div className="space-y-2">

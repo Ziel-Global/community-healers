@@ -6,7 +6,7 @@ export default function QuestionsPage() {
     return (
         <DashboardLayout
             title="Question Bank Mastery"
-            subtitle="Manage exam questions, categories, and difficulty levels"
+            subtitle="Manage training questions and categories"
             portalType="admin"
             navItems={superAdminNavItems}
         >

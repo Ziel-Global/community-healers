@@ -85,7 +85,7 @@ export function CenterStats() {
             value: statsData.verifiedPresent || 0,
             icon: CheckCircle2,
             color: "bg-emerald-500",
-            description: "Identity confirmed and exam unlocked",
+            description: "Identity confirmed and training unlocked",
         },
         {
             title: "Pending / Absent",

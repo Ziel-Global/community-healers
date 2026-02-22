@@ -6,7 +6,7 @@ export default function ConfigPage() {
     return (
         <DashboardLayout
             title="Global Configuration"
-            subtitle="Manage system-wide exam rules and policies"
+            subtitle="Manage system-wide training rules and policies"
             portalType="admin"
             navItems={superAdminNavItems}
         >

@@ -6,7 +6,7 @@ export default function CentersPage() {
     return (
         <DashboardLayout
             title="Infrastructure Control"
-            subtitle="Manage regions and training/exam centers"
+            subtitle="Manage regions and training centers"
             portalType="admin"
             navItems={superAdminNavItems}
         >
