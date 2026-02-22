@@ -151,7 +151,7 @@ export function ExamStep({ onNext }: WizardStepProps) {
         <div className="text-center space-y-4">
           <div className="w-16 h-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin mx-auto" />
           <div>
-            <h3 className="font-display font-bold text-xl text-foreground">Submitting Your Exam...</h3>
+            <h3 className="font-display font-bold text-xl text-foreground">Submitting Your Test...</h3>
             <p className="text-sm text-muted-foreground mt-1">Please wait while we process your answers</p>
           </div>
         </div>
@@ -276,7 +276,7 @@ export function ExamStep({ onNext }: WizardStepProps) {
                   </button>
                 ))}
               </div>
-              <Button 
+              <Button
                 onClick={handleSubmit}
                 className="w-full font-bold gap-2 shadow-lg"
                 disabled={answeredCount < 20}
