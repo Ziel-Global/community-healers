@@ -145,6 +145,18 @@ export const createQuestion = async (request: CreateQuestionRequest): Promise<vo
     }
 };
 
+export const updateQuestion = async (id: string, request: CreateQuestionRequest): Promise<void> => {
+    try {
+        await api.put(`/super-admin/question/${id}`, request);
+    } catch (error: any) {
+        console.error('Update Question error:', error);
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        }
+        throw new Error('Failed to update question.');
+    }
+};
+
 export const deleteQuestion = async (id: string): Promise<void> => {
     try {
         await api.delete(`/super-admin/question/${id}`);
@@ -232,6 +244,7 @@ export const superAdminService = {
     getCenterAdmins,
     getQuestions,
     createQuestion,
+    updateQuestion,
     deleteQuestion,
     getDashboardStats,
     getAuditLogs,

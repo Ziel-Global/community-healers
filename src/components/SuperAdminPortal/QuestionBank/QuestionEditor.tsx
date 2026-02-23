@@ -15,8 +15,19 @@ import {
     AlertCircle,
     Edit3,
     Trash2,
-    Tag
+    Tag,
+    AlertTriangle
 } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +56,9 @@ export function QuestionEditor() {
         option4Urdu: "",
         correctAnswer: "",
     });
+    const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [questionToDelete, setQuestionToDelete] = useState<Question | null>(null);
 
     const fetchQuestions = async () => {
         try {
@@ -118,29 +132,22 @@ export function QuestionEditor() {
                         formData.correctAnswer === formData.option3 ? 3 : 4,
             };
 
-            await superAdminService.createQuestion(request);
-
-            toast({
-                title: "Question Added",
-                description: "The question has been successfully added to the question bank.",
-            });
+            if (editingQuestionId) {
+                await superAdminService.updateQuestion(editingQuestionId, request);
+                toast({
+                    title: "Question Updated",
+                    description: "The question has been successfully updated.",
+                });
+            } else {
+                await superAdminService.createQuestion(request);
+                toast({
+                    title: "Question Added",
+                    description: "The question has been successfully added to the question bank.",
+                });
+            }
 
             setIsDialogOpen(false);
-            // Reset form
-            setFormData({
-                text: "",
-                textUrdu: "",
-                category: "GENERAL",
-                option1: "",
-                option1Urdu: "",
-                option2: "",
-                option2Urdu: "",
-                option3: "",
-                option3Urdu: "",
-                option4: "",
-                option4Urdu: "",
-                correctAnswer: "",
-            });
+            resetForm();
 
             // Refresh list
             await fetchQuestions();
@@ -153,6 +160,70 @@ export function QuestionEditor() {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleEdit = (question: Question) => {
+        setEditingQuestionId(question.id);
+        setFormData({
+            text: question.questionText,
+            textUrdu: question.questionTextUrdu || "",
+            category: question.category,
+            option1: question.options.find(o => o.optionNumber === 1)?.optionText || "",
+            option1Urdu: question.option1Urdu || "",
+            option2: question.options.find(o => o.optionNumber === 2)?.optionText || "",
+            option2Urdu: question.option2Urdu || "",
+            option3: question.options.find(o => o.optionNumber === 3)?.optionText || "",
+            option3Urdu: question.option3Urdu || "",
+            option4: question.options.find(o => o.optionNumber === 4)?.optionText || "",
+            option4Urdu: question.option4Urdu || "",
+            correctAnswer: question.options.find(o => o.optionNumber === question.correctAnswer)?.optionText || "",
+        });
+        setIsDialogOpen(true);
+    };
+
+    const handleDeleteClick = (question: Question) => {
+        setQuestionToDelete(question);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!questionToDelete) return;
+
+        try {
+            await superAdminService.deleteQuestion(questionToDelete.id);
+            toast({
+                title: "Question Deleted",
+                description: "The question has been successfully removed.",
+            });
+            await fetchQuestions();
+        } catch (error: any) {
+            toast({
+                title: "Delete Failed",
+                description: error.message || "Could not delete the question.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsDeleteDialogOpen(false);
+            setQuestionToDelete(null);
+        }
+    };
+
+    const resetForm = () => {
+        setEditingQuestionId(null);
+        setFormData({
+            text: "",
+            textUrdu: "",
+            category: "GENERAL",
+            option1: "",
+            option1Urdu: "",
+            option2: "",
+            option2Urdu: "",
+            option3: "",
+            option3Urdu: "",
+            option4: "",
+            option4Urdu: "",
+            correctAnswer: "",
+        });
     };
 
     return (
@@ -216,10 +287,20 @@ export function QuestionEditor() {
                                         </div>
 
                                         <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleEdit(q)}
+                                                className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary"
+                                            >
                                                 <Edit3 className="w-4 h-4" />
                                             </Button>
-                                            <Button variant="ghost" size="sm" className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-destructive">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDeleteClick(q)}
+                                                className="h-9 w-9 p-0 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-destructive"
+                                            >
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
                                         </div>
@@ -230,13 +311,16 @@ export function QuestionEditor() {
                 </div>
             )}
 
-            {/* Add Question Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            {/* Add/Edit Question Dialog */}
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) resetForm();
+            }}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-2xl alumni-sans-title flex items-center gap-2">
-                            <HelpCircle className="w-6 h-6 text-primary" />
-                            Add New Question
+                            {editingQuestionId ? <Edit3 className="w-6 h-6 text-primary" /> : <HelpCircle className="w-6 h-6 text-primary" />}
+                            {editingQuestionId ? 'Edit Question' : 'Add New Question'}
                         </DialogTitle>
                         <DialogDescription>
                             Create a new question for the training question bank.
@@ -425,7 +509,10 @@ export function QuestionEditor() {
                     <DialogFooter>
                         <Button
                             variant="outline"
-                            onClick={() => setIsDialogOpen(false)}
+                            onClick={() => {
+                                setIsDialogOpen(false);
+                                resetForm();
+                            }}
                             disabled={isSubmitting}
                         >
                             Cancel
@@ -438,18 +525,45 @@ export function QuestionEditor() {
                             {isSubmitting ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Adding...
+                                    {editingQuestionId ? 'Saving...' : 'Adding...'}
                                 </>
                             ) : (
                                 <>
-                                    <Plus className="w-4 h-4" />
-                                    Add Question
+                                    {editingQuestionId ? <Edit3 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                    {editingQuestionId ? 'Save Changes' : 'Add Question'}
                                 </>
                             )}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                            <AlertTriangle className="w-5 h-5" />
+                            Confirm Deletion
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this question? This action cannot be undone.
+                            <div className="mt-4 p-3 bg-muted rounded-lg text-foreground italic border-l-4 border-destructive">
+                                "{questionToDelete?.questionText}"
+                            </div>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setQuestionToDelete(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            Delete Question
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
