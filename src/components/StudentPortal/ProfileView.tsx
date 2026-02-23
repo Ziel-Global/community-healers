@@ -53,6 +53,12 @@ interface CandidateData {
     status: string;
     downloadUrl: string | null;
   } | null;
+  payment?: {
+    isPaid: boolean;
+    status: string;
+    paidAt: string;
+    transactionId: string;
+  }
 }
 
 interface ProfileViewProps {
@@ -394,6 +400,22 @@ export function ProfileView({
                 {candidateData?.createdAt ? format(new Date(candidateData.createdAt), 'MMMM dd, yyyy') : t("common.na")}
               </p>
             </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">{t("profile.paymentStatus", "Fee Payment")}</p>
+              <div className="flex items-center mt-0.5">
+                {candidateData?.payment?.isPaid ? (
+                  <Badge variant="outline" className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
+                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                    {t("profile.paid", "Paid")}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30">
+                    <Clock className="w-3 h-3 mr-1" />
+                    {t("profile.unpaid", "Unpaid")}
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -408,9 +430,9 @@ export function ProfileView({
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
-            <div className={`p-4 rounded-xl ${isRegistrationComplete || examScheduleInfo?.examScheduled ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
+            <div className={`p-4 rounded-xl ${isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
               <div className="flex items-center gap-2 mb-2">
-                {isRegistrationComplete || examScheduleInfo?.examScheduled ? (
+                {isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid ? (
                   <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                 ) : (
                   <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -418,14 +440,14 @@ export function ProfileView({
                 <p className="font-semibold text-foreground">{t("profile.registration")}</p>
               </div>
               <p className="text-xs text-muted-foreground">
-                {isRegistrationComplete || examScheduleInfo?.examScheduled ? t("profile.completedVerified") : t("profile.inProgress")}
+                {isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid ? t("profile.completedVerified") : t("profile.inProgress")}
               </p>
             </div>
-            <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-green-500/10 border-green-500/30' : (isRegistrationComplete || examScheduleInfo?.examScheduled) ? 'bg-blue-500/10 border-blue-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+            <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-green-500/10 border-green-500/30' : (isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid) ? 'bg-blue-500/10 border-blue-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
               <div className="flex items-center gap-2 mb-2">
                 {hasCertificate ? (
                   <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                ) : (isRegistrationComplete || examScheduleInfo?.examScheduled) ? (
+                ) : (isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid) ? (
                   <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 ) : (
                   <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
@@ -435,7 +457,7 @@ export function ProfileView({
               <p className="text-xs text-muted-foreground">
                 {hasCertificate
                   ? `${t("certificate.passed")} - ${t("certificate.examScore")}: ${candidateData?.certificate?.score}%`
-                  : (isRegistrationComplete || examScheduleInfo?.examScheduled)
+                  : (isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid)
                     ? (() => {
                       try {
                         const dateObj = examScheduleInfo?.examDate ? parseISO(examScheduleInfo.examDate) : (scheduledExamDate || new Date());

@@ -9,6 +9,9 @@ interface FeePaymentCardProps {
     amount: number;
     isPaid?: boolean;
     isQRGenerated?: boolean;
+    isLoadingQR?: boolean;
+    isLoadingPay?: boolean;
+    qrCodeBase64?: string | null;
     onPay?: () => void;
     onGenerateQR?: () => void;
 }
@@ -18,6 +21,9 @@ export function FeePaymentCard({
     amount,
     isPaid = false,
     isQRGenerated = false,
+    isLoadingQR = false,
+    isLoadingPay = false,
+    qrCodeBase64 = null,
     onPay,
     onGenerateQR
 }: FeePaymentCardProps) {
@@ -61,23 +67,31 @@ export function FeePaymentCard({
 
 
                         {!isQRGenerated ? (
-                            <Button onClick={onGenerateQR} className="w-full h-12 gradient-white font-semibold text-white shadow-royal hover:opacity-90">
-                                Generate QR
-                                <ArrowRight className="w-4 h-4 ml-2" />
+                            <Button
+                                onClick={onGenerateQR}
+                                disabled={isLoadingQR}
+                                className="w-full h-12 gradient-white font-semibold text-white shadow-royal hover:opacity-90"
+                            >
+                                {isLoadingQR ? t('common.loading', 'Generating...') : 'Generate QR'}
+                                {!isLoadingQR && <ArrowRight className="w-4 h-4 ml-2" />}
                             </Button>
                         ) : (
                             <div className="space-y-4 animate-in fade-in zoom-in duration-300">
                                 <div className="bg-white p-4 rounded-xl inline-block border-2 border-primary/20 shadow-sm mx-auto">
                                     <img
-                                        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=GovernCertWisePayment"
+                                        src={qrCodeBase64 ? `data:image/jpeg;base64,${qrCodeBase64}` : "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=GovernCertWisePayment"}
                                         alt="Payment QR Code"
                                         className="w-40 h-40 mx-auto"
                                     />
                                 </div>
                                 <p className="text-sm text-muted-foreground">Scan the QR code to pay PKR {amount.toLocaleString()}</p>
-                                <Button onClick={onPay} className="w-full h-12 bg-black text-white font-semibold shadow-lg hover:bg-black/90">
-                                    Confirm Payment
-                                    <ArrowRight className="w-4 h-4 ml-2" />
+                                <Button
+                                    onClick={onPay}
+                                    disabled={isLoadingPay}
+                                    className="w-full h-12 bg-black text-white font-semibold shadow-lg hover:bg-black/90"
+                                >
+                                    {isLoadingPay ? t('common.loading', 'Confirming...') : 'Confirm Payment'}
+                                    {!isLoadingPay && <ArrowRight className="w-4 h-4 ml-2" />}
                                 </Button>
                             </div>
                         )}

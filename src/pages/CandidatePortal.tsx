@@ -41,6 +41,7 @@ export default function CandidatePortal() {
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
   const [scheduledExamDate, setScheduledExamDate] = useState<Date | undefined>(undefined);
   const [certificate, setCertificate] = useState<any | null>(null);
+  const [isPaid, setIsPaid] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -51,6 +52,9 @@ export default function CandidatePortal() {
         const data = response.data.data;
         if (data?.certificate) {
           setCertificate(data.certificate);
+        }
+        if (data?.payment?.isPaid) {
+          setIsPaid(true);
         }
       } catch (error) {
         console.error('Failed to fetch candidate data', error);
@@ -68,7 +72,14 @@ export default function CandidatePortal() {
     };
   }, []);
 
-  const wizardSteps = [
+  const wizardSteps = isPaid ? [
+    {
+      id: 3,
+      title: t('wizard.scheduleExam'),
+      description: t('wizard.pickExamDate'),
+      component: SchedulingStep,
+    }
+  ] : [
     {
       id: 1,
       title: t('wizard.registration'),
@@ -99,7 +110,7 @@ export default function CandidatePortal() {
     if (activeTab === "profile") {
       return (
         <ProfileView
-          isRegistrationComplete={isRegistrationComplete}
+          isRegistrationComplete={isRegistrationComplete || isPaid}
           scheduledExamDate={scheduledExamDate}
         />
       );

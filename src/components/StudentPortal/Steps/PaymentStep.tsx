@@ -3,20 +3,77 @@ import { WizardStepProps } from "../CandidateWizard";
 import { FeePaymentCard } from "../Payments/FeePaymentCard";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Wallet, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { api } from "@/services/api";
 
 export function PaymentStep({ onNext, onBack }: WizardStepProps) {
   const { t } = useTranslation();
   const [isPaid, setIsPaid] = useState(false);
   const [isQRGenerated, setIsQRGenerated] = useState(false);
+  const [isLoadingQR, setIsLoadingQR] = useState(false);
+  const [qrCodeBase64, setQrCodeBase64] = useState<string | null>(null);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [isConfirmingPay, setIsConfirmingPay] = useState(false);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
 
-  const handleGenerateQR = () => {
-    setIsQRGenerated(true);
+  useEffect(() => {
+    const checkPaymentStatus = async () => {
+      try {
+        const response = await api.get('/candidates/payments/status');
+        if (response.data?.data) {
+          const { status, transactionId: existingTxId } = response.data.data;
+          if (status === 'PAID') {
+            setIsPaid(true);
+            if (existingTxId) {
+              setTransactionId(existingTxId);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check payment status', error);
+      } finally {
+        setIsCheckingStatus(false);
+      }
+    };
+
+    checkPaymentStatus();
+  }, []);
+
+  const handleGenerateQR = async () => {
+    if (isCheckingStatus) return;
+    try {
+      setIsLoadingQR(true);
+      const response = await api.post('/candidates/payments/initiate');
+      if (response.data?.data?.qrCodeBase64 && response.data?.data?.transactionId) {
+        setQrCodeBase64(response.data.data.qrCodeBase64);
+        setTransactionId(response.data.data.transactionId);
+        setIsQRGenerated(true);
+      } else {
+        console.error('Failed to generate QR code: Invalid response structure');
+      }
+    } catch (error) {
+      console.error('Failed to generate QR code', error);
+    } finally {
+      setIsLoadingQR(false);
+    }
   };
 
-  const handlePayment = () => {
-    // Payment logic would go here
-    setIsPaid(true);
+  const handlePayment = async () => {
+    if (!transactionId) return;
+
+    try {
+      setIsConfirmingPay(true);
+      await api.post(`/candidates/payments/confirm/${transactionId}`, {
+        bankTransactionRef: `BANK-REF-${Math.floor(Math.random() * 100000)}`
+      });
+      setIsPaid(true);
+
+    } catch (error) {
+      console.error('Failed to confirm payment', error);
+      // Fallback: still show paid if needed, or leave it handling error properly
+    } finally {
+      setIsConfirmingPay(false);
+    }
   };
 
   const handleNext = () => {
@@ -26,7 +83,16 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      {isCheckingStatus && (
+        <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
+          <div className="flex flex-col items-center justify-center space-y-3">
+            <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <p className="text-sm font-medium text-muted-foreground">{t('common.loading', 'Loading payment status...')}</p>
+          </div>
+        </div>
+      )}
+
       {/* Step Header */}
       <div className="bg-card border border-border/60 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-2">
@@ -51,6 +117,9 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
           amount={3000}
           isPaid={isPaid}
           isQRGenerated={isQRGenerated}
+          isLoadingQR={isLoadingQR}
+          qrCodeBase64={qrCodeBase64}
+          isLoadingPay={isConfirmingPay}
           onPay={handlePayment}
           onGenerateQR={handleGenerateQR}
         />
