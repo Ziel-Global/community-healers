@@ -77,6 +77,11 @@ export function DashboardLayout({
     }
   };
 
+  const handleBackToHome = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await handleLogout();
+  };
+
   return (
     <div className="h-screen bg-background overflow-hidden">
       {/* Mobile sidebar backdrop */}
@@ -97,7 +102,7 @@ export function DashboardLayout({
       >
         <div className="p-6">
           {/* Logo */}
-          <Link to={getLogoutRedirectPath()} className="flex items-center gap-3 mb-8">
+          <Link to={getLogoutRedirectPath()} onClick={handleBackToHome} className="flex items-center gap-3 mb-8">
             <div
               className={cn(
                 "w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md",

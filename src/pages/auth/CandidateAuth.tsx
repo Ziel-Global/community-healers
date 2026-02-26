@@ -32,11 +32,14 @@ export default function CandidateAuth() {
     document.documentElement.dir = 'ltr';
     document.documentElement.lang = 'en';
 
-    // Auto logout when navigating back to auth page
+    // Clear any existing session when auth page is accessed
     if (isAuthenticated) {
-      logout();
+      logout().catch((error) => {
+        console.error("Failed to clear session on auth page:", error);
+      });
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
   const [formData, setFormData] = useState({
     firstName: "",

@@ -31,7 +31,20 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            // Determine the login page from the stored token's role before clearing
+            // Don't redirect if this is a login/auth request failure
+            // (wrong credentials should just show error, not redirect)
+            const requestUrl = error.config?.url || '';
+            const isAuthRequest = requestUrl.includes('/auth/login') || 
+                                 requestUrl.includes('/auth/signup') || 
+                                 requestUrl.includes('/auth/verify');
+            
+            if (isAuthRequest) {
+                // Just pass the error through for login attempts
+                return Promise.reject(error);
+            }
+
+            // For other 401 errors (expired token during authenticated requests),
+            // clear session and redirect to appropriate login page
             const token = localStorage.getItem('token');
             let redirectPath = '/';
 

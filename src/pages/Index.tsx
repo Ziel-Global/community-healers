@@ -1,6 +1,8 @@
 import { Header } from "@/components/Header";
 import { PortalCard } from "@/components/PortalCard";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import {
   GraduationCap,
   Building2,
@@ -98,6 +100,18 @@ const features = [
 ];
 
 export default function Index() {
+  const { logout, isAuthenticated } = useAuth();
+
+  // Clear session when landing page is accessed
+  useEffect(() => {
+    if (isAuthenticated) {
+      logout().catch((error) => {
+        console.error("Failed to clear session on landing page:", error);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
