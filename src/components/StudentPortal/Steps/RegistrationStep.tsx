@@ -109,6 +109,18 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
         return;
       }
 
+      if (personalInfo.cnic && personalInfo.cnic.length !== 13) {
+        setFormErrors({ cnic: true });
+        toast({
+          title: t('registration.invalidCnic') || "Invalid CNIC",
+          description: t('registration.invalidCnicDesc') || "CNIC must be exactly 13 digits long without dashes.",
+          variant: "destructive",
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setIsLoading(false);
+        return;
+      }
+
       // Clear form errors if validation passed
       setFormErrors({});
 

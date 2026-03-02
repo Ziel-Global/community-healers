@@ -37,17 +37,21 @@ export const centerNavItems = [
 export default function CenterAdminPortal() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [centerData, setCenterData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCloseVerificationOpen, setIsCloseVerificationOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchCenterDetails = async () => {
+      setIsLoading(true);
       try {
         const data = await centerAdminService.getCenterDetails();
         setCenterData(data);
       } catch (error) {
         console.error("Failed to fetch center details", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchCenterDetails();
@@ -83,6 +87,7 @@ export default function CenterAdminPortal() {
           location={centerData?.city?.name ? `${centerData.city.name}, Pakistan` : undefined}
           adminName={centerData?.primaryAdmin ? `${centerData.primaryAdmin.firstName} ${centerData.primaryAdmin.lastName}` : undefined}
           email={centerData?.primaryAdmin?.email}
+          isLoading={isLoading}
         />
 
         {/* Quick Stats Grid */}

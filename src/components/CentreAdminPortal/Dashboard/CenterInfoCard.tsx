@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, MapPin, ShieldCheck, Mail } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CenterInfoProps {
     name?: string;
@@ -7,6 +8,7 @@ interface CenterInfoProps {
     location?: string;
     adminName?: string;
     email?: string;
+    isLoading?: boolean;
 }
 
 export function CenterInfoCard({
@@ -14,8 +16,47 @@ export function CenterInfoCard({
     id = "LHR-003",
     location = "Model Town, Lahore",
     adminName = "M. Siddique",
-    email
+    email,
+    isLoading = false
 }: CenterInfoProps) {
+    if (isLoading) {
+        return (
+            <Card className="border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden border-l-4 border-l-primary/40">
+                <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="flex items-center gap-4">
+                            <Skeleton className="w-14 h-14 rounded-2xl" />
+                            <div className="space-y-2">
+                                <Skeleton className="h-8 w-64" />
+                                <div className="flex items-center gap-2">
+                                    <Skeleton className="h-4 w-20 rounded-full" />
+                                    <Skeleton className="h-4 w-40" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-4">
+                            <div className="p-3 rounded-xl bg-secondary/30 border border-border/20 flex items-center gap-3 w-40">
+                                <Skeleton className="w-8 h-8 rounded-lg" />
+                                <div className="space-y-1">
+                                    <Skeleton className="h-2 w-16" />
+                                    <Skeleton className="h-4 w-24" />
+                                </div>
+                            </div>
+                            <div className="p-3 rounded-xl bg-secondary/30 border border-border/20 flex items-center gap-3 w-40">
+                                <Skeleton className="w-8 h-8 rounded-lg" />
+                                <div className="space-y-1">
+                                    <Skeleton className="h-2 w-16" />
+                                    <Skeleton className="h-4 w-24" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
     const contactEmail = email || `support@${id.toLowerCase()}.gov.pk`;
 
     return (

@@ -105,7 +105,10 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                                 placeholder={t('personalInfo.cnicPlaceholder')}
                                 className={cn("pl-10", errors.cnic && "border-destructive focus-visible:ring-destructive")}
                                 value={data.cnic}
-                                onChange={(e) => handleChange("cnic", e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\\D/g, '').slice(0, 13);
+                                    handleChange("cnic", val);
+                                }}
                             />
                         </div>
                     </div>
