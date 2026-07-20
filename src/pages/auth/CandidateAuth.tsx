@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail } from "lucide-react";
+import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail, KeyRound, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import i18n from "@/i18n";
@@ -21,6 +21,16 @@ export default function CandidateAuth() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotStep, setForgotStep] = useState<"phone" | "otp" | "reset">("phone");
+  const [forgotPhone, setForgotPhone] = useState("");
+  const [forgotOtp, setForgotOtp] = useState(["", "", "", "", "", ""]);
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const forgotOtpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
   const { loginCandidate, signup, verifyCandidate, logout, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -363,7 +373,23 @@ export default function CandidateAuth() {
 
             {!isSignUp && (
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="password" className="text-sm">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-sm">Password</Label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForgotPassword(true);
+                      setForgotStep("phone");
+                      setForgotPhone("");
+                      setForgotOtp(["", "", "", "", "", ""]);
+                      setNewPassword("");
+                      setConfirmNewPassword("");
+                    }}
+                    className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   <Input
@@ -463,6 +489,305 @@ export default function CandidateAuth() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Forgot Password Modal */}
+      <Dialog open={showForgotPassword} onOpenChange={(open) => {
+        if (!open) {
+          setShowForgotPassword(false);
+          setForgotStep("phone");
+          setForgotLoading(false);
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          {/* Step 1: Enter Phone Number */}
+          {forgotStep === "phone" && (
+            <>
+              <DialogHeader>
+                <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                  <Phone className="w-6 h-6 text-primary" />
+                </div>
+                <DialogTitle className="text-2xl alumni-sans-title text-center">Forgot Password</DialogTitle>
+                <DialogDescription className="text-center">
+                  Enter your registered phone number and we'll send you a verification code.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="forgotPhone" className="text-sm">Phone Number</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <Input
+                      id="forgotPhone"
+                      type="tel"
+                      placeholder="03001234567"
+                      className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      value={forgotPhone}
+                      onChange={(e) => setForgotPhone(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowForgotPassword(false)}
+                    className="flex-1 h-11"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="forest"
+                    className="flex-1 h-11 alumni-sans-subtitle"
+                    disabled={forgotLoading || !forgotPhone.trim()}
+                    onClick={() => {
+                      if (forgotPhone.length < 10) {
+                        toast({
+                          variant: "destructive",
+                          title: "Invalid Phone Number",
+                          description: "Please enter a valid phone number.",
+                        });
+                        return;
+                      }
+                      setForgotLoading(true);
+                      // Simulate sending OTP
+                      setTimeout(() => {
+                        setForgotLoading(false);
+                        setForgotStep("otp");
+                        toast({
+                          title: "OTP Sent",
+                          description: "A verification code has been sent to your phone.",
+                        });
+                      }, 1500);
+                    }}
+                  >
+                    {forgotLoading ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        Sending...
+                      </>
+                    ) : (
+                      "Send OTP"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Step 2: Enter OTP */}
+          {forgotStep === "otp" && (
+            <>
+              <DialogHeader>
+                <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                  <ShieldCheck className="w-6 h-6 text-primary" />
+                </div>
+                <DialogTitle className="text-2xl alumni-sans-title text-center">Verify OTP</DialogTitle>
+                <DialogDescription className="text-center">
+                  Enter the 6-digit code sent to <span className="font-semibold text-foreground">{forgotPhone}</span>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div className="space-y-3">
+                  <Label className="text-sm">Verification Code</Label>
+                  <div className="flex justify-center gap-2 sm:gap-3">
+                    {forgotOtp.map((digit, index) => (
+                      <Input
+                        key={index}
+                        ref={(el) => (forgotOtpRefs.current[index] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        value={digit}
+                        onChange={(e) => {
+                          let value = e.target.value;
+                          if (value.length > 1) value = value.slice(-1);
+                          if (!/^\d*$/.test(value)) return;
+                          const newOtp = [...forgotOtp];
+                          newOtp[index] = value;
+                          setForgotOtp(newOtp);
+                          if (value && index < 5) {
+                            forgotOtpRefs.current[index + 1]?.focus();
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Backspace" && !forgotOtp[index] && index > 0) {
+                            forgotOtpRefs.current[index - 1]?.focus();
+                          }
+                        }}
+                        onPaste={(e) => {
+                          e.preventDefault();
+                          const pastedData = e.clipboardData.getData("text").slice(0, 6);
+                          if (!/^\d+$/.test(pastedData)) return;
+                          const newOtp = pastedData.split("").concat(Array(6 - pastedData.length).fill("")).slice(0, 6);
+                          setForgotOtp(newOtp);
+                          const nextEmptyIndex = newOtp.findIndex(val => !val);
+                          forgotOtpRefs.current[nextEmptyIndex !== -1 ? nextEmptyIndex : 5]?.focus();
+                        }}
+                        className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold border-2 focus:border-primary"
+                        maxLength={1}
+                        autoFocus={index === 0}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="text-sm text-primary hover:text-primary/80 font-medium w-full text-center"
+                  >
+                    Resend OTP
+                  </button>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setForgotStep("phone");
+                      setForgotOtp(["", "", "", "", "", ""]);
+                    }}
+                    className="flex-1 h-11"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="forest"
+                    className="flex-1 h-11 alumni-sans-subtitle"
+                    disabled={forgotLoading || forgotOtp.join("").length !== 6}
+                    onClick={() => {
+                      setForgotLoading(true);
+                      // Simulate OTP verification
+                      setTimeout(() => {
+                        setForgotLoading(false);
+                        setForgotStep("reset");
+                        toast({
+                          title: "OTP Verified",
+                          description: "Please set your new password.",
+                        });
+                      }, 1500);
+                    }}
+                  >
+                    {forgotLoading ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        Verifying...
+                      </>
+                    ) : (
+                      "Verify"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Step 3: Reset Password */}
+          {forgotStep === "reset" && (
+            <>
+              <DialogHeader>
+                <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mb-2">
+                  <KeyRound className="w-6 h-6 text-emerald-600" />
+                </div>
+                <DialogTitle className="text-2xl alumni-sans-title text-center">Reset Password</DialogTitle>
+                <DialogDescription className="text-center">
+                  Create a new password for your account.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword" className="text-sm">New Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      placeholder="Enter new password"
+                      className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${newPassword && newPassword.length < 6 ? "border-destructive focus:border-destructive" : ""
+                        }`}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  {newPassword && newPassword.length < 6 && (
+                    <p className="text-xs text-destructive mt-1 animate-in fade-in slide-in-from-top-1">
+                      Password must be at least 6 characters
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmNewPassword" className="text-sm">Confirm New Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <Input
+                      id="confirmNewPassword"
+                      type="password"
+                      placeholder="Re-enter new password"
+                      className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${confirmNewPassword && newPassword !== confirmNewPassword ? "border-destructive focus:border-destructive" : ""
+                        }`}
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    />
+                  </div>
+                  {confirmNewPassword && newPassword !== confirmNewPassword && (
+                    <p className="text-xs text-destructive mt-1 animate-in fade-in slide-in-from-top-1">
+                      Passwords do not match
+                    </p>
+                  )}
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowForgotPassword(false)}
+                    className="flex-1 h-11"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="forest"
+                    className="flex-1 h-11 alumni-sans-subtitle"
+                    disabled={
+                      forgotLoading ||
+                      !newPassword ||
+                      newPassword.length < 6 ||
+                      newPassword !== confirmNewPassword
+                    }
+                    onClick={() => {
+                      setForgotLoading(true);
+                      // Simulate password reset
+                      setTimeout(() => {
+                        setForgotLoading(false);
+                        setShowForgotPassword(false);
+                        setForgotStep("phone");
+                        setNewPassword("");
+                        setConfirmNewPassword("");
+                        toast({
+                          title: "Password Reset Successful",
+                          description: "Your password has been updated. Please sign in with your new password.",
+                        });
+                      }, 1500);
+                    }}
+                  >
+                    {forgotLoading ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        Resetting...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 mr-1" />
+                        Reset Password
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
