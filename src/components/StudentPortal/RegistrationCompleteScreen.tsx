@@ -1,18 +1,32 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Calendar, MapPin, Clock, PartyPopper, FileText, Shield, AlertCircle, User } from "lucide-react";
+import { CheckCircle2, Calendar, MapPin, Clock, PartyPopper, FileText, Shield, AlertCircle, User, RefreshCw } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { formatTimeLabel } from "@/utils/time";
 
 interface RegistrationCompleteScreenProps {
   examDate: Date | string;
   centerName: string;
   centerId: string;
+  examStartTime?: string;
+  arriveByTime?: string;
+  verificationMessage?: string;
+  wasAutoRescheduled?: boolean;
   onGoToProfile: () => void;
 }
 
-export function RegistrationCompleteScreen({ examDate, centerName, centerId, onGoToProfile }: RegistrationCompleteScreenProps) {
+export function RegistrationCompleteScreen({
+  examDate,
+  centerName,
+  centerId,
+  examStartTime,
+  arriveByTime,
+  verificationMessage,
+  wasAutoRescheduled,
+  onGoToProfile,
+}: RegistrationCompleteScreenProps) {
   const { t } = useTranslation();
   const dateObj = (() => {
     try {
@@ -22,6 +36,17 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
       return new Date();
     }
   })();
+
+  const datePart = (() => {
+    try {
+      return format(dateObj, 'yyyy-MM-dd');
+    } catch {
+      return new Date().toISOString().split('T')[0];
+    }
+  })();
+
+  const startLabel = formatTimeLabel(examStartTime, { fallback: "9:00 AM", datePart });
+  const arriveLabel = formatTimeLabel(arriveByTime, { fallback: "", datePart });
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-2">
@@ -44,6 +69,15 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
             </p>
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
+            {wasAutoRescheduled && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+                <RefreshCw className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  {t('complete.autoRescheduledNotice')}
+                </p>
+              </div>
+            )}
+
             {/* Exam Schedule Card */}
             <div className="p-4 sm:p-6 rounded-xl bg-card border border-border/60 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
@@ -67,7 +101,7 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
                 <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
                   <Clock className="w-5 h-5 text-primary mx-auto mb-2" />
                   <p className="text-xs text-muted-foreground mb-1">{t('complete.time')}</p>
-                  <p className="font-bold text-foreground text-sm sm:text-base">10:00 AM</p>
+                  <p className="font-bold text-foreground text-sm sm:text-base">{startLabel}</p>
                 </div>
                 <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
                   <MapPin className="w-5 h-5 text-primary mx-auto mb-2" />
@@ -75,6 +109,13 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
                   <p className="font-bold text-foreground text-sm sm:text-base">{centerId}</p>
                 </div>
               </div>
+
+              {arriveLabel && (
+                <div className="mt-3 p-3 rounded-lg bg-secondary/40 border border-border/40 text-center sm:text-left">
+                  <p className="text-xs text-muted-foreground mb-0.5">{t('complete.arriveBy')}</p>
+                  <p className="font-semibold text-foreground">{arriveLabel}</p>
+                </div>
+              )}
             </div>
 
             {/* Center Details */}
@@ -94,6 +135,9 @@ export function RegistrationCompleteScreen({ examDate, centerName, centerId, onG
                 <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-muted-foreground space-y-2">
                   <p className="font-semibold text-foreground text-base">{t('complete.whatsNext')}</p>
+                  {verificationMessage && (
+                    <p className="text-foreground/90">{verificationMessage}</p>
+                  )}
                   <ul className="space-y-1.5">
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />

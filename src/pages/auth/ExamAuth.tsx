@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Smartphone, Lock, ArrowRight, Loader2, BookOpen, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -103,13 +104,12 @@ export default function ExamAuth() {
                             </div>
                             <div className="space-y-2">
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                                    <Input
+                                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground z-10" />
+                                    <PasswordInput
                                         placeholder={t("examAuth.passwordPlaceholder")}
                                         className="pl-10 h-11 sm:h-12"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        type="password"
                                     />
                                 </div>
                             </div>

@@ -14,6 +14,7 @@ import VerificationPage from "./pages/center/VerificationPage";
 import MonitoringPage from "./pages/center/MonitoringPage";
 import ResultsPage from "./pages/center/ResultsPage";
 import ReportsPage from "./pages/center/ReportsPage";
+import SettingsPage from "./pages/center/SettingsPage";
 import SuperAdminPortal from "./pages/SuperAdminPortal";
 import ConfigPage from "./pages/admin/ConfigPage";
 import CentersPage from "./pages/admin/CentersPage";
@@ -72,6 +73,7 @@ export function AppRoutes() {
             <Route path="/center/monitoring" element={<ProtectedRoute portalType="center"><MonitoringPage /></ProtectedRoute>} />
             <Route path="/center/results" element={<ProtectedRoute portalType="center"><ResultsPage /></ProtectedRoute>} />
             <Route path="/center/reports" element={<ProtectedRoute portalType="center"><ReportsPage /></ProtectedRoute>} />
+            <Route path="/center/settings" element={<ProtectedRoute portalType="center"><SettingsPage /></ProtectedRoute>} />
 
 
 

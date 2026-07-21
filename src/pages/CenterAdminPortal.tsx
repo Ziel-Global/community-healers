@@ -12,9 +12,11 @@ import {
   LayoutDashboard,
   Users,
   FileText,
+  Settings,
 } from "lucide-react";
 import { centerAdminService } from "@/services/centerAdminService";
 import { toast } from "sonner";
+import { formatTimeLabel, toTimeInputValue } from "@/utils/time";
 
 export const centerNavItems = [
   {
@@ -31,6 +33,11 @@ export const centerNavItems = [
     label: "Reports",
     href: "/center/reports",
     icon: <FileText className="w-4 h-4" />,
+  },
+  {
+    label: "Settings",
+    href: "/center/settings",
+    icon: <Settings className="w-4 h-4" />,
   },
 ];
 
@@ -87,6 +94,14 @@ export default function CenterAdminPortal() {
           location={centerData?.city?.name ? `${centerData.city.name}, Pakistan` : undefined}
           adminName={centerData?.primaryAdmin ? `${centerData.primaryAdmin.firstName} ${centerData.primaryAdmin.lastName}` : undefined}
           email={centerData?.primaryAdmin?.email}
+          trainingStartTime={formatTimeLabel(
+            toTimeInputValue(centerData?.trainingStartTime, "09:00"),
+            { fallback: "9:00 AM" }
+          )}
+          trainingEndTime={formatTimeLabel(
+            toTimeInputValue(centerData?.trainingEndTime, "17:00"),
+            { fallback: "5:00 PM" }
+          )}
           isLoading={isLoading}
         />
 

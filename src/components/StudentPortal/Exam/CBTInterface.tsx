@@ -5,9 +5,10 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Clock, ChevronLeft, ChevronRight, Send, AlertTriangle, BookOpen, Languages } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight, Send, AlertTriangle, BookOpen, Languages, MonitorSmartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/services/api";
+import { getExamOnOtherDeviceMessage, isExamOnOtherDeviceError } from "@/utils/examSession";
 
 interface Question {
     id: string;
@@ -35,6 +36,7 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
     const [answers, setAnswers] = useState<Record<number, { questionId: string; optionId: string; optionNumber: number }>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [otherDeviceBlock, setOtherDeviceBlock] = useState<string | null>(null);
     const [language, setLanguage] = useState<"en" | "ur">("en");
     const isUrdu = language === "ur";
 
@@ -290,9 +292,39 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
         } catch (error: any) {
             console.error("Failed to submit exam:", error);
             setIsSubmitting(false);
-            alert("Failed to submit exam. Please try again or contact support.");
+            if (isExamOnOtherDeviceError(error)) {
+                setOtherDeviceBlock(getExamOnOtherDeviceMessage(error));
+                return;
+            }
+            alert(error.response?.data?.message || "Failed to submit exam. Please try again or contact support.");
         }
     };
+
+    if (otherDeviceBlock) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <Card className="max-w-md w-full border-amber-500/30 shadow-lg text-center">
+                    <CardContent className="p-8 space-y-6">
+                        <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto">
+                            <MonitorSmartphone className="w-10 h-10 text-amber-600" />
+                        </div>
+                        <div>
+                            <h3 className="font-display font-bold text-2xl text-foreground mb-2">
+                                Exam Open on Another Device
+                            </h3>
+                            <p className="text-muted-foreground">{otherDeviceBlock}</p>
+                            <p className="text-sm text-muted-foreground mt-3">
+                                Continue and submit on the original device. This session cannot submit the exam.
+                            </p>
+                        </div>
+                        <Button onClick={() => navigate("/training/auth")} variant="outline" className="w-full font-bold">
+                            Back to Login
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     if (isSubmitted) {
         return (

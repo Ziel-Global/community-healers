@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, ArrowLeft, Mail, Lock, GraduationCap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -151,10 +152,9 @@ export default function SuperAdminAuth() {
                 )}
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+                <PasswordInput
                   id="password"
-                  type="password"
                   placeholder="Enter your password"
                   className="pl-10 h-12 border-2 focus:border-primary"
                   value={password}

@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X, RefreshCw } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { api } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { CertificateCard } from "./CertificateCard";
 import { useTranslation } from "react-i18next";
+import { formatTimeLabel } from "@/utils/time";
 
 interface UploadedDocument {
   id: string;
@@ -58,7 +59,9 @@ interface CandidateData {
     status: string;
     paidAt: string;
     transactionId: string;
-  }
+  };
+  requiresRepayment?: boolean;
+  consecutiveMisses?: number;
 }
 
 interface ProfileViewProps {
@@ -237,6 +240,24 @@ export function ProfileView({
               </div>
             </CardHeader>
             <CardContent>
+              {examScheduleInfo.wasAutoRescheduled && (
+                <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-start gap-2">
+                  <RefreshCw className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-amber-800 dark:text-amber-300">
+                    {t("profile.autoRescheduledNotice")}
+                  </p>
+                </div>
+              )}
+
+              {(candidateData?.requiresRepayment || examScheduleInfo.requiresRepayment) && (
+                <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-destructive">
+                    {t("profile.requiresRepaymentNotice")}
+                  </p>
+                </div>
+              )}
+
               <div className="grid sm:grid-cols-2 gap-4 mb-4">
                 <div className="p-4 rounded-xl bg-card border border-border/40">
                   <p className="text-xs text-muted-foreground mb-1">{t("profile.examDate")}</p>
@@ -244,7 +265,6 @@ export function ProfileView({
                     {(() => {
                       try {
                         if (!examScheduleInfo.examDate) return t("common.na");
-                        // Extract only the date part YYYY-MM-DD to avoid time conflicts
                         const datePart = examScheduleInfo.examDate.split('T')[0];
                         return format(parseISO(datePart), 'MMMM d, yyyy');
                       } catch (e) {
@@ -257,37 +277,23 @@ export function ProfileView({
                 <div className="p-4 rounded-xl bg-card border border-border/40">
                   <p className="text-xs text-muted-foreground mb-1">{t("profile.examTime")}</p>
                   <p className="font-bold text-foreground">
-                    {(() => {
-                      try {
-                        const startTime = examScheduleInfo.examStartTime;
-                        if (!startTime) return '10:00 AM';
-
-                        // If it already looks like a formatted time (e.g. "10:00 AM"), just return it
-                        if (startTime.includes('AM') || startTime.includes('PM')) {
-                          return startTime;
-                        }
-
-                        // If it's a full ISO string
-                        if (startTime.includes('T')) {
-                          return format(parseISO(startTime), 'h:mm a');
-                        }
-
-                        const datePart = (examScheduleInfo.examDate || new Date().toISOString()).split('T')[0];
-                        const combined = `${datePart}T${startTime}`;
-                        const parsed = parseISO(combined);
-
-                        if (isNaN(parsed.getTime())) {
-                          return startTime; // Fallback to raw string if parsing fails
-                        }
-
-                        return format(parsed, 'h:mm a');
-                      } catch (e) {
-                        // Silently return fallback or raw string to avoid console noise
-                        return examScheduleInfo.examStartTime || '10:00 AM';
-                      }
-                    })()}
+                    {formatTimeLabel(examScheduleInfo.examStartTime, {
+                      fallback: "9:00 AM",
+                      datePart: examScheduleInfo.examDate,
+                    })}
                   </p>
                 </div>
+                {examScheduleInfo.arriveByTime && (
+                  <div className="p-4 rounded-xl bg-card border border-border/40 sm:col-span-2">
+                    <p className="text-xs text-muted-foreground mb-1">{t("profile.arriveBy")}</p>
+                    <p className="font-bold text-foreground">
+                      {formatTimeLabel(examScheduleInfo.arriveByTime, {
+                        fallback: t("common.na"),
+                        datePart: examScheduleInfo.examDate,
+                      })}
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="space-y-3">
                 <div className="p-4 rounded-xl bg-card border border-border/40">
@@ -312,7 +318,8 @@ export function ProfileView({
               </div>
               <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
                 <p className="text-xs text-muted-foreground">
-                  <strong className="text-foreground">{t("common.note")}</strong> {t("profile.examNote")}
+                  <strong className="text-foreground">{t("common.note")}</strong>{" "}
+                  {examScheduleInfo.verificationMessage || t("profile.examNote")}
                 </p>
               </div>
             </CardContent>

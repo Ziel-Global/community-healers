@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Building2, MapPin, Users, Activity, Plus, Search, MoreHorizontal, Phone, Mail, User, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -488,10 +489,9 @@ export function CenterManager() {
                                 <div className="space-y-2">
                                     <Label htmlFor="adminPassword">Admin Password *</Label>
                                     <div className="relative">
-                                        <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                                        <Input
+                                        <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground z-10" />
+                                        <PasswordInput
                                             id="adminPassword"
-                                            type="password"
                                             placeholder="••••••••"
                                             className="pl-10"
                                             value={formData.adminPassword}
@@ -503,10 +503,9 @@ export function CenterManager() {
                                 <div className="space-y-2">
                                     <Label htmlFor="adminConfirmPassword">Confirm Admin Password *</Label>
                                     <div className="relative">
-                                        <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                                        <Input
+                                        <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground z-10" />
+                                        <PasswordInput
                                             id="adminConfirmPassword"
-                                            type="password"
                                             placeholder="••••••••"
                                             className="pl-10"
                                             value={formData.adminConfirmPassword}

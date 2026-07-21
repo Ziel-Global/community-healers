@@ -5,22 +5,24 @@ import { CBTInterface } from "@/components/StudentPortal/Exam/CBTInterface";
 import { Button } from "@/components/ui/button";
 import { parseISO, format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, LogOut, Loader2, AlertCircle, Ban, CheckCircle, FileText, Clock } from "lucide-react";
+import { BookOpen, LogOut, Loader2, AlertCircle, Ban, CheckCircle, FileText, Clock, MonitorSmartphone } from "lucide-react";
 import { api } from "@/services/api";
 import { CandidateStatus, CandidateStatusResponse, ExamScheduledResponse } from "@/types/auth";
 import { useAuth } from "@/context/AuthContext";
+import { getExamOnOtherDeviceMessage, isExamOnOtherDeviceError } from "@/utils/examSession";
 
 export default function ExamPortal() {
     const navigate = useNavigate();
     const { i18n } = useTranslation();
     const { logout } = useAuth();
-    const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress">("loading");
+    const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress" | "other-device">("loading");
     const [countdown, setCountdown] = useState(3);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [candidateStatus, setCandidateStatus] = useState<CandidateStatusResponse | null>(null);
     const [questions, setQuestions] = useState<any[]>([]);
     const [scheduledExam, setScheduledExam] = useState<ExamScheduledResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [otherDeviceMessage, setOtherDeviceMessage] = useState<string | null>(null);
 
     // Fetch candidate status on component mount
     useEffect(() => {
@@ -108,7 +110,12 @@ export default function ExamPortal() {
             setExamState("countdown");
         } catch (err: any) {
             console.error("Failed to fetch questions:", err);
-            alert("Failed to load exam questions. Please try again.");
+            if (isExamOnOtherDeviceError(err)) {
+                setOtherDeviceMessage(getExamOnOtherDeviceMessage(err));
+                setExamState("other-device");
+                return;
+            }
+            alert(err.response?.data?.message || "Failed to load exam questions. Please try again.");
         }
     };
 
@@ -388,6 +395,58 @@ export default function ExamPortal() {
                         <span className="text-6xl font-bold text-primary-foreground">{countdown}</span>
                     </div>
                     <p className="text-xl text-muted-foreground">Test starting in...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Exam locked to another device
+    if (examState === "other-device") {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <header className="border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
+                                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+                                </div>
+                                <div>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Training Portal</h1>
+                                    <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut} className="gap-1 sm:gap-2">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <Card className="w-full max-w-md border-amber-500/30 shadow-royal text-center">
+                        <CardHeader className="space-y-4">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                <MonitorSmartphone className="w-8 h-8 text-amber-600" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-xl sm:text-2xl font-display">Exam Open on Another Device</CardTitle>
+                                <CardDescription className="mt-2">
+                                    {otherDeviceMessage || "Exam already in progress on another device. Please continue on the original device."}
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-sm text-muted-foreground text-left bg-secondary/40 rounded-lg p-4">
+                                This exam cannot be started or continued here. Return to the device where you first began the exam.
+                            </p>
+                            <Button variant="outline" className="w-full" onClick={handleLogout} disabled={isLoggingOut}>
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                Back to Login
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         );

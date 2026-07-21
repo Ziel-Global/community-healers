@@ -6,10 +6,10 @@ import { ChevronLeft, ChevronRight, Calendar, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-
 import { format } from "date-fns";
+import { isRepaymentRequiredMessage } from "@/utils/time";
 
-export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
+export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequiresRepayment }: WizardStepProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -21,7 +21,6 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
 
     setIsScheduling(true);
     try {
-      // Standard format YYYY-MM-DD for backend
       const examDate = format(selectedDate, 'yyyy-MM-dd');
       await api.post('/candidates/me/schedule', { examDate });
 
@@ -34,7 +33,21 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
       onNext();
     } catch (error: any) {
       console.error("Scheduling error details:", error.response?.data);
-      const errorMessage = error.response?.data?.message || error.response?.data?.error || t('scheduling.failedToSchedule');
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        t('scheduling.failedToSchedule');
+
+      if (isRepaymentRequiredMessage(errorMessage)) {
+        onRequiresRepayment?.();
+        toast({
+          title: t('scheduling.repaymentRequiredTitle'),
+          description: errorMessage || t('scheduling.repaymentRequiredDesc'),
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: t('scheduling.schedulingFailed'),
         description: errorMessage,
@@ -60,7 +73,7 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
               {t('scheduling.title')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {t('scheduling.description')}
+              {isRepayment ? t('scheduling.repaymentDescription') : t('scheduling.description')}
             </p>
           </div>
         </div>
@@ -90,11 +103,11 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
       <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-border/60">
         <Button onClick={onBack} variant="outline" size="lg" className="group w-full sm:w-auto">
           <ChevronLeft className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 rtl:-scale-x-100 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
-          {t('scheduling.backToPayment')}
+          {isRepayment ? t('scheduling.backToPayment') : t('scheduling.backToPayment')}
         </Button>
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
           <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-            {t('scheduling.stepInfo')}
+            {isRepayment ? t('scheduling.repaymentStepInfo') : t('scheduling.stepInfo')}
           </div>
           <Button
             onClick={handleNext}
@@ -109,7 +122,7 @@ export function SchedulingStep({ onNext, onBack }: WizardStepProps) {
               </>
             ) : (
               <>
-                {t('scheduling.completeRegistration')}
+                {isRepayment ? t('scheduling.scheduleExam') : t('scheduling.completeRegistration')}
                 <ChevronRight className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 rtl:-scale-x-100 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
               </>
             )}

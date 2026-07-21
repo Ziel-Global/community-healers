@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Building2, MapPin, ShieldCheck, Mail } from "lucide-react";
+import { Building2, MapPin, ShieldCheck, Mail, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface CenterInfoProps {
@@ -8,6 +8,8 @@ interface CenterInfoProps {
     location?: string;
     adminName?: string;
     email?: string;
+    trainingStartTime?: string;
+    trainingEndTime?: string;
     isLoading?: boolean;
 }
 
@@ -17,6 +19,8 @@ export function CenterInfoCard({
     location = "Model Town, Lahore",
     adminName = "M. Siddique",
     email,
+    trainingStartTime,
+    trainingEndTime,
     isLoading = false
 }: CenterInfoProps) {
     if (isLoading) {
@@ -58,6 +62,10 @@ export function CenterInfoCard({
     }
 
     const contactEmail = email || `support@${id.toLowerCase()}.gov.pk`;
+    const timingsLabel =
+        trainingStartTime && trainingEndTime
+            ? `${trainingStartTime} – ${trainingEndTime}`
+            : null;
 
     return (
         <Card className="border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden border-l-4 border-l-primary">
@@ -82,6 +90,17 @@ export function CenterInfoCard({
                     </div>
 
                     <div className="flex flex-wrap gap-4">
+                        {timingsLabel && (
+                            <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                                    <Clock className="w-4 h-4 text-amber-600" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Training Hours</p>
+                                    <p className="text-sm font-semibold text-foreground">{timingsLabel}</p>
+                                </div>
+                            </div>
+                        )}
                         <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                                 <ShieldCheck className="w-4 h-4 text-emerald-500" />

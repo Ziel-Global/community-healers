@@ -20,6 +20,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import { getCandidateAvatarUrl } from "@/utils/avatar";
 
 interface Document {
     id: string;
@@ -160,7 +161,11 @@ export function PassedCandidateTable() {
                         day: 'numeric' 
                     }),
                     fatherName: apiCandidate.fatherName,
-                    photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${apiCandidate.user.firstName}`,
+                    photo: getCandidateAvatarUrl({
+                        seed: apiCandidate.user.firstName,
+                        cnic: apiCandidate.cnic,
+                        documents: apiCandidate.documents,
+                    }),
                     documents: apiCandidate.documents || [],
                     certificateIssued: apiCandidate.certificateIssued
                 }));
@@ -250,7 +255,11 @@ export function PassedCandidateTable() {
                     day: 'numeric' 
                 }),
                 fatherName: apiCandidate.fatherName,
-                photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${apiCandidate.user.firstName}`,
+                photo: getCandidateAvatarUrl({
+                    seed: apiCandidate.user.firstName,
+                    cnic: apiCandidate.cnic,
+                    documents: apiCandidate.documents,
+                }),
                 documents: apiCandidate.documents || [],
                 certificateIssued: apiCandidate.certificateIssued
             }));
@@ -297,7 +306,11 @@ export function PassedCandidateTable() {
                     day: 'numeric' 
                 }),
                 fatherName: apiCandidate.fatherName,
-                photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${apiCandidate.user.firstName}`,
+                photo: getCandidateAvatarUrl({
+                    seed: apiCandidate.user.firstName,
+                    cnic: apiCandidate.cnic,
+                    documents: apiCandidate.documents,
+                }),
                 documents: apiCandidate.documents || [],
                 certificateIssued: apiCandidate.certificateIssued
             }));

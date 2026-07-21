@@ -7,6 +7,7 @@ import { CheckCircle2, UserCheck, ShieldCheck, XCircle, Fingerprint, Loader2 } f
 import { cn } from "@/lib/utils";
 import { centerAdminService } from "@/services/centerAdminService";
 import { useToast } from "@/hooks/use-toast";
+import { getCandidateAvatarUrl } from "@/utils/avatar";
 
 interface Candidate {
     id: string;
@@ -29,6 +30,15 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
 
     const isVerified = checklist.present && checklist.faceMatch && checklist.cnicMatch;
 
+    const getErrorMessage = (error: any, fallback: string) => {
+        return (
+            error?.response?.data?.message ||
+            error?.response?.data?.error ||
+            error?.response?.data?.data?.message ||
+            fallback
+        );
+    };
+
     const handleVerifyAndUnlock = async () => {
         if (!candidate?.id) return;
         setLoading(true);
@@ -39,11 +49,11 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                 description: "Candidate verified and exam unlocked.",
             });
             navigate("/center/candidates");
-        } catch (error) {
+        } catch (error: any) {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to verify candidate. Please try again.",
+                description: getErrorMessage(error, "Failed to verify candidate. Please try again."),
             });
         } finally {
             setLoading(false);
@@ -60,11 +70,11 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                 description: "Candidate has been marked as rejected.",
             });
             navigate("/center/candidates");
-        } catch (error) {
+        } catch (error: any) {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to reject candidate. Please try again.",
+                description: getErrorMessage(error, "Failed to reject candidate. Please try again."),
             });
         } finally {
             setLoading(false);
@@ -76,7 +86,10 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
         name: candidate?.name || "Muhammad Ahmed",
         cnic: candidate?.cnic || "35201-1234567-1",
         time: candidate?.time || "09:00 AM",
-        photo: candidate?.photo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${candidate?.name || "Ahmed"}`
+        photo: candidate?.photo || getCandidateAvatarUrl({
+            seed: candidate?.name || "Ahmed",
+            cnic: candidate?.cnic,
+        }),
     };
 
     return (

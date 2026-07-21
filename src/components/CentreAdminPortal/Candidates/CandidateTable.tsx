@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Calendar, FileText, Download, ExternalLink, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { centerAdminService } from "@/services/centerAdminService";
+import { getCandidateAvatarUrl } from "@/utils/avatar";
 
 interface Document {
     id: string;
@@ -84,21 +85,41 @@ export function CandidateTable({
                     setCandidates([]);
                 } else {
                     // Map API response to Component Candidate interface
-                    const mappedCandidates: Candidate[] = candidatesArray.map((item: any) => ({
-                        id: item.userId || item.id || item.cnic, // Prefer userId
-                        name: item.user ? `${item.user.firstName} ${item.user.lastName}` : (item.name || 'Unknown'),
-                        cnic: item.cnic || 'N/A',
-                        time: item.time || "09:00 AM", // Placeholder
-                        payment: item.payment || "Paid", // Placeholder
-                        status: item.candidateStatus ? (item.candidateStatus.charAt(0).toUpperCase() + item.candidateStatus.slice(1).toLowerCase()) : "Pending", // Normalize case
-                        photo: item.photo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.user?.firstName || item.name || 'candidate'}`,
-                        phone: item.user?.phoneNumber || item.phone,
-                        email: item.user?.email || item.email,
-                        address: item.address,
-                        dob: item.dob,
-                        fatherName: item.fatherName,
-                        documents: item.documents || []
-                    }));
+                    const mappedCandidates: Candidate[] = candidatesArray.map((item: any) => {
+                        const name = item.user
+                            ? `${item.user.firstName} ${item.user.lastName}`
+                            : (item.name || "Unknown");
+                        const documents = (item.documents || []).map((d: any) => ({
+                            id: d.id,
+                            name: d.name || d.type || "Document",
+                            type: d.type,
+                            uploadDate: d.createdAt || d.uploadDate || "",
+                            fileUrl: d.fileUrl,
+                        }));
+
+                        return {
+                            id: item.userId || item.id || item.cnic,
+                            name,
+                            cnic: item.cnic || "N/A",
+                            time: item.examStartTime || item.time || "09:00 AM",
+                            payment: item.payment || "Paid",
+                            status: item.candidateStatus
+                                ? (item.candidateStatus.charAt(0).toUpperCase() + item.candidateStatus.slice(1).toLowerCase())
+                                : "Pending",
+                            photo: getCandidateAvatarUrl({
+                                seed: item.user?.firstName || name,
+                                cnic: item.cnic,
+                                photoUrl: item.photo,
+                                documents,
+                            }),
+                            phone: item.user?.phoneNumber || item.phone,
+                            email: item.user?.email || item.email,
+                            address: item.address,
+                            dob: item.dob,
+                            fatherName: item.fatherName,
+                            documents,
+                        };
+                    });
                     setCandidates(mappedCandidates);
                 }
             } catch (err) {

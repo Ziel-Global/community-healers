@@ -55,7 +55,11 @@
     "paymentDate": "Payment Date",
     "status": "Status",
     "success": "Success",
-    "downloadReceipt": "Download Receipt"
+    "downloadReceipt": "Download Receipt",
+    "repaymentTitle": "Exam Fee Payment Required",
+    "repaymentDescription": "You missed training twice. Pay the exam fee again to book a new date.",
+    "repaymentNotice": "After two consecutive misses, a new exam fee payment is required before you can schedule again.",
+    "repaymentStepInfo": "Repayment • Then schedule"
   },
   "scheduling": {
     "title": "Schedule Your Training",
@@ -77,7 +81,11 @@
     "examScheduledTitle": "Training Scheduled",
     "examScheduledDesc": "Your training has been scheduled for {{date}}.",
     "schedulingFailed": "Scheduling Failed",
-    "failedToSchedule": "Failed to schedule training. Please try again."
+    "failedToSchedule": "Failed to schedule training. Please try again.",
+    "repaymentDescription": "After payment, select a new training date.",
+    "repaymentStepInfo": "Step 2 of 2 • Scheduling",
+    "repaymentRequiredTitle": "Payment Required",
+    "repaymentRequiredDesc": "Please pay the exam fee again before scheduling a new date."
   },
   "profile": {
     "candidateId": "Candidate ID",
@@ -86,10 +94,13 @@
     "examScheduledDesc": "Your training has been scheduled",
     "examDate": "Training Date",
     "examTime": "Training Time",
+    "arriveBy": "Arrive by",
     "testCenter": "Training Center",
     "centerAddress": "Center Address",
     "city": "City",
-    "examNote": "Please arrive at the training center 15 minutes before your scheduled time. Bring a valid ID and your training confirmation.",
+    "examNote": "Please reach the centre at least 1 hour before the training start time for the verification process.",
+    "autoRescheduledNotice": "You missed your previous session. You have been moved to a new date at no extra charge.",
+    "requiresRepaymentNotice": "You missed training twice. Pay the exam fee again, then book a new date.",
     "date": "Date",
     "time": "Time",
     "center": "Center",
@@ -139,6 +150,7 @@
     "scheduledDetails": "Your scheduled training details",
     "date": "Date",
     "time": "Time",
+    "arriveBy": "Arrive by",
     "center": "Center",
     "assignedCenter": "Your assigned training center",
     "whatsNext": "What's Next?",
@@ -152,7 +164,8 @@
     "received": "Received",
     "examLabel": "Training",
     "scheduledLabel": "Scheduled",
-    "goToProfile": "Go to Profile"
+    "goToProfile": "Go to Profile",
+    "autoRescheduledNotice": "You were auto-rescheduled to this new date after missing your previous session (no extra fee)."
   },
   "certificate": {
     "ready": "Your Certificate is Ready!",
@@ -324,6 +337,8 @@
     "viewProfile": "View Profile",
     "examAlreadyScheduled": "Training Already Scheduled",
     "examAlreadyScheduledDesc": "Your training has been scheduled. View your profile for training details.",
+    "autoRescheduledTitle": "Training Rescheduled",
+    "autoRescheduledDesc": "You missed your previous session and were moved to a new date free of charge. View your profile for details.",
     "goToProfile": "Go to Profile",
     "yourAssignedCenter": "Your Assigned Center",
     "loading": "Loading..."

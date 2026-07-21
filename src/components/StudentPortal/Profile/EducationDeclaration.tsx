@@ -95,8 +95,8 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                 </div>
             </CardHeader>
             <CardContent className="space-y-8">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 border border-border/40">
-                    <div className="space-y-1">
+                <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-secondary/30 border border-border/40">
+                    <div className="space-y-1 min-w-0">
                         <Label htmlFor="education-switch" className="text-base font-semibold">{t('education.has16Years')}</Label>
                         <p className="text-sm text-muted-foreground">{t('education.description')}</p>
                     </div>
@@ -104,6 +104,7 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                         id="education-switch"
                         checked={hasSixteenYears}
                         onCheckedChange={handleToggle}
+                        className="shrink-0 shadow-sm"
                     />
                 </div>
 

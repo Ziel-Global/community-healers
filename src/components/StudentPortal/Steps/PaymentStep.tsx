@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Wallet, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
 
-export function PaymentStep({ onNext, onBack }: WizardStepProps) {
+export function PaymentStep({ onNext, onBack, isFirstStep, isRepayment = false }: WizardStepProps) {
   const { t } = useTranslation();
   const [isPaid, setIsPaid] = useState(false);
   const [isQRGenerated, setIsQRGenerated] = useState(false);
@@ -18,6 +18,12 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
+      // For second-miss repayment, always require a fresh payment
+      if (isRepayment) {
+        setIsCheckingStatus(false);
+        return;
+      }
+
       try {
         const response = await api.get('/candidates/payments/status');
         if (response.data?.data) {
@@ -37,7 +43,7 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
     };
 
     checkPaymentStatus();
-  }, []);
+  }, [isRepayment]);
 
   const handleGenerateQR = async () => {
     if (isCheckingStatus) return;
@@ -70,7 +76,6 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
 
     } catch (error) {
       console.error('Failed to confirm payment', error);
-      // Fallback: still show paid if needed, or leave it handling error properly
     } finally {
       setIsConfirmingPay(false);
     }
@@ -101,19 +106,27 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
           </div>
           <div>
             <h2 className="font-display font-bold text-xl text-foreground">
-              {t('payment.title')}
+              {isRepayment ? t('payment.repaymentTitle') : t('payment.title')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {t('payment.description')}
+              {isRepayment ? t('payment.repaymentDescription') : t('payment.description')}
             </p>
           </div>
         </div>
       </div>
 
+      {isRepayment && (
+        <div className="max-w-md mx-auto bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+          <p className="text-sm text-amber-800 dark:text-amber-300">
+            {t('payment.repaymentNotice')}
+          </p>
+        </div>
+      )}
+
       {/* Payment Card - Centered */}
       <div className="max-w-md mx-auto">
         <FeePaymentCard
-          type="registration"
+          type={isRepayment ? "exam" : "registration"}
           amount={3000}
           isPaid={isPaid}
           isQRGenerated={isQRGenerated}
@@ -139,7 +152,7 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
       )}
 
       {/* Payment Status Warning */}
-      {!isPaid && (
+      {!isPaid && !isRepayment && (
         <div className="max-w-md mx-auto bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
           <p className="text-sm text-amber-700 dark:text-amber-400">
             {t('payment.warning')}
@@ -149,13 +162,17 @@ export function PaymentStep({ onNext, onBack }: WizardStepProps) {
 
       {/* Navigation */}
       <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-border/60">
-        <Button onClick={onBack} variant="outline" size="lg" className="group w-full sm:w-auto">
-          <ChevronLeft className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 rtl:-scale-x-100 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
-          {t('payment.backToRegistration')}
-        </Button>
+        {!isFirstStep && !isRepayment ? (
+          <Button onClick={onBack} variant="outline" size="lg" className="group w-full sm:w-auto">
+            <ChevronLeft className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 rtl:-scale-x-100 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
+            {t('payment.backToRegistration')}
+          </Button>
+        ) : (
+          <div className="hidden sm:block" />
+        )}
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
           <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-            {t('payment.stepInfo')}
+            {isRepayment ? t('payment.repaymentStepInfo') : t('payment.stepInfo')}
           </div>
           <Button
             onClick={handleNext}

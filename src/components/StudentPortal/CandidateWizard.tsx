@@ -15,6 +15,8 @@ export interface WizardStepProps {
   onBack: () => void;
   isFirstStep: boolean;
   isLastStep: boolean;
+  isRepayment?: boolean;
+  onRequiresRepayment?: () => void;
 }
 
 interface CandidateWizardProps {
@@ -22,9 +24,18 @@ interface CandidateWizardProps {
   initialStep?: number;
   onStepChange?: (step: number) => void;
   onComplete?: () => void;
+  isRepayment?: boolean;
+  onRequiresRepayment?: () => void;
 }
 
-export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComplete }: CandidateWizardProps) {
+export function CandidateWizard({
+  steps,
+  initialStep = 0,
+  onStepChange,
+  onComplete,
+  isRepayment = false,
+  onRequiresRepayment,
+}: CandidateWizardProps) {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -143,6 +154,8 @@ export function CandidateWizard({ steps, initialStep = 0, onStepChange, onComple
           onBack={handleBack}
           isFirstStep={currentStep === 0}
           isLastStep={currentStep === steps.length - 1}
+          isRepayment={isRepayment}
+          onRequiresRepayment={onRequiresRepayment}
         />
       </div>
     </div>

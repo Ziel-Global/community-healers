@@ -63,6 +63,21 @@ export function DashboardLayout({
     }
   };
 
+  const getPortalHomePath = () => {
+    switch (portalType) {
+      case "candidate":
+        return "/candidate";
+      case "center":
+        return "/center";
+      case "ministry":
+        return "/ministry";
+      case "admin":
+        return "/admin";
+      default:
+        return "/";
+    }
+  };
+
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
@@ -75,11 +90,6 @@ export function DashboardLayout({
     } finally {
       setIsLoggingOut(false);
     }
-  };
-
-  const handleBackToHome = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    await handleLogout();
   };
 
   return (
@@ -102,7 +112,11 @@ export function DashboardLayout({
       >
         <div className="p-6">
           {/* Logo */}
-          <Link to={getLogoutRedirectPath()} onClick={handleBackToHome} className="flex items-center gap-3 mb-8">
+          <Link
+            to={getPortalHomePath()}
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-3 mb-8"
+          >
             <div
               className={cn(
                 "w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md",

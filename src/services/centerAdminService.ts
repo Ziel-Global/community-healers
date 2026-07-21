@@ -39,8 +39,18 @@ export const updateCandidateStatus = async (id: string, status: 'VERIFIED' | 'RE
 export const getCenterDetails = async (): Promise<any> => {
     try {
         const response = await api.get('/center-admin/center-details');
-        // Handle nesting: response.data (axios) -> data (api) -> data (array)
-        return response.data?.data?.data?.[0] || null;
+        const nested = response.data?.data?.data ?? response.data?.data ?? response.data;
+
+        if (Array.isArray(nested)) {
+            return nested[0] || null;
+        }
+        if (Array.isArray(nested?.centers)) {
+            return nested.centers[0] || null;
+        }
+        if (nested && typeof nested === 'object' && (nested.id || nested.name)) {
+            return nested;
+        }
+        return null;
     } catch (error: any) {
         console.error('Error fetching center details:', error);
         throw error;
@@ -79,6 +89,34 @@ export const getDashboardStats = async (): Promise<any> => {
     }
 };
 
+export interface TrainingTimingsPayload {
+    trainingStartTime: string;
+    trainingEndTime: string;
+}
+
+export interface TrainingTimingsResponse {
+    id: string;
+    name: string;
+    trainingStartTime: string;
+    trainingEndTime: string;
+}
+
+export const updateTrainingTimings = async (
+    centerId: string,
+    timings: TrainingTimingsPayload
+): Promise<TrainingTimingsResponse> => {
+    try {
+        const response = await api.patch(
+            `/center-admin/centers/${centerId}/training-timings`,
+            timings
+        );
+        return response.data?.data?.data || response.data?.data || response.data;
+    } catch (error: any) {
+        console.error('Error updating training timings:', error);
+        throw error;
+    }
+};
+
 export const centerAdminService = {
     getTodayCandidates,
     updateCandidateStatus,
@@ -86,4 +124,5 @@ export const centerAdminService = {
     getReports,
     closeVerification,
     getDashboardStats,
+    updateTrainingTimings,
 };

@@ -77,6 +77,14 @@ export interface ExamScheduledResponse {
     examScheduled: boolean;
     examDate?: string;
     examStartTime?: string;
+    trainingEndTime?: string;
+    arriveByTime?: string;
+    verificationClosesAt?: string;
+    verificationMessage?: string;
+    verificationOpen?: boolean;
+    wasAutoRescheduled?: boolean;
+    requiresRepayment?: boolean;
+    consecutiveMisses?: number;
     centerName?: string;
     centerAddress?: string;
     centerLicenseNumber?: string | null;
@@ -85,4 +93,9 @@ export interface ExamScheduledResponse {
     numberOfQuestions?: number;
     message?: string;
     candidateStatus?: string;
+}
+
+export interface CandidateProfileFlags {
+    requiresRepayment?: boolean;
+    consecutiveMisses?: number;
 }

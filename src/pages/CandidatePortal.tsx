@@ -42,6 +42,7 @@ export default function CandidatePortal() {
   const [scheduledExamDate, setScheduledExamDate] = useState<Date | undefined>(undefined);
   const [certificate, setCertificate] = useState<any | null>(null);
   const [isPaid, setIsPaid] = useState(false);
+  const [requiresRepayment, setRequiresRepayment] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -55,6 +56,9 @@ export default function CandidatePortal() {
         }
         if (data?.payment?.isPaid) {
           setIsPaid(true);
+        }
+        if (data?.requiresRepayment) {
+          setRequiresRepayment(true);
         }
       } catch (error) {
         console.error('Failed to fetch candidate data', error);
@@ -72,38 +76,67 @@ export default function CandidatePortal() {
     };
   }, []);
 
-  const wizardSteps = isPaid ? [
-    {
-      id: 3,
-      title: t('wizard.scheduleExam'),
-      description: t('wizard.pickExamDate'),
-      component: SchedulingStep,
+  useEffect(() => {
+    if (examScheduleInfo?.requiresRepayment) {
+      setRequiresRepayment(true);
     }
-  ] : [
-    {
-      id: 1,
-      title: t('wizard.registration'),
-      description: t('wizard.completeProfile'),
-      component: RegistrationStep,
-    },
-    {
-      id: 2,
-      title: t('wizard.payment'),
-      description: t('wizard.payPKR'),
-      component: PaymentStep,
-    },
-    {
-      id: 3,
-      title: t('wizard.scheduleExam'),
-      description: t('wizard.pickExamDate'),
-      component: SchedulingStep,
-    },
-  ];
+  }, [examScheduleInfo?.requiresRepayment]);
+
+  const wizardSteps = requiresRepayment
+    ? [
+        {
+          id: 2,
+          title: t('wizard.payment'),
+          description: t('wizard.payPKR'),
+          component: PaymentStep,
+        },
+        {
+          id: 3,
+          title: t('wizard.scheduleExam'),
+          description: t('wizard.pickExamDate'),
+          component: SchedulingStep,
+        },
+      ]
+    : isPaid
+      ? [
+          {
+            id: 3,
+            title: t('wizard.scheduleExam'),
+            description: t('wizard.pickExamDate'),
+            component: SchedulingStep,
+          },
+        ]
+      : [
+          {
+            id: 1,
+            title: t('wizard.registration'),
+            description: t('wizard.completeProfile'),
+            component: RegistrationStep,
+          },
+          {
+            id: 2,
+            title: t('wizard.payment'),
+            description: t('wizard.payPKR'),
+            component: PaymentStep,
+          },
+          {
+            id: 3,
+            title: t('wizard.scheduleExam'),
+            description: t('wizard.pickExamDate'),
+            component: SchedulingStep,
+          },
+        ];
 
   const handleWizardComplete = async () => {
     setIsRegistrationComplete(true);
-    // Fetch the actual confirmed exam schedule from the backend
+    setRequiresRepayment(false);
     await checkExamSchedule();
+  };
+
+  const handleRequiresRepayment = () => {
+    setRequiresRepayment(true);
+    setIsRegistrationComplete(false);
+    setCurrentWizardStep(0);
   };
 
   const renderContent = () => {
@@ -153,11 +186,21 @@ export default function CandidatePortal() {
       );
     }
 
-    // 2. If status is ABSENT or REJECTED, allow re-registration (show wizard)
-    // implicitly handled by falling through to the wizard return at the end if we don't return early here.
+    // 2. Second miss: must repay before booking again
+    if (requiresRepayment) {
+      return (
+        <CandidateWizard
+          steps={wizardSteps}
+          initialStep={currentWizardStep}
+          onStepChange={setCurrentWizardStep}
+          onComplete={handleWizardComplete}
+          isRepayment
+          onRequiresRepayment={handleRequiresRepayment}
+        />
+      );
+    }
 
     // 3. Success Screen (Registration Complete) - Highest priority immediately after scheduling
-    // This shows the confetti and the central success message
     if (isRegistrationComplete && !certificate && candidateStatus !== "SUBMITTED" && candidateStatus !== "ABSENT" && candidateStatus !== "REJECTED") {
       const examDateStr = examScheduleInfo?.examDate;
       const displayDate = examDateStr ? parseISO(examDateStr) : (scheduledExamDate || new Date());
@@ -167,8 +210,12 @@ export default function CandidatePortal() {
           examDate={displayDate}
           centerName={examScheduleInfo?.centerName || t('candidatePortal.yourAssignedCenter')}
           centerId={examScheduleInfo?.centerName?.split(' ').map(w => w[0]).join('') || "CENTER"}
+          examStartTime={examScheduleInfo?.examStartTime}
+          arriveByTime={examScheduleInfo?.arriveByTime}
+          verificationMessage={examScheduleInfo?.verificationMessage}
+          wasAutoRescheduled={examScheduleInfo?.wasAutoRescheduled}
           onGoToProfile={() => {
-            setIsRegistrationComplete(false); // Clear the local success state when moving away
+            setIsRegistrationComplete(false);
             setActiveTab("profile");
           }}
         />
@@ -181,10 +228,14 @@ export default function CandidatePortal() {
         <div className="max-w-3xl mx-auto">
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
             <h2 className="text-2xl font-semibold text-blue-900 dark:text-blue-100 mb-2">
-              {t('candidatePortal.examAlreadyScheduled')}
+              {examScheduleInfo?.wasAutoRescheduled
+                ? t('candidatePortal.autoRescheduledTitle')
+                : t('candidatePortal.examAlreadyScheduled')}
             </h2>
             <p className="text-blue-700 dark:text-blue-300 mb-4">
-              {t('candidatePortal.examAlreadyScheduledDesc')}
+              {examScheduleInfo?.wasAutoRescheduled
+                ? t('candidatePortal.autoRescheduledDesc')
+                : t('candidatePortal.examAlreadyScheduledDesc')}
             </p>
             <Button onClick={() => setActiveTab("profile")} variant="default">
               {t('candidatePortal.goToProfile')}
@@ -201,6 +252,7 @@ export default function CandidatePortal() {
         initialStep={currentWizardStep}
         onStepChange={setCurrentWizardStep}
         onComplete={handleWizardComplete}
+        onRequiresRepayment={handleRequiresRepayment}
       />
     );
   };
@@ -208,13 +260,10 @@ export default function CandidatePortal() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      // Call logout endpoint which clears cookies and logs the logout event
       await logout();
-      // Redirect to candidate auth page after successful logout
       navigate("/candidate/auth");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Still redirect even if logout fails to ensure user is logged out locally
       navigate("/candidate/auth");
     } finally {
       setIsLoggingOut(false);
@@ -228,7 +277,19 @@ export default function CandidatePortal() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-2">
             {/* Logo/Branding */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("application");
+                setSearchParams((prev) => {
+                  const next = new URLSearchParams(prev);
+                  next.set("tab", "application");
+                  next.delete("step");
+                  return next;
+                });
+              }}
+              className="flex items-center gap-2 sm:gap-3 text-left hover:opacity-90 transition-opacity"
+            >
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
                 <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
               </div>
@@ -236,7 +297,7 @@ export default function CandidatePortal() {
                 <h1 className="alumni-sans-title text-xl text-foreground">{t('nav.title')}</h1>
                 <p className="alumni-sans-subtitle text-sm text-muted-foreground">{t('nav.subtitle')}</p>
               </div>
-            </div>
+            </button>
 
             {/* Navigation Tabs & Actions */}
             <div className="flex items-center gap-2 sm:gap-3">

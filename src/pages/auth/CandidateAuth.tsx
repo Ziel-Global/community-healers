@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -334,10 +335,9 @@ export default function CandidateAuth() {
                 <div className="space-y-1.5 sm:space-y-2">
                   <Label htmlFor="password" className="text-sm">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                    <Input
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
+                    <PasswordInput
                       id="password"
-                      type="password"
                       placeholder="Create a strong password"
                       className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${formData.password && formData.password.length < 6 ? "border-destructive focus:border-destructive" : ""
                         }`}
@@ -356,10 +356,9 @@ export default function CandidateAuth() {
                 <div className="space-y-1.5 sm:space-y-2">
                   <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                    <Input
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
+                    <PasswordInput
                       id="confirmPassword"
-                      type="password"
                       placeholder="Re-enter your password"
                       className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                       value={formData.confirmPassword}
@@ -391,10 +390,9 @@ export default function CandidateAuth() {
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                  <Input
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
+                  <PasswordInput
                     id="password"
-                    type="password"
                     placeholder="Enter your password"
                     className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
                     value={formData.password}
@@ -699,10 +697,9 @@ export default function CandidateAuth() {
                 <div className="space-y-2">
                   <Label htmlFor="newPassword" className="text-sm">New Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                    <Input
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
+                    <PasswordInput
                       id="newPassword"
-                      type="password"
                       placeholder="Enter new password"
                       className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${newPassword && newPassword.length < 6 ? "border-destructive focus:border-destructive" : ""
                         }`}
@@ -720,10 +717,9 @@ export default function CandidateAuth() {
                 <div className="space-y-2">
                   <Label htmlFor="confirmNewPassword" className="text-sm">Confirm New Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                    <Input
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
+                    <PasswordInput
                       id="confirmNewPassword"
-                      type="password"
                       placeholder="Re-enter new password"
                       className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${confirmNewPassword && newPassword !== confirmNewPassword ? "border-destructive focus:border-destructive" : ""
                         }`}
