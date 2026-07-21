@@ -128,9 +128,10 @@ export default function CandidatePortal() {
         ];
 
   const handleWizardComplete = async () => {
-    setIsRegistrationComplete(true);
     setRequiresRepayment(false);
+    // Load the real schedule first so the success screen never flashes the 9:00 AM fallback
     await checkExamSchedule();
+    setIsRegistrationComplete(true);
   };
 
   const handleRequiresRepayment = () => {

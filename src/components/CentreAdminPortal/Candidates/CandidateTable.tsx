@@ -8,6 +8,7 @@ import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Cale
 import { cn } from "@/lib/utils";
 import { centerAdminService } from "@/services/centerAdminService";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
+import { formatTimeLabel } from "@/utils/time";
 
 interface Document {
     id: string;
@@ -101,7 +102,10 @@ export function CandidateTable({
                             id: item.userId || item.id || item.cnic,
                             name,
                             cnic: item.cnic || "N/A",
-                            time: item.examStartTime || item.time || "09:00 AM",
+                            time: formatTimeLabel(item.examStartTime || item.time, {
+                                fallback: "9:00 AM",
+                                datePart: item.examDate,
+                            }),
                             payment: item.payment || "Paid",
                             status: item.candidateStatus
                                 ? (item.candidateStatus.charAt(0).toUpperCase() + item.candidateStatus.slice(1).toLowerCase())
@@ -109,7 +113,7 @@ export function CandidateTable({
                             photo: getCandidateAvatarUrl({
                                 seed: item.user?.firstName || name,
                                 cnic: item.cnic,
-                                photoUrl: item.photo,
+                                photoUrl: item.photoUrl || item.photo,
                                 documents,
                             }),
                             phone: item.user?.phoneNumber || item.phone,
@@ -183,7 +187,20 @@ export function CandidateTable({
                                 <tr key={c.id} className="hover:bg-primary/5 transition-colors group">
                                     <td className="p-3 sm:p-4">
                                         <div className="flex items-center gap-2 sm:gap-3">
-                                            <img src={c.photo} alt={c.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-secondary object-cover border border-border/40 flex-shrink-0" />
+                                            <img
+                                                src={c.photo}
+                                                alt={c.name}
+                                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-secondary object-cover border border-border/40 flex-shrink-0"
+                                                onError={(e) => {
+                                                    const img = e.currentTarget;
+                                                    if (img.dataset.fallbackApplied === "true") return;
+                                                    img.dataset.fallbackApplied = "true";
+                                                    img.src = getCandidateAvatarUrl({
+                                                        seed: c.name,
+                                                        cnic: c.cnic,
+                                                    });
+                                                }}
+                                            />
                                             <div className="min-w-0">
                                                 <p className="alumni-sans-subtitle text-foreground text-base sm:text-lg truncate">{c.name}</p>
                                                 <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono truncate">{c.id}</p>
@@ -240,6 +257,15 @@ export function CandidateTable({
                                     src={selectedCandidate.photo}
                                     alt={selectedCandidate.name}
                                     className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-secondary object-cover border-2 border-border/40"
+                                    onError={(e) => {
+                                        const img = e.currentTarget;
+                                        if (img.dataset.fallbackApplied === "true") return;
+                                        img.dataset.fallbackApplied = "true";
+                                        img.src = getCandidateAvatarUrl({
+                                            seed: selectedCandidate.name,
+                                            cnic: selectedCandidate.cnic,
+                                        });
+                                    }}
                                 />
                                 <div className="flex-1">
                                     <h3 className="text-lg sm:text-xl font-bold text-foreground">{selectedCandidate.name}</h3>

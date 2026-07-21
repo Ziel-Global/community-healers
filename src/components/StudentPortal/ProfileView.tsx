@@ -278,7 +278,7 @@ export function ProfileView({
                   <p className="text-xs text-muted-foreground mb-1">{t("profile.examTime")}</p>
                   <p className="font-bold text-foreground">
                     {formatTimeLabel(examScheduleInfo.examStartTime, {
-                      fallback: "9:00 AM",
+                      fallback: "—",
                       datePart: examScheduleInfo.examDate,
                     })}
                   </p>

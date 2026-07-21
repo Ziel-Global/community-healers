@@ -45,7 +45,7 @@ export function RegistrationCompleteScreen({
     }
   })();
 
-  const startLabel = formatTimeLabel(examStartTime, { fallback: "9:00 AM", datePart });
+  const startLabel = formatTimeLabel(examStartTime, { fallback: "—", datePart });
   const arriveLabel = formatTimeLabel(arriveByTime, { fallback: "", datePart });
 
   return (
