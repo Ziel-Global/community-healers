@@ -25,13 +25,22 @@
     "continueToPayment": "Continue to Payment",
     "missingDocumentsTitle": "Missing Required Documents",
     "missingDocumentsDescription": "Please upload the following documents before proceeding to payment:",
+    "identityRequirementHint": "Upload photo, passport, and either CNIC (front + back) or visa.",
     "documentsMissing": "Documents Missing",
     "registrationSaved": "Registration Saved",
     "registrationSavedDesc": "Your information has been saved successfully.",
     "error": "Error",
     "failedToSave": "Failed to save registration details. Please try again.",
     "ageRequirementTitle": "Age Requirement Not Met",
-    "ageRequirementDesc": "You must be at least 16 years old to proceed."
+    "ageRequirementDesc": "You must be at least 16 years old to proceed.",
+    "missingDoc": {
+      "photo": "Candidate Photo",
+      "passport": "Passport",
+      "cnicOrVisa": "CNIC (front + back) or Visa",
+      "cnicFront": "CNIC Front",
+      "cnicBack": "CNIC Back",
+      "visa": "Visa"
+    }
   },
   "payment": {
     "title": "Registration Payment",
@@ -137,6 +146,7 @@
     "candidatePhoto": "Candidate Photo",
     "cnicFront": "CNIC Front",
     "cnicBack": "CNIC Back",
+    "visa": "Visa",
     "policeClearance": "Police Clearance Certificate",
     "medicalCertificate": "Medical Certificate",
     "passport": "Passport",
@@ -299,8 +309,11 @@
   "documents": {
     "title": "Document Upload",
     "description": "Upload high-quality scans of your original documents",
-    "mandatoryLabel": "Mandatory",
+    "mandatoryLabel": "Required",
     "optionalLabel": "Optional",
+    "identityOptionLabel": "Identity option",
+    "identityRequirementTitle": "Required for payment",
+    "identityRequirementDesc": "Upload photo, passport, and either CNIC (front + back) or visa.",
     "uploadButton": "Upload",
     "uploading": "Uploading...",
     "removeFile": "Change File",
@@ -309,6 +322,7 @@
     "candidatePhoto": "Candidate Photo",
     "cnicFront": "CNIC Front",
     "cnicBack": "CNIC Back",
+    "visa": "Visa",
     "policeClearance": "Police Clearance Certificate",
     "medicalCertificate": "Medical Certificate",
     "passport": "Passport",

@@ -25,6 +25,8 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
   const [candidateData, setCandidateData] = useState<any>(null);
   const [missingDocuments, setMissingDocuments] = useState<string[]>([]);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
+  const [canProceedToPayment, setCanProceedToPayment] = useState(false);
+  const [docsValidated, setDocsValidated] = useState(false);
 
   // Lifted state for PersonalInfoForm
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
@@ -36,20 +38,38 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
     address: "",
   });
 
-  useEffect(() => {
-    const fetchCandidateData = async () => {
-      try {
-        const response = await api.get('/candidates/me');
-        const data = response.data.data;
-        setCandidateData(data);
+  const formatMissingDocLabel = (doc: string) => {
+    const labelKey = `registration.missingDoc.${doc}`;
+    const translated = t(labelKey);
+    if (translated !== labelKey) return translated;
+    const formatted = doc.replace(/([A-Z])/g, ' $1').trim();
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  };
 
-        // Initialize personal info state from API data
-        // Also check localStorage for any unsaved drafts if needed, but per request we strictly respect input/API flow
-        // The user request was "what ever that we get from api that fills the input... the body should be made from that"
-        // So we initialize with API data.
+  const refreshDocumentValidation = async () => {
+    try {
+      const validationResponse = await api.get('/candidates/me/validate-documents');
+      const validationData = validationResponse.data.data;
+      const canProceed = !!validationData.canProceedToPayment;
+      setCanProceedToPayment(canProceed);
+      setMissingDocuments(canProceed ? [] : (validationData.missingDocuments || []));
+      setDocsValidated(true);
+      return validationData;
+    } catch (error) {
+      console.error('Failed to validate documents', error);
+      setDocsValidated(true);
+      return null;
+    }
+  };
 
+  const fetchCandidateData = async (includePersonalInfo = false) => {
+    try {
+      const response = await api.get('/candidates/me');
+      const data = response.data.data;
+      setCandidateData(data);
+
+      if (includePersonalInfo) {
         const dob = data.dob ? new Date(data.dob).toISOString().split('T')[0] : "";
-
         setPersonalInfo({
           fatherName: data.fatherName || "",
           cnic: data.cnic || "",
@@ -58,12 +78,18 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           city: data.cityId || "",
           address: data.address || "",
         });
-
-      } catch (error) {
-        console.error('Failed to fetch candidate data', error);
       }
+    } catch (error) {
+      console.error('Failed to fetch candidate data', error);
+    }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      await fetchCandidateData(true);
+      await refreshDocumentValidation();
     };
-    fetchCandidateData();
+    init();
   }, []);
 
   const handlePersonalInfoUpdate = (field: keyof PersonalInfo, value: string) => {
@@ -125,33 +151,21 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       setFormErrors({});
 
       // 2. Validate documents SECOND
-      const validationResponse = await api.get('/candidates/me/validate-documents');
-      const validationData = validationResponse.data.data;
+      const validationData = await refreshDocumentValidation();
 
-      if (!validationData.canProceedToPayment) {
-        // Store missing documents for display
-        setMissingDocuments(validationData.missingDocuments);
-
-        // Show error with missing documents
-        const missingDocsFormatted = validationData.missingDocuments
-          .map((doc: string) => {
-            // Convert camelCase to readable format
-            const formatted = doc.replace(/([A-Z])/g, ' $1').trim();
-            return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-          })
-          .join(', ');
+      if (!validationData?.canProceedToPayment) {
+        const missing = validationData?.missingDocuments || missingDocuments;
 
         toast({
           title: t('registration.documentsMissing'),
-          description: `${t('registration.missingDocumentsDescription')} ${missingDocsFormatted}`,
+          description: `${t('registration.identityRequirementHint')}${
+            missing.length ? ` (${missing.map(formatMissingDocLabel).join(', ')})` : ''
+          }`,
           variant: "destructive",
         });
         setIsLoading(false);
         return;
       }
-
-      // Clear missing documents if validation passed
-      setMissingDocuments([]);
 
       // 3. Validate Age THIRD
       if (personalInfo.dob) {
@@ -227,27 +241,33 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           onUpdate={handlePersonalInfoUpdate}
           errors={formErrors}
         />
-        <DocumentUpload candidateData={candidateData} />
+        <DocumentUpload
+          candidateData={candidateData}
+          onUploadComplete={async () => {
+            await fetchCandidateData(false);
+            await refreshDocumentValidation();
+          }}
+        />
         <EducationDeclaration candidateData={candidateData} />
       </div>
 
       {/* Missing Documents Alert */}
-      {missingDocuments.length > 0 && (
+      {docsValidated && !canProceedToPayment && (
         <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h3 className="font-semibold text-destructive mb-2">{t('registration.missingDocumentsTitle')}</h3>
               <p className="text-sm text-destructive/90 mb-3">
-                {t('registration.missingDocumentsDescription')}
+                {t('registration.identityRequirementHint')}
               </p>
-              <ul className="list-disc list-inside space-y-1 text-sm text-destructive/80">
-                {missingDocuments.map((doc) => {
-                  const formatted = doc.replace(/([A-Z])/g, ' $1').trim();
-                  const displayName = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-                  return <li key={doc}>{displayName}</li>;
-                })}
-              </ul>
+              {missingDocuments.length > 0 && (
+                <ul className="list-disc list-inside space-y-1 text-sm text-destructive/80">
+                  {missingDocuments.map((doc) => (
+                    <li key={doc}>{formatMissingDocLabel(doc)}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>
@@ -262,7 +282,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           onClick={handleSubmit}
           size="lg"
           className="group"
-          disabled={isLoading}
+          disabled={isLoading || (docsValidated && !canProceedToPayment)}
         >
           {isLoading ? (
             <>

@@ -21,6 +21,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
+import { getDocumentPreviewUrl } from "@/utils/sampleDocuments";
 
 interface Document {
     id: string;
@@ -678,6 +679,7 @@ export function PassedCandidateTable() {
                                                 photo: "Candidate Photo",
                                                 cnicFront: "CNIC Front",
                                                 cnicBack: "CNIC Back",
+                                                visa: "Visa",
                                                 passport: "Passport",
                                                 degreeTranscript: "Degree/Transcript",
                                                 medicalCertificate: "Medical Certificate",
@@ -723,7 +725,10 @@ export function PassedCandidateTable() {
                                                         size="sm"
                                                         variant="ghost"
                                                         className="h-8 w-8 p-0"
-                                                        onClick={() => window.open(`http://localhost:3001${doc.fileUrl}`, '_blank')}
+                                                        onClick={() => {
+                                                            const url = getDocumentPreviewUrl(doc.type);
+                                                            if (url) window.open(url, '_blank');
+                                                        }}
                                                     >
                                                         <ExternalLink className="w-4 h-4" />
                                                     </Button>
@@ -732,8 +737,10 @@ export function PassedCandidateTable() {
                                                         variant="ghost"
                                                         className="h-8 w-8 p-0"
                                                         onClick={() => {
+                                                            const url = getDocumentPreviewUrl(doc.type);
+                                                            if (!url) return;
                                                             const link = document.createElement('a');
-                                                            link.href = `http://localhost:3001${doc.fileUrl}`;
+                                                            link.href = url;
                                                             link.download = docName;
                                                             link.click();
                                                         }}

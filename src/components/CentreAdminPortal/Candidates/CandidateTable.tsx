@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { centerAdminService } from "@/services/centerAdminService";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
 import { formatTimeLabel } from "@/utils/time";
+import { getDocumentPreviewUrl } from "@/utils/sampleDocuments";
 
 interface Document {
     id: string;
@@ -90,13 +91,23 @@ export function CandidateTable({
                         const name = item.user
                             ? `${item.user.firstName} ${item.user.lastName}`
                             : (item.name || "Unknown");
-                        const documents = (item.documents || []).map((d: any) => ({
-                            id: d.id,
-                            name: d.name || d.type || "Document",
-                            type: d.type,
-                            uploadDate: d.createdAt || d.uploadDate || "",
-                            fileUrl: d.fileUrl,
-                        }));
+                        const documents = (item.documents || []).map((d: any) => {
+                            const typeLabels: Record<string, string> = {
+                                photo: "Candidate Photo",
+                                passport: "Passport",
+                                visa: "Visa",
+                                cnicFront: "CNIC Front",
+                                cnicBack: "CNIC Back",
+                                degreeTranscript: "Degree/Transcript",
+                            };
+                            return {
+                                id: d.id,
+                                name: typeLabels[d.type] || d.name || d.type || "Document",
+                                type: d.type,
+                                uploadDate: d.createdAt || d.uploadDate || "",
+                                fileUrl: getDocumentPreviewUrl(d.type) || "",
+                            };
+                        });
 
                         return {
                             id: item.userId || item.id || item.cnic,
@@ -378,7 +389,10 @@ export function CandidateTable({
                                                         size="sm"
                                                         variant="ghost"
                                                         className="h-8 w-8 p-0"
-                                                        onClick={() => window.open(doc.fileUrl, '_blank')}
+                                                        disabled={!doc.fileUrl}
+                                                        onClick={() => {
+                                                            if (doc.fileUrl) window.open(doc.fileUrl, '_blank');
+                                                        }}
                                                     >
                                                         <ExternalLink className="w-4 h-4" />
                                                     </Button>
@@ -386,8 +400,9 @@ export function CandidateTable({
                                                         size="sm"
                                                         variant="ghost"
                                                         className="h-8 w-8 p-0"
+                                                        disabled={!doc.fileUrl}
                                                         onClick={() => {
-                                                            // Download logic
+                                                            if (!doc.fileUrl) return;
                                                             const link = document.createElement('a');
                                                             link.href = doc.fileUrl;
                                                             link.download = doc.name;

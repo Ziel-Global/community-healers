@@ -1,3 +1,5 @@
+import { resolveFileUrl } from "./fileUrl";
+
 /** Pakistani CNIC: last digit odd = male, even = female (NADRA). */
 export function genderFromCnic(cnic?: string | null): "male" | "female" | null {
   const digits = (cnic || "").replace(/\D/g, "");
@@ -40,20 +42,6 @@ const MALE_TOPS = [
   "turban",
 ];
 
-const API_URL = (import.meta.env.VITE_BACKEND_URL || "").replace(/\/$/, "");
-
-function resolveUploadedPhotoUrl(url?: string | null): string | null {
-  const trimmed = url?.trim();
-  if (!trimmed) return null;
-
-  if (/^(https?:|data:)/i.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (!API_URL) return trimmed;
-  return `${API_URL}${trimmed.startsWith("/") ? "" : "/"}${trimmed}`;
-}
-
 function buildDiceBearUrl(seed: string, cnic?: string | null): string {
   const params = new URLSearchParams();
   params.set("seed", seed);
@@ -83,8 +71,8 @@ export function getCandidateAvatarUrl(options: {
   documents?: Array<{ type?: string; fileUrl?: string | null }> | null;
 }): string {
   const uploadedPhoto =
-    resolveUploadedPhotoUrl(options.photoUrl) ||
-    resolveUploadedPhotoUrl(
+    resolveFileUrl(options.photoUrl) ||
+    resolveFileUrl(
       options.documents?.find((d) => d.type === "photo" && d.fileUrl)?.fileUrl,
     );
 

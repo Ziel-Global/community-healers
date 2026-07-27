@@ -12,6 +12,8 @@ interface Document {
     nameKey: string;
     type: string;
     isMandatory: boolean;
+    /** Counts toward identity: CNIC front+back OR visa */
+    identityOption?: boolean;
     status: "pending" | "uploading" | "complete" | "error";
     fileName?: string;
     fileType?: string;
@@ -20,18 +22,18 @@ interface Document {
 
 const initialDocuments: Document[] = [
     { id: "photo", nameKey: "documents.candidatePhoto", type: "Image", isMandatory: true, status: "pending" },
-    { id: "cnicFront", nameKey: "documents.cnicFront", type: "Image/PDF", isMandatory: true, status: "pending" },
-    { id: "cnicBack", nameKey: "documents.cnicBack", type: "Image/PDF", isMandatory: true, status: "pending" },
-    { id: "policeClearance", nameKey: "documents.policeClearance", type: "PDF", isMandatory: true, status: "pending" },
-    { id: "medicalCertificate", nameKey: "documents.medicalCertificate", type: "PDF", isMandatory: true, status: "pending" },
-    { id: "passport", nameKey: "documents.passport", type: "PDF", isMandatory: true, status: "pending" },
+    { id: "passport", nameKey: "documents.passport", type: "Image/PDF", isMandatory: true, status: "pending" },
+    { id: "visa", nameKey: "documents.visa", type: "Image/PDF", isMandatory: false, identityOption: true, status: "pending" },
+    { id: "cnicFront", nameKey: "documents.cnicFront", type: "Image/PDF", isMandatory: false, identityOption: true, status: "pending" },
+    { id: "cnicBack", nameKey: "documents.cnicBack", type: "Image/PDF", isMandatory: false, identityOption: true, status: "pending" },
 ];
 
 interface DocumentUploadProps {
     candidateData: any;
+    onUploadComplete?: () => void;
 }
 
-export function DocumentUpload({ candidateData }: DocumentUploadProps) {
+export function DocumentUpload({ candidateData, onUploadComplete }: DocumentUploadProps) {
     const { t } = useTranslation();
     const { toast } = useToast();
     const [documents, setDocuments] = useState<Document[]>(initialDocuments);
@@ -104,6 +106,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                 title: t('documents.uploadSuccess'),
                 description: `${file.name}`,
             });
+            onUploadComplete?.();
         } catch (error: any) {
             setDocuments(prev => prev.map(doc =>
                 doc.id === docId
@@ -147,6 +150,16 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
+                <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex gap-3">
+                    <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <div className="text-sm text-foreground/90 space-y-1">
+                        <p className="font-semibold">{t('documents.identityRequirementTitle')}</p>
+                        <p className="text-muted-foreground text-xs leading-relaxed">
+                            {t('documents.identityRequirementDesc')}
+                        </p>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {documents.map((doc) => (
                         <div
@@ -158,9 +171,9 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                         "bg-card border-border/60"
                             )}
                         >
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
                                 <div className={cn(
-                                    "w-10 h-10 rounded-lg flex items-center justify-center",
+                                    "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
                                     doc.status === "complete" ? "bg-success/10 text-success" :
                                         doc.status === "uploading" ? "bg-primary/10 text-primary" :
                                             "bg-secondary text-muted-foreground"
@@ -173,12 +186,26 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                         <FileText className="w-5 h-5" />
                                     )}
                                 </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
+                                <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2">
                                         <p className="text-sm font-semibold text-foreground">{t(doc.nameKey)}</p>
-                                        {doc.isMandatory && <span className="text-[10px] font-bold text-destructive uppercase">{t('documents.mandatoryLabel')}</span>}
+                                        {doc.isMandatory && (
+                                            <span className="text-[10px] font-bold text-destructive uppercase">
+                                                {t('documents.mandatoryLabel')}
+                                            </span>
+                                        )}
+                                        {!doc.isMandatory && doc.identityOption && (
+                                            <span className="text-[10px] font-bold text-primary uppercase">
+                                                {t('documents.identityOptionLabel')}
+                                            </span>
+                                        )}
+                                        {!doc.isMandatory && !doc.identityOption && (
+                                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                                                {t('documents.optionalLabel')}
+                                            </span>
+                                        )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground truncate">
                                         {doc.status === "complete" ? doc.fileName :
                                             doc.status === "uploading" ? t('documents.uploading') :
                                                 `${t('profile.format')}: ${doc.type}`}
@@ -186,7 +213,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                                 {doc.status === "complete" ? (
                                     <Button
                                         variant="ghost"
@@ -202,7 +229,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                             type="file"
                                             ref={el => fileInputRefs.current[doc.id] = el}
                                             className="hidden"
-                                            accept={doc.type.includes('Image') ? 'image/*' : 'application/pdf'}
+                                            accept={doc.type.includes('Image') ? 'image/*,application/pdf' : 'application/pdf'}
                                             onChange={(e) => handleFileSelect(doc.id, e.target.files?.[0] || null)}
                                         />
                                         <Button

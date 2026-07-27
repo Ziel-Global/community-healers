@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { CertificateCard } from "./CertificateCard";
 import { useTranslation } from "react-i18next";
 import { formatTimeLabel } from "@/utils/time";
+import { getDocumentPreviewUrl, getSampleDocumentUrl } from "@/utils/sampleDocuments";
 
 interface UploadedDocument {
   id: string;
@@ -72,6 +73,37 @@ interface ProfileViewProps {
   certificateNumber?: string;
 }
 
+function fileNameFromUrl(url: string) {
+  try {
+    const path = url.split("?")[0];
+    return decodeURIComponent(path.split("/").pop() || "document");
+  } catch {
+    return "document";
+  }
+}
+
+function detectFileType(url?: string | null): string {
+  if (!url) return "application/octet-stream";
+  const clean = url.split("?")[0].toLowerCase();
+  if (clean.endsWith(".pdf")) return "application/pdf";
+  if (/\.(jpe?g|png|gif|webp|bmp)$/i.test(clean)) return "image/jpeg";
+  // Cloud/object URLs often omit extensions — treat as image by default for preview
+  return "image/jpeg";
+}
+
+function isImageFile(fileType?: string, url?: string) {
+  if (fileType?.startsWith("image/")) return true;
+  if (!url) return false;
+  const clean = url.split("?")[0].toLowerCase();
+  return /\.(jpe?g|png|gif|webp|bmp)$/i.test(clean);
+}
+
+function isPdfFile(fileType?: string, url?: string) {
+  if (fileType === "application/pdf") return true;
+  if (!url) return false;
+  return url.split("?")[0].toLowerCase().endsWith(".pdf");
+}
+
 export function ProfileView({
   isRegistrationComplete = false,
   scheduledExamDate,
@@ -101,39 +133,35 @@ export function ProfileView({
           // Define expected document types to ensure we display all required slots even if not uploaded
           const expectedDocs = [
             { id: "photo", nameKey: "profile.candidatePhoto", isMandatory: true },
-            { id: "cnicFront", nameKey: "profile.cnicFront", isMandatory: true },
-            { id: "cnicBack", nameKey: "profile.cnicBack", isMandatory: true },
-            { id: "policeClearance", nameKey: "profile.policeClearance", isMandatory: true },
-            { id: "medicalCertificate", nameKey: "profile.medicalCertificate", isMandatory: true },
-            { id: "passport", nameKey: "profile.passport", isMandatory: false },
+            { id: "passport", nameKey: "profile.passport", isMandatory: true },
+            { id: "visa", nameKey: "profile.visa", isMandatory: false },
+            { id: "cnicFront", nameKey: "profile.cnicFront", isMandatory: false },
+            { id: "cnicBack", nameKey: "profile.cnicBack", isMandatory: false },
             { id: "degreeTranscript", nameKey: "profile.degreeTranscript", isMandatory: false },
           ];
 
           expectedDocs.forEach(expected => {
             const found = data.documents.find((d: any) => d.type === expected.id);
-            if (found) {
-              // CRITICAL FIX: Only consider it complete if fileUrl is present
-              const isComplete = !!found.fileUrl;
+            const sampleUrl = getSampleDocumentUrl(expected.id);
+            // Preview always uses frontend static files — never backend /uploads
+            const previewUrl = getDocumentPreviewUrl(expected.id);
+            const isComplete = !!sampleUrl || !!found?.fileUrl;
+            const fileType = detectFileType(previewUrl || undefined);
 
-              apiDocs.push({
-                id: found.id || expected.id,
-                name: t(expected.nameKey),
-                type: found.type,
-                isMandatory: expected.isMandatory && !isComplete, // If not complete, it remains mandatory pending
-                status: isComplete ? "complete" : "pending",
-                fileName: found.fileUrl ? found.fileUrl.split('/').pop() : undefined,
-                fileData: found.fileUrl,
-                fileType: found.fileUrl?.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'
-              });
-            } else {
-              apiDocs.push({
-                id: expected.id,
-                name: t(expected.nameKey),
-                type: "PDF/Image",
-                isMandatory: expected.isMandatory,
-                status: "pending"
-              });
-            }
+            apiDocs.push({
+              id: found?.id || expected.id,
+              name: t(expected.nameKey),
+              type: found?.type || expected.id,
+              isMandatory: expected.isMandatory && !isComplete,
+              status: isComplete ? "complete" : "pending",
+              fileName: sampleUrl
+                ? sampleUrl.split("/").pop()
+                : found?.fileUrl
+                  ? fileNameFromUrl(found.fileUrl)
+                  : undefined,
+              fileData: previewUrl || undefined,
+              fileType,
+            });
           });
 
           setUploadedDocuments(apiDocs);
@@ -152,23 +180,8 @@ export function ProfileView({
   const pendingDocs = uploadedDocuments.filter(doc => doc.status === "pending" && doc.isMandatory);
 
   const handleViewDocument = (doc: UploadedDocument) => {
-    if (doc.fileData) { // fileData now holds the URL
-      // Open PDFs in a new tab
-      if (isPdfFile(doc.fileType || (doc.fileData.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'))) {
-        window.open(doc.fileData, '_blank');
-      } else {
-        // Show images in modal
-        setPreviewDoc(doc);
-      }
-    }
-  };
-
-  const isImageFile = (fileType?: string) => {
-    return fileType?.startsWith('image/') || false;
-  };
-
-  const isPdfFile = (fileType?: string) => {
-    return fileType === 'application/pdf';
+    if (!doc.fileData) return;
+    setPreviewDoc(doc);
   };
 
   const hasCertificate = !!candidateData?.certificate;
@@ -525,28 +538,40 @@ export function ProfileView({
               {completedDocs.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-green-500/5 border border-green-500/20"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleViewDocument(doc)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleViewDocument(doc);
+                    }
+                  }}
+                  className="flex items-center justify-between p-3 rounded-lg bg-green-500/5 border border-green-500/20 cursor-pointer hover:bg-green-500/10 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
                       <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-foreground">{doc.name}</p>
+                        <p className="font-medium text-foreground truncate">{doc.name}</p>
                         {doc.isMandatory && (
                           <span className="text-[10px] font-bold text-primary uppercase">{t("profile.required")}</span>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">{doc.fileName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{doc.fileName}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-8 gap-1 text-muted-foreground hover:text-foreground"
-                      onClick={() => handleViewDocument(doc)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewDocument(doc);
+                      }}
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">{t("profile.view")}</span>
@@ -607,37 +632,50 @@ export function ProfileView({
               {previewDoc?.name}
             </DialogTitle>
           </DialogHeader>
-          <div className="mt-4 max-h-[70vh] overflow-auto rounded-lg border border-border/40 bg-muted/20">
+          <div className="mt-4 max-h-[70vh] overflow-auto rounded-lg border border-border/40 bg-muted/20 p-2">
             {previewDoc?.fileData && (
               <>
-                {isImageFile(previewDoc.fileType) && (
+                {isImageFile(previewDoc.fileType, previewDoc.fileData) && (
                   <img
                     src={previewDoc.fileData}
                     alt={previewDoc.name}
-                    className="w-full h-auto object-contain"
+                    className="w-full h-auto object-contain rounded-md"
                   />
                 )}
-                {isPdfFile(previewDoc.fileType) && (
-                  <div className="p-8 text-center">
-                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">
-                      {t("profile.pdfInNewTab")}
-                    </p>
-                  </div>
+                {isPdfFile(previewDoc.fileType, previewDoc.fileData) && (
+                  <iframe
+                    src={previewDoc.fileData}
+                    title={previewDoc.name}
+                    className="w-full h-[65vh] rounded-md border-0"
+                  />
                 )}
-                {!isImageFile(previewDoc.fileType) && !isPdfFile(previewDoc.fileType) && (
-                  <div className="p-8 text-center">
-                    <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                {!isImageFile(previewDoc.fileType, previewDoc.fileData) &&
+                  !isPdfFile(previewDoc.fileType, previewDoc.fileData) && (
+                  <div className="p-8 text-center space-y-3">
+                    <FileText className="w-12 h-12 text-muted-foreground mx-auto" />
                     <p className="text-sm text-muted-foreground">
                       {t("profile.previewNotAvailable")}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">{previewDoc.fileName}</p>
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open(previewDoc.fileData, "_blank")}
+                    >
+                      {t("profile.view")}
+                    </Button>
                   </div>
                 )}
               </>
             )}
           </div>
           <div className="flex justify-end gap-2 mt-4">
+            {previewDoc?.fileData && (
+              <Button
+                variant="outline"
+                onClick={() => window.open(previewDoc.fileData, "_blank")}
+              >
+                {t("profile.view")}
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setPreviewDoc(null)}>
               {t("profile.close")}
             </Button>
