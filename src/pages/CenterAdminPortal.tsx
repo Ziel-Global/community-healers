@@ -65,9 +65,14 @@ export default function CenterAdminPortal() {
   }, []);
 
   const handleCloseVerification = async () => {
+    if (!centerData?.id) {
+      toast.error("Center details are still loading. Please try again.");
+      return;
+    }
+
     setIsClosing(true);
     try {
-      await centerAdminService.closeVerification();
+      await centerAdminService.closeVerification(centerData.id);
       setIsCloseVerificationOpen(false);
       toast.success("Verification closed successfully.");
       setRefreshTrigger(prev => prev + 1);
@@ -121,6 +126,7 @@ export default function CenterAdminPortal() {
               size="sm"
               className="gap-2"
               onClick={() => setIsCloseVerificationOpen(true)}
+              disabled={!centerData?.id || isLoading}
             >
               <Lock className="w-4 h-4" />
               Close Verification
@@ -156,7 +162,7 @@ export default function CenterAdminPortal() {
             <DialogHeader>
               <DialogTitle>Close Verification?</DialogTitle>
               <DialogDescription>
-                Are you sure you want to close verification for today? This action cannot be undone and will mark all pending candidates as absent.
+                Are you sure you want to close verification for {centerData?.name || "this center"}? This action cannot be undone and will mark only this center's pending candidates as absent after their verification time has closed.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

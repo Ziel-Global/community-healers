@@ -31,7 +31,7 @@ const portalColors = {
 const portalLabels = {
   candidate: "Candidate",
   center: "Center Admin",
-  admin: "Super Admin",
+  admin: "Admin",
   ministry: "Ministry",
 };
 

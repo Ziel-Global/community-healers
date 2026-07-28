@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Clock, ChevronLeft, ChevronRight, Send, AlertTriangle, BookOpen, Languages, MonitorSmartphone } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight, Send, AlertTriangle, BookOpen, Languages, MonitorSmartphone, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/services/api";
 import { getExamOnOtherDeviceMessage, isExamOnOtherDeviceError } from "@/utils/examSession";
@@ -38,6 +38,8 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [otherDeviceBlock, setOtherDeviceBlock] = useState<string | null>(null);
     const [language, setLanguage] = useState<"en" | "ur">("en");
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const speechRequestId = useRef(0);
     const isUrdu = language === "ur";
 
     useEffect(() => {
@@ -55,6 +57,14 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    };
+
+    const stopQuestionAudio = () => {
+        speechRequestId.current += 1;
+        if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
+        setIsSpeaking(false);
     };
 
     // Use provided questions or fallback to default questions
@@ -265,6 +275,51 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
     const answeredCount = Object.keys(answers).length;
     const progress = (answeredCount / totalQuestions) * 100;
 
+    const handleQuestionAudio = () => {
+        if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+            alert("Audio playback is not supported by this browser.");
+            return;
+        }
+
+        if (isSpeaking) {
+            stopQuestionAudio();
+            return;
+        }
+
+        const question = questions[currentQuestion];
+        const useUrduAudio = isUrdu && Boolean(question.questionTextUrdu);
+        const text = useUrduAudio ? question.questionTextUrdu! : question.questionText;
+        const requestId = speechRequestId.current + 1;
+        speechRequestId.current = requestId;
+
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = useUrduAudio ? "ur-PK" : "en-US";
+        utterance.rate = 0.9;
+        utterance.onend = () => {
+            if (speechRequestId.current === requestId) setIsSpeaking(false);
+        };
+        utterance.onerror = () => {
+            if (speechRequestId.current === requestId) setIsSpeaking(false);
+        };
+
+        setIsSpeaking(true);
+        window.speechSynthesis.speak(utterance);
+    };
+
+    // Stop narration when the candidate moves to another question, changes
+    // language, or leaves the exam screen.
+    useEffect(() => {
+        stopQuestionAudio();
+    }, [currentQuestion, language]);
+
+    useEffect(() => () => {
+        speechRequestId.current += 1;
+        if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
+    }, []);
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
@@ -398,11 +453,24 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
                 <div className="lg:col-span-3 space-y-6">
                     <Card className="border-border/40 shadow-md min-h-[400px] flex flex-col">
                         <CardHeader className="border-b border-border/20 bg-secondary/10">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                    <BookOpen className="w-4 h-4 text-primary" />
+                            <div className="flex items-center justify-between gap-3 mb-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <BookOpen className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <span className="text-sm font-bold text-muted-foreground">Question {currentQuestion + 1}</span>
                                 </div>
-                                <span className="text-sm font-bold text-muted-foreground">Question {currentQuestion + 1}</span>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleQuestionAudio}
+                                    className="gap-2 shrink-0"
+                                    aria-label={isSpeaking ? "Stop question audio" : "Read question aloud"}
+                                >
+                                    {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                                    <span className="hidden sm:inline">{isSpeaking ? "Stop audio" : "Listen"}</span>
+                                </Button>
                             </div>
                             <CardTitle className={cn(
                                 "text-xl sm:text-2xl leading-relaxed",

@@ -107,7 +107,7 @@ export default function SuperAdminPortal() {
 
   return (
     <DashboardLayout
-      title="Super Admin Portal"
+      title="Admin Portal"
       subtitle="System-Wide Governance & Configuration"
       portalType="admin"
       navItems={superAdminNavItems}

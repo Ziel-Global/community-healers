@@ -68,9 +68,11 @@ export const getReports = async (): Promise<any[]> => {
     }
 };
 
-export const closeVerification = async (): Promise<any> => {
+export const closeVerification = async (centerId: string): Promise<any> => {
     try {
-        const response = await api.patch('/center-admin/mark-pending-absent');
+        const response = await api.patch('/center-admin/mark-pending-absent', undefined, {
+            params: { centerId },
+        });
         return response.data;
     } catch (error: any) {
         console.error('Error closing verification:', error);

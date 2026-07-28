@@ -32,7 +32,7 @@ export default function SuperAdminAuth() {
     if (isSignUp) {
       toast({
         title: "Setup Restricted",
-        description: "Super Admin setup is restricted to system initialization. Please contact support.",
+        description: "Admin setup is restricted to system initialization. Please contact support.",
       });
       return;
     }
@@ -69,7 +69,7 @@ export default function SuperAdminAuth() {
           </div>
 
           <h1 className="text-4xl alumni-sans-title mb-4 text-white">
-            Super Admin
+            Admin
           </h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-md">
             Complete system administration access. Manage centers, question banks, training content, and all platform operations.
@@ -100,7 +100,7 @@ export default function SuperAdminAuth() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
               <ShieldCheck className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-sm font-display font-bold">Super Admin</span>
+            <span className="text-sm font-display font-bold">Admin</span>
           </div>
           <Link
             to="/"

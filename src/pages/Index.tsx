@@ -53,7 +53,7 @@ const portals = [
     ],
   },
   {
-    title: "Super Admin",
+    title: "Admin",
     description:
       "Configure centers, manage question banks, upload training content, and oversee system operations.",
     icon: ShieldCheck,

@@ -3,7 +3,7 @@ import { WizardStepProps } from "../CandidateWizard";
 import { ExamSlotPicker } from "../Scheduling/ExamSlotPicker";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Calendar, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -15,10 +15,15 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isScheduling, setIsScheduling] = useState(false);
   const [isScheduled, setIsScheduled] = useState(false);
+  const schedulingRequestInFlight = useRef(false);
 
   const handleNext = async () => {
-    if (!selectedDate) return;
+    // The schedule control appears in both the picker and the wizard footer.
+    // A rapid double-click must not issue a second request after the first
+    // booking succeeds, because the API correctly treats that as a reschedule.
+    if (!selectedDate || schedulingRequestInFlight.current || isScheduled) return;
 
+    schedulingRequestInFlight.current = true;
     setIsScheduling(true);
     try {
       const examDate = format(selectedDate, 'yyyy-MM-dd');
@@ -54,6 +59,7 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
         variant: "destructive",
       });
     } finally {
+      schedulingRequestInFlight.current = false;
       setIsScheduling(false);
     }
   };
