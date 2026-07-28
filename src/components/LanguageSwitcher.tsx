@@ -14,6 +14,7 @@ export function LanguageSwitcher() {
 
     return (
         <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={toggleLanguage}

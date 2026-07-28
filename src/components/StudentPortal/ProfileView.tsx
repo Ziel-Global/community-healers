@@ -14,7 +14,7 @@ import { getDocumentPreviewUrl, getSampleDocumentUrl } from "@/utils/sampleDocum
 
 interface UploadedDocument {
   id: string;
-  name: string;
+  nameKey: string;
   type: string;
   isMandatory: boolean;
   status: "pending" | "uploading" | "complete" | "error";
@@ -63,6 +63,11 @@ interface CandidateData {
   };
   requiresRepayment?: boolean;
   consecutiveMisses?: number;
+  documents?: Array<{
+    id?: string;
+    type: string;
+    fileUrl?: string | null;
+  }>;
 }
 
 interface ProfileViewProps {
@@ -123,7 +128,7 @@ export function ProfileView({
     const fetchCandidateData = async () => {
       try {
         const response = await api.get('/candidates/me');
-        const data = response.data.data;
+        const data = response.data.data as CandidateData;
         setCandidateData(data);
 
         // Map API documents to UploadedDocument interface
@@ -141,7 +146,7 @@ export function ProfileView({
           ];
 
           expectedDocs.forEach(expected => {
-            const found = data.documents.find((d: any) => d.type === expected.id);
+            const found = data.documents.find((document) => document.type === expected.id);
             const sampleUrl = getSampleDocumentUrl(expected.id);
             // Preview always uses frontend static files — never backend /uploads
             const previewUrl = getDocumentPreviewUrl(expected.id);
@@ -150,7 +155,7 @@ export function ProfileView({
 
             apiDocs.push({
               id: found?.id || expected.id,
-              name: t(expected.nameKey),
+              nameKey: expected.nameKey,
               type: found?.type || expected.id,
               isMandatory: expected.isMandatory && !isComplete,
               status: isComplete ? "complete" : "pending",
@@ -174,7 +179,7 @@ export function ProfileView({
       }
     };
     fetchCandidateData();
-  }, [t]);
+  }, []);
 
   const completedDocs = uploadedDocuments.filter(doc => doc.status === "complete");
   const pendingDocs = uploadedDocuments.filter(doc => doc.status === "pending" && doc.isMandatory);
@@ -555,7 +560,7 @@ export function ProfileView({
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-foreground truncate">{doc.name}</p>
+                        <p className="font-medium text-foreground truncate">{t(doc.nameKey)}</p>
                         {doc.isMandatory && (
                           <span className="text-[10px] font-bold text-primary uppercase">{t("profile.required")}</span>
                         )}
@@ -604,7 +609,7 @@ export function ProfileView({
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="font-medium text-foreground">{doc.name}</p>
+                            <p className="font-medium text-foreground">{t(doc.nameKey)}</p>
                             <span className="text-[10px] font-bold text-destructive uppercase">{t("profile.required")}</span>
                           </div>
                           <p className="text-xs text-muted-foreground">{t("profile.format")}: {doc.type}</p>
@@ -629,7 +634,7 @@ export function ProfileView({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary" />
-              {previewDoc?.name}
+              {previewDoc ? t(previewDoc.nameKey) : null}
             </DialogTitle>
           </DialogHeader>
           <div className="mt-4 max-h-[70vh] overflow-auto rounded-lg border border-border/40 bg-muted/20 p-2">
@@ -638,14 +643,14 @@ export function ProfileView({
                 {isImageFile(previewDoc.fileType, previewDoc.fileData) && (
                   <img
                     src={previewDoc.fileData}
-                    alt={previewDoc.name}
+                    alt={t(previewDoc.nameKey)}
                     className="w-full h-auto object-contain rounded-md"
                   />
                 )}
                 {isPdfFile(previewDoc.fileType, previewDoc.fileData) && (
                   <iframe
                     src={previewDoc.fileData}
-                    title={previewDoc.name}
+                    title={t(previewDoc.nameKey)}
                     className="w-full h-[65vh] rounded-md border-0"
                   />
                 )}
