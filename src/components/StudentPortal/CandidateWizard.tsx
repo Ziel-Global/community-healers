@@ -37,35 +37,46 @@ export function CandidateWizard({
   onRequiresRepayment,
 }: CandidateWizardProps) {
   const { t } = useTranslation();
-  const [currentStep, setCurrentStep] = useState(initialStep);
+  const clampStep = (step: number) =>
+    Math.min(Math.max(step, 0), Math.max(steps.length - 1, 0));
+  const [currentStep, setCurrentStep] = useState(() => clampStep(initialStep));
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    setCurrentStep(initialStep);
-  }, [initialStep]);
+    setCurrentStep(clampStep(initialStep));
+  }, [initialStep, steps.length]);
+
+  // The repayment flow changes the wizard from three steps to two. Use a
+  // safe index while React applies the new URL step, so a scheduling error
+  // cannot briefly try to render steps[2] from the two-step wizard.
+  const safeCurrentStep = clampStep(currentStep);
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCompletedSteps(prev => new Set(prev).add(currentStep));
-      const nextStep = currentStep + 1;
+    if (safeCurrentStep < steps.length - 1) {
+      setCompletedSteps(prev => new Set(prev).add(safeCurrentStep));
+      const nextStep = safeCurrentStep + 1;
       setCurrentStep(nextStep);
       onStepChange?.(nextStep);
     } else {
       // Last step completed
-      setCompletedSteps(prev => new Set(prev).add(currentStep));
+      setCompletedSteps(prev => new Set(prev).add(safeCurrentStep));
       onComplete?.();
     }
   };
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      const prevStep = currentStep - 1;
+    if (safeCurrentStep > 0) {
+      const prevStep = safeCurrentStep - 1;
       setCurrentStep(prevStep);
       onStepChange?.(prevStep);
     }
   };
 
-  const CurrentStepComponent = steps[currentStep].component;
+  const CurrentStepComponent = steps[safeCurrentStep]?.component;
+
+  if (!CurrentStepComponent) {
+    return null;
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -83,7 +94,7 @@ export function CandidateWizard({
           <div className="text-left sm:text-right">
             <p className="text-xs sm:text-sm text-muted-foreground">{t('wizard.currentStep')}</p>
             <p className="text-xl sm:text-2xl font-bold text-primary">
-              {currentStep + 1}/{steps.length}
+              {safeCurrentStep + 1}/{steps.length}
             </p>
           </div>
         </div>
@@ -95,7 +106,7 @@ export function CandidateWizard({
             <div
               className="h-full bg-primary transition-all duration-500"
               style={{
-                width: `${(currentStep / (steps.length - 1)) * 100}%`,
+                width: `${steps.length > 1 ? (safeCurrentStep / (steps.length - 1)) * 100 : 100}%`,
               }}
             />
           </div>
@@ -103,8 +114,8 @@ export function CandidateWizard({
           {/* Steps */}
           {steps.map((step, index) => {
             const isCompleted = completedSteps.has(index);
-            const isCurrent = index === currentStep;
-            const isPast = index < currentStep;
+            const isCurrent = index === safeCurrentStep;
+            const isPast = index < safeCurrentStep;
 
             return (
               <div
@@ -152,8 +163,8 @@ export function CandidateWizard({
         <CurrentStepComponent
           onNext={handleNext}
           onBack={handleBack}
-          isFirstStep={currentStep === 0}
-          isLastStep={currentStep === steps.length - 1}
+          isFirstStep={safeCurrentStep === 0}
+          isLastStep={safeCurrentStep === steps.length - 1}
           isRepayment={isRepayment}
           onRequiresRepayment={onRequiresRepayment}
         />

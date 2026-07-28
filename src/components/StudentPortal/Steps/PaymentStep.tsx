@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Wallet, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { api } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 export function PaymentStep({ onNext, onBack, isFirstStep, isRepayment = false }: WizardStepProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [isPaid, setIsPaid] = useState(false);
   const [isQRGenerated, setIsQRGenerated] = useState(false);
   const [isLoadingQR, setIsLoadingQR] = useState(false);
@@ -56,9 +58,21 @@ export function PaymentStep({ onNext, onBack, isFirstStep, isRepayment = false }
         setIsQRGenerated(true);
       } else {
         console.error('Failed to generate QR code: Invalid response structure');
+        toast({
+          title: 'Could not generate QR',
+          description: 'The payment service returned an incomplete response. Please try again.',
+          variant: 'destructive',
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to generate QR code', error);
+      toast({
+        title: 'Could not generate QR',
+        description:
+          error.response?.data?.message ||
+          'Please try again in a moment.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoadingQR(false);
     }
