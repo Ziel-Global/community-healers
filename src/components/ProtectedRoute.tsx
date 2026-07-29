@@ -1,12 +1,13 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { PortalType, PORTAL_ALLOWED_ROLES, ROLE_HOME_PATH } from '@/types/roles';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
-    portalType: 'candidate' | 'center' | 'admin' | 'ministry' | 'exam';
+    portalType: PortalType;
 }
 
-const authPaths: Record<string, string> = {
+const authPaths: Record<PortalType, string> = {
     candidate: '/candidate/auth',
     center: '/center/auth',
     admin: '/admin/auth',
@@ -15,7 +16,7 @@ const authPaths: Record<string, string> = {
 };
 
 export function ProtectedRoute({ children, portalType }: ProtectedRouteProps) {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading, user } = useAuth();
 
     if (isLoading) {
         // Show a minimal centered spinner while auth state is resolving
@@ -26,8 +27,16 @@ export function ProtectedRoute({ children, portalType }: ProtectedRouteProps) {
         );
     }
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
         return <Navigate to={authPaths[portalType] || '/'} replace />;
+    }
+
+    // Authenticated, but not necessarily authorized for THIS portal — a
+    // candidate token must not be able to open the center/admin/ministry UI
+    // just because it's a valid, logged-in session.
+    const allowedRoles = PORTAL_ALLOWED_ROLES[portalType];
+    if (!allowedRoles.includes(user.role)) {
+        return <Navigate to={ROLE_HOME_PATH[user.role] || '/'} replace />;
     }
 
     return <>{children}</>;

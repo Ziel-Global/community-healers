@@ -1,10 +1,12 @@
+import { UserRole } from './roles';
+
 export interface User {
     id: string;
     email: string;
     firstName: string;
     lastName: string;
     phoneNumber: string;
-    role: 'student' | 'admin' | 'ministry' | 'center_admin';
+    role: UserRole;
 }
 
 export interface CandidateLoginCredentials {
@@ -71,6 +73,8 @@ export interface CandidateStatusResponse {
     candidateStatus: CandidateStatus;
     examDate: string;
     examSessionId: string;
+    examInProgress?: boolean;
+    examEndTime?: string;
 }
 
 export interface ExamScheduledResponse {

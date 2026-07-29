@@ -289,14 +289,18 @@ export default function CandidatePortal() {
                   return next;
                 });
               }}
-              className="flex items-center gap-2 sm:gap-3 text-left hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 sm:gap-3 text-start hover:opacity-90 transition-opacity"
             >
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
                 <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="alumni-sans-title text-xl text-foreground">{t('nav.title')}</h1>
-                <p className="alumni-sans-subtitle text-sm text-muted-foreground">{t('nav.subtitle')}</p>
+              <div className="portal-brand hidden sm:flex flex-col justify-center min-w-0">
+                <h1 className="portal-brand-title alumni-sans-title text-xl text-foreground leading-tight">
+                  {t('nav.title')}
+                </h1>
+                <p className="portal-brand-subtitle alumni-sans-subtitle text-sm text-muted-foreground leading-snug">
+                  {t('nav.subtitle')}
+                </p>
               </div>
             </button>
 

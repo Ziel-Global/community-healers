@@ -15,7 +15,7 @@ export default function ExamPortal() {
     const navigate = useNavigate();
     const { i18n } = useTranslation();
     const { logout } = useAuth();
-    const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress" | "other-device">("loading");
+    const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress" | "other-device" | "questions-error">("loading");
     const [countdown, setCountdown] = useState(3);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [candidateStatus, setCandidateStatus] = useState<CandidateStatusResponse | null>(null);
@@ -23,6 +23,10 @@ export default function ExamPortal() {
     const [scheduledExam, setScheduledExam] = useState<ExamScheduledResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [otherDeviceMessage, setOtherDeviceMessage] = useState<string | null>(null);
+    const [questionsErrorMessage, setQuestionsErrorMessage] = useState<string | null>(null);
+    const [isFetchingQuestions, setIsFetchingQuestions] = useState(false);
+    const [examEndTime, setExamEndTime] = useState<string | null>(null);
+    const [draftAnswers, setDraftAnswers] = useState<Record<string, number>>({});
 
     // Fetch candidate status on component mount
     useEffect(() => {
@@ -37,8 +41,15 @@ export default function ExamPortal() {
                 // Set exam state based on candidate status
                 switch (statusData.candidateStatus) {
                     case CandidateStatus.VERIFIED:
-                        console.log("Status: VERIFIED");
-                        setExamState("verified");
+                        if (statusData.examInProgress) {
+                            // Candidate already started the exam (e.g. before a refresh) —
+                            // resume silently instead of showing "Begin Examination" again.
+                            console.log("Status: VERIFIED, exam already in progress — resuming");
+                            loadQuestions({ isResume: true });
+                        } else {
+                            console.log("Status: VERIFIED");
+                            setExamState("verified");
+                        }
                         break;
                     case CandidateStatus.PENDING:
                         console.log("Status: PENDING");
@@ -100,22 +111,58 @@ export default function ExamPortal() {
         }
     }, [examState, countdown]);
 
-    const handleStartExam = async () => {
+    const QUESTIONS_FETCH_ATTEMPTS = 3;
+    const QUESTIONS_RETRY_DELAY_MS = 1500;
+
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const loadQuestions = async (options?: { isResume?: boolean }) => {
+        const isResume = options?.isResume ?? false;
+        setQuestionsErrorMessage(null);
+        setIsFetchingQuestions(true);
+
         try {
-            console.log("Fetching exam questions...");
-            const response = await api.get('/candidates/me/questions');
-            console.log("Questions response:", response.data);
-            const questionsData = response.data.data.questions;
-            setQuestions(questionsData);
-            setExamState("countdown");
-        } catch (err: any) {
-            console.error("Failed to fetch questions:", err);
-            if (isExamOnOtherDeviceError(err)) {
-                setOtherDeviceMessage(getExamOnOtherDeviceMessage(err));
-                setExamState("other-device");
-                return;
+            for (let attempt = 1; attempt <= QUESTIONS_FETCH_ATTEMPTS; attempt++) {
+                try {
+                    console.log(`Fetching exam questions (attempt ${attempt}/${QUESTIONS_FETCH_ATTEMPTS})...`);
+                    const response = await api.get('/candidates/me/questions');
+                    const questionsData = response.data?.data?.questions;
+                    const timer = response.data?.data?.timer;
+                    const savedAnswers = response.data?.data?.draftAnswers;
+
+                    if (Array.isArray(questionsData) && questionsData.length > 0) {
+                        setQuestions(questionsData);
+                        setExamEndTime(timer?.examEndTime ?? null);
+                        setDraftAnswers(savedAnswers && typeof savedAnswers === "object" ? savedAnswers : {});
+                        // Resuming an already-started exam (e.g. after a refresh) drops
+                        // straight back into the test — the countdown/rules screen is
+                        // only for a genuinely fresh start.
+                        setExamState(isResume ? "in-progress" : "countdown");
+                        return;
+                    }
+
+                    console.warn("Questions response was empty, will retry if attempts remain:", response.data);
+                } catch (err: any) {
+                    console.error(`Failed to fetch questions (attempt ${attempt}):`, err);
+                    if (isExamOnOtherDeviceError(err)) {
+                        setOtherDeviceMessage(getExamOnOtherDeviceMessage(err));
+                        setExamState("other-device");
+                        return;
+                    }
+                }
+
+                if (attempt < QUESTIONS_FETCH_ATTEMPTS) {
+                    await sleep(QUESTIONS_RETRY_DELAY_MS);
+                }
             }
-            alert(err.response?.data?.message || "Failed to load exam questions. Please try again.");
+
+            // All attempts exhausted with no usable questions.
+            setQuestionsErrorMessage(
+                "We couldn't load your test questions after several attempts. This is usually temporary — please check your internet connection and try again. If the problem continues, contact your exam center for help."
+            );
+            setExamState("questions-error");
+        } finally {
+            setIsFetchingQuestions(false);
         }
     };
 
@@ -452,6 +499,63 @@ export default function ExamPortal() {
         );
     }
 
+    // Questions failed to load after retries
+    if (examState === "questions-error") {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <header className="border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
+                                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+                                </div>
+                                <div>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Training Portal</h1>
+                                    <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut} className="gap-1 sm:gap-2">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <Card className="w-full max-w-md border-destructive/40 shadow-royal text-center">
+                        <CardHeader className="space-y-4">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/20 flex items-center justify-center">
+                                <AlertCircle className="w-8 h-8 text-destructive" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-xl sm:text-2xl font-display text-destructive">Unable to Load Test Questions</CardTitle>
+                                <CardDescription className="mt-2">
+                                    {questionsErrorMessage || "We couldn't load your test questions. Please try again."}
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <Button
+                                onClick={() => loadQuestions()}
+                                disabled={isFetchingQuestions}
+                                className="w-full gradient-primary text-white font-semibold"
+                            >
+                                {isFetchingQuestions ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                {isFetchingQuestions ? "Retrying..." : "Try Again"}
+                            </Button>
+                            <Button onClick={handleLogout} variant="outline" disabled={isLoggingOut} className="w-full">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <LogOut className="w-4 h-4 mr-2" />}
+                                {isLoggingOut ? "Logging out..." : "Back to Login"}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
     // Exam in progress
     if (examState === "in-progress") {
         return (
@@ -481,6 +585,8 @@ export default function ExamPortal() {
                         questions={questions}
                         onComplete={handleExamComplete}
                         durationMinutes={scheduledExam?.durationMinutes || 20}
+                        examEndTime={examEndTime}
+                        initialAnswers={draftAnswers}
                     />
                 </main>
             </div>
@@ -592,10 +698,12 @@ export default function ExamPortal() {
                         {/* Start Button */}
                         <div className="pt-4">
                             <Button
-                                onClick={handleStartExam}
+                                onClick={() => loadQuestions()}
+                                disabled={isFetchingQuestions}
                                 className="w-full h-12 sm:h-14 text-base sm:text-lg gradient-primary text-white font-semibold"
                             >
-                                Begin Examination
+                                {isFetchingQuestions ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
+                                {isFetchingQuestions ? "Loading Questions..." : "Begin Examination"}
                             </Button>
                             <p className="text-center text-xs text-muted-foreground mt-3">
                                 By clicking above, you confirm that you have read and understood the rules

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
+import { UserRole } from '../types/roles';
 import { authService } from '../services/authService';
 import { parseJwt, isTokenExpired } from '../utils/jwt';
 import i18n from '../i18n';
@@ -71,7 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     });
 
                     // Load exam schedule info for candidates
-                    if ((user.role === 'student' || user.role === 'CANDIDATE') && storedExamInfo && storedExamInfo !== "undefined") {
+                    if (user.role === 'CANDIDATE' && storedExamInfo && storedExamInfo !== "undefined") {
                         try {
                             setExamScheduleInfo(JSON.parse(storedExamInfo));
                         } catch (e) {
@@ -117,16 +118,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             let user = response.user;
             if (!user) {
                 const decoded = parseJwt(token);
-                if (decoded) {
-                    user = {
-                        id: decoded.sub || decoded.id,
-                        email: decoded.email,
-                        firstName: decoded.firstName || 'Candidate',
-                        lastName: decoded.lastName || '',
-                        role: decoded.role || 'student',
-                        phoneNumber: decoded.phoneNumber || credentials.phoneNumber,
-                    };
+                if (!decoded?.role) {
+                    throw new Error('Invalid session: token is missing a role.');
                 }
+                user = {
+                    id: decoded.sub || decoded.id,
+                    email: decoded.email,
+                    firstName: decoded.firstName || 'Candidate',
+                    lastName: decoded.lastName || '',
+                    role: decoded.role as UserRole,
+                    phoneNumber: decoded.phoneNumber || credentials.phoneNumber,
+                };
             }
 
             localStorage.setItem('token', token);
@@ -141,7 +143,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             });
 
             // Check exam schedule after successful login for candidates
-            if (user.role === 'student' || (user.role as string) === 'CANDIDATE') {
+            if (user.role === 'CANDIDATE') {
                 try {
                     const examInfo = await authService.checkExamScheduled();
                     setExamScheduleInfo(examInfo);
@@ -177,16 +179,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             let user = response.user;
             if (!user) {
                 const decoded = parseJwt(token);
-                if (decoded) {
-                    user = {
-                        id: decoded.sub || decoded.id,
-                        email: decoded.email,
-                        firstName: decoded.firstName || 'Center',
-                        lastName: decoded.lastName || 'Admin',
-                        role: decoded.role || 'center_admin',
-                        phoneNumber: decoded.phoneNumber || '',
-                    };
+                if (!decoded?.role) {
+                    throw new Error('Invalid session: token is missing a role.');
                 }
+                user = {
+                    id: decoded.sub || decoded.id,
+                    email: decoded.email,
+                    firstName: decoded.firstName || 'Center',
+                    lastName: decoded.lastName || 'Admin',
+                    role: decoded.role as UserRole,
+                    phoneNumber: decoded.phoneNumber || '',
+                };
             }
 
             localStorage.setItem('token', token);
@@ -226,16 +229,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             let user = response.user;
             if (!user) {
                 const decoded = parseJwt(token);
-                if (decoded) {
-                    user = {
-                        id: decoded.sub || decoded.id,
-                        email: decoded.email,
-                        firstName: decoded.firstName || 'Ministry',
-                        lastName: decoded.lastName || 'Official',
-                        role: decoded.role || 'ministry',
-                        phoneNumber: decoded.phoneNumber || '',
-                    };
+                if (!decoded?.role) {
+                    throw new Error('Invalid session: token is missing a role.');
                 }
+                user = {
+                    id: decoded.sub || decoded.id,
+                    email: decoded.email,
+                    firstName: decoded.firstName || 'Ministry',
+                    lastName: decoded.lastName || 'Official',
+                    role: decoded.role as UserRole,
+                    phoneNumber: decoded.phoneNumber || '',
+                };
             }
 
             localStorage.setItem('token', token);
@@ -277,16 +281,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             let user = response.user;
             if (!user) {
                 const decoded = parseJwt(token);
-                if (decoded) {
-                    user = {
-                        id: decoded.sub || decoded.id || decoded.userId,
-                        email: decoded.email,
-                        firstName: decoded.firstName || 'Admin', // Fallback if not in token
-                        lastName: decoded.lastName || 'User',
-                        role: decoded.role || 'admin',
-                        phoneNumber: decoded.phoneNumber || '',
-                    };
+                if (!decoded?.role) {
+                    throw new Error('Invalid session: token is missing a role.');
                 }
+                user = {
+                    id: decoded.sub || decoded.id || decoded.userId,
+                    email: decoded.email,
+                    firstName: decoded.firstName || 'Admin', // Fallback if not in token
+                    lastName: decoded.lastName || 'User',
+                    role: decoded.role as UserRole,
+                    phoneNumber: decoded.phoneNumber || '',
+                };
             }
 
             localStorage.setItem('token', token);
@@ -364,16 +369,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             let user = response.user;
             if (!user) {
                 const decoded = parseJwt(token);
-                if (decoded) {
-                    user = {
-                        id: decoded.sub || decoded.id,
-                        email: decoded.email,
-                        firstName: decoded.firstName || 'Candidate',
-                        lastName: decoded.lastName || '',
-                        role: decoded.role || 'CANDIDATE',
-                        phoneNumber: decoded.phoneNumber || credentials.phoneNumber,
-                    };
+                if (!decoded?.role) {
+                    throw new Error('Invalid session: token is missing a role.');
                 }
+                user = {
+                    id: decoded.sub || decoded.id,
+                    email: decoded.email,
+                    firstName: decoded.firstName || 'Candidate',
+                    lastName: decoded.lastName || '',
+                    role: decoded.role as UserRole,
+                    phoneNumber: decoded.phoneNumber || credentials.phoneNumber,
+                };
             }
 
             localStorage.setItem('token', token);

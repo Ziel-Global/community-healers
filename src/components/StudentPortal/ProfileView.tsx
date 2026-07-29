@@ -212,23 +212,28 @@ export function ProfileView({
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/20 flex-shrink-0">
               <User className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
             </div>
-            <div className="flex-1 text-center sm:text-left w-full">
+            <div className="flex-1 text-center sm:text-start w-full">
               <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-2 mb-2">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground">
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground leading-tight">
                     {candidateData ? `${candidateData.user.firstName} ${candidateData.user.lastName}` : t("common.na")}
                   </h2>
-                  <p className="text-sm text-muted-foreground">{t("profile.candidateId")}: {candidateData?.userId || t("common.na")}</p>
+                  <p className="mt-1 text-sm text-muted-foreground leading-snug flex flex-wrap items-baseline justify-center sm:justify-start gap-x-1.5 gap-y-0.5">
+                    <span className="urdu-label font-medium">{t("profile.candidateId")}:</span>
+                    <span className="font-mono text-[0.95em] tracking-tight" dir="ltr">
+                      {candidateData?.userId || t("common.na")}
+                    </span>
+                  </p>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mt-4">
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                   <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-foreground truncate">{candidateData?.user.email || t("common.na")}</span>
+                  <span className="text-foreground truncate" dir="ltr">{candidateData?.user.email || t("common.na")}</span>
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                   <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-foreground">{candidateData?.user.phoneNumber || t("common.na")}</span>
+                  <span className="text-foreground" dir="ltr">{candidateData?.user.phoneNumber || t("common.na")}</span>
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -246,12 +251,12 @@ export function ProfileView({
           <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Calendar className="w-6 h-6 text-primary" />
                 </div>
-                <div>
-                  <CardTitle className="text-xl alumni-sans-title">{t("profile.examScheduled")}</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
+                <div className="portal-section-heading min-w-0">
+                  <CardTitle className="text-xl alumni-sans-title leading-tight">{t("profile.examScheduled")}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-0.5 leading-snug">
                     {t("profile.examScheduledDesc")}
                   </p>
                 </div>
@@ -277,9 +282,9 @@ export function ProfileView({
               )}
 
               <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                <div className="p-4 rounded-xl bg-card border border-border/40">
-                  <p className="text-xs text-muted-foreground mb-1">{t("profile.examDate")}</p>
-                  <p className="font-bold text-foreground">
+                <div className="p-4 rounded-xl bg-card border border-border/40 text-start">
+                  <p className="urdu-label text-xs text-muted-foreground mb-1.5 font-medium">{t("profile.examDate")}</p>
+                  <p className="font-bold text-foreground leading-snug" dir="ltr">
                     {(() => {
                       try {
                         if (!examScheduleInfo.examDate) return t("common.na");
@@ -292,9 +297,9 @@ export function ProfileView({
                     })()}
                   </p>
                 </div>
-                <div className="p-4 rounded-xl bg-card border border-border/40">
-                  <p className="text-xs text-muted-foreground mb-1">{t("profile.examTime")}</p>
-                  <p className="font-bold text-foreground">
+                <div className="p-4 rounded-xl bg-card border border-border/40 text-start">
+                  <p className="urdu-label text-xs text-muted-foreground mb-1.5 font-medium">{t("profile.examTime")}</p>
+                  <p className="font-bold text-foreground leading-snug" dir="ltr">
                     {formatTimeLabel(examScheduleInfo.examStartTime, {
                       fallback: "—",
                       datePart: examScheduleInfo.examDate,
@@ -302,9 +307,9 @@ export function ProfileView({
                   </p>
                 </div>
                 {examScheduleInfo.arriveByTime && (
-                  <div className="p-4 rounded-xl bg-card border border-border/40 sm:col-span-2">
-                    <p className="text-xs text-muted-foreground mb-1">{t("profile.arriveBy")}</p>
-                    <p className="font-bold text-foreground">
+                  <div className="p-4 rounded-xl bg-card border border-border/40 sm:col-span-2 text-start">
+                    <p className="urdu-label text-xs text-muted-foreground mb-1.5 font-medium">{t("profile.arriveBy")}</p>
+                    <p className="font-bold text-foreground leading-snug" dir="ltr">
                       {formatTimeLabel(examScheduleInfo.arriveByTime, {
                         fallback: t("common.na"),
                         datePart: examScheduleInfo.examDate,
@@ -314,10 +319,10 @@ export function ProfileView({
                 )}
               </div>
               <div className="space-y-3">
-                <div className="p-4 rounded-xl bg-card border border-border/40">
-                  <p className="text-xs text-muted-foreground mb-1">{t("profile.testCenter")}</p>
+                <div className="p-4 rounded-xl bg-card border border-border/40 text-start">
+                  <p className="urdu-label text-xs text-muted-foreground mb-1.5 font-medium">{t("profile.testCenter")}</p>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between">
-                    <p className="font-bold text-foreground">{examScheduleInfo.centerName || t("common.na")}</p>
+                    <p className="font-bold text-foreground leading-snug">{examScheduleInfo.centerName || t("common.na")}</p>
                     {examScheduleInfo.centerLicenseNumber && (
                       <Badge variant="secondary" className="text-[10px] w-fit">
                         {examScheduleInfo.centerLicenseNumber}
@@ -325,13 +330,13 @@ export function ProfileView({
                     )}
                   </div>
                 </div>
-                <div className="p-4 rounded-xl bg-card border border-border/40">
-                  <p className="text-xs text-muted-foreground mb-1">{t("profile.centerAddress")}</p>
-                  <p className="text-sm text-foreground whitespace-pre-line">{examScheduleInfo.centerAddress || t("common.na")}</p>
+                <div className="p-4 rounded-xl bg-card border border-border/40 text-start">
+                  <p className="urdu-label text-xs text-muted-foreground mb-1.5 font-medium">{t("profile.centerAddress")}</p>
+                  <p className="text-sm text-foreground whitespace-pre-line leading-snug">{examScheduleInfo.centerAddress || t("common.na")}</p>
                 </div>
-                <div className="p-4 rounded-xl bg-card border border-border/40">
-                  <p className="text-xs text-muted-foreground mb-1">{t("profile.city")}</p>
-                  <p className="font-bold text-foreground">{examScheduleInfo.cityName || t("common.na")}</p>
+                <div className="p-4 rounded-xl bg-card border border-border/40 text-start">
+                  <p className="urdu-label text-xs text-muted-foreground mb-1.5 font-medium">{t("profile.city")}</p>
+                  <p className="font-bold text-foreground leading-snug">{examScheduleInfo.cityName || t("common.na")}</p>
                 </div>
               </div>
               <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
@@ -351,12 +356,12 @@ export function ProfileView({
           <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Calendar className="w-6 h-6 text-primary" />
                 </div>
-                <div>
-                  <CardTitle className="text-xl alumni-sans-title">{t("profile.examScheduled")}</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
+                <div className="portal-section-heading min-w-0">
+                  <CardTitle className="text-xl alumni-sans-title leading-tight">{t("profile.examScheduled")}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-0.5 leading-snug">
                     {t("profile.examScheduledDesc")}
                   </p>
                 </div>
@@ -364,17 +369,17 @@ export function ProfileView({
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-card border border-border/40">
-                  <p className="text-xs text-muted-foreground mb-1">{t("profile.date")}</p>
-                  <p className="font-bold text-foreground">{format(scheduledExamDate, 'MMMM d, yyyy')}</p>
+                <div className="p-4 rounded-xl bg-card border border-border/40 text-start">
+                  <p className="urdu-label text-xs text-muted-foreground mb-1.5 font-medium">{t("profile.date")}</p>
+                  <p className="font-bold text-foreground leading-snug" dir="ltr">{format(scheduledExamDate, 'MMMM d, yyyy')}</p>
                 </div>
-                <div className="p-4 rounded-xl bg-card border border-border/40">
-                  <p className="text-xs text-muted-foreground mb-1">{t("profile.time")}</p>
-                  <p className="font-bold text-foreground">10:00 AM</p>
+                <div className="p-4 rounded-xl bg-card border border-border/40 text-start">
+                  <p className="urdu-label text-xs text-muted-foreground mb-1.5 font-medium">{t("profile.time")}</p>
+                  <p className="font-bold text-foreground leading-snug" dir="ltr">10:00 AM</p>
                 </div>
-                <div className="p-4 rounded-xl bg-card border border-border/40">
-                  <p className="text-xs text-muted-foreground mb-1">{t("profile.center")}</p>
-                  <p className="font-bold text-foreground">LHR-003</p>
+                <div className="p-4 rounded-xl bg-card border border-border/40 text-start">
+                  <p className="urdu-label text-xs text-muted-foreground mb-1.5 font-medium">{t("profile.center")}</p>
+                  <p className="font-bold text-foreground leading-snug">LHR-003</p>
                 </div>
               </div>
               <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">

@@ -16,7 +16,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         display: ['Playfair Display', 'serif'],
-        urdu: ['Lateef', 'Noto Sans Arabic', 'Noto Nastaliq Urdu', 'serif'],
+        urdu: ['Noto Sans Arabic', 'Lateef', 'Noto Nastaliq Urdu', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

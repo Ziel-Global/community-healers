@@ -257,7 +257,7 @@ export function CandidateTable({
             <Dialog open={!!selectedCandidate} onOpenChange={() => setSelectedCandidate(null)}>
                 <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="text-xl sm:text-2xl font-bold">Candidate Details</DialogTitle>
+                        <DialogTitle className="text-xl sm:text-2xl font-bold alumni-sans-title">Candidate Details</DialogTitle>
                     </DialogHeader>
 
                     {selectedCandidate && (
@@ -279,7 +279,7 @@ export function CandidateTable({
                                     }}
                                 />
                                 <div className="flex-1">
-                                    <h3 className="text-lg sm:text-xl font-bold text-foreground">{selectedCandidate.name}</h3>
+                                    <h3 className="text-lg sm:text-xl font-bold text-foreground alumni-sans-title">{selectedCandidate.name}</h3>
                                     <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-1">{selectedCandidate.id}</p>
                                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
                                         <StatusBadge status={selectedCandidate.status} />

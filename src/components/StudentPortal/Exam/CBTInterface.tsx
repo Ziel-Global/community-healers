@@ -26,14 +26,48 @@ interface CBTInterfaceProps {
     questions?: Question[];
     onComplete?: () => void;
     durationMinutes?: number;
+    /** Absolute server-anchored deadline (ISO string) — source of truth for the timer. */
+    examEndTime?: string | null;
+    /** Previously autosaved answers, keyed by questionId -> selectedOptionNumber. */
+    initialAnswers?: Record<string, number>;
 }
 
-export function CBTInterface({ questions: propQuestions, onComplete, durationMinutes = 20 }: CBTInterfaceProps) {
+type AnswerRecord = Record<number, { questionId: string; optionId: string; optionNumber: number }>;
+
+function computeTimeLeft(examEndTime: string | null | undefined, fallbackMinutes: number): number {
+    if (examEndTime) {
+        const ms = new Date(examEndTime).getTime() - Date.now();
+        return Math.max(0, Math.round(ms / 1000));
+    }
+    return fallbackMinutes * 60;
+}
+
+function buildInitialAnswers(questions: Question[], saved?: Record<string, number>): AnswerRecord {
+    if (!saved) return {};
+    const result: AnswerRecord = {};
+    questions.forEach((question, index) => {
+        const selectedOptionNumber = saved[question.id];
+        if (selectedOptionNumber === undefined) return;
+        const option = question.options.find((o) => o.optionNumber === selectedOptionNumber);
+        if (option) {
+            result[index] = {
+                questionId: question.id,
+                optionId: option.id,
+                optionNumber: option.optionNumber,
+            };
+        }
+    });
+    return result;
+}
+
+export function CBTInterface({ questions: propQuestions, onComplete, durationMinutes = 20, examEndTime, initialAnswers }: CBTInterfaceProps) {
     const navigate = useNavigate();
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(durationMinutes * 60); // duration in seconds
+    // Anchored to the server's examEndTime rather than a fixed countdown, so a
+    // refresh recomputes the true remaining time instead of restarting it.
+    const [timeLeft, setTimeLeft] = useState(() => computeTimeLeft(examEndTime, durationMinutes));
     // Store answers as { questionIndex: { questionId, optionId, optionNumber } }
-    const [answers, setAnswers] = useState<Record<number, { questionId: string; optionId: string; optionNumber: number }>>({});
+    const [answers, setAnswers] = useState<AnswerRecord>(() => buildInitialAnswers(propQuestions ?? [], initialAnswers));
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [otherDeviceBlock, setOtherDeviceBlock] = useState<string | null>(null);
@@ -48,10 +82,14 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
             return;
         }
         const timer = setInterval(() => {
-            setTimeLeft((prev) => prev - 1);
+            if (examEndTime) {
+                setTimeLeft(computeTimeLeft(examEndTime, durationMinutes));
+            } else {
+                setTimeLeft((prev) => Math.max(0, prev - 1));
+            }
         }, 1000);
         return () => clearInterval(timer);
-    }, [timeLeft]);
+    }, [timeLeft, examEndTime]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -67,209 +105,7 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
         setIsSpeaking(false);
     };
 
-    // Use provided questions or fallback to default questions
-    const questions = propQuestions && propQuestions.length > 0 ? propQuestions : [
-        {
-            id: "1",
-            questionText: "What is the primary procedure for emergency equipment shutdown?",
-            options: [
-                { id: "1-1", optionNumber: 1, optionText: "Press Emergency Stop" },
-                { id: "1-2", optionNumber: 2, optionText: "Wait for supervisor" },
-                { id: "1-3", optionNumber: 3, optionText: "Unplug power" },
-                { id: "1-4", optionNumber: 4, optionText: "Check manual first" },
-            ],
-        },
-        {
-            id: "2",
-            questionText: "How often should safety goggles be inspected?",
-            options: [
-                { id: "2-1", optionNumber: 1, optionText: "Monthly" },
-                { id: "2-2", optionNumber: 2, optionText: "Weekly" },
-                { id: "2-3", optionNumber: 3, optionText: "Before every use" },
-                { id: "2-4", optionNumber: 4, optionText: "Annually" },
-            ],
-        },
-        {
-            id: "3",
-            questionText: "Which of the following is a proper lifting technique?",
-            options: [
-                { id: "3-1", optionNumber: 1, optionText: "Bend at waist" },
-                { id: "3-2", optionNumber: 2, optionText: "Bend knees and keep back straight" },
-                { id: "3-3", optionNumber: 3, optionText: "Use back muscles" },
-                { id: "3-4", optionNumber: 4, optionText: "Twist while lifting" },
-            ],
-        },
-        {
-            id: "4",
-            questionText: "What does PPE stand for?",
-            options: [
-                { id: "4-1", optionNumber: 1, optionText: "Personal Protection Equipment" },
-                { id: "4-2", optionNumber: 2, optionText: "Professional Practice Environment" },
-                { id: "4-3", optionNumber: 3, optionText: "Personal Protective Equipment" },
-                { id: "4-4", optionNumber: 4, optionText: "Primary Prevention Equipment" },
-            ],
-        },
-        {
-            id: "5",
-            questionText: "What is the first step in a risk assessment?",
-            options: [
-                { id: "5-1", optionNumber: 1, optionText: "Implement controls" },
-                { id: "5-2", optionNumber: 2, optionText: "Identify hazards" },
-                { id: "5-3", optionNumber: 3, optionText: "Review incidents" },
-                { id: "5-4", optionNumber: 4, optionText: "Train staff" },
-            ],
-        },
-        {
-            id: "6",
-            questionText: "How long should you wash your hands in a healthcare setting?",
-            options: [
-                { id: "6-1", optionNumber: 1, optionText: "10 seconds" },
-                { id: "6-2", optionNumber: 2, optionText: "20 seconds" },
-                { id: "6-3", optionNumber: 3, optionText: "30 seconds" },
-                { id: "6-4", optionNumber: 4, optionText: "1 minute" },
-            ],
-        },
-        {
-            id: "7",
-            questionText: "What color is typically used for fire safety signs?",
-            options: [
-                { id: "7-1", optionNumber: 1, optionText: "Blue" },
-                { id: "7-2", optionNumber: 2, optionText: "Green" },
-                { id: "7-3", optionNumber: 3, optionText: "Red" },
-                { id: "7-4", optionNumber: 4, optionText: "Yellow" },
-            ],
-        },
-        {
-            id: "8",
-            questionText: "At what temperature should a refrigerator be maintained?",
-            options: [
-                { id: "8-1", optionNumber: 1, optionText: "Below 5°C" },
-                { id: "8-2", optionNumber: 2, optionText: "Below 10°C" },
-                { id: "8-3", optionNumber: 3, optionText: "Below 15°C" },
-                { id: "8-4", optionNumber: 4, optionText: "Below 20°C" },
-            ],
-        },
-        {
-            id: "9",
-            questionText: "What does SOP stand for?",
-            options: [
-                { id: "9-1", optionNumber: 1, optionText: "Standard Operating Procedure" },
-                { id: "9-2", optionNumber: 2, optionText: "Safety Operation Plan" },
-                { id: "9-3", optionNumber: 3, optionText: "Standard Organization Protocol" },
-                { id: "9-4", optionNumber: 4, optionText: "Systematic Operational Process" },
-            ],
-        },
-        {
-            id: "10",
-            questionText: "How often should fire drills be conducted?",
-            options: [
-                { id: "10-1", optionNumber: 1, optionText: "Monthly" },
-                { id: "10-2", optionNumber: 2, optionText: "Quarterly" },
-                { id: "10-3", optionNumber: 3, optionText: "Bi-annually" },
-                { id: "10-4", optionNumber: 4, optionText: "Annually" },
-            ],
-        },
-        {
-            id: "11",
-            questionText: "What is the maximum safe lifting weight without assistance?",
-            options: [
-                { id: "11-1", optionNumber: 1, optionText: "10 kg" },
-                { id: "11-2", optionNumber: 2, optionText: "15 kg" },
-                { id: "11-3", optionNumber: 3, optionText: "20 kg" },
-                { id: "11-4", optionNumber: 4, optionText: "25 kg" },
-            ],
-        },
-        {
-            id: "12",
-            questionText: "Which document outlines workplace safety requirements?",
-            options: [
-                { id: "12-1", optionNumber: 1, optionText: "Employee handbook" },
-                { id: "12-2", optionNumber: 2, optionText: "Health and Safety Policy" },
-                { id: "12-3", optionNumber: 3, optionText: "Job description" },
-                { id: "12-4", optionNumber: 4, optionText: "Training manual" },
-            ],
-        },
-        {
-            id: "13",
-            questionText: "What should you do if you witness an unsafe act?",
-            options: [
-                { id: "13-1", optionNumber: 1, optionText: "Ignore it" },
-                { id: "13-2", optionNumber: 2, optionText: "Report it immediately" },
-                { id: "13-3", optionNumber: 3, optionText: "Wait for someone else to report" },
-                { id: "13-4", optionNumber: 4, optionText: "Document it later" },
-            ],
-        },
-        {
-            id: "14",
-            questionText: "What is the proper way to store chemicals?",
-            options: [
-                { id: "14-1", optionNumber: 1, optionText: "Alphabetically" },
-                { id: "14-2", optionNumber: 2, optionText: "By purchase date" },
-                { id: "14-3", optionNumber: 3, optionText: "By compatibility" },
-                { id: "14-4", optionNumber: 4, optionText: "By size" },
-            ],
-        },
-        {
-            id: "15",
-            questionText: "How many fire extinguisher types are there?",
-            options: [
-                { id: "15-1", optionNumber: 1, optionText: "3" },
-                { id: "15-2", optionNumber: 2, optionText: "4" },
-                { id: "15-3", optionNumber: 3, optionText: "5" },
-                { id: "15-4", optionNumber: 4, optionText: "6" },
-            ],
-        },
-        {
-            id: "16",
-            questionText: "What does MSDS stand for?",
-            options: [
-                { id: "16-1", optionNumber: 1, optionText: "Material Safety Data Sheet" },
-                { id: "16-2", optionNumber: 2, optionText: "Medical Safety Data System" },
-                { id: "16-3", optionNumber: 3, optionText: "Minimum Safety Design Standard" },
-                { id: "16-4", optionNumber: 4, optionText: "Manual Safety Detection System" },
-            ],
-        },
-        {
-            id: "17",
-            questionText: "What is the recommended distance from a fire exit?",
-            options: [
-                { id: "17-1", optionNumber: 1, optionText: "15 meters" },
-                { id: "17-2", optionNumber: 2, optionText: "30 meters" },
-                { id: "17-3", optionNumber: 3, optionText: "45 meters" },
-                { id: "17-4", optionNumber: 4, optionText: "60 meters" },
-            ],
-        },
-        {
-            id: "18",
-            questionText: "Which of these is NOT a type of workplace hazard?",
-            options: [
-                { id: "18-1", optionNumber: 1, optionText: "Physical" },
-                { id: "18-2", optionNumber: 2, optionText: "Chemical" },
-                { id: "18-3", optionNumber: 3, optionText: "Financial" },
-                { id: "18-4", optionNumber: 4, optionText: "Biological" },
-            ],
-        },
-        {
-            id: "19",
-            questionText: "What is the first aid priority in an emergency?",
-            options: [
-                { id: "19-1", optionNumber: 1, optionText: "Call for help" },
-                { id: "19-2", optionNumber: 2, optionText: "Check for danger" },
-                { id: "19-3", optionNumber: 3, optionText: "Start CPR" },
-                { id: "19-4", optionNumber: 4, optionText: "Apply bandages" },
-            ],
-        },
-        {
-            id: "20",
-            questionText: "How often should electrical equipment be tested?",
-            options: [
-                { id: "20-1", optionNumber: 1, optionText: "Monthly" },
-                { id: "20-2", optionNumber: 2, optionText: "Every 3 months" },
-                { id: "20-3", optionNumber: 3, optionText: "Every 6 months" },
-                { id: "20-4", optionNumber: 4, optionText: "Annually" },
-            ],
-        },
-    ];
+    const questions = propQuestions ?? [];
 
     const totalQuestions = questions.length;
     const answeredCount = Object.keys(answers).length;
@@ -320,6 +156,27 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
         }
     }, []);
 
+    const selectAnswer = (option: Question["options"][number]) => {
+        const question = questions[currentQuestion];
+        setAnswers((prev) => ({
+            ...prev,
+            [currentQuestion]: {
+                questionId: question.id,
+                optionId: option.id,
+                optionNumber: option.optionNumber,
+            },
+        }));
+
+        // Autosave so the answer survives a refresh; a failure here is silent
+        // and non-blocking — the final submit is still the source of truth.
+        api.patch('/candidates/me/exam/answer', {
+            questionId: question.id,
+            selectedOptionNumber: option.optionNumber,
+        }).catch((err) => {
+            console.error("Failed to autosave answer:", err);
+        });
+    };
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
@@ -354,6 +211,31 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
             alert(error.response?.data?.message || "Failed to submit exam. Please try again or contact support.");
         }
     };
+
+    if (totalQuestions === 0) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <Card className="max-w-md w-full border-destructive/40 shadow-lg text-center">
+                    <CardContent className="p-8 space-y-6">
+                        <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+                            <AlertTriangle className="w-10 h-10 text-destructive" />
+                        </div>
+                        <div>
+                            <h3 className="font-display font-bold text-2xl text-foreground mb-2">
+                                No Test Questions Available
+                            </h3>
+                            <p className="text-muted-foreground">
+                                We couldn't load any questions for this test. Please contact your exam center for assistance.
+                            </p>
+                        </div>
+                        <Button onClick={() => navigate("/training/auth")} variant="outline" className="w-full font-bold">
+                            Back to Login
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     if (otherDeviceBlock) {
         return (
@@ -487,14 +369,7 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
                                 onValueChange={(optionId) => {
                                     const selectedOption = questions[currentQuestion].options.find(opt => opt.id === optionId);
                                     if (selectedOption) {
-                                        setAnswers({
-                                            ...answers,
-                                            [currentQuestion]: {
-                                                questionId: questions[currentQuestion].id,
-                                                optionId: selectedOption.id,
-                                                optionNumber: selectedOption.optionNumber
-                                            }
-                                        });
+                                        selectAnswer(selectedOption);
                                     }
                                 }}
                                 className="space-y-4"
@@ -510,16 +385,7 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
                                                 : "border-transparent bg-secondary/20 hover:bg-secondary/40 hover:border-border/60"
                                         )}
                                         dir={isUrdu ? "rtl" : "ltr"}
-                                        onClick={() => {
-                                            setAnswers({
-                                                ...answers,
-                                                [currentQuestion]: {
-                                                    questionId: questions[currentQuestion].id,
-                                                    optionId: option.id,
-                                                    optionNumber: option.optionNumber
-                                                }
-                                            });
-                                        }}
+                                        onClick={() => selectAnswer(option)}
                                     >
                                         <RadioGroupItem value={option.id} id={`option-${option.id}`} className="sr-only" />
                                         <div className={cn(
