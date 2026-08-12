@@ -17,6 +17,8 @@
 
     /* Linting */
     "strict": false,
+    /* Required for Zod's type inference to work correctly — see https://zod.dev/?id=requirements */
+    "strictNullChecks": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitAny": false,

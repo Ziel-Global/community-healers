@@ -22,6 +22,41 @@ export interface CreateCenterRequest {
     };
 }
 
+export interface SuperAdminCenter {
+    id: string;
+    name: string;
+    location: string;
+    capacity: number;
+    status: string;
+    attendance: string;
+    address?: string;
+    contactPerson?: string;
+    phone?: string;
+    email?: string;
+    established?: string;
+}
+
+export interface SuperAdminCenterDetails {
+    id: string;
+    name: string;
+    status: string;
+    city?: {
+        id: string;
+        name: string;
+    };
+    address?: string;
+    capacity: number;
+    createdAt?: string;
+    licenseNumber?: string | null;
+    totalCandidates: number;
+    appearedCandidates: number;
+    primaryAdmin?: {
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
+}
+
 export interface CenterAdmin {
     id: string;
     name: string;

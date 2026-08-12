@@ -5,10 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon, Home, AlertCircle } from "lucide-react";
-import { differenceInYears, parseISO, isValid } from "date-fns";
 import { cn } from "@/lib/utils";
-import { api } from "@/services/api";
-import { superAdminService } from "@/services/superAdminService";
+import { useCities } from "@/hooks/queries/useReferenceQueries";
+import { PERSONAL_INFO_ERROR_CODES, dobFieldSchema } from "@/schemas/registrationSchemas";
 
 interface PersonalInfo {
     fatherName: string;
@@ -32,11 +31,8 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
     const validateAge = (dobString: string) => {
         if (!dobString) return null;
 
-        const birthDate = parseISO(dobString);
-        if (!isValid(birthDate)) return null;
-
-        const age = differenceInYears(new Date(), birthDate);
-        if (age < 16) {
+        const result = dobFieldSchema.safeParse(dobString);
+        if (!result.success && result.error.issues[0].message === PERSONAL_INFO_ERROR_CODES.DOB_TOO_YOUNG) {
             return t('personalInfo.ageWarning');
         }
         return null;
@@ -49,19 +45,9 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
         }
     }, [data.dob, t]);
 
-    // Fetch cities from API
-    const [cities, setCities] = useState<Array<{ id: string; name: string }>>([]);
-    useEffect(() => {
-        const fetchCities = async () => {
-            try {
-                const citiesData = await superAdminService.getCities();
-                setCities(Array.isArray(citiesData) ? citiesData : []);
-            } catch (error) {
-                console.error('Failed to fetch cities', error);
-            }
-        };
-        fetchCities();
-    }, []);
+    // Fetch cities from the shared reference-data cache
+    const { data: citiesData } = useCities();
+    const cities = Array.isArray(citiesData) ? citiesData : [];
 
     const handleChange = (field: keyof PersonalInfo, value: string) => {
         onUpdate(field, value);
@@ -106,7 +92,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                                 className={cn("pl-10", errors.cnic && "border-destructive focus-visible:ring-destructive")}
                                 value={data.cnic}
                                 onChange={(e) => {
-                                    const val = e.target.value.replace(/\\D/g, '').slice(0, 13);
+                                    const val = e.target.value.replace(/\D/g, '').slice(0, 13);
                                     handleChange("cnic", val);
                                 }}
                             />

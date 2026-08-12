@@ -1,27 +1,9 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileText, Calendar as CalendarIcon, Filter, Loader2 } from "lucide-react";
-import { centerAdminService } from "@/services/centerAdminService";
+import { Card } from "@/components/ui/card";
+import { FileText, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { useHistoricalReports } from "@/hooks/queries/useCenterAdminQueries";
 
 export function HistoricalReports() {
-    const [reports, setReports] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchReports = async () => {
-            try {
-                const data = await centerAdminService.getReports();
-                setReports(data);
-            } catch (error) {
-                console.error("Failed to fetch reports:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchReports();
-    }, []);
+    const { data: reports = [], isLoading } = useHistoricalReports();
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -51,7 +33,7 @@ export function HistoricalReports() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
-                        {loading ? (
+                        {isLoading ? (
                             <tr>
                                 <td colSpan={3} className="p-8 text-center">
                                     <div className="flex flex-col items-center gap-2 text-muted-foreground">

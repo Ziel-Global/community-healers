@@ -1,4 +1,5 @@
 import { api } from './api';
+import { MinistryCenter, EligibleCandidate, RegistryCertificate, IssuanceLog, IssuedCertificate, BulkIssueCertificatesResponse } from '../types/ministry';
 
 export interface DashboardStats {
     totalIssued?: number;
@@ -22,9 +23,8 @@ export interface IssuanceTrendResponse {
 export const getDashboardStats = async (): Promise<DashboardStats | null> => {
     try {
         const response = await api.get('/ministry/dashboard-stats');
-        // Handle nesting: response.data (axios) -> data (api) -> data (actual stats object)
-        return response.data?.data?.data || null;
-    } catch (error: any) {
+        return response.data || null;
+    } catch (error: unknown) {
         console.error('Error fetching ministry dashboard stats:', error);
         throw error;
     }
@@ -33,10 +33,72 @@ export const getDashboardStats = async (): Promise<DashboardStats | null> => {
 export const getIssuanceTrend = async (): Promise<IssuanceTrendResponse | null> => {
     try {
         const response = await api.get('/ministry/certificates/issuance-trend');
-        // Handle nesting: response.data (axios) -> data (api) -> data (actual trend object)
-        return response.data?.data?.data || null;
-    } catch (error: any) {
+        return response.data || null;
+    } catch (error: unknown) {
         console.error('Error fetching ministry issuance trend:', error);
+        throw error;
+    }
+};
+
+export const getCenters = async (): Promise<MinistryCenter[]> => {
+    try {
+        const response = await api.get('/ministry/centers');
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error fetching ministry centers:', error);
+        throw error;
+    }
+};
+
+export const getEligibleCandidates = async (centerId?: string): Promise<EligibleCandidate[]> => {
+    try {
+        const url = centerId
+            ? `/ministry/certificates/eligible-candidates?centerId=${centerId}`
+            : '/ministry/certificates/eligible-candidates';
+        const response = await api.get(url);
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error fetching eligible candidates:', error);
+        throw error;
+    }
+};
+
+export const bulkIssueCertificates = async (candidateIds: string[]): Promise<BulkIssueCertificatesResponse> => {
+    try {
+        const response = await api.post('/ministry/certificates/bulk-issue', { candidateIds });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error bulk-issuing certificates:', error);
+        throw error;
+    }
+};
+
+export const issueCertificate = async (candidateId: string): Promise<IssuedCertificate> => {
+    try {
+        const response = await api.post('/ministry/certificates', { candidateId });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error issuing certificate:', error);
+        throw error;
+    }
+};
+
+export const getRegistry = async (): Promise<RegistryCertificate[]> => {
+    try {
+        const response = await api.get('/ministry/certificates/registry');
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error fetching certificate registry:', error);
+        throw error;
+    }
+};
+
+export const getIssuanceLogs = async (): Promise<IssuanceLog[]> => {
+    try {
+        const response = await api.get('/ministry/certificates/issuance-logs');
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error fetching issuance logs:', error);
         throw error;
     }
 };
@@ -44,4 +106,10 @@ export const getIssuanceTrend = async (): Promise<IssuanceTrendResponse | null> 
 export const ministryService = {
     getDashboardStats,
     getIssuanceTrend,
+    getCenters,
+    getEligibleCandidates,
+    bulkIssueCertificates,
+    issueCertificate,
+    getRegistry,
+    getIssuanceLogs,
 };

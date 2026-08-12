@@ -16,7 +16,8 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { centerAdminService } from "@/services/centerAdminService";
+import { useUpdateCandidateStatus } from "@/hooks/queries/useCenterAdminQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
 import { getDocumentPreviewUrl, getSampleDocumentUrl } from "@/utils/sampleDocuments";
@@ -69,7 +70,8 @@ function isPdfUrl(url?: string | null) {
 export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
     const navigate = useNavigate();
     const { toast } = useToast();
-    const [loading, setLoading] = useState(false);
+    const updateCandidateStatus = useUpdateCandidateStatus();
+    const loading = updateCandidateStatus.isPending;
     const [previewDoc, setPreviewDoc] = useState<{
         label: string;
         fileUrl: string;
@@ -104,55 +106,50 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
         });
     }, [candidate?.documents]);
 
-    const getErrorMessage = (error: any, fallback: string) => {
-        return (
-            error?.response?.data?.message ||
-            error?.response?.data?.error ||
-            error?.response?.data?.data?.message ||
-            fallback
+    const handleVerifyAndUnlock = () => {
+        if (!candidate?.id) return;
+        updateCandidateStatus.mutate(
+            { id: candidate.id, status: 'VERIFIED' },
+            {
+                onSuccess: () => {
+                    toast({
+                        title: "Success",
+                        description: "Candidate verified and exam unlocked.",
+                    });
+                    navigate("/center/candidates");
+                },
+                onError: (error) => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: getApiErrorMessage(error, "Failed to verify candidate. Please try again."),
+                    });
+                },
+            }
         );
     };
 
-    const handleVerifyAndUnlock = async () => {
+    const handleReject = () => {
         if (!candidate?.id) return;
-        setLoading(true);
-        try {
-            await centerAdminService.updateCandidateStatus(candidate.id, 'VERIFIED');
-            toast({
-                title: "Success",
-                description: "Candidate verified and exam unlocked.",
-            });
-            navigate("/center/candidates");
-        } catch (error: any) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: getErrorMessage(error, "Failed to verify candidate. Please try again."),
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleReject = async () => {
-        if (!candidate?.id) return;
-        setLoading(true);
-        try {
-            await centerAdminService.updateCandidateStatus(candidate.id, 'REJECTED');
-            toast({
-                title: "Candidate Rejected",
-                description: "Candidate has been marked as rejected.",
-            });
-            navigate("/center/candidates");
-        } catch (error: any) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: getErrorMessage(error, "Failed to reject candidate. Please try again."),
-            });
-        } finally {
-            setLoading(false);
-        }
+        updateCandidateStatus.mutate(
+            { id: candidate.id, status: 'REJECTED' },
+            {
+                onSuccess: () => {
+                    toast({
+                        title: "Candidate Rejected",
+                        description: "Candidate has been marked as rejected.",
+                    });
+                    navigate("/center/candidates");
+                },
+                onError: (error) => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: getApiErrorMessage(error, "Failed to reject candidate. Please try again."),
+                    });
+                },
+            }
+        );
     };
 
     const displayData = {

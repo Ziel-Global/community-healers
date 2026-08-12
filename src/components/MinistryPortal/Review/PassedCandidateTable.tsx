@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,6 @@ import { Search, Filter, Award, User, Calendar, ExternalLink, CheckCircle2, X, P
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { api } from "@/services/api";
 import {
     Command,
     CommandEmpty,
@@ -22,60 +21,14 @@ import {
 } from "@/components/ui/popover";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
 import { getDocumentPreviewUrl } from "@/utils/sampleDocuments";
-
-interface Document {
-    id: string;
-    candidateId: string;
-    type: string;
-    fileUrl: string;
-    reviewStatus: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface Center {
-    id: string;
-    name: string;
-    cityId: string;
-    city: {
-        id: string;
-        name: string;
-    };
-    address: string;
-    capacity: number;
-    status: string;
-}
-
-interface ApiCandidate {
-    userId: string;
-    user: {
-        id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        phoneNumber: string;
-        status: string;
-        role: string;
-    };
-    cnic: string;
-    fatherName: string;
-    dob: string;
-    cityId: string;
-    city: {
-        id: string;
-        name: string;
-    };
-    address: string;
-    has16YearsEducation: boolean;
-    certificateIssued: boolean;
-    createdAt: string;
-    updatedAt: string;
-    documents?: Document[];
-    obtainedScore: number;
-    totalScore: number;
-    scorePercentage: string;
-    examTime: string;
-}
+import {
+    useBulkIssueCertificates,
+    useEligibleCandidates,
+    useIssueCertificate,
+    useMinistryCenters,
+} from "@/hooks/queries/useMinistryQueries";
+import { getApiErrorMessage } from "@/lib/errors";
+import type { EligibleCandidate, MinistryCandidateDocument } from "@/types/ministry";
 
 interface Candidate {
     id: string;
@@ -91,97 +44,75 @@ interface Candidate {
     dob: string;
     fatherName: string;
     photo?: string;
-    documents: Document[];
+    documents: MinistryCandidateDocument[];
     certificateIssued: boolean;
+}
+
+function toDisplayCandidate(apiCandidate: EligibleCandidate): Candidate {
+    return {
+        id: apiCandidate.userId,
+        name: `${apiCandidate.user.firstName} ${apiCandidate.user.lastName}`,
+        cnic: apiCandidate.cnic,
+        score: `${apiCandidate.obtainedScore}/${apiCandidate.totalScore}`,
+        date: new Date(apiCandidate.examTime).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        }),
+        center: apiCandidate.city?.name || "N/A",
+        status: apiCandidate.certificateIssued ? "Certificate Issued" : "Passed",
+        phone: apiCandidate.user.phoneNumber,
+        email: apiCandidate.user.email,
+        address: apiCandidate.address,
+        dob: new Date(apiCandidate.dob).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }),
+        fatherName: apiCandidate.fatherName,
+        photo: getCandidateAvatarUrl({
+            seed: apiCandidate.user.firstName,
+            cnic: apiCandidate.cnic,
+            documents: apiCandidate.documents,
+        }),
+        documents: apiCandidate.documents || [],
+        certificateIssued: apiCandidate.certificateIssued
+    };
 }
 
 export function PassedCandidateTable() {
     const [isBulkMode, setIsBulkMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
-    const [centers, setCenters] = useState<Center[]>([]);
     const [selectedCenter, setSelectedCenter] = useState<string>("");
     const [centerFilterOpen, setCenterFilterOpen] = useState(false);
-    const [isLoadingCenters, setIsLoadingCenters] = useState(false);
-    const [candidates, setCandidates] = useState<Candidate[]>([]);
-    const [isLoadingCandidates, setIsLoadingCandidates] = useState(false);
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [issuingCertificate, setIssuingCertificate] = useState(false);
 
-    // Fetch centers on component mount
+    const { data: centers = [], isLoading: isLoadingCenters, error: centersError } = useMinistryCenters();
+    const {
+        data: apiCandidates = [],
+        isLoading: isLoadingCandidates,
+        error: candidatesError,
+    } = useEligibleCandidates(selectedCenter);
+    const bulkIssueMutation = useBulkIssueCertificates();
+    const issueMutation = useIssueCertificate();
+    const issuingCertificate = bulkIssueMutation.isPending || issueMutation.isPending;
+
+    const candidates = useMemo(() => apiCandidates.map(toDisplayCandidate), [apiCandidates]);
+
     useEffect(() => {
-        const fetchCenters = async () => {
-            setIsLoadingCenters(true);
-            try {
-                const response = await api.get('/ministry/centers');
-                const centersData = response.data.data.data;
-                setCenters(centersData);
-            } catch (error) {
-                console.error("Failed to fetch centers:", error);
-                toast.error("Failed to load centers");
-            } finally {
-                setIsLoadingCenters(false);
-            }
-        };
+        if (centersError) {
+            console.error("Failed to fetch centers:", centersError);
+            toast.error(getApiErrorMessage(centersError, "Failed to load centers"));
+        }
+    }, [centersError]);
 
-        fetchCenters();
-    }, []);
-
-    // Fetch candidates when selectedCenter changes
     useEffect(() => {
-        const fetchCandidates = async () => {
-            setIsLoadingCandidates(true);
-            try {
-                // Build API URL with centerId query parameter if center is selected
-                const url = selectedCenter 
-                    ? `/ministry/certificates/eligible-candidates?centerId=${selectedCenter}`
-                    : '/ministry/certificates/eligible-candidates';
-                
-                const response = await api.get(url);
-                const apiCandidates: ApiCandidate[] = response.data.data.data;
-                
-                // Transform API data to match our Candidate interface
-                const transformedCandidates: Candidate[] = apiCandidates.map((apiCandidate) => ({
-                    id: apiCandidate.userId,
-                    name: `${apiCandidate.user.firstName} ${apiCandidate.user.lastName}`,
-                    cnic: apiCandidate.cnic,
-                    score: `${apiCandidate.obtainedScore}/${apiCandidate.totalScore}`,
-                    date: new Date(apiCandidate.examTime).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                    }),
-                    center: apiCandidate.city?.name || "N/A",
-                    status: apiCandidate.certificateIssued ? "Certificate Issued" : "Passed",
-                    phone: apiCandidate.user.phoneNumber,
-                    email: apiCandidate.user.email,
-                    address: apiCandidate.address,
-                    dob: new Date(apiCandidate.dob).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                    }),
-                    fatherName: apiCandidate.fatherName,
-                    photo: getCandidateAvatarUrl({
-                        seed: apiCandidate.user.firstName,
-                        cnic: apiCandidate.cnic,
-                        documents: apiCandidate.documents,
-                    }),
-                    documents: apiCandidate.documents || [],
-                    certificateIssued: apiCandidate.certificateIssued
-                }));
-                
-                setCandidates(transformedCandidates);
-            } catch (error) {
-                console.error("Failed to fetch candidates:", error);
-                toast.error("Failed to load candidates");
-            } finally {
-                setIsLoadingCandidates(false);
-            }
-        };
-
-        fetchCandidates();
-    }, [selectedCenter]);
+        if (candidatesError) {
+            console.error("Failed to fetch candidates:", candidatesError);
+            toast.error(getApiErrorMessage(candidatesError, "Failed to load candidates"));
+        }
+    }, [candidatesError]);
 
     const handleBulkModeToggle = () => {
         if (!isBulkMode) {
@@ -211,118 +142,36 @@ export function PassedCandidateTable() {
         }
     };
 
-    const handleIssueCertificates = async () => {
+    const handleIssueCertificates = () => {
         if (selectedIds.length === 0) {
             toast.error("No candidates selected");
             return;
         }
-        
-        setIssuingCertificate(true);
-        try {
-            // Use bulk-issue endpoint with candidateIds
-            await api.post('/ministry/certificates/bulk-issue', { 
-                candidateIds: selectedIds 
-            });
-            
-            toast.success(`Certificates issued for ${selectedIds.length} candidate(s)`);
-            setIsBulkMode(false);
-            setSelectedIds([]);
-            
-            // Refresh candidates list with current center filter
-            const url = selectedCenter 
-                ? `/ministry/certificates/eligible-candidates?centerId=${selectedCenter}`
-                : '/ministry/certificates/eligible-candidates';
-            
-            const response = await api.get(url);
-            const apiCandidates: ApiCandidate[] = response.data.data.data;
-            const transformedCandidates: Candidate[] = apiCandidates.map((apiCandidate) => ({
-                id: apiCandidate.userId,
-                name: `${apiCandidate.user.firstName} ${apiCandidate.user.lastName}`,
-                cnic: apiCandidate.cnic,
-                score: `${apiCandidate.obtainedScore}/${apiCandidate.totalScore}`,
-                date: new Date(apiCandidate.examTime).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric' 
-                }),
-                center: apiCandidate.city?.name || "N/A",
-                status: apiCandidate.certificateIssued ? "Certificate Issued" : "Passed",
-                phone: apiCandidate.user.phoneNumber,
-                email: apiCandidate.user.email,
-                address: apiCandidate.address,
-                dob: new Date(apiCandidate.dob).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                }),
-                fatherName: apiCandidate.fatherName,
-                photo: getCandidateAvatarUrl({
-                    seed: apiCandidate.user.firstName,
-                    cnic: apiCandidate.cnic,
-                    documents: apiCandidate.documents,
-                }),
-                documents: apiCandidate.documents || [],
-                certificateIssued: apiCandidate.certificateIssued
-            }));
-            setCandidates(transformedCandidates);
-        } catch (error) {
-            console.error("Failed to issue certificates:", error);
-            toast.error("Failed to issue certificates");
-        } finally {
-            setIssuingCertificate(false);
-        }
+
+        bulkIssueMutation.mutate(selectedIds, {
+            onSuccess: () => {
+                toast.success(`Certificates issued for ${selectedIds.length} candidate(s)`);
+                setIsBulkMode(false);
+                setSelectedIds([]);
+            },
+            onError: (error) => {
+                console.error("Failed to issue certificates:", error);
+                toast.error(getApiErrorMessage(error, "Failed to issue certificates"));
+            },
+        });
     };
 
-    const handleIssueSingleCertificate = async (candidateId: string, candidateName: string) => {
-        setIssuingCertificate(true);
-        try {
-            await api.post('/ministry/certificates', { candidateId });
-            toast.success(`Certificate issued for ${candidateName}`);
-            
-            // Refresh candidates list with current center filter
-            const url = selectedCenter 
-                ? `/ministry/certificates/eligible-candidates?centerId=${selectedCenter}`
-                : '/ministry/certificates/eligible-candidates';
-            
-            const response = await api.get(url);
-            const apiCandidates: ApiCandidate[] = response.data.data.data;
-            const transformedCandidates: Candidate[] = apiCandidates.map((apiCandidate) => ({
-                id: apiCandidate.userId,
-                name: `${apiCandidate.user.firstName} ${apiCandidate.user.lastName}`,
-                cnic: apiCandidate.cnic,
-                score: `${apiCandidate.obtainedScore}/${apiCandidate.totalScore}`,
-                date: new Date(apiCandidate.examTime).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric' 
-                }),
-                center: apiCandidate.city?.name || "N/A",
-                status: apiCandidate.certificateIssued ? "Certificate Issued" : "Passed",
-                phone: apiCandidate.user.phoneNumber,
-                email: apiCandidate.user.email,
-                address: apiCandidate.address,
-                dob: new Date(apiCandidate.dob).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                }),
-                fatherName: apiCandidate.fatherName,
-                photo: getCandidateAvatarUrl({
-                    seed: apiCandidate.user.firstName,
-                    cnic: apiCandidate.cnic,
-                    documents: apiCandidate.documents,
-                }),
-                documents: apiCandidate.documents || [],
-                certificateIssued: apiCandidate.certificateIssued
-            }));
-            setCandidates(transformedCandidates);
-            setSelectedCandidate(null);
-        } catch (error) {
-            console.error("Failed to issue certificate:", error);
-            toast.error("Failed to issue certificate");
-        } finally {
-            setIssuingCertificate(false);
-        }
+    const handleIssueSingleCertificate = (candidateId: string, candidateName: string) => {
+        issueMutation.mutate(candidateId, {
+            onSuccess: () => {
+                toast.success(`Certificate issued for ${candidateName}`);
+                setSelectedCandidate(null);
+            },
+            onError: (error) => {
+                console.error("Failed to issue certificate:", error);
+                toast.error(getApiErrorMessage(error, "Failed to issue certificate"));
+            },
+        });
     };
 
     const filteredCandidates = candidates.filter(candidate => {

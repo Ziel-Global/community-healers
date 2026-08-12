@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CenterStats } from "@/components/CentreAdminPortal/Dashboard/CenterStats";
 import { CenterInfoCard } from "@/components/CentreAdminPortal/Dashboard/CenterInfoCard";
@@ -14,7 +14,8 @@ import {
   FileText,
   Settings,
 } from "lucide-react";
-import { centerAdminService } from "@/services/centerAdminService";
+import { useCenterDetails, useCloseVerification } from "@/hooks/queries/useCenterAdminQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "sonner";
 import { formatTimeLabel, toTimeInputValue } from "@/utils/time";
 
@@ -43,45 +44,27 @@ export const centerNavItems = [
 
 export default function CenterAdminPortal() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [centerData, setCenterData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isCloseVerificationOpen, setIsCloseVerificationOpen] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  useEffect(() => {
-    const fetchCenterDetails = async () => {
-      setIsLoading(true);
-      try {
-        const data = await centerAdminService.getCenterDetails();
-        setCenterData(data);
-      } catch (error) {
-        console.error("Failed to fetch center details", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchCenterDetails();
-  }, []);
+  const { data: centerData, isLoading } = useCenterDetails();
+  const closeVerification = useCloseVerification();
+  const isClosing = closeVerification.isPending;
 
-  const handleCloseVerification = async () => {
+  const handleCloseVerification = () => {
     if (!centerData?.id) {
       toast.error("Center details are still loading. Please try again.");
       return;
     }
 
-    setIsClosing(true);
-    try {
-      await centerAdminService.closeVerification(centerData.id);
-      setIsCloseVerificationOpen(false);
-      toast.success("Verification closed successfully.");
-      setRefreshTrigger(prev => prev + 1);
-    } catch (error) {
-      console.error("Failed to close verification", error);
-      toast.error("Failed to close verification. Please try again.");
-    } finally {
-      setIsClosing(false);
-    }
+    closeVerification.mutate(centerData.id, {
+      onSuccess: () => {
+        setIsCloseVerificationOpen(false);
+        toast.success("Verification closed successfully.");
+      },
+      onError: (error) => {
+        toast.error(getApiErrorMessage(error, "Failed to close verification. Please try again."));
+      },
+    });
   };
 
   return (
@@ -154,7 +137,7 @@ export default function CenterAdminPortal() {
               </SelectContent>
             </Select>
           </div>
-          <CandidateTable statusFilter={statusFilter} refreshTrigger={refreshTrigger} canVerify={true} />
+          <CandidateTable statusFilter={statusFilter} canVerify={true} />
         </div>
 
         <Dialog open={isCloseVerificationOpen} onOpenChange={setIsCloseVerificationOpen}>

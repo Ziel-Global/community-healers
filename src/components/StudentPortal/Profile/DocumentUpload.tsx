@@ -5,7 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Upload, FileCheck, X, AlertCircle, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { api } from "@/services/api";
+import { useUploadDocument } from "@/hooks/queries/useCandidateQueries";
+import { getApiErrorMessage } from "@/lib/errors";
+import { DOCUMENT_ERROR_CODES, DocumentType, documentMetadataSchema } from "@/schemas/documentSchemas";
 
 interface Document {
     id: string;
@@ -30,14 +32,14 @@ const initialDocuments: Document[] = [
 
 interface DocumentUploadProps {
     candidateData: any;
-    onUploadComplete?: () => void;
 }
 
-export function DocumentUpload({ candidateData, onUploadComplete }: DocumentUploadProps) {
+export function DocumentUpload({ candidateData }: DocumentUploadProps) {
     const { t } = useTranslation();
     const { toast } = useToast();
     const [documents, setDocuments] = useState<Document[]>(initialDocuments);
     const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+    const uploadDocumentMutation = useUploadDocument();
 
     useEffect(() => {
         if (candidateData && candidateData.documents) {
@@ -64,10 +66,16 @@ export function DocumentUpload({ candidateData, onUploadComplete }: DocumentUplo
     const handleFileSelect = async (docId: string, file: File | null) => {
         if (!file) return;
 
-        if (file.size > 5 * 1024 * 1024) {
+        const validation = documentMetadataSchema.safeParse({ type: docId as DocumentType, file });
+        if (!validation.success) {
+            const code = validation.error.issues[0].message;
+            const description =
+                code === DOCUMENT_ERROR_CODES.UNSUPPORTED_TYPE
+                    ? t('documents.unsupportedFileType') || "This file type isn't supported. Please upload an image or PDF."
+                    : t('documents.maxSize');
             toast({
                 title: t('documents.uploadFailed'),
-                description: t('documents.maxSize'),
+                description,
                 variant: "destructive",
             });
             return;
@@ -79,47 +87,42 @@ export function DocumentUpload({ candidateData, onUploadComplete }: DocumentUplo
                 : doc
         ));
 
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('type', docId);
+        uploadDocumentMutation.mutate(
+            { type: docId, file },
+            {
+                onSuccess: (uploadedDoc) => {
+                    setDocuments(prev => prev.map(doc =>
+                        doc.id === docId
+                            ? {
+                                ...doc,
+                                status: "complete" as const,
+                                fileName: file.name,
+                                fileType: file.type,
+                                fileUrl: uploadedDoc?.url
+                            }
+                            : doc
+                    ));
 
-            const response = await api.post('/candidates/me/documents', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
+                    toast({
+                        title: t('documents.uploadSuccess'),
+                        description: `${file.name}`,
+                    });
+                },
+                onError: (error) => {
+                    setDocuments(prev => prev.map(doc =>
+                        doc.id === docId
+                            ? { ...doc, status: "error" as const }
+                            : doc
+                    ));
 
-            const uploadedDoc = response.data.data;
-
-            setDocuments(prev => prev.map(doc =>
-                doc.id === docId
-                    ? {
-                        ...doc,
-                        status: "complete" as const,
-                        fileName: file.name,
-                        fileType: file.type,
-                        fileUrl: uploadedDoc?.fileUrl
-                    }
-                    : doc
-            ));
-
-            toast({
-                title: t('documents.uploadSuccess'),
-                description: `${file.name}`,
-            });
-            onUploadComplete?.();
-        } catch (error: any) {
-            setDocuments(prev => prev.map(doc =>
-                doc.id === docId
-                    ? { ...doc, status: "error" as const }
-                    : doc
-            ));
-
-            toast({
-                title: t('documents.uploadFailed'),
-                description: error.response?.data?.message || t('documents.uploadFailed'),
-                variant: "destructive",
-            });
-        }
+                    toast({
+                        title: t('documents.uploadFailed'),
+                        description: getApiErrorMessage(error, t('documents.uploadFailed')),
+                        variant: "destructive",
+                    });
+                },
+            },
+        );
     };
 
     const handleRemoveFile = (docId: string) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Calendar, FileText, Download, ExternalLink, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { centerAdminService } from "@/services/centerAdminService";
+import { useTodayCandidates } from "@/hooks/queries/useCenterAdminQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
 import { formatTimeLabel } from "@/utils/time";
 import { getDocumentPreviewUrl } from "@/utils/sampleDocuments";
@@ -53,100 +54,82 @@ const StatusBadge = ({ status }: { status: string }) => {
 interface CandidateTableProps {
     statusFilter?: string;
     examDate?: string;
-    refreshTrigger?: number;
     canVerify?: boolean;
 }
 
 export function CandidateTable({
     statusFilter = "all",
     examDate,
-    refreshTrigger = 0,
     canVerify = false
 }: CandidateTableProps) {
     const navigate = useNavigate();
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
-    const [candidates, setCandidates] = useState<Candidate[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchCandidates = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                // Default to today if not provided
-                const targetDate = examDate || new Date().toISOString().split('T')[0];
+    // Default to today if not provided
+    const targetDate = examDate || new Date().toISOString().split('T')[0];
+    const { data, isLoading: loading, isError, error: queryError } = useTodayCandidates(targetDate);
 
-                const data = await centerAdminService.getTodayCandidates(targetDate);
+    const candidates: Candidate[] = useMemo(() => {
+        // Data is already unwrapped by the service
+        const candidatesArray = data || [];
 
-                // Data is already unwrapped by the service
-                const candidatesArray = data || [];
+        if (!Array.isArray(candidatesArray)) {
+            console.error("Expected array but got:", data);
+            return [];
+        }
 
-                if (!Array.isArray(candidatesArray)) {
-                    console.error("Expected array but got:", data);
-                    setCandidates([]);
-                } else {
-                    // Map API response to Component Candidate interface
-                    const mappedCandidates: Candidate[] = candidatesArray.map((item: any) => {
-                        const name = item.user
-                            ? `${item.user.firstName} ${item.user.lastName}`
-                            : (item.name || "Unknown");
-                        const documents = (item.documents || []).map((d: any) => {
-                            const typeLabels: Record<string, string> = {
-                                photo: "Candidate Photo",
-                                passport: "Passport",
-                                visa: "Visa",
-                                cnicFront: "CNIC Front",
-                                cnicBack: "CNIC Back",
-                                degreeTranscript: "Degree/Transcript",
-                            };
-                            return {
-                                id: d.id,
-                                name: typeLabels[d.type] || d.name || d.type || "Document",
-                                type: d.type,
-                                uploadDate: d.createdAt || d.uploadDate || "",
-                                fileUrl: getDocumentPreviewUrl(d.type) || "",
-                            };
-                        });
+        // Map API response to Component Candidate interface
+        return candidatesArray.map((item: any) => {
+            const name = item.user
+                ? `${item.user.firstName} ${item.user.lastName}`
+                : (item.name || "Unknown");
+            const documents = (item.documents || []).map((d: any) => {
+                const typeLabels: Record<string, string> = {
+                    photo: "Candidate Photo",
+                    passport: "Passport",
+                    visa: "Visa",
+                    cnicFront: "CNIC Front",
+                    cnicBack: "CNIC Back",
+                    degreeTranscript: "Degree/Transcript",
+                };
+                return {
+                    id: d.id,
+                    name: typeLabels[d.type] || d.name || d.type || "Document",
+                    type: d.type,
+                    uploadDate: d.createdAt || d.uploadDate || "",
+                    fileUrl: getDocumentPreviewUrl(d.type) || "",
+                };
+            });
 
-                        return {
-                            id: item.userId || item.id || item.cnic,
-                            name,
-                            cnic: item.cnic || "N/A",
-                            time: formatTimeLabel(item.examStartTime || item.time, {
-                                fallback: "9:00 AM",
-                                datePart: item.examDate,
-                            }),
-                            payment: item.payment || "Paid",
-                            status: item.candidateStatus
-                                ? (item.candidateStatus.charAt(0).toUpperCase() + item.candidateStatus.slice(1).toLowerCase())
-                                : "Pending",
-                            photo: getCandidateAvatarUrl({
-                                seed: item.user?.firstName || name,
-                                cnic: item.cnic,
-                                photoUrl: item.photoUrl || item.photo,
-                                documents,
-                            }),
-                            phone: item.user?.phoneNumber || item.phone,
-                            email: item.user?.email || item.email,
-                            address: item.address,
-                            dob: item.dob,
-                            fatherName: item.fatherName,
-                            documents,
-                        };
-                    });
-                    setCandidates(mappedCandidates);
-                }
-            } catch (err) {
-                console.error("Failed to fetch candidates", err);
-                setError("Failed to load candidates.");
-            } finally {
-                setLoading(false);
-            }
-        };
+            return {
+                id: item.userId || item.id || item.cnic,
+                name,
+                cnic: item.cnic || "N/A",
+                time: formatTimeLabel(item.examStartTime || item.time, {
+                    fallback: "9:00 AM",
+                    datePart: item.examDate,
+                }),
+                payment: item.payment || "Paid",
+                status: item.candidateStatus
+                    ? (item.candidateStatus.charAt(0).toUpperCase() + item.candidateStatus.slice(1).toLowerCase())
+                    : "Pending",
+                photo: getCandidateAvatarUrl({
+                    seed: item.user?.firstName || name,
+                    cnic: item.cnic,
+                    photoUrl: item.photoUrl || item.photo,
+                    documents,
+                }),
+                phone: item.user?.phoneNumber || item.phone,
+                email: item.user?.email || item.email,
+                address: item.address,
+                dob: item.dob,
+                fatherName: item.fatherName,
+                documents,
+            };
+        });
+    }, [data]);
 
-        fetchCandidates();
-    }, [examDate, refreshTrigger]);
+    const error = isError ? getApiErrorMessage(queryError, "Failed to load candidates.") : null;
 
     const handleVerify = () => {
         // Navigate to verification page with candidate data

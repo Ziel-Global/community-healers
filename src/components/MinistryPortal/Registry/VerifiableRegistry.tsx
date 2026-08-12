@@ -1,47 +1,23 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, ShieldCheck, Download, History, QrCode, UserCheck, ExternalLink, Award } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { api } from "@/services/api";
 import { toast } from "sonner";
-
-interface CertificateRegistry {
-    id: string;
-    certificateNumber: string;
-    issuedDate: string;
-    status: string;
-    score: string;
-    candidateId: string;
-    candidateName: string;
-    cnic: string;
-    city: string;
-    email: string;
-}
+import { useRegistry } from "@/hooks/queries/useMinistryQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export function VerifiableRegistry() {
-    const [certificates, setCertificates] = useState<CertificateRegistry[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const { data: certificates = [], isLoading, error } = useRegistry();
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        const fetchCertificates = async () => {
-            setIsLoading(true);
-            try {
-                const response = await api.get('/ministry/certificates/registry');
-                const certificatesData: CertificateRegistry[] = response.data.data.data;
-                setCertificates(certificatesData);
-            } catch (error) {
-                console.error("Failed to fetch certificates:", error);
-                toast.error("Failed to load certificate registry");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchCertificates();
-    }, []);
+        if (error) {
+            console.error("Failed to fetch certificates:", error);
+            toast.error(getApiErrorMessage(error, "Failed to load certificate registry"));
+        }
+    }, [error]);
 
     const filteredCertificates = certificates.filter(cert => {
         if (!searchQuery) return true;

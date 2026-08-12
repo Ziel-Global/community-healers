@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { MinistryStats } from "@/components/MinistryPortal/Dashboard/MinistryStats";
-import { ministryService, IssuanceTrendResponse } from "@/services/ministryService";
+import { useIssuanceTrend } from "@/hooks/queries/useMinistryQueries";
 import {
   ShieldCheck,
   History,
@@ -54,33 +54,16 @@ const chartConfig = {
 
 export default function MinistryPortal() {
   const [timeFilter, setTimeFilter] = useState<"days" | "months" | "years">("months");
-  const [trendData, setTrendData] = useState<any[]>([]);
-  const [growthPercentage, setGrowthPercentage] = useState<number>(0);
-  const [isLoadingTrend, setIsLoadingTrend] = useState(true);
+  const { data: trendResponse, isLoading: isLoadingTrend } = useIssuanceTrend(timeFilter);
 
-  useEffect(() => {
-    const fetchTrend = async () => {
-      setIsLoadingTrend(true);
-      try {
-        const response = await ministryService.getIssuanceTrend();
-        if (response && response.data) {
-          // Map API data { label, value } to chart data { period, certificates }
-          const mappedData = response.data.map(item => ({
-            period: item.label,
-            certificates: item.value
-          }));
-          setTrendData(mappedData);
-          setGrowthPercentage(response.growthPercentage);
-        }
-      } catch (error) {
-        console.error("Failed to fetch issuance trend:", error);
-      } finally {
-        setIsLoadingTrend(false);
-      }
-    };
-
-    fetchTrend();
-  }, [timeFilter]);
+  // Map API data { label, value } to chart data { period, certificates }
+  const trendData = trendResponse?.data
+    ? trendResponse.data.map(item => ({
+        period: item.label,
+        certificates: item.value
+      }))
+    : [];
+  const growthPercentage = trendResponse?.growthPercentage ?? 0;
 
   const getGrowthText = () => {
     return `${growthPercentage >= 0 ? "+" : ""}${growthPercentage}% growth`;

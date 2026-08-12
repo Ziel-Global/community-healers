@@ -45,7 +45,6 @@ function mockAuth(role: UserRole | null) {
         isAuthenticated: role !== null,
         isLoading: false,
         user: role ? { id: "u1", email: "a@b.com", firstName: "A", lastName: "B", phoneNumber: "", role } : null,
-        token: role ? "fake-token" : null,
         error: null,
         loginCandidate: vi.fn(),
         loginCenterAdmin: vi.fn(),

@@ -3,12 +3,12 @@ import { useTranslation } from "react-i18next";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { AppRoutes } from "./AppRoutes";
-
-const queryClient = new QueryClient();
+import { RouteErrorBoundary } from "./errors/RouteErrorBoundary";
+import { queryClient } from "./lib/queryClient";
 
 const App = () => {
   const { i18n } = useTranslation();
@@ -36,7 +36,9 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <AppRoutes />
+            <RouteErrorBoundary>
+              <AppRoutes />
+            </RouteErrorBoundary>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

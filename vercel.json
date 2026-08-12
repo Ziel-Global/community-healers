@@ -1,6 +1,26 @@
 {
   "rewrites": [
     {
+      "source": "/auth/:path*",
+      "destination": "https://ministry-backend-2jdm.onrender.com/auth/:path*"
+    },
+    {
+      "source": "/candidates/:path*",
+      "destination": "https://ministry-backend-2jdm.onrender.com/candidates/:path*"
+    },
+    {
+      "source": "/center-admin/:path*",
+      "destination": "https://ministry-backend-2jdm.onrender.com/center-admin/:path*"
+    },
+    {
+      "source": "/ministry/:path*",
+      "destination": "https://ministry-backend-2jdm.onrender.com/ministry/:path*"
+    },
+    {
+      "source": "/super-admin/:path*",
+      "destination": "https://ministry-backend-2jdm.onrender.com/super-admin/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

@@ -1,28 +1,9 @@
-import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, Clock, FileCheck, TrendingUp, ShieldCheck, Loader2 } from "lucide-react";
-import { ministryService, DashboardStats } from "@/services/ministryService";
+import { useMinistryStats } from "@/hooks/queries/useMinistryQueries";
 
 export function MinistryStats() {
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-
-    useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const data = await ministryService.getDashboardStats();
-                setStats(data);
-            } catch (err) {
-                console.error("Failed to fetch ministry stats:", err);
-                setError(true);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchStats();
-    }, []);
+    const { data: stats, isLoading: loading, isError: error } = useMinistryStats();
 
     if (loading) {
         return (

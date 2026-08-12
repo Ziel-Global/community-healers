@@ -3,65 +3,59 @@ import { WizardStepProps } from "../CandidateWizard";
 import { ExamSlotPicker } from "../Scheduling/ExamSlotPicker";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Calendar, Loader2 } from "lucide-react";
-import { useRef, useState } from "react";
-import { api } from "@/services/api";
+import { useState } from "react";
+import { useScheduleExam } from "@/hooks/queries/useCandidateQueries";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { isRepaymentRequiredMessage } from "@/utils/time";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequiresRepayment }: WizardStepProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [isScheduling, setIsScheduling] = useState(false);
   const [isScheduled, setIsScheduled] = useState(false);
-  const schedulingRequestInFlight = useRef(false);
+  const scheduleExamMutation = useScheduleExam();
 
-  const handleNext = async () => {
+  const handleNext = () => {
     // The schedule control appears in both the picker and the wizard footer.
     // A rapid double-click must not issue a second request after the first
     // booking succeeds, because the API correctly treats that as a reschedule.
-    if (!selectedDate || schedulingRequestInFlight.current || isScheduled) return;
+    // `mutation.isPending` (checked via disabled state below) is the dedupe guard now.
+    if (!selectedDate || scheduleExamMutation.isPending || isScheduled) return;
 
-    schedulingRequestInFlight.current = true;
-    setIsScheduling(true);
-    try {
-      const examDate = format(selectedDate, 'yyyy-MM-dd');
-      await api.post('/candidates/me/schedule', { examDate });
-
-      setIsScheduled(true);
-      toast({
-        title: t('scheduling.examScheduledTitle'),
-        description: t('scheduling.examScheduledDesc', { date: format(selectedDate, 'EEEE, MMMM d, yyyy') }),
-      });
-
-      onNext();
-    } catch (error: any) {
-      console.error("Scheduling error details:", error.response?.data);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        t('scheduling.failedToSchedule');
-
-      if (isRepaymentRequiredMessage(errorMessage)) {
-        onRequiresRepayment?.();
+    const examDate = format(selectedDate, 'yyyy-MM-dd');
+    scheduleExamMutation.mutate(examDate, {
+      onSuccess: () => {
+        setIsScheduled(true);
         toast({
-          title: t('scheduling.repaymentRequiredTitle'),
-          description: errorMessage || t('scheduling.repaymentRequiredDesc'),
+          title: t('scheduling.examScheduledTitle'),
+          description: t('scheduling.examScheduledDesc', { date: format(selectedDate, 'EEEE, MMMM d, yyyy') }),
+        });
+
+        onNext();
+      },
+      onError: (error: any) => {
+        console.error("Scheduling error details:", error.response?.data);
+        const errorMessage = getApiErrorMessage(error, t('scheduling.failedToSchedule'));
+
+        if (isRepaymentRequiredMessage(errorMessage)) {
+          onRequiresRepayment?.();
+          toast({
+            title: t('scheduling.repaymentRequiredTitle'),
+            description: errorMessage || t('scheduling.repaymentRequiredDesc'),
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: t('scheduling.schedulingFailed'),
+          description: errorMessage,
           variant: "destructive",
         });
-        return;
-      }
-
-      toast({
-        title: t('scheduling.schedulingFailed'),
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      schedulingRequestInFlight.current = false;
-      setIsScheduling(false);
-    }
+      },
+    });
   };
 
   const canProceed = selectedDate !== undefined;
@@ -91,7 +85,7 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
           selectedDate={selectedDate}
           onDateSelect={setSelectedDate}
           onSchedule={handleNext}
-          isScheduling={isScheduling}
+          isScheduling={scheduleExamMutation.isPending}
           isScheduled={isScheduled}
         />
       </div>
@@ -118,10 +112,10 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
           <Button
             onClick={handleNext}
             size="lg"
-            disabled={!canProceed || isScheduling}
+            disabled={!canProceed || scheduleExamMutation.isPending}
             className="group w-full sm:w-auto order-1 sm:order-2"
           >
-            {isScheduling ? (
+            {scheduleExamMutation.isPending ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 {t('scheduling.scheduling')}

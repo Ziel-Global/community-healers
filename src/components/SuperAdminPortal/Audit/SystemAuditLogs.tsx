@@ -2,16 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { History, User, FileText, Settings, ShieldCheck, Clock, ExternalLink } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { superAdminService } from "@/services/superAdminService";
+import { useAuditLogs } from "@/hooks/queries/useSuperAdminQueries";
 import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function SystemAuditLogs() {
-    const { data: logResponse, isLoading } = useQuery({
-        queryKey: ["audit-logs"],
-        queryFn: superAdminService.getAuditLogs,
-    });
+    const { data: logResponse, isLoading } = useAuditLogs();
 
     const logs = logResponse?.data || [];
 

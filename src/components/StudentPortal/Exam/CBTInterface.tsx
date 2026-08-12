@@ -7,8 +7,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Clock, ChevronLeft, ChevronRight, Send, AlertTriangle, BookOpen, Languages, MonitorSmartphone, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { api } from "@/services/api";
+import { useAutosaveAnswer, useSubmitExam } from "@/hooks/queries/useCandidateQueries";
 import { getExamOnOtherDeviceMessage, isExamOnOtherDeviceError } from "@/utils/examSession";
+import { getApiErrorMessage } from "@/lib/errors";
 
 interface Question {
     id: string;
@@ -68,13 +69,15 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
     const [timeLeft, setTimeLeft] = useState(() => computeTimeLeft(examEndTime, durationMinutes));
     // Store answers as { questionIndex: { questionId, optionId, optionNumber } }
     const [answers, setAnswers] = useState<AnswerRecord>(() => buildInitialAnswers(propQuestions ?? [], initialAnswers));
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [otherDeviceBlock, setOtherDeviceBlock] = useState<string | null>(null);
     const [language, setLanguage] = useState<"en" | "ur">("en");
     const [isSpeaking, setIsSpeaking] = useState(false);
     const speechRequestId = useRef(0);
     const isUrdu = language === "ur";
+    const autosaveAnswerMutation = useAutosaveAnswer();
+    const submitExamMutation = useSubmitExam();
+    const isSubmitting = submitExamMutation.isPending;
 
     useEffect(() => {
         if (timeLeft <= 0) {
@@ -169,47 +172,37 @@ export function CBTInterface({ questions: propQuestions, onComplete, durationMin
 
         // Autosave so the answer survives a refresh; a failure here is silent
         // and non-blocking — the final submit is still the source of truth.
-        api.patch('/candidates/me/exam/answer', {
-            questionId: question.id,
-            selectedOptionNumber: option.optionNumber,
-        }).catch((err) => {
-            console.error("Failed to autosave answer:", err);
-        });
+        autosaveAnswerMutation.mutate({ questionId: question.id, selectedOptionNumber: option.optionNumber });
     };
 
     const handleSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            // Transform answers to API format
-            const formattedAnswers = Object.values(answers).map(answer => ({
-                questionId: answer.questionId,
-                selectedOptionNumber: answer.optionNumber
-            }));
+        // Transform answers to API format
+        const formattedAnswers = Object.values(answers).map(answer => ({
+            questionId: answer.questionId,
+            selectedOptionNumber: answer.optionNumber
+        }));
 
-            console.log("Submitting exam with answers:", formattedAnswers);
+        console.log("Submitting exam with answers:", formattedAnswers);
 
-            const response = await api.post('/candidates/me/exam/submit', {
-                answers: formattedAnswers
-            });
+        submitExamMutation.mutate(formattedAnswers, {
+            onSuccess: (submissionData) => {
+                console.log("Exam submission response:", submissionData);
+                setIsSubmitted(true);
 
-            console.log("Exam submission response:", response.data);
-
-            setIsSubmitting(false);
-            setIsSubmitted(true);
-
-            // Call onComplete if provided
-            if (onComplete) {
-                onComplete();
-            }
-        } catch (error: any) {
-            console.error("Failed to submit exam:", error);
-            setIsSubmitting(false);
-            if (isExamOnOtherDeviceError(error)) {
-                setOtherDeviceBlock(getExamOnOtherDeviceMessage(error));
-                return;
-            }
-            alert(error.response?.data?.message || "Failed to submit exam. Please try again or contact support.");
-        }
+                // Call onComplete if provided
+                if (onComplete) {
+                    onComplete();
+                }
+            },
+            onError: (error: any) => {
+                console.error("Failed to submit exam:", error);
+                if (isExamOnOtherDeviceError(error)) {
+                    setOtherDeviceBlock(getExamOnOtherDeviceMessage(error));
+                    return;
+                }
+                alert(getApiErrorMessage(error, "Failed to submit exam. Please try again or contact support."));
+            },
+        });
     };
 
     if (totalQuestions === 0) {

@@ -1,65 +1,41 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserCog, Shield, Building2, Mail, ExternalLink, ShieldCheck } from "lucide-react";
-import { superAdminService } from "@/services/superAdminService";
 import { useToast } from "@/hooks/use-toast";
-
-interface CenterAdmin {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    status: string;
-    centers: Array<{
-        id: string;
-        name: string;
-        code: string;
-    }>;
-    createdAt: string;
-}
+import { useCenterAdmins } from "@/hooks/queries/useSuperAdminQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export function AdminAccountList() {
     const { toast } = useToast();
-    const [admins, setAdmins] = useState<CenterAdmin[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { data: admins = [], isLoading, error } = useCenterAdmins();
 
-    // Fetch center admins on component mount
     useEffect(() => {
-        const fetchAdmins = async () => {
-            try {
-                const adminsData = await superAdminService.getCenterAdmins();
-                setAdmins(adminsData);
-            } catch (error: any) {
-                console.error("Failed to load center admins", error);
+        if (!error) return;
 
-                // Check if it's a 401 (token expired)
-                if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
-                    toast({
-                        title: "Session Expired",
-                        description: "Your session has expired. Please log in again.",
-                        variant: "destructive",
-                    });
+        console.error("Failed to load center admins", error);
 
-                    // Clear auth and redirect to login
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = '/auth/super-admin';
-                } else {
-                    toast({
-                        title: "Failed to Load Admins",
-                        description: error.message || "An error occurred while fetching center admins.",
-                        variant: "destructive",
-                    });
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        const message = getApiErrorMessage(error);
+        // Check if it's a 401 (token expired)
+        if (message?.includes('jwt expired') || message?.includes('401')) {
+            toast({
+                title: "Session Expired",
+                description: "Your session has expired. Please log in again.",
+                variant: "destructive",
+            });
 
-        fetchAdmins();
-    }, [toast]);
+            // Clear auth and redirect to login
+            localStorage.removeItem('user');
+            window.location.href = '/auth/super-admin';
+        } else {
+            toast({
+                title: "Failed to Load Admins",
+                description: message || "An error occurred while fetching center admins.",
+                variant: "destructive",
+            });
+        }
+    }, [error, toast]);
 
     if (isLoading) {
         return (

@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PersonalInfoForm } from "@/components/StudentPortal/Profile/PersonalInfoForm";
 import { DocumentUpload } from "@/components/StudentPortal/Profile/DocumentUpload";
 import { EducationDeclaration } from "@/components/StudentPortal/Profile/EducationDeclaration";
 import { ProfileStatusTracker } from "@/components/StudentPortal/Profile/ProfileStatusTracker";
 import { LayoutDashboard, FileText, Calendar, BookOpen, Award, User, Bell } from "lucide-react";
-import { api } from "@/services/api";
+import { useCandidateMe } from "@/hooks/queries/useCandidateQueries";
 
 export const candidateNavItems = [
     {
@@ -53,22 +52,7 @@ const steps = [
 ];
 
 export default function RegistrationPage() {
-    const [candidateData, setCandidateData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchCandidateData = async () => {
-            try {
-                const response = await api.get('/candidates/me');
-                setCandidateData(response.data.data);
-            } catch (error) {
-                console.error('Failed to fetch candidate data', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCandidateData();
-    }, []);
+    const { data: candidateData } = useCandidateMe();
 
     return (
         <DashboardLayout

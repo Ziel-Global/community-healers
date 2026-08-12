@@ -367,6 +367,26 @@
     "save": "Save",
     "cancel": "Cancel",
     "na": "N/A",
-    "pakistan": "Pakistan"
+    "pakistan": "Pakistan",
+    "roleAccessDenied": "You don't have permission to access this portal.",
+    "rateLimited_one": "Too many requests. Please wait {{count}} second and try again.",
+    "rateLimited_other": "Too many requests. Please wait {{count}} seconds and try again.",
+    "rateLimitedGeneric": "You're making requests too quickly. Please wait a moment and try again."
+  },
+  "examResult": {
+    "passedTitle": "Congratulations!",
+    "failedTitle": "Exam Result",
+    "passedMessage": "You have successfully passed the CBT Certification.",
+    "failedMessage": "You did not meet the passing criteria.",
+    "absentMessage": "You were marked absent for the exam.",
+    "yourScore": "Your Score",
+    "status": "Status",
+    "examinationDate": "Examination Date",
+    "passingThreshold": "Passing Threshold",
+    "totalQuestions": "Total Questions",
+    "certificateProcessing": "Your certificate is being processed and will be available for download shortly.",
+    "goToCertificates": "Go to Certificates",
+    "reattemptEligible": "Don't worry! You are eligible for one reattempt without any additional fee.",
+    "scheduleReattempt": "Schedule Reattempt"
   }
 }

@@ -31,17 +31,25 @@ import {
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { superAdminService } from "@/services/superAdminService";
 import { Question, QuestionCategory, CreateQuestionRequest } from "@/types/superAdmin";
+import {
+    useQuestions,
+    useCreateQuestion,
+    useUpdateQuestion,
+    useDeleteQuestion,
+} from "@/hooks/queries/useSuperAdminQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export function QuestionEditor() {
     const { toast } = useToast();
     const [selectedCategory, setSelectedCategory] = useState("All");
-    const [questions, setQuestions] = useState<Question[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { data: questions = [], isLoading, error } = useQuestions();
+    const createQuestionMutation = useCreateQuestion();
+    const updateQuestionMutation = useUpdateQuestion();
+    const deleteQuestionMutation = useDeleteQuestion();
     const [searchQuery, setSearchQuery] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const isSubmitting = createQuestionMutation.isPending || updateQuestionMutation.isPending;
     const [formData, setFormData] = useState({
         text: "",
         textUrdu: "",
@@ -60,41 +68,31 @@ export function QuestionEditor() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [questionToDelete, setQuestionToDelete] = useState<Question | null>(null);
 
-    const fetchQuestions = async () => {
-        try {
-            const questionsData = await superAdminService.getQuestions();
-            setQuestions(questionsData);
-        } catch (error: any) {
-            console.error("Failed to load questions", error);
-
-            // Check if it's a 401 (token expired)
-            if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
-                toast({
-                    title: "Session Expired",
-                    description: "Your session has expired. Please log in again.",
-                    variant: "destructive",
-                });
-
-                // Clear auth and redirect to login
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/auth/super-admin';
-            } else {
-                toast({
-                    title: "Failed to Load Questions",
-                    description: error.message || "An error occurred while fetching questions.",
-                    variant: "destructive",
-                });
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Fetch questions on component mount
+    // Surface query errors (e.g. session expiry) the same way the manual fetch used to.
     useEffect(() => {
-        fetchQuestions();
-    }, [toast]);
+        if (!error) return;
+
+        console.error("Failed to load questions", error);
+
+        const message = getApiErrorMessage(error);
+        if (message?.includes('jwt expired') || message?.includes('401')) {
+            toast({
+                title: "Session Expired",
+                description: "Your session has expired. Please log in again.",
+                variant: "destructive",
+            });
+
+            // Clear auth and redirect to login
+            localStorage.removeItem('user');
+            window.location.href = '/auth/super-admin';
+        } else {
+            toast({
+                title: "Failed to Load Questions",
+                description: message || "An error occurred while fetching questions.",
+                variant: "destructive",
+            });
+        }
+    }, [error, toast]);
 
     const handleSubmit = async () => {
         // Validate required fields
@@ -112,53 +110,62 @@ export function QuestionEditor() {
             return;
         }
 
-        setIsSubmitting(true);
+        const request: CreateQuestionRequest = {
+            questionText: formData.text,
+            questionTextUrdu: formData.textUrdu,
+            category: formData.category as QuestionCategory,
+            option1: formData.option1,
+            option1Urdu: formData.option1Urdu,
+            option2: formData.option2,
+            option2Urdu: formData.option2Urdu,
+            option3: formData.option3,
+            option3Urdu: formData.option3Urdu,
+            option4: formData.option4,
+            option4Urdu: formData.option4Urdu,
+            correctAnswer: formData.correctAnswer === formData.option1 ? 1 :
+                formData.correctAnswer === formData.option2 ? 2 :
+                    formData.correctAnswer === formData.option3 ? 3 : 4,
+        };
 
-        try {
-            const request: CreateQuestionRequest = {
-                questionText: formData.text,
-                questionTextUrdu: formData.textUrdu,
-                category: formData.category as QuestionCategory,
-                option1: formData.option1,
-                option1Urdu: formData.option1Urdu,
-                option2: formData.option2,
-                option2Urdu: formData.option2Urdu,
-                option3: formData.option3,
-                option3Urdu: formData.option3Urdu,
-                option4: formData.option4,
-                option4Urdu: formData.option4Urdu,
-                correctAnswer: formData.correctAnswer === formData.option1 ? 1 :
-                    formData.correctAnswer === formData.option2 ? 2 :
-                        formData.correctAnswer === formData.option3 ? 3 : 4,
-            };
-
-            if (editingQuestionId) {
-                await superAdminService.updateQuestion(editingQuestionId, request);
-                toast({
-                    title: "Question Updated",
-                    description: "The question has been successfully updated.",
-                });
-            } else {
-                await superAdminService.createQuestion(request);
-                toast({
-                    title: "Question Added",
-                    description: "The question has been successfully added to the question bank.",
-                });
-            }
-
-            setIsDialogOpen(false);
-            resetForm();
-
-            // Refresh list
-            await fetchQuestions();
-        } catch (error: any) {
-            toast({
-                title: "Failed to Add Question",
-                description: error.message || "An error occurred while adding the question.",
-                variant: "destructive",
+        if (editingQuestionId) {
+            updateQuestionMutation.mutate(
+                { id: editingQuestionId, request },
+                {
+                    onSuccess: () => {
+                        toast({
+                            title: "Question Updated",
+                            description: "The question has been successfully updated.",
+                        });
+                        setIsDialogOpen(false);
+                        resetForm();
+                    },
+                    onError: (error) => {
+                        toast({
+                            title: "Failed to Update Question",
+                            description: getApiErrorMessage(error, "An error occurred while updating the question."),
+                            variant: "destructive",
+                        });
+                    },
+                }
+            );
+        } else {
+            createQuestionMutation.mutate(request, {
+                onSuccess: () => {
+                    toast({
+                        title: "Question Added",
+                        description: "The question has been successfully added to the question bank.",
+                    });
+                    setIsDialogOpen(false);
+                    resetForm();
+                },
+                onError: (error) => {
+                    toast({
+                        title: "Failed to Add Question",
+                        description: getApiErrorMessage(error, "An error occurred while adding the question."),
+                        variant: "destructive",
+                    });
+                },
             });
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -186,26 +193,28 @@ export function QuestionEditor() {
         setIsDeleteDialogOpen(true);
     };
 
-    const confirmDelete = async () => {
+    const confirmDelete = () => {
         if (!questionToDelete) return;
 
-        try {
-            await superAdminService.deleteQuestion(questionToDelete.id);
-            toast({
-                title: "Question Deleted",
-                description: "The question has been successfully removed.",
-            });
-            await fetchQuestions();
-        } catch (error: any) {
-            toast({
-                title: "Delete Failed",
-                description: error.message || "Could not delete the question.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsDeleteDialogOpen(false);
-            setQuestionToDelete(null);
-        }
+        deleteQuestionMutation.mutate(questionToDelete.id, {
+            onSuccess: () => {
+                toast({
+                    title: "Question Deleted",
+                    description: "The question has been successfully removed.",
+                });
+            },
+            onError: (error) => {
+                toast({
+                    title: "Delete Failed",
+                    description: getApiErrorMessage(error, "Could not delete the question."),
+                    variant: "destructive",
+                });
+            },
+            onSettled: () => {
+                setIsDeleteDialogOpen(false);
+                setQuestionToDelete(null);
+            },
+        });
     };
 
     const resetForm = () => {
@@ -554,12 +563,13 @@ export function QuestionEditor() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setQuestionToDelete(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => setQuestionToDelete(null)} disabled={deleteQuestionMutation.isPending}>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={confirmDelete}
+                            disabled={deleteQuestionMutation.isPending}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                            Delete Question
+                            {deleteQuestionMutation.isPending ? "Deleting..." : "Delete Question"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

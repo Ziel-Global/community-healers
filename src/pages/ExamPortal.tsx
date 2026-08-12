@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CBTInterface } from "@/components/StudentPortal/Exam/CBTInterface";
@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { parseISO, format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, LogOut, Loader2, AlertCircle, Ban, CheckCircle, FileText, Clock, MonitorSmartphone } from "lucide-react";
-import { api } from "@/services/api";
-import { CandidateStatus, CandidateStatusResponse, ExamScheduledResponse } from "@/types/auth";
+import { useExamStatus, useExamQuestions } from "@/hooks/queries/useCandidateQueries";
+import { authService } from "@/services/authService";
+import { CandidateStatus, ExamScheduledResponse } from "@/types/auth";
 import { useAuth } from "@/context/AuthContext";
 import { getExamOnOtherDeviceMessage, isExamOnOtherDeviceError } from "@/utils/examSession";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export default function ExamPortal() {
     const navigate = useNavigate();
@@ -18,80 +20,103 @@ export default function ExamPortal() {
     const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress" | "other-device" | "questions-error">("loading");
     const [countdown, setCountdown] = useState(3);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
-    const [candidateStatus, setCandidateStatus] = useState<CandidateStatusResponse | null>(null);
-    const [questions, setQuestions] = useState<any[]>([]);
     const [scheduledExam, setScheduledExam] = useState<ExamScheduledResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [otherDeviceMessage, setOtherDeviceMessage] = useState<string | null>(null);
     const [questionsErrorMessage, setQuestionsErrorMessage] = useState<string | null>(null);
-    const [isFetchingQuestions, setIsFetchingQuestions] = useState(false);
     const [examEndTime, setExamEndTime] = useState<string | null>(null);
     const [draftAnswers, setDraftAnswers] = useState<Record<string, number>>({});
 
-    // Fetch candidate status on component mount
+    const statusQuery = useExamStatus();
+    const questionsQuery = useExamQuestions();
+    const candidateStatus = statusQuery.data ?? null;
+    const questions = questionsQuery.data?.questions ?? [];
+    const isFetchingQuestions = questionsQuery.isFetching;
+    // `refetch()` takes no arguments, so whether this fetch should drop
+    // straight into "in-progress" (resume) or go through the countdown
+    // screen (fresh start) is tracked out-of-band here and read back when
+    // the questions query settles.
+    const isResumeRef = useRef(false);
+
+    const beginExam = (options?: { isResume?: boolean }) => {
+        isResumeRef.current = options?.isResume ?? false;
+        setQuestionsErrorMessage(null);
+        questionsQuery.refetch();
+    };
+
+    // React to the candidate-status query resolving — drives the initial
+    // exam-state transition exactly like the old fetchCandidateStatus did.
     useEffect(() => {
-        const fetchCandidateStatus = async () => {
-            try {
-                console.log("Fetching candidate status...");
-                const response = await api.get('/candidates/me/status');
-                console.log("Candidate status response:", response.data);
-                const statusData: CandidateStatusResponse = response.data.data;
-                setCandidateStatus(statusData);
+        if (!statusQuery.isSuccess || !statusQuery.data) return;
+        const statusData = statusQuery.data;
+        console.log("Candidate status response:", statusData);
 
-                // Set exam state based on candidate status
-                switch (statusData.candidateStatus) {
-                    case CandidateStatus.VERIFIED:
-                        if (statusData.examInProgress) {
-                            // Candidate already started the exam (e.g. before a refresh) —
-                            // resume silently instead of showing "Begin Examination" again.
-                            console.log("Status: VERIFIED, exam already in progress — resuming");
-                            loadQuestions({ isResume: true });
-                        } else {
-                            console.log("Status: VERIFIED");
-                            setExamState("verified");
-                        }
-                        break;
-                    case CandidateStatus.PENDING:
-                        console.log("Status: PENDING");
-                        setExamState("pending");
-                        break;
-                    case CandidateStatus.REJECTED:
-                        console.log("Status: REJECTED");
-                        setExamState("rejected");
-                        break;
-                    case CandidateStatus.ABSENT:
-                        console.log("Status: ABSENT");
-                        setExamState("absent");
-                        break;
-                    case CandidateStatus.SUBMITTED:
-                        console.log("Status: SUBMITTED");
-                        setExamState("submitted");
-                        break;
-                    default:
-                        console.log("Status: Unknown, defaulting to PENDING");
-                        setExamState("pending");
+        switch (statusData.candidateStatus) {
+            case CandidateStatus.VERIFIED:
+                if (statusData.examInProgress) {
+                    // Candidate already started the exam (e.g. before a refresh) —
+                    // resume silently instead of showing "Begin Examination" again.
+                    console.log("Status: VERIFIED, exam already in progress — resuming");
+                    beginExam({ isResume: true });
+                } else {
+                    console.log("Status: VERIFIED");
+                    setExamState("verified");
                 }
-
-                // Also fetch full scheduled exam details for duration/question count
-                try {
-                    const scheduledResponse = await api.get('/candidates/me/exam-scheduled');
-                    if (scheduledResponse.data.data) {
-                        setScheduledExam(scheduledResponse.data.data);
-                    }
-                } catch (schedErr) {
-                    console.error("Failed to fetch scheduled exam details:", schedErr);
-                }
-            } catch (err: any) {
-                console.error("Failed to fetch candidate status:", err);
-                console.error("Error response:", err.response);
-                setError(err.response?.data?.message || "Failed to load exam status");
+                break;
+            case CandidateStatus.PENDING:
+                console.log("Status: PENDING");
                 setExamState("pending");
+                break;
+            case CandidateStatus.REJECTED:
+                console.log("Status: REJECTED");
+                setExamState("rejected");
+                break;
+            case CandidateStatus.ABSENT:
+                console.log("Status: ABSENT");
+                setExamState("absent");
+                break;
+            case CandidateStatus.SUBMITTED:
+                console.log("Status: SUBMITTED");
+                setExamState("submitted");
+                break;
+            default:
+                console.log("Status: Unknown, defaulting to PENDING");
+                setExamState("pending");
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusQuery.isSuccess, statusQuery.data]);
+
+    useEffect(() => {
+        if (!statusQuery.isError) return;
+        const err = statusQuery.error;
+        console.error("Failed to fetch candidate status:", err);
+        setError(getApiErrorMessage(err, "Failed to load exam status"));
+        setExamState("pending");
+    }, [statusQuery.isError, statusQuery.error]);
+
+    // Also fetch full scheduled exam details for duration/question count —
+    // a secondary, best-effort fetch: failures are swallowed and never
+    // block the primary status-driven state machine above.
+    useEffect(() => {
+        if (!statusQuery.isSuccess) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const scheduledData = await authService.checkExamScheduled();
+                if (!cancelled && scheduledData) {
+                    setScheduledExam(scheduledData);
+                }
+            } catch (schedErr) {
+                console.error("Failed to fetch scheduled exam details:", schedErr);
             }
+        })();
+        return () => {
+            cancelled = true;
         };
+    }, [statusQuery.isSuccess]);
 
-        fetchCandidateStatus();
-
-        // RTL Cleanup on unmount
+    // RTL cleanup on unmount
+    useEffect(() => {
         return () => {
             if (i18n.language === 'ur') {
                 i18n.changeLanguage('en');
@@ -111,60 +136,35 @@ export default function ExamPortal() {
         }
     }, [examState, countdown]);
 
-    const QUESTIONS_FETCH_ATTEMPTS = 3;
-    const QUESTIONS_RETRY_DELAY_MS = 1500;
+    // React to the on-demand exam-questions query settling (fired by
+    // beginExam(), either from the "Begin Examination"/"Try Again" click or
+    // the auto-resume path above).
+    useEffect(() => {
+        if (!questionsQuery.isSuccess || !questionsQuery.data) return;
+        const data = questionsQuery.data;
+        setExamEndTime(data.timer?.examEndTime ?? null);
+        setDraftAnswers(data.draftAnswers && typeof data.draftAnswers === "object" ? data.draftAnswers : {});
+        // Resuming an already-started exam (e.g. after a refresh) drops
+        // straight back into the test — the countdown/rules screen is
+        // only for a genuinely fresh start.
+        setExamState(isResumeRef.current ? "in-progress" : "countdown");
+    }, [questionsQuery.isSuccess, questionsQuery.data]);
 
-    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    const loadQuestions = async (options?: { isResume?: boolean }) => {
-        const isResume = options?.isResume ?? false;
-        setQuestionsErrorMessage(null);
-        setIsFetchingQuestions(true);
-
-        try {
-            for (let attempt = 1; attempt <= QUESTIONS_FETCH_ATTEMPTS; attempt++) {
-                try {
-                    console.log(`Fetching exam questions (attempt ${attempt}/${QUESTIONS_FETCH_ATTEMPTS})...`);
-                    const response = await api.get('/candidates/me/questions');
-                    const questionsData = response.data?.data?.questions;
-                    const timer = response.data?.data?.timer;
-                    const savedAnswers = response.data?.data?.draftAnswers;
-
-                    if (Array.isArray(questionsData) && questionsData.length > 0) {
-                        setQuestions(questionsData);
-                        setExamEndTime(timer?.examEndTime ?? null);
-                        setDraftAnswers(savedAnswers && typeof savedAnswers === "object" ? savedAnswers : {});
-                        // Resuming an already-started exam (e.g. after a refresh) drops
-                        // straight back into the test — the countdown/rules screen is
-                        // only for a genuinely fresh start.
-                        setExamState(isResume ? "in-progress" : "countdown");
-                        return;
-                    }
-
-                    console.warn("Questions response was empty, will retry if attempts remain:", response.data);
-                } catch (err: any) {
-                    console.error(`Failed to fetch questions (attempt ${attempt}):`, err);
-                    if (isExamOnOtherDeviceError(err)) {
-                        setOtherDeviceMessage(getExamOnOtherDeviceMessage(err));
-                        setExamState("other-device");
-                        return;
-                    }
-                }
-
-                if (attempt < QUESTIONS_FETCH_ATTEMPTS) {
-                    await sleep(QUESTIONS_RETRY_DELAY_MS);
-                }
-            }
-
-            // All attempts exhausted with no usable questions.
-            setQuestionsErrorMessage(
-                "We couldn't load your test questions after several attempts. This is usually temporary — please check your internet connection and try again. If the problem continues, contact your exam center for help."
-            );
-            setExamState("questions-error");
-        } finally {
-            setIsFetchingQuestions(false);
+    useEffect(() => {
+        if (!questionsQuery.isError) return;
+        const err = questionsQuery.error;
+        console.error("Failed to fetch questions:", err);
+        if (isExamOnOtherDeviceError(err)) {
+            setOtherDeviceMessage(getExamOnOtherDeviceMessage(err));
+            setExamState("other-device");
+            return;
         }
-    };
+        // All attempts exhausted with no usable questions.
+        setQuestionsErrorMessage(
+            "We couldn't load your test questions after several attempts. This is usually temporary — please check your internet connection and try again. If the problem continues, contact your exam center for help."
+        );
+        setExamState("questions-error");
+    }, [questionsQuery.isError, questionsQuery.error]);
 
     const handleExamComplete = () => {
         // Exam submission is handled by CBTInterface
@@ -538,7 +538,7 @@ export default function ExamPortal() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <Button
-                                onClick={() => loadQuestions()}
+                                onClick={() => beginExam()}
                                 disabled={isFetchingQuestions}
                                 className="w-full gradient-primary text-white font-semibold"
                             >
@@ -698,7 +698,7 @@ export default function ExamPortal() {
                         {/* Start Button */}
                         <div className="pt-4">
                             <Button
-                                onClick={() => loadQuestions()}
+                                onClick={() => beginExam()}
                                 disabled={isFetchingQuestions}
                                 className="w-full h-12 sm:h-14 text-base sm:text-lg gradient-primary text-white font-semibold"
                             >

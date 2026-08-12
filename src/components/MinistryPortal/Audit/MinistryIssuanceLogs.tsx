@@ -1,58 +1,20 @@
-import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { History, FileSignature, CheckCircle2, AlertTriangle, Clock, User, Users } from "lucide-react";
-import { api } from "@/services/api";
 import { toast } from "sonner";
-
-interface IssuanceCandidate {
-    certificateNumber: string;
-    candidateId: string;
-    candidateName: string;
-    cnic: string;
-    city: string;
-    email: string;
-    score: number;
-}
-
-interface IssuanceLog {
-    id: string;
-    issuedDate: string;
-    issuedByUserId: string;
-    issuedByName: string;
-    notes: string;
-    certificateNumber?: string;
-    score?: number;
-    candidateId?: string;
-    candidateName?: string;
-    cnic?: string;
-    city?: string;
-    email?: string;
-    candidateCount?: number;
-    candidates?: IssuanceCandidate[];
-}
+import { useIssuanceLogs } from "@/hooks/queries/useMinistryQueries";
+import { getApiErrorMessage } from "@/lib/errors";
+import { useEffect } from "react";
 
 export function MinistryIssuanceLogs() {
-    const [logs, setLogs] = useState<IssuanceLog[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const { data: logs = [], isLoading, error } = useIssuanceLogs();
 
     useEffect(() => {
-        const fetchLogs = async () => {
-            setIsLoading(true);
-            try {
-                const response = await api.get('/ministry/certificates/issuance-logs');
-                const logsData: IssuanceLog[] = response.data.data.data;
-                setLogs(logsData);
-            } catch (error) {
-                console.error("Failed to fetch issuance logs:", error);
-                toast.error("Failed to load issuance logs");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchLogs();
-    }, []);
+        if (error) {
+            console.error("Failed to fetch issuance logs:", error);
+            toast.error(getApiErrorMessage(error, "Failed to load issuance logs"));
+        }
+    }, [error]);
 
     const getTimeAgo = (dateString: string) => {
         const date = new Date(dateString);

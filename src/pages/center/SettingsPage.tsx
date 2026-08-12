@@ -6,75 +6,57 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { TimePicker } from "@/components/ui/time-picker";
 import { Clock, Loader2, Save } from "lucide-react";
-import { centerAdminService } from "@/services/centerAdminService";
+import { useCenterDetails, useUpdateTrainingTimings } from "@/hooks/queries/useCenterAdminQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 import { toTimeInputValue } from "@/utils/time";
 import { toast } from "sonner";
 
 const DEFAULT_START = "09:00";
 const DEFAULT_END = "17:00";
 
-function extractApiError(error: any, fallback: string): string {
-  const data = error?.response?.data;
-  const message =
-    data?.message ||
-    data?.error ||
-    data?.data?.message ||
-    (Array.isArray(data?.message) ? data.message.join(", ") : null);
-
-  if (typeof message === "string" && message.trim()) return message;
-  if (Array.isArray(message) && message.length) return message.join(", ");
-  if (error?.code === "ERR_NETWORK") {
-    return "Cannot reach the server. Check that the backend is running and VITE_BACKEND_URL is correct.";
-  }
-  return fallback;
-}
-
 export default function SettingsPage() {
-  const [centerId, setCenterId] = useState<string | null>(null);
-  const [centerName, setCenterName] = useState("");
   const [trainingStartTime, setTrainingStartTime] = useState(DEFAULT_START);
   const [trainingEndTime, setTrainingEndTime] = useState(DEFAULT_END);
   const [savedStartTime, setSavedStartTime] = useState(DEFAULT_START);
   const [savedEndTime, setSavedEndTime] = useState(DEFAULT_END);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(false);
+
+  const { data: centerData, isLoading, isError, error: loadQueryError } = useCenterDetails();
+  const updateTimings = useUpdateTrainingTimings();
+
+  const centerId = centerData?.id ?? null;
+  const centerName = centerData?.name || "";
+
+  const loadError = isError
+    ? getApiErrorMessage(loadQueryError, "Failed to load training timings.")
+    : (!isLoading && !centerId ? "No centre is linked to this admin account." : null);
+
+  // Seed the draft/saved baseline from the fetched center details, once.
+  // Guarded by `initialized` so a background refetch doesn't clobber
+  // in-progress edits the user hasn't saved yet.
+  useEffect(() => {
+    if (!isLoading && centerData?.id && !initialized) {
+      const start = toTimeInputValue(centerData.trainingStartTime, DEFAULT_START);
+      const end = toTimeInputValue(centerData.trainingEndTime, DEFAULT_END);
+      setTrainingStartTime(start);
+      setTrainingEndTime(end);
+      setSavedStartTime(start);
+      setSavedEndTime(end);
+      setInitialized(true);
+    }
+  }, [isLoading, centerData, initialized]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(getApiErrorMessage(loadQueryError, "Failed to load training timings."));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isError]);
 
   const hasChanges =
     trainingStartTime !== savedStartTime || trainingEndTime !== savedEndTime;
 
-  useEffect(() => {
-    const load = async () => {
-      setIsLoading(true);
-      setLoadError(null);
-      try {
-        const data = await centerAdminService.getCenterDetails();
-        if (data?.id) {
-          const start = toTimeInputValue(data.trainingStartTime, DEFAULT_START);
-          const end = toTimeInputValue(data.trainingEndTime, DEFAULT_END);
-          setCenterId(data.id);
-          setCenterName(data.name || "");
-          setTrainingStartTime(start);
-          setTrainingEndTime(end);
-          setSavedStartTime(start);
-          setSavedEndTime(end);
-        } else {
-          setCenterId(null);
-          setLoadError("No centre is linked to this admin account.");
-        }
-      } catch (error: any) {
-        console.error("Failed to load center details", error);
-        const message = extractApiError(error, "Failed to load training timings.");
-        setLoadError(message);
-        toast.error(message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!centerId) {
       toast.error(loadError || "Center ID not available. Reload the page and try again.");
       return;
@@ -85,25 +67,23 @@ export default function SettingsPage() {
       return;
     }
 
-    setIsSaving(true);
-    try {
-      const updated = await centerAdminService.updateTrainingTimings(centerId, {
-        trainingStartTime,
-        trainingEndTime,
-      });
-      const start = toTimeInputValue(updated?.trainingStartTime, trainingStartTime);
-      const end = toTimeInputValue(updated?.trainingEndTime, trainingEndTime);
-      setTrainingStartTime(start);
-      setTrainingEndTime(end);
-      setSavedStartTime(start);
-      setSavedEndTime(end);
-      if (updated?.name) setCenterName(updated.name);
-      toast.success("Training timings saved.");
-    } catch (error: any) {
-      toast.error(extractApiError(error, "Failed to save training timings."));
-    } finally {
-      setIsSaving(false);
-    }
+    updateTimings.mutate(
+      { centerId, timings: { trainingStartTime, trainingEndTime } },
+      {
+        onSuccess: (updated) => {
+          const start = toTimeInputValue(updated?.trainingStartTime, trainingStartTime);
+          const end = toTimeInputValue(updated?.trainingEndTime, trainingEndTime);
+          setTrainingStartTime(start);
+          setTrainingEndTime(end);
+          setSavedStartTime(start);
+          setSavedEndTime(end);
+          toast.success("Training timings saved.");
+        },
+        onError: (error) => {
+          toast.error(getApiErrorMessage(error, "Failed to save training timings."));
+        },
+      }
+    );
   };
 
   return (
@@ -175,10 +155,10 @@ export default function SettingsPage() {
 
                 <Button
                   onClick={handleSave}
-                  disabled={isSaving || !centerId || !hasChanges}
+                  disabled={updateTimings.isPending || !centerId || !hasChanges}
                   className="w-full sm:w-auto gap-2"
                 >
-                  {isSaving ? (
+                  {updateTimings.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Save className="w-4 h-4" />

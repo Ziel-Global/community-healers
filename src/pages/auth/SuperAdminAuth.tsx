@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ShieldCheck, ArrowLeft, Mail, Lock, GraduationCap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { emailLoginSchema } from "@/schemas/authSchemas";
 
 export default function SuperAdminAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -37,9 +38,19 @@ export default function SuperAdminAuth() {
       return;
     }
 
+    const result = emailLoginSchema.safeParse({ email, password });
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Input",
+        description: result.error.issues[0].message,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      await loginSuperAdmin({ email, password });
+      await loginSuperAdmin(result.data);
       navigate("/admin");
       toast({
         title: "Welcome back, Admin!",

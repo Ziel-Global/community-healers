@@ -3,38 +3,37 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { candidateNavItems } from "./RegistrationPage";
 import { ExamSlotPicker } from "@/components/StudentPortal/Scheduling/ExamSlotPicker";
 import { FeePaymentCard } from "@/components/StudentPortal/Payments/FeePaymentCard";
-import { api } from "@/services/api";
+import { useScheduleExam } from "@/hooks/queries/useCandidateQueries";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export default function SchedulingPage() {
     const { toast } = useToast();
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-    const [isScheduling, setIsScheduling] = useState(false);
     const [isScheduled, setIsScheduled] = useState(false);
+    const scheduleExamMutation = useScheduleExam();
 
-    const handleSchedule = async () => {
+    const handleSchedule = () => {
         if (!selectedDate) return;
 
-        setIsScheduling(true);
-        try {
-            const examDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
-            await api.post('/candidates/me/schedule', { examDate });
-
-            setIsScheduled(true);
-            toast({
-                title: "Exam Scheduled",
-                description: `Your exam has been scheduled for ${selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`,
-            });
-        } catch (error: any) {
-            console.error("Scheduling error:", error);
-            toast({
-                title: "Scheduling Failed",
-                description: error.response?.data?.message || "Failed to schedule exam. Please try again.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsScheduling(false);
-        }
+        const examDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        scheduleExamMutation.mutate(examDate, {
+            onSuccess: () => {
+                setIsScheduled(true);
+                toast({
+                    title: "Exam Scheduled",
+                    description: `Your exam has been scheduled for ${selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`,
+                });
+            },
+            onError: (error) => {
+                console.error("Scheduling error:", error);
+                toast({
+                    title: "Scheduling Failed",
+                    description: getApiErrorMessage(error, "Failed to schedule exam. Please try again."),
+                    variant: "destructive",
+                });
+            },
+        });
     };
 
     return (
@@ -51,7 +50,7 @@ export default function SchedulingPage() {
                             selectedDate={selectedDate}
                             onDateSelect={setSelectedDate}
                             onSchedule={handleSchedule}
-                            isScheduling={isScheduling}
+                            isScheduling={scheduleExamMutation.isPending}
                             isScheduled={isScheduled}
                         />
                     </div>

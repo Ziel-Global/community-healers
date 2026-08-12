@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ministryNavItems } from "../MinistryPortal";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,48 +6,20 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, MapPin, Users, Activity, Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { api } from "@/services/api";
 import { toast } from "sonner";
-
-interface Center {
-    id: string;
-    name: string;
-    cityId: string;
-    city: {
-        id: string;
-        name: string;
-    };
-    address: string;
-    capacity: number;
-    status: string;
-    focalPersonUserId: string;
-    primaryAdminUserId: string;
-    createdAt: string;
-    updatedAt: string;
-}
+import { useMinistryCenters } from "@/hooks/queries/useMinistryQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export default function CenterOversightPage() {
-    const [centers, setCenters] = useState<Center[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const { data: centers = [], isLoading, error } = useMinistryCenters();
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        const fetchCenters = async () => {
-            setIsLoading(true);
-            try {
-                const response = await api.get('/ministry/centers');
-                const centersData: Center[] = response.data.data.data;
-                setCenters(centersData);
-            } catch (error) {
-                console.error("Failed to fetch centers:", error);
-                toast.error("Failed to load centers");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchCenters();
-    }, []);
+        if (error) {
+            console.error("Failed to fetch centers:", error);
+            toast.error(getApiErrorMessage(error, "Failed to load centers"));
+        }
+    }, [error]);
 
     const filteredCenters = centers.filter(center => {
         if (!searchQuery) return true;

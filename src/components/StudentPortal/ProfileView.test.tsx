@@ -1,11 +1,11 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import i18n from "@/i18n";
-import { api } from "@/services/api";
+import { candidateService } from "@/services/candidateService";
 import { ProfileView } from "./ProfileView";
 
-vi.mock("@/services/api", () => ({
-  api: { get: vi.fn() },
+vi.mock("@/services/candidateService", () => ({
+  candidateService: { getMe: vi.fn() },
 }));
 
 vi.mock("@/context/AuthContext", () => ({
@@ -37,7 +37,7 @@ const candidate = {
 
 describe("ProfileView language changes", () => {
   beforeEach(async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { data: candidate } });
+    vi.mocked(candidateService.getMe).mockResolvedValue(candidate);
     await i18n.changeLanguage("en");
   });
 
@@ -49,7 +49,7 @@ describe("ProfileView language changes", () => {
     render(<ProfileView />);
 
     expect(await screen.findByText("Candidate Photo")).toBeInTheDocument();
-    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(candidateService.getMe).toHaveBeenCalledTimes(1));
 
     await act(async () => {
       await i18n.changeLanguage("ur");
@@ -60,6 +60,6 @@ describe("ProfileView language changes", () => {
       await i18n.changeLanguage("en");
     });
     expect(await screen.findByText("Candidate Photo")).toBeInTheDocument();
-    expect(api.get).toHaveBeenCalledTimes(1);
+    expect(candidateService.getMe).toHaveBeenCalledTimes(1);
   });
 });

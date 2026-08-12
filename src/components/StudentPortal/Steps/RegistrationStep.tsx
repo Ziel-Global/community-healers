@@ -6,8 +6,10 @@ import { DocumentUpload } from "../Profile/DocumentUpload";
 import { EducationDeclaration } from "../Profile/EducationDeclaration";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, FileCheck, Loader2, AlertCircle } from "lucide-react";
-import { api } from "@/services/api";
+import { useCandidateMe, useDocumentValidation, useUpdateCandidateMe } from "@/hooks/queries/useCandidateQueries";
 import { useToast } from "@/hooks/use-toast";
+import { PERSONAL_INFO_ERROR_CODES, personalInfoSchema } from "@/schemas/registrationSchemas";
+import { getApiErrorMessage } from "@/lib/errors";
 
 interface PersonalInfo {
   fatherName: string;
@@ -21,12 +23,22 @@ interface PersonalInfo {
 export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [candidateData, setCandidateData] = useState<any>(null);
-  const [missingDocuments, setMissingDocuments] = useState<string[]>([]);
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
-  const [canProceedToPayment, setCanProceedToPayment] = useState(false);
-  const [docsValidated, setDocsValidated] = useState(false);
+
+  const { data: candidateData } = useCandidateMe();
+  const {
+    data: documentValidation,
+    isLoading: isValidatingDocs,
+    refetch: refetchDocumentValidation,
+  } = useDocumentValidation();
+  const updateCandidateMeMutation = useUpdateCandidateMe();
+
+  const isLoading = updateCandidateMeMutation.isPending;
+  const canProceedToPayment = !!documentValidation?.canProceedToPayment;
+  const missingDocuments = canProceedToPayment ? [] : (documentValidation?.missingDocuments || []);
+  // Mirrors the old `docsValidated` flag: true once the first validation
+  // response (success or failure) has settled.
+  const docsValidated = !isValidatingDocs;
 
   // Lifted state for PersonalInfoForm
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
@@ -38,6 +50,23 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
     address: "",
   });
 
+  // Seed the controlled form from the candidate's saved profile once it loads.
+  useEffect(() => {
+    if (!candidateData) return;
+    const dob = candidateData.dob ? new Date(candidateData.dob).toISOString().split('T')[0] : "";
+    setPersonalInfo({
+      fatherName: candidateData.fatherName || "",
+      cnic: candidateData.cnic || "",
+      dob,
+      phone: candidateData.user?.phoneNumber || "",
+      // `cityId` isn't part of the CandidateMe shape (city comes back as
+      // `{ id, name }`) — preserved as-is from the pre-migration behavior,
+      // where this always resolved to "" via the same implicit-any lookup.
+      city: (candidateData as unknown as { cityId?: string }).cityId || "",
+      address: candidateData.address || "",
+    });
+  }, [candidateData]);
+
   const formatMissingDocLabel = (doc: string) => {
     const labelKey = `registration.missingDoc.${doc}`;
     const translated = t(labelKey);
@@ -45,52 +74,6 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
     const formatted = doc.replace(/([A-Z])/g, ' $1').trim();
     return formatted.charAt(0).toUpperCase() + formatted.slice(1);
   };
-
-  const refreshDocumentValidation = async () => {
-    try {
-      const validationResponse = await api.get('/candidates/me/validate-documents');
-      const validationData = validationResponse.data.data;
-      const canProceed = !!validationData.canProceedToPayment;
-      setCanProceedToPayment(canProceed);
-      setMissingDocuments(canProceed ? [] : (validationData.missingDocuments || []));
-      setDocsValidated(true);
-      return validationData;
-    } catch (error) {
-      console.error('Failed to validate documents', error);
-      setDocsValidated(true);
-      return null;
-    }
-  };
-
-  const fetchCandidateData = async (includePersonalInfo = false) => {
-    try {
-      const response = await api.get('/candidates/me');
-      const data = response.data.data;
-      setCandidateData(data);
-
-      if (includePersonalInfo) {
-        const dob = data.dob ? new Date(data.dob).toISOString().split('T')[0] : "";
-        setPersonalInfo({
-          fatherName: data.fatherName || "",
-          cnic: data.cnic || "",
-          dob: dob,
-          phone: data.user?.phoneNumber || "",
-          city: data.cityId || "",
-          address: data.address || "",
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch candidate data', error);
-    }
-  };
-
-  useEffect(() => {
-    const init = async () => {
-      await fetchCandidateData(true);
-      await refreshDocumentValidation();
-    };
-    init();
-  }, []);
 
   const handlePersonalInfoUpdate = (field: keyof PersonalInfo, value: string) => {
     setPersonalInfo(prev => ({
@@ -100,17 +83,38 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
   };
 
   const handleSubmit = async () => {
-    setIsLoading(true);
     try {
-      // 1. Validate Personal Info Fields FIRST
-      const requiredFields: (keyof PersonalInfo)[] = ["fatherName", "cnic", "dob", "city", "address"];
-      const newErrors: Record<string, boolean> = {};
-      const missingFieldLabels: string[] = [];
+      // 1. Validate Personal Info Fields FIRST (fatherName, cnic, dob, city, address)
+      const validation = personalInfoSchema.safeParse(personalInfo);
 
-      requiredFields.forEach(field => {
-        if (!personalInfo[field] || personalInfo[field].trim() === "") {
+      if (!validation.success) {
+        const newErrors: Record<string, boolean> = {};
+        const codeByField: Record<string, string> = {};
+        for (const issue of validation.error.issues) {
+          const field = String(issue.path[0]);
           newErrors[field] = true;
-          // Map field keys to readable labels for the toast message
+          codeByField[field] = issue.message; // stable error code, not display text
+        }
+        setFormErrors(newErrors);
+
+        if (
+          codeByField.cnic === PERSONAL_INFO_ERROR_CODES.CNIC_LENGTH ||
+          codeByField.cnic === PERSONAL_INFO_ERROR_CODES.CNIC_FORMAT
+        ) {
+          toast({
+            title: t('registration.invalidCnic') || "Invalid CNIC",
+            description: t('registration.invalidCnicDesc') || "CNIC must be exactly 13 digits long without dashes.",
+            variant: "destructive",
+          });
+        } else if (
+          codeByField.dob === PERSONAL_INFO_ERROR_CODES.DOB_TOO_YOUNG
+        ) {
+          toast({
+            title: t('registration.ageRequirementTitle'),
+            description: t('registration.ageRequirementDesc'),
+            variant: "destructive",
+          });
+        } else {
           const labelMap: Record<string, string> = {
             fatherName: t('personalInfo.fatherName'),
             cnic: t('personalInfo.cnic'),
@@ -118,40 +122,27 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
             city: t('personalInfo.city'),
             address: t('personalInfo.address')
           };
-          missingFieldLabels.push(labelMap[field] || field);
+          const missingFieldLabels = Object.keys(newErrors)
+            .filter(field => codeByField[field] === PERSONAL_INFO_ERROR_CODES.REQUIRED || codeByField[field] === PERSONAL_INFO_ERROR_CODES.DOB_INVALID)
+            .map(field => labelMap[field] || field);
+          toast({
+            title: t('registration.fieldsRequired'),
+            description: `${t('registration.followingFieldsRequired')}: ${missingFieldLabels.join(", ")}`,
+            variant: "destructive",
+          });
         }
-      });
 
-      if (missingFieldLabels.length > 0) {
-        setFormErrors(newErrors);
-        toast({
-          title: t('registration.fieldsRequired'),
-          description: `${t('registration.followingFieldsRequired')}: ${missingFieldLabels.join(", ")}`,
-          variant: "destructive",
-        });
         // Scroll to top to show missing fields
         window.scrollTo({ top: 0, behavior: "smooth" });
-        setIsLoading(false);
-        return;
-      }
-
-      if (personalInfo.cnic && personalInfo.cnic.length !== 13) {
-        setFormErrors({ cnic: true });
-        toast({
-          title: t('registration.invalidCnic') || "Invalid CNIC",
-          description: t('registration.invalidCnicDesc') || "CNIC must be exactly 13 digits long without dashes.",
-          variant: "destructive",
-        });
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        setIsLoading(false);
         return;
       }
 
       // Clear form errors if validation passed
       setFormErrors({});
 
-      // 2. Validate documents SECOND
-      const validationData = await refreshDocumentValidation();
+      // 2. Validate documents SECOND — re-fetch so we check against the
+      // latest state, not a possibly-stale cached value.
+      const { data: validationData } = await refetchDocumentValidation();
 
       if (!validationData?.canProceedToPayment) {
         const missing = validationData?.missingDocuments || missingDocuments;
@@ -163,26 +154,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           }`,
           variant: "destructive",
         });
-        setIsLoading(false);
         return;
-      }
-
-      // 3. Validate Age THIRD
-      if (personalInfo.dob) {
-        const { differenceInYears, parseISO, isValid } = await import("date-fns");
-        const birthDate = parseISO(personalInfo.dob);
-        if (isValid(birthDate)) {
-          const age = differenceInYears(new Date(), birthDate);
-          if (age < 16) {
-            toast({
-              title: t('registration.ageRequirementTitle'),
-              description: t('registration.ageRequirementDesc'),
-              variant: "destructive",
-            });
-            setIsLoading(false);
-            return;
-          }
-        }
       }
 
       // Construct payload directly from the controlled state
@@ -195,7 +167,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
         has16YearsEducation: localStorage.getItem("has16YearsEducation") === "true",
       };
 
-      await api.put('/candidates/me', profilePayload);
+      await updateCandidateMeMutation.mutateAsync(profilePayload);
 
       toast({
         title: t('registration.registrationSaved'),
@@ -203,15 +175,13 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       });
 
       onNext();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Registration error:", error);
       toast({
         title: t('registration.error'),
-        description: error.response?.data?.message || t('registration.failedToSave'),
+        description: getApiErrorMessage(error, t('registration.failedToSave')),
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -241,13 +211,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           onUpdate={handlePersonalInfoUpdate}
           errors={formErrors}
         />
-        <DocumentUpload
-          candidateData={candidateData}
-          onUploadComplete={async () => {
-            await fetchCandidateData(false);
-            await refreshDocumentValidation();
-          }}
-        />
+        <DocumentUpload candidateData={candidateData} />
         <EducationDeclaration candidateData={candidateData} />
       </div>
 

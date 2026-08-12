@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { BookOpen, GraduationCap, Upload, FileCheck, Info, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { api } from "@/services/api";
+import { useUploadDocument } from "@/hooks/queries/useCandidateQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 
 interface EducationDeclarationProps {
@@ -18,9 +19,9 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
     const { toast } = useToast();
     const [hasSixteenYears, setHasSixteenYears] = useState(false);
     const [isUploaded, setIsUploaded] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
     const [uploadedFileName, setUploadedFileName] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const uploadDocumentMutation = useUploadDocument();
 
     useEffect(() => {
         if (candidateData) {
@@ -54,31 +55,26 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
             return;
         }
 
-        setIsUploading(true);
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('type', 'degreeTranscript');
-
-            await api.post('/candidates/me/documents', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-
-            setIsUploaded(true);
-            setUploadedFileName(file.name);
-            toast({
-                title: t('documents.uploadSuccess'),
-                description: `${file.name}`,
-            });
-        } catch (error: any) {
-            toast({
-                title: t('documents.uploadFailed'),
-                description: error.response?.data?.message || t('documents.uploadFailed'),
-                variant: "destructive",
-            });
-        } finally {
-            setIsUploading(false);
-        }
+        uploadDocumentMutation.mutate(
+            { type: 'degreeTranscript', file },
+            {
+                onSuccess: () => {
+                    setIsUploaded(true);
+                    setUploadedFileName(file.name);
+                    toast({
+                        title: t('documents.uploadSuccess'),
+                        description: `${file.name}`,
+                    });
+                },
+                onError: (error) => {
+                    toast({
+                        title: t('documents.uploadFailed'),
+                        description: getApiErrorMessage(error, t('documents.uploadFailed')),
+                        variant: "destructive",
+                    });
+                },
+            },
+        );
     };
 
     return (
@@ -121,7 +117,7 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
                                 isUploaded ? "bg-success/5 border-success/30" : "bg-secondary/10 border-border/60 hover:border-primary/40"
                             )}
                         >
-                            {isUploading ? (
+                            {uploadDocumentMutation.isPending ? (
                                 <div className="flex flex-col items-center gap-2">
                                     <Loader2 className="w-8 h-8 text-primary animate-spin" />
                                     <p className="text-sm text-muted-foreground">{t('education.uploading')}</p>

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { useQuery } from "@tanstack/react-query";
-import { superAdminService } from "@/services/superAdminService";
+import { useDashboardStats, useExamParticipationTrend } from "@/hooks/queries/useSuperAdminQueries";
 import {
   Shield,
   Settings2,
@@ -90,15 +89,9 @@ const chartConfig = {
 export default function SuperAdminPortal() {
   const [timeFilter, setTimeFilter] = useState<"days" | "months" | "years">("months");
 
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ["dashboard-stats"],
-    queryFn: superAdminService.getDashboardStats,
-  });
+  const { data: stats, isLoading } = useDashboardStats();
 
-  const { data: trendData, isLoading: isTrendLoading } = useQuery({
-    queryKey: ["exam-participation-trend", timeFilter],
-    queryFn: () => superAdminService.getExamParticipationTrend(timeFilter),
-  });
+  const { data: trendData, isLoading: isTrendLoading } = useExamParticipationTrend(timeFilter);
 
   const getGrowthText = () => {
     if (isTrendLoading || !trendData) return "Loading...";

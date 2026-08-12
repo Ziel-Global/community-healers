@@ -11,33 +11,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { CenterDetail } from "./CenterDetail";
-import { superAdminService } from "@/services/superAdminService";
-
-interface Center {
-    id: string;
-    name: string;
-    location: string;
-    capacity: number;
-    status: string;
-    attendance: string;
-    address?: string;
-    contactPerson?: string;
-    phone?: string;
-    email?: string;
-    established?: string;
-}
+import { SuperAdminCenter } from "@/types/superAdmin";
+import { useSuperAdminCenters, useCreateCenter, useCreateCity } from "@/hooks/queries/useSuperAdminQueries";
+import { useCities } from "@/hooks/queries/useReferenceQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export function CenterManager() {
     const { toast } = useToast();
-    const [centers, setCenters] = useState<Center[]>([]);
-    const [cities, setCities] = useState<Array<{ id: string; name: string }>>([]);
+    const { data: centers = [], isLoading: isLoadingCenters, error: centersError } = useSuperAdminCenters();
+    const { data: cities = [], error: citiesError } = useCities();
+    const createCenterMutation = useCreateCenter();
+    const createCityMutation = useCreateCity();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isCityDialogOpen, setIsCityDialogOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSubmittingCity, setIsSubmittingCity] = useState(false);
-    const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
-    const [isLoadingCenters, setIsLoadingCenters] = useState(true);
+    const [selectedCenter, setSelectedCenter] = useState<SuperAdminCenter | null>(null);
     const [newCityName, setNewCityName] = useState("");
+    const isSubmitting = createCenterMutation.isPending;
+    const isSubmittingCity = createCityMutation.isPending;
     const [formData, setFormData] = useState({
         name: "",
         cityId: "",
@@ -51,63 +41,26 @@ export function CenterManager() {
         adminConfirmPassword: "",
     });
 
-    // Fetch centers on component mount
+    // Surface query errors (e.g. session expiry) the same way the manual fetches used to.
     useEffect(() => {
-        const fetchCenters = async () => {
-            try {
-                const centersData = await superAdminService.getCenters();
-                setCenters(centersData);
-            } catch (error: any) {
-                console.error("Failed to load centers", error);
+        const error = centersError || citiesError;
+        if (!error) return;
 
-                // Check if it's a 401 (token expired)
-                if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
-                    toast({
-                        title: "Session Expired",
-                        description: "Your session has expired. Please log in again.",
-                        variant: "destructive",
-                    });
+        console.error("Failed to load centers/cities", error);
 
-                    // Clear auth and redirect to login
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = '/auth/super-admin';
-                }
-            } finally {
-                setIsLoadingCenters(false);
-            }
-        };
+        const message = getApiErrorMessage(error);
+        if (message?.includes('jwt expired') || message?.includes('401')) {
+            toast({
+                title: "Session Expired",
+                description: "Your session has expired. Please log in again.",
+                variant: "destructive",
+            });
 
-        fetchCenters();
-    }, [toast]);
-
-    // Fetch cities on component mount
-    const fetchCities = async () => {
-        try {
-            const citiesData = await superAdminService.getCities();
-            setCities(citiesData);
-        } catch (error: any) {
-            console.error("Failed to load cities", error);
-
-            // Check if it's a 401 (token expired)
-            if (error.message?.includes('jwt expired') || error.message?.includes('401')) {
-                toast({
-                    title: "Session Expired",
-                    description: "Your session has expired. Please log in again.",
-                    variant: "destructive",
-                });
-
-                // Clear auth and redirect to login
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/auth/super-admin';
-            }
+            // Clear auth and redirect to login
+            localStorage.removeItem('user');
+            window.location.href = '/auth/super-admin';
         }
-    };
-
-    useEffect(() => {
-        fetchCities();
-    }, [toast]);
+    }, [centersError, citiesError, toast]);
 
     // If a center is selected, show detail view
     if (selectedCenter) {
@@ -146,11 +99,8 @@ export function CenterManager() {
             return;
         }
 
-        setIsSubmitting(true);
-
-        try {
-            // Call the API to create center
-            await superAdminService.createCenter({
+        createCenterMutation.mutate(
+            {
                 name: formData.name,
                 cityId: formData.cityId,
                 licenseNumber: formData.licenseNumber,
@@ -162,41 +112,39 @@ export function CenterManager() {
                     firstName: formData.adminFirstName,
                     lastName: formData.adminLastName,
                 },
-            });
+            },
+            {
+                onSuccess: () => {
+                    toast({
+                        title: "Center Established",
+                        description: `${formData.name} has been successfully created.`,
+                    });
 
-            toast({
-                title: "Center Established",
-                description: `${formData.name} has been successfully created.`,
-            });
+                    setIsDialogOpen(false);
 
-            setIsDialogOpen(false);
-
-            // Reset form
-            setFormData({
-                name: "",
-                cityId: "",
-                address: "",
-                licenseNumber: "",
-                capacity: "",
-                adminFirstName: "",
-                adminLastName: "",
-                adminEmail: "",
-                adminPassword: "",
-                adminConfirmPassword: "",
-            });
-
-            // Refresh centers list from API
-            const centersData = await superAdminService.getCenters();
-            setCenters(centersData);
-        } catch (error: any) {
-            toast({
-                title: "Failed to Create Center",
-                description: error.message || "An error occurred while creating the center.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
+                    // Reset form
+                    setFormData({
+                        name: "",
+                        cityId: "",
+                        address: "",
+                        licenseNumber: "",
+                        capacity: "",
+                        adminFirstName: "",
+                        adminLastName: "",
+                        adminEmail: "",
+                        adminPassword: "",
+                        adminConfirmPassword: "",
+                    });
+                },
+                onError: (error) => {
+                    toast({
+                        title: "Failed to Create Center",
+                        description: getApiErrorMessage(error, "An error occurred while creating the center."),
+                        variant: "destructive",
+                    });
+                },
+            }
+        );
     };
 
     const handleCitySubmit = async () => {
@@ -209,29 +157,24 @@ export function CenterManager() {
             return;
         }
 
-        setIsSubmittingCity(true);
+        createCityMutation.mutate(newCityName, {
+            onSuccess: () => {
+                toast({
+                    title: "City Added",
+                    description: `${newCityName} has been successfully added.`,
+                });
 
-        try {
-            await superAdminService.createCity(newCityName);
-            toast({
-                title: "City Added",
-                description: `${newCityName} has been successfully added.`,
-            });
-
-            setIsCityDialogOpen(false);
-            setNewCityName("");
-
-            // Refresh cities list
-            fetchCities();
-        } catch (error: any) {
-            toast({
-                title: "Failed to Add City",
-                description: error.message || "An error occurred while adding the city.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsSubmittingCity(false);
-        }
+                setIsCityDialogOpen(false);
+                setNewCityName("");
+            },
+            onError: (error) => {
+                toast({
+                    title: "Failed to Add City",
+                    description: getApiErrorMessage(error, "An error occurred while adding the city."),
+                    variant: "destructive",
+                });
+            },
+        });
     };
 
     return (

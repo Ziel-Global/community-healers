@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { PortalType, PORTAL_ALLOWED_ROLES, ROLE_HOME_PATH } from '@/types/roles';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -20,11 +21,7 @@ export function ProtectedRoute({ children, portalType }: ProtectedRouteProps) {
 
     if (isLoading) {
         // Show a minimal centered spinner while auth state is resolving
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
+        return <LoadingSpinner />;
     }
 
     if (!isAuthenticated || !user) {

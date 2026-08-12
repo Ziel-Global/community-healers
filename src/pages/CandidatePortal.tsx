@@ -11,7 +11,7 @@ import { SchedulingStep } from "@/components/StudentPortal/Steps/SchedulingStep"
 import { Button } from "@/components/ui/button";
 import { User, FileText, Shield, LogOut, Loader2 } from "lucide-react";
 import { parseISO } from "date-fns";
-import { api } from "@/services/api";
+import { useCandidateMe } from "@/hooks/queries/useCandidateQueries";
 import { CertificateCard } from "@/components/StudentPortal/CertificateCard";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -38,36 +38,22 @@ export default function CandidatePortal() {
       return newParams;
     });
   };
+  const { data: candidateData, isLoading: loading, refetch: refetchCandidateMe } = useCandidateMe();
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
   const [scheduledExamDate, setScheduledExamDate] = useState<Date | undefined>(undefined);
-  const [certificate, setCertificate] = useState<any | null>(null);
-  const [isPaid, setIsPaid] = useState(false);
   const [requiresRepayment, setRequiresRepayment] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  useEffect(() => {
-    const fetchCandidateData = async () => {
-      try {
-        const response = await api.get('/candidates/me');
-        const data = response.data.data;
-        if (data?.certificate) {
-          setCertificate(data.certificate);
-        }
-        if (data?.payment?.isPaid) {
-          setIsPaid(true);
-        }
-        if (data?.requiresRepayment) {
-          setRequiresRepayment(true);
-        }
-      } catch (error) {
-        console.error('Failed to fetch candidate data', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCandidateData();
+  const certificate = candidateData?.certificate ?? null;
+  const isPaid = !!candidateData?.payment?.isPaid;
 
+  useEffect(() => {
+    if (candidateData?.requiresRepayment) {
+      setRequiresRepayment(true);
+    }
+  }, [candidateData?.requiresRepayment]);
+
+  useEffect(() => {
     // RTL Cleanup on unmount
     return () => {
       if (i18n.language === 'ur') {
@@ -130,7 +116,7 @@ export default function CandidatePortal() {
   const handleWizardComplete = async () => {
     setRequiresRepayment(false);
     // Load the real schedule first so the success screen never flashes the 9:00 AM fallback
-    await checkExamSchedule();
+    await Promise.all([checkExamSchedule(), refetchCandidateMe()]);
     setIsRegistrationComplete(true);
   };
 

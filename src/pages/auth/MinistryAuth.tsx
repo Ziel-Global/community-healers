@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Landmark, ArrowLeft, Mail, Lock, KeyRound, Building, GraduationCap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { emailLoginSchema } from "@/schemas/authSchemas";
 
 export default function MinistryAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -37,9 +38,19 @@ export default function MinistryAuth() {
       return;
     }
 
+    const result = emailLoginSchema.safeParse({ email, password });
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Input",
+        description: result.error.issues[0].message,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      await loginMinistry({ email, password });
+      await loginMinistry(result.data);
       navigate("/ministry");
       toast({
         title: "Welcome back!",

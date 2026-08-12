@@ -4,95 +4,84 @@ import { FeePaymentCard } from "../Payments/FeePaymentCard";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Wallet, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { api } from "@/services/api";
+import {
+  usePaymentStatus,
+  useInitiatePayment,
+  useConfirmPayment,
+} from "@/hooks/queries/useCandidateQueries";
 import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export function PaymentStep({ onNext, onBack, isFirstStep, isRepayment = false }: WizardStepProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isPaid, setIsPaid] = useState(false);
   const [isQRGenerated, setIsQRGenerated] = useState(false);
-  const [isLoadingQR, setIsLoadingQR] = useState(false);
-  const [qrCodeBase64, setQrCodeBase64] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState<string | null>(null);
-  const [isConfirmingPay, setIsConfirmingPay] = useState(false);
-  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+
+  const {
+    data: paymentStatusData,
+    isLoading: isCheckingStatus,
+  } = usePaymentStatus({ enabled: !isRepayment });
+  const initiatePaymentMutation = useInitiatePayment();
+  const confirmPaymentMutation = useConfirmPayment();
 
   useEffect(() => {
-    const checkPaymentStatus = async () => {
-      // For second-miss repayment, always require a fresh payment
-      if (isRepayment) {
-        setIsCheckingStatus(false);
-        return;
+    // For second-miss repayment, always require a fresh payment
+    if (isRepayment || !paymentStatusData) return;
+
+    const { status, transactionId: existingTxId } = paymentStatusData;
+    if (status === 'PAID') {
+      setIsPaid(true);
+      if (existingTxId) {
+        setTransactionId(existingTxId);
       }
+    }
+  }, [paymentStatusData, isRepayment]);
 
-      try {
-        const response = await api.get('/candidates/payments/status');
-        if (response.data?.data) {
-          const { status, transactionId: existingTxId } = response.data.data;
-          if (status === 'PAID') {
-            setIsPaid(true);
-            if (existingTxId) {
-              setTransactionId(existingTxId);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Failed to check payment status', error);
-      } finally {
-        setIsCheckingStatus(false);
-      }
-    };
+  const qrCodeBase64 = initiatePaymentMutation.data?.qrCodeBase64 ?? null;
 
-    checkPaymentStatus();
-  }, [isRepayment]);
-
-  const handleGenerateQR = async () => {
+  const handleGenerateQR = () => {
     if (isCheckingStatus) return;
-    try {
-      setIsLoadingQR(true);
-      const response = await api.post('/candidates/payments/initiate');
-      if (response.data?.data?.qrCodeBase64 && response.data?.data?.transactionId) {
-        setQrCodeBase64(response.data.data.qrCodeBase64);
-        setTransactionId(response.data.data.transactionId);
-        setIsQRGenerated(true);
-      } else {
-        console.error('Failed to generate QR code: Invalid response structure');
+    initiatePaymentMutation.mutate(undefined, {
+      onSuccess: (data) => {
+        if (data?.qrCodeBase64 && data?.transactionId) {
+          setTransactionId(data.transactionId);
+          setIsQRGenerated(true);
+        } else {
+          console.error('Failed to generate QR code: Invalid response structure');
+          toast({
+            title: 'Could not generate QR',
+            description: 'The payment service returned an incomplete response. Please try again.',
+            variant: 'destructive',
+          });
+        }
+      },
+      onError: (error) => {
+        console.error('Failed to generate QR code', error);
         toast({
           title: 'Could not generate QR',
-          description: 'The payment service returned an incomplete response. Please try again.',
+          description: getApiErrorMessage(error, 'Please try again in a moment.'),
           variant: 'destructive',
         });
-      }
-    } catch (error: any) {
-      console.error('Failed to generate QR code', error);
-      toast({
-        title: 'Could not generate QR',
-        description:
-          error.response?.data?.message ||
-          'Please try again in a moment.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoadingQR(false);
-    }
+      },
+    });
   };
 
-  const handlePayment = async () => {
+  const handlePayment = () => {
     if (!transactionId) return;
 
-    try {
-      setIsConfirmingPay(true);
-      await api.post(`/candidates/payments/confirm/${transactionId}`, {
-        bankTransactionRef: `BANK-REF-${Math.floor(Math.random() * 100000)}`
-      });
-      setIsPaid(true);
-
-    } catch (error) {
-      console.error('Failed to confirm payment', error);
-    } finally {
-      setIsConfirmingPay(false);
-    }
+    confirmPaymentMutation.mutate(
+      { transactionId, bankTransactionRef: `BANK-REF-${Math.floor(Math.random() * 100000)}` },
+      {
+        onSuccess: () => {
+          setIsPaid(true);
+        },
+        onError: (error) => {
+          console.error('Failed to confirm payment', error);
+        },
+      },
+    );
   };
 
   const handleNext = () => {
@@ -144,9 +133,9 @@ export function PaymentStep({ onNext, onBack, isFirstStep, isRepayment = false }
           amount={3000}
           isPaid={isPaid}
           isQRGenerated={isQRGenerated}
-          isLoadingQR={isLoadingQR}
+          isLoadingQR={initiatePaymentMutation.isPending}
           qrCodeBase64={qrCodeBase64}
-          isLoadingPay={isConfirmingPay}
+          isLoadingPay={confirmPaymentMutation.isPending}
           onPay={handlePayment}
           onGenerateQR={handleGenerateQR}
         />

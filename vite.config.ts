@@ -31,6 +31,10 @@ export default defineConfig(({ mode }) => {
           target: backendUrl,
           changeOrigin: true,
         },
+        "/ministry": {
+          target: backendUrl,
+          changeOrigin: true,
+        },
       },
     },
     plugins: [react()].filter(Boolean),

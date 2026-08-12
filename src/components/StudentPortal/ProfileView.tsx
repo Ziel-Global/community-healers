@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X, RefreshCw } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { api } from "@/services/api";
+import { useCandidateMe } from "@/hooks/queries/useCandidateQueries";
 import { useAuth } from "@/context/AuthContext";
 import { CertificateCard } from "./CertificateCard";
 import { useTranslation } from "react-i18next";
@@ -21,53 +21,6 @@ interface UploadedDocument {
   fileName?: string;
   fileData?: string;
   fileType?: string;
-}
-
-interface CandidateData {
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string;
-    role: string;
-    status: string;
-  };
-  userId: string;
-  cnic: string;
-  fatherName: string;
-  dob: string;
-  city: {
-    id: string;
-    name: string;
-  };
-  address: string;
-  has16YearsEducation: boolean;
-  certificateIssued: boolean;
-  createdAt: string;
-  updatedAt: string;
-  certificate?: {
-    id: string;
-    certificate_number: string;
-    issuedDate: string;
-    expiryDate: string | null;
-    score: string;
-    status: string;
-    downloadUrl: string | null;
-  } | null;
-  payment?: {
-    isPaid: boolean;
-    status: string;
-    paidAt: string;
-    transactionId: string;
-  };
-  requiresRepayment?: boolean;
-  consecutiveMisses?: number;
-  documents?: Array<{
-    id?: string;
-    type: string;
-    fileUrl?: string | null;
-  }>;
 }
 
 interface ProfileViewProps {
@@ -116,70 +69,53 @@ export function ProfileView({
   examScore,
   certificateNumber
 }: ProfileViewProps) {
-  const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
   const [previewDoc, setPreviewDoc] = useState<UploadedDocument | null>(null);
-  const [candidateData, setCandidateData] = useState<CandidateData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: candidateData, isLoading: loading } = useCandidateMe();
   const { examScheduleInfo } = useAuth();
   const { t } = useTranslation();
 
-  // Fetch candidate data from API
-  useEffect(() => {
-    const fetchCandidateData = async () => {
-      try {
-        const response = await api.get('/candidates/me');
-        const data = response.data.data as CandidateData;
-        setCandidateData(data);
+  // Map API documents to UploadedDocument interface
+  const uploadedDocuments: UploadedDocument[] = (() => {
+    if (!candidateData?.documents || !Array.isArray(candidateData.documents)) return [];
+    const documents = candidateData.documents;
+    const apiDocs: UploadedDocument[] = [];
 
-        // Map API documents to UploadedDocument interface
-        if (data.documents && Array.isArray(data.documents)) {
-          const apiDocs: UploadedDocument[] = [];
+    // Define expected document types to ensure we display all required slots even if not uploaded
+    const expectedDocs = [
+      { id: "photo", nameKey: "profile.candidatePhoto", isMandatory: true },
+      { id: "passport", nameKey: "profile.passport", isMandatory: true },
+      { id: "visa", nameKey: "profile.visa", isMandatory: false },
+      { id: "cnicFront", nameKey: "profile.cnicFront", isMandatory: false },
+      { id: "cnicBack", nameKey: "profile.cnicBack", isMandatory: false },
+      { id: "degreeTranscript", nameKey: "profile.degreeTranscript", isMandatory: false },
+    ];
 
-          // Define expected document types to ensure we display all required slots even if not uploaded
-          const expectedDocs = [
-            { id: "photo", nameKey: "profile.candidatePhoto", isMandatory: true },
-            { id: "passport", nameKey: "profile.passport", isMandatory: true },
-            { id: "visa", nameKey: "profile.visa", isMandatory: false },
-            { id: "cnicFront", nameKey: "profile.cnicFront", isMandatory: false },
-            { id: "cnicBack", nameKey: "profile.cnicBack", isMandatory: false },
-            { id: "degreeTranscript", nameKey: "profile.degreeTranscript", isMandatory: false },
-          ];
+    expectedDocs.forEach(expected => {
+      const found = documents.find((document) => document.type === expected.id);
+      const sampleUrl = getSampleDocumentUrl(expected.id);
+      // Preview always uses frontend static files — never backend /uploads
+      const previewUrl = getDocumentPreviewUrl(expected.id);
+      const isComplete = !!sampleUrl || !!found?.fileUrl;
+      const fileType = detectFileType(previewUrl || undefined);
 
-          expectedDocs.forEach(expected => {
-            const found = data.documents.find((document) => document.type === expected.id);
-            const sampleUrl = getSampleDocumentUrl(expected.id);
-            // Preview always uses frontend static files — never backend /uploads
-            const previewUrl = getDocumentPreviewUrl(expected.id);
-            const isComplete = !!sampleUrl || !!found?.fileUrl;
-            const fileType = detectFileType(previewUrl || undefined);
+      apiDocs.push({
+        id: found?.id || expected.id,
+        nameKey: expected.nameKey,
+        type: found?.type || expected.id,
+        isMandatory: expected.isMandatory && !isComplete,
+        status: isComplete ? "complete" : "pending",
+        fileName: sampleUrl
+          ? sampleUrl.split("/").pop()
+          : found?.fileUrl
+            ? fileNameFromUrl(found.fileUrl)
+            : undefined,
+        fileData: previewUrl || undefined,
+        fileType,
+      });
+    });
 
-            apiDocs.push({
-              id: found?.id || expected.id,
-              nameKey: expected.nameKey,
-              type: found?.type || expected.id,
-              isMandatory: expected.isMandatory && !isComplete,
-              status: isComplete ? "complete" : "pending",
-              fileName: sampleUrl
-                ? sampleUrl.split("/").pop()
-                : found?.fileUrl
-                  ? fileNameFromUrl(found.fileUrl)
-                  : undefined,
-              fileData: previewUrl || undefined,
-              fileType,
-            });
-          });
-
-          setUploadedDocuments(apiDocs);
-        }
-
-      } catch (error) {
-        console.error('Failed to fetch candidate data', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCandidateData();
-  }, []);
+    return apiDocs;
+  })();
 
   const completedDocs = uploadedDocuments.filter(doc => doc.status === "complete");
   const pendingDocs = uploadedDocuments.filter(doc => doc.status === "pending" && doc.isMandatory);

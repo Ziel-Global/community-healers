@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Building2, ArrowLeft, Mail, Lock, User, Hash, GraduationCap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { emailLoginSchema } from "@/schemas/authSchemas";
 
 export default function CenterAdminAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -37,9 +38,19 @@ export default function CenterAdminAuth() {
       return;
     }
 
+    const result = emailLoginSchema.safeParse({ email, password });
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Input",
+        description: result.error.issues[0].message,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      await loginCenterAdmin({ email, password });
+      await loginCenterAdmin(result.data);
       navigate("/center");
       toast({
         title: "Welcome back!",
@@ -171,14 +182,7 @@ export default function CenterAdminAuth() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                {!isSignUp && (
-                  <button
-                    type="button"
-                    className="text-base text-primary hover:text-primary/80 alumni-sans-subtitle"
-                  >
-                    Forgot password?
-                  </button>
-                )}
+                {/* Forgot password — hidden until a real reset API is wired up (this button never did anything; no handler was ever attached). */}
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />

@@ -15,6 +15,18 @@ import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail, KeyRound, CheckCircl
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import i18n from "@/i18n";
+import {
+  candidateLoginSchema,
+  candidateSignupSchema,
+  candidateVerifySchema,
+  forgotPasswordPhoneSchema,
+  resetPasswordSchema,
+} from "@/schemas/authSchemas";
+
+// Disabled until a real OTP delivery channel (SMS/Jazz) is wired up behind
+// /auth/forgot-password/*. Previously this whole flow faked success with
+// setTimeout() and never called an API — flip to true once that's real.
+const FORGOT_PASSWORD_ENABLED = false;
 
 export default function CandidateAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -35,6 +47,11 @@ export default function CandidateAuth() {
   const navigate = useNavigate();
   const { loginCandidate, signup, verifyCandidate, logout, isAuthenticated } = useAuth();
   const { toast } = useToast();
+
+  // Live validation for the reset-password step, recomputed each render.
+  const resetPasswordValidation = resetPasswordSchema.safeParse({ newPassword, confirmNewPassword });
+  const newPasswordTooShort = resetPasswordValidation.error?.issues.some((issue) => issue.path[0] === "newPassword") ?? false;
+  const passwordsDontMatch = resetPasswordValidation.error?.issues.some((issue) => issue.path[0] === "confirmNewPassword") ?? false;
 
   // Force English and LTR immediately when component loads
   useEffect(() => {
@@ -74,32 +91,18 @@ export default function CandidateAuth() {
 
     try {
       if (isSignUp) {
-        if (formData.password.length < 6) {
+        const result = candidateSignupSchema.safeParse(formData);
+        if (!result.success) {
           toast({
             variant: "destructive",
-            title: "Password too short",
-            description: "Password must be at least 6 characters long.",
-          });
-          setLoading(false);
-          return;
-        }
-        if (formData.password !== formData.confirmPassword) {
-          toast({
-            variant: "destructive",
-            title: "Passwords don't match",
-            description: "Please make sure your passwords match.",
+            title: "Invalid Input",
+            description: result.error.issues[0].message,
           });
           setLoading(false);
           return;
         }
         // Register
-        await signup({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          password: formData.password
-        });
+        await signup(result.data);
         setShowOtpModal(true);
         setLoading(false); // Stop loading to show OTP modal
         toast({
@@ -107,11 +110,21 @@ export default function CandidateAuth() {
           description: "An OTP has been sent to your phone.",
         });
       } else {
-        // Login
-        await loginCandidate({
+        const result = candidateLoginSchema.safeParse({
           phoneNumber: formData.phoneNumber,
-          password: formData.password
+          password: formData.password,
         });
+        if (!result.success) {
+          toast({
+            variant: "destructive",
+            title: "Invalid Input",
+            description: result.error.issues[0].message,
+          });
+          setLoading(false);
+          return;
+        }
+        // Login
+        await loginCandidate(result.data);
         navigate("/candidate");
         toast({
           title: "Welcome back!",
@@ -171,14 +184,15 @@ export default function CandidateAuth() {
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const otpValue = otp.join("");
-    if (otpValue.length !== 6) return;
+    const result = candidateVerifySchema.safeParse({
+      phoneNumber: formData.phoneNumber,
+      otp: otpValue,
+    });
+    if (!result.success) return;
 
     setLoading(true);
     try {
-      await verifyCandidate({
-        phoneNumber: formData.phoneNumber,
-        otp: otpValue
-      });
+      await verifyCandidate(result.data);
       setShowOtpModal(false);
       navigate("/candidate");
       toast({
@@ -374,20 +388,7 @@ export default function CandidateAuth() {
               <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-sm">Password</Label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowForgotPassword(true);
-                      setForgotStep("phone");
-                      setForgotPhone("");
-                      setForgotOtp(["", "", "", "", "", ""]);
-                      setNewPassword("");
-                      setConfirmNewPassword("");
-                    }}
-                    className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-                  >
-                    Forgot password?
-                  </button>
+                  {/* Forgot Password trigger — hidden alongside the modal below, see the comment there. */}
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
@@ -490,7 +491,17 @@ export default function CandidateAuth() {
         </DialogContent>
       </Dialog>
 
-      {/* Forgot Password Modal */}
+      {/*
+        Forgot Password Modal — disabled for now.
+        This flow used to fake success with setTimeout() and never called a
+        real API; there's no OTP delivery channel (SMS/Jazz) wired up yet to
+        actually reset a password. Hiding it rather than shipping something
+        that tells a user their password changed when it didn't. Re-enable
+        by wrapping this Dialog in `{true && (...)}` (or removing the wrapper
+        below) once /auth/forgot-password/request+verify have a real OTP
+        channel behind them.
+      */}
+      {FORGOT_PASSWORD_ENABLED && (
       <Dialog open={showForgotPassword} onOpenChange={(open) => {
         if (!open) {
           setShowForgotPassword(false);
@@ -542,11 +553,12 @@ export default function CandidateAuth() {
                     className="flex-1 h-11 alumni-sans-subtitle"
                     disabled={forgotLoading || !forgotPhone.trim()}
                     onClick={() => {
-                      if (forgotPhone.length < 10) {
+                      const result = forgotPasswordPhoneSchema.safeParse({ phone: forgotPhone });
+                      if (!result.success) {
                         toast({
                           variant: "destructive",
                           title: "Invalid Phone Number",
-                          description: "Please enter a valid phone number.",
+                          description: result.error.issues[0].message,
                         });
                         return;
                       }
@@ -701,14 +713,14 @@ export default function CandidateAuth() {
                     <PasswordInput
                       id="newPassword"
                       placeholder="Enter new password"
-                      className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${newPassword && newPassword.length < 6 ? "border-destructive focus:border-destructive" : ""
+                      className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${newPassword && newPasswordTooShort ? "border-destructive focus:border-destructive" : ""
                         }`}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       autoFocus
                     />
                   </div>
-                  {newPassword && newPassword.length < 6 && (
+                  {newPassword && newPasswordTooShort && (
                     <p className="text-xs text-destructive mt-1 animate-in fade-in slide-in-from-top-1">
                       Password must be at least 6 characters
                     </p>
@@ -721,13 +733,13 @@ export default function CandidateAuth() {
                     <PasswordInput
                       id="confirmNewPassword"
                       placeholder="Re-enter new password"
-                      className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${confirmNewPassword && newPassword !== confirmNewPassword ? "border-destructive focus:border-destructive" : ""
+                      className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${confirmNewPassword && passwordsDontMatch ? "border-destructive focus:border-destructive" : ""
                         }`}
                       value={confirmNewPassword}
                       onChange={(e) => setConfirmNewPassword(e.target.value)}
                     />
                   </div>
-                  {confirmNewPassword && newPassword !== confirmNewPassword && (
+                  {confirmNewPassword && passwordsDontMatch && (
                     <p className="text-xs text-destructive mt-1 animate-in fade-in slide-in-from-top-1">
                       Passwords do not match
                     </p>
@@ -746,12 +758,7 @@ export default function CandidateAuth() {
                     type="button"
                     variant="forest"
                     className="flex-1 h-11 alumni-sans-subtitle"
-                    disabled={
-                      forgotLoading ||
-                      !newPassword ||
-                      newPassword.length < 6 ||
-                      newPassword !== confirmNewPassword
-                    }
+                    disabled={forgotLoading || !resetPasswordValidation.success}
                     onClick={() => {
                       setForgotLoading(true);
                       // Simulate password reset
@@ -786,6 +793,7 @@ export default function CandidateAuth() {
           )}
         </DialogContent>
       </Dialog>
+      )}
     </div>
   );
 }

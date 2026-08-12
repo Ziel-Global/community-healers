@@ -21,8 +21,9 @@ import {
     Loader2,
     Shield
 } from "lucide-react";
-import { superAdminService } from "@/services/superAdminService";
 import { useToast } from "@/hooks/use-toast";
+import { useCenterDetails, useCenterRegisteredCandidates } from "@/hooks/queries/useSuperAdminQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 
 interface CenterDetailProps {
     center: {
@@ -63,60 +64,33 @@ const StatCard = ({ title, value, icon: Icon, desc }: any) => (
 export function CenterDetail({ center, onBack }: CenterDetailProps) {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [open, setOpen] = useState(false);
-    const [centerDetails, setCenterDetails] = useState<any>(null);
-    const [registeredData, setRegisteredData] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isCandidatesLoading, setIsCandidatesLoading] = useState(false);
     const { toast } = useToast();
 
-    // Fetch center details and registered candidates
+    const dateStr = format(selectedDate, "yyyy-MM-dd");
+
+    const { data: centerDetails, isLoading, error: detailsError } = useCenterDetails(center.id);
+    const { data: registeredData, isLoading: isCandidatesLoading, error: candidatesError } = useCenterRegisteredCandidates(center.id, dateStr);
+
+    // Surface query errors the same way the manual fetches used to.
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(true);
-                const details = await superAdminService.getCenterDetails(center.id);
-                setCenterDetails(details);
-            } catch (error: any) {
-                console.error('Failed to fetch center details:', error);
-                toast({
-                    title: "Error",
-                    description: "Failed to load center details. Please try again.",
-                    variant: "destructive",
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        if (!detailsError) return;
+        console.error('Failed to fetch center details:', detailsError);
+        toast({
+            title: "Error",
+            description: getApiErrorMessage(detailsError, "Failed to load center details. Please try again."),
+            variant: "destructive",
+        });
+    }, [detailsError, toast]);
 
-        if (center.id) {
-            fetchData();
-        }
-    }, [center.id, toast]);
-
-    // Fetch candidates when date changes
     useEffect(() => {
-        const fetchCandidates = async () => {
-            try {
-                setIsCandidatesLoading(true);
-                const dateStr = format(selectedDate, "yyyy-MM-dd");
-                const data = await superAdminService.getCenterRegisteredCandidates(center.id, dateStr);
-                setRegisteredData(data);
-            } catch (error: any) {
-                console.error('Failed to fetch registered candidates:', error);
-                toast({
-                    title: "Error",
-                    description: "Failed to load registered candidates for the selected date.",
-                    variant: "destructive",
-                });
-            } finally {
-                setIsCandidatesLoading(false);
-            }
-        };
-
-        if (center.id && selectedDate) {
-            fetchCandidates();
-        }
-    }, [center.id, selectedDate, toast]);
+        if (!candidatesError) return;
+        console.error('Failed to fetch registered candidates:', candidatesError);
+        toast({
+            title: "Error",
+            description: getApiErrorMessage(candidatesError, "Failed to load registered candidates for the selected date."),
+            variant: "destructive",
+        });
+    }, [candidatesError, toast]);
 
     if (isLoading) {
         return (

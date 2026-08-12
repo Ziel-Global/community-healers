@@ -5,58 +5,40 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Settings2, Save, AlertTriangle, Loader2 } from "lucide-react";
-import { superAdminService } from "@/services/superAdminService";
 import { toast } from "sonner";
+import { useExamSettings, useUpdateExamSettings } from "@/hooks/queries/useSuperAdminQueries";
+import { getApiErrorMessage } from "@/lib/errors";
 
 export function ExamRulesForm() {
     const [duration, setDuration] = useState(0);
     const [questions, setQuestions] = useState(0);
-    const [loading, setLoading] = useState(false);
 
-    const handleSave = async () => {
-        setLoading(true);
-        try {
-            await superAdminService.updateExamSettings({
+    const { data: settings, isLoading } = useExamSettings();
+    const updateExamSettingsMutation = useUpdateExamSettings();
+
+    const handleSave = () => {
+        updateExamSettingsMutation.mutate(
+            {
                 durationMinutes: Number(duration),
                 numberOfQuestions: Number(questions),
-            });
-            toast.success("Configuration saved successfully!");
-        } catch (error: any) {
-            toast.error(error.message || "Failed to save configuration.");
-        } finally {
-            setLoading(false);
-        }
+            },
+            {
+                onSuccess: () => {
+                    toast.success("Configuration saved successfully!");
+                },
+                onError: (error) => {
+                    toast.error(getApiErrorMessage(error, "Failed to save configuration."));
+                },
+            }
+        );
     };
 
     useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const settings = await superAdminService.getExamSettings();
-                // Check if settings are nested in response.data or similar, 
-                // but service should handle it. Assuming settings matches ExamSettings interface.
-                // However, based on user's previous logs, response might be wrapped. 
-                // Let's assume service returns the data part. 
-                // But wait, the user showed a response format earlier:
-                // { statusCode: 200, message: "...", data: { ... } }
-                // So response.data in service might be the wrapper.
-                // I should verify how api.ts handles it or just inspecting the data.
-                // For now, let's assume the service returns the `data` object which IS the settings, 
-                // or I might need to adjust based on backend response shape.
-                // If the backend returns { data: { durationMinutes: ... } }, I need to handle that.
-                // Let's try to map it safely.
-                if (settings) {
-                    // Service now returns the clean object
-                    if (settings.durationMinutes) setDuration(settings.durationMinutes);
-                    if (settings.numberOfQuestions) setQuestions(settings.numberOfQuestions);
-                }
-            } catch (error) {
-                console.error("Failed to load settings", error);
-                // toast.error("Failed to load current settings.");
-            }
-        };
-
-        fetchSettings();
-    }, []);
+        if (settings) {
+            if (settings.durationMinutes) setDuration(settings.durationMinutes);
+            if (settings.numberOfQuestions) setQuestions(settings.numberOfQuestions);
+        }
+    }, [settings]);
 
     return (
         <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm">
@@ -73,34 +55,41 @@ export function ExamRulesForm() {
                 </div>
             </CardHeader>
             <CardContent className="p-6 space-y-8">
-                <div className="grid md:grid-cols-2 gap-8">
-                    <div className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="duration" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Test Duration (Minutes)</Label>
-                            <Input
-                                id="duration"
-                                type="number"
-                                value={duration}
-                                onChange={(e) => setDuration(Number(e.target.value))}
-                                className="h-11 bg-white/50 border-border/60"
-                            />
-                            <p className="text-[10px] text-muted-foreground italic">Default duration for all standard certification trainings.</p>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="questions" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Number of Questions</Label>
-                            <Input
-                                id="questions"
-                                type="number"
-                                value={questions}
-                                onChange={(e) => setQuestions(Number(e.target.value))}
-                                className="h-11 bg-white/50 border-border/60"
-                            />
-                            <p className="text-[10px] text-muted-foreground italic">Randomly pulled from the active question bank.</p>
-                        </div>
+                {isLoading ? (
+                    <div className="flex flex-col items-center gap-3 py-12">
+                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        <p className="text-sm text-muted-foreground animate-pulse">Loading current configuration...</p>
                     </div>
+                ) : (
+                    <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="duration" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Test Duration (Minutes)</Label>
+                                <Input
+                                    id="duration"
+                                    type="number"
+                                    value={duration}
+                                    onChange={(e) => setDuration(Number(e.target.value))}
+                                    className="h-11 bg-white/50 border-border/60"
+                                />
+                                <p className="text-[10px] text-muted-foreground italic">Default duration for all standard certification trainings.</p>
+                            </div>
 
-                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="questions" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Number of Questions</Label>
+                                <Input
+                                    id="questions"
+                                    type="number"
+                                    value={questions}
+                                    onChange={(e) => setQuestions(Number(e.target.value))}
+                                    className="h-11 bg-white/50 border-border/60"
+                                />
+                                <p className="text-[10px] text-muted-foreground italic">Randomly pulled from the active question bank.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                )}
 
                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex gap-4">
                     <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
@@ -112,10 +101,10 @@ export function ExamRulesForm() {
                 <div className="flex justify-between items-center pt-4 border-t border-border/40">
                     <Button
                         onClick={handleSave}
-                        disabled={loading}
+                        disabled={updateExamSettingsMutation.isPending || isLoading}
                         className="gradient-primary text-white font-bold h-11 px-8 shadow-lg group"
                     >
-                        {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />}
+                        {updateExamSettingsMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />}
                         Save & Apply Configuration
                     </Button>
                 </div>

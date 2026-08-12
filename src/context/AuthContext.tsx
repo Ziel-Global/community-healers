@@ -1,9 +1,9 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
-import { UserRole } from '../types/roles';
 import { authService } from '../services/authService';
-import { parseJwt, isTokenExpired } from '../utils/jwt';
 import i18n from '../i18n';
+import { authKeys, useExamSchedule } from '../hooks/queries/useAuthQueries';
 
 interface AuthContextType extends AuthState {
     loginCandidate: (credentials: CandidateLoginCredentials) => Promise<void>;
@@ -31,68 +31,54 @@ interface AuthProviderProps {
     children: ReactNode;
 }
 
+function applyLoggedInUser(user: User) {
+    localStorage.setItem('user', JSON.stringify(user));
+}
+
+function clearStoredSession() {
+    localStorage.removeItem('user');
+    localStorage.removeItem('examScheduleInfo');
+}
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+    const queryClient = useQueryClient();
     const [state, setState] = useState<AuthState>({
         user: null,
-        token: null,
         isAuthenticated: false,
         isLoading: true,
         error: null,
     });
 
-    const [examScheduleInfo, setExamScheduleInfo] = useState<ExamScheduledResponse | null>(null);
+    // Backed by useExamSchedule (see hooks/queries/useAuthQueries.ts) instead of
+    // manually-managed state + a localStorage mirror — only fetches once a
+    // candidate is actually authenticated.
+    const examScheduleQuery = useExamSchedule({
+        enabled: state.isAuthenticated && state.user?.role === 'CANDIDATE',
+    });
+    const examScheduleInfo = examScheduleQuery.data ?? null;
 
-    // Check for existing token on mount
+    /** Persists the logged-in user and marks the session active — every successful login/verify/session-check path ends here. */
+    const hydrateSession = (user: User) => {
+        applyLoggedInUser(user);
+        setState({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+        });
+    };
+
+    // The access token lives in an httpOnly cookie the browser manages — it's
+    // never readable by JS, so there's no client-side expiry check to make
+    // anymore. Instead, verify the session against the backend directly.
     useEffect(() => {
         const checkAuth = async () => {
-            const storedToken = localStorage.getItem('token');
-            const storedUser = localStorage.getItem('user');
-            const storedExamInfo = localStorage.getItem('examScheduleInfo');
-
-            if (storedToken && storedUser && storedUser !== "undefined" && storedToken !== "undefined") {
-                // Check if token is expired before restoring auth state
-                if (isTokenExpired(storedToken)) {
-                    console.warn('Stored JWT token is expired — clearing session.');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('examScheduleInfo');
-                    setState((prev) => ({ ...prev, isLoading: false }));
-                    return;
-                }
-
-                try {
-                    // Ideally, validate token with backend here
-                    const user = JSON.parse(storedUser);
-                    setState({
-                        user,
-                        token: storedToken,
-                        isAuthenticated: true,
-                        isLoading: false,
-                        error: null,
-                    });
-
-                    // Load exam schedule info for candidates
-                    if (user.role === 'CANDIDATE' && storedExamInfo && storedExamInfo !== "undefined") {
-                        try {
-                            setExamScheduleInfo(JSON.parse(storedExamInfo));
-                        } catch (e) {
-                            console.error('Failed to parse exam schedule info:', e);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Failed to parse user from local storage:', error);
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('examScheduleInfo');
-                    setState((prev) => ({ ...prev, isLoading: false }));
-                }
-            } else {
-                // Clear invalid items if they exist
-                if (storedUser === "undefined" || storedToken === "undefined") {
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('examScheduleInfo');
-                }
+            try {
+                const response = await authService.getMe();
+                hydrateSession(response.user);
+            } catch {
+                // No valid session cookie (never logged in, expired, or revoked).
+                clearStoredSession();
                 setState((prev) => ({ ...prev, isLoading: false }));
             }
         };
@@ -104,59 +90,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const response = await authService.loginCandidate(credentials);
-            const token = response.token ||
-                response.accessToken ||
-                response.access_token ||
-                response.data?.data?.accessToken ||
-                response.data?.accessToken;
+            hydrateSession(response.user);
 
-            if (!token) {
-                console.error("Login response structure:", response);
-                throw new Error("No access token received from server");
+            // examScheduleQuery becomes enabled now that isAuthenticated + role
+            // are set (candidate), fetching automatically; invalidate too in
+            // case a query for this key was already cached from before.
+            if (response.user.role === 'CANDIDATE') {
+                queryClient.invalidateQueries({ queryKey: authKeys.examSchedule() });
             }
-
-            let user = response.user;
-            if (!user) {
-                const decoded = parseJwt(token);
-                if (!decoded?.role) {
-                    throw new Error('Invalid session: token is missing a role.');
-                }
-                user = {
-                    id: decoded.sub || decoded.id,
-                    email: decoded.email,
-                    firstName: decoded.firstName || 'Candidate',
-                    lastName: decoded.lastName || '',
-                    role: decoded.role as UserRole,
-                    phoneNumber: decoded.phoneNumber || credentials.phoneNumber,
-                };
-            }
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-
-            setState({
-                user,
-                token,
-                isAuthenticated: true,
-                isLoading: false,
-                error: null,
-            });
-
-            // Check exam schedule after successful login for candidates
-            if (user.role === 'CANDIDATE') {
-                try {
-                    const examInfo = await authService.checkExamScheduled();
-                    setExamScheduleInfo(examInfo);
-                    localStorage.setItem('examScheduleInfo', JSON.stringify(examInfo));
-                } catch (error) {
-                    console.error('Failed to check exam schedule:', error);
-                }
-            }
-        } catch (error: any) {
+        } catch (error: unknown) {
             setState((prev) => ({
                 ...prev,
                 isLoading: false,
-                error: error.message || 'Login failed',
+                error: error instanceof Error ? error.message : 'Login failed',
             }));
             throw error;
         }
@@ -166,47 +112,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const response = await authService.loginCenterAdmin(credentials);
-            const token = response.token ||
-                response.accessToken ||
-                response.access_token ||
-                response.data?.data?.accessToken ||
-                response.data?.accessToken;
-
-            if (!token) {
-                throw new Error("No access token received from server");
-            }
-
-            let user = response.user;
-            if (!user) {
-                const decoded = parseJwt(token);
-                if (!decoded?.role) {
-                    throw new Error('Invalid session: token is missing a role.');
-                }
-                user = {
-                    id: decoded.sub || decoded.id,
-                    email: decoded.email,
-                    firstName: decoded.firstName || 'Center',
-                    lastName: decoded.lastName || 'Admin',
-                    role: decoded.role as UserRole,
-                    phoneNumber: decoded.phoneNumber || '',
-                };
-            }
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-
-            setState({
-                user,
-                token,
-                isAuthenticated: true,
-                isLoading: false,
-                error: null,
-            });
-        } catch (error: any) {
+            hydrateSession(response.user);
+        } catch (error: unknown) {
             setState((prev) => ({
                 ...prev,
                 isLoading: false,
-                error: error.message || 'Login failed',
+                error: error instanceof Error ? error.message : 'Login failed',
             }));
             throw error;
         }
@@ -216,47 +127,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const response = await authService.loginMinistry(credentials);
-            const token = response.token ||
-                response.accessToken ||
-                response.access_token ||
-                response.data?.data?.accessToken ||
-                response.data?.accessToken;
-
-            if (!token) {
-                throw new Error("No access token received from server");
-            }
-
-            let user = response.user;
-            if (!user) {
-                const decoded = parseJwt(token);
-                if (!decoded?.role) {
-                    throw new Error('Invalid session: token is missing a role.');
-                }
-                user = {
-                    id: decoded.sub || decoded.id,
-                    email: decoded.email,
-                    firstName: decoded.firstName || 'Ministry',
-                    lastName: decoded.lastName || 'Official',
-                    role: decoded.role as UserRole,
-                    phoneNumber: decoded.phoneNumber || '',
-                };
-            }
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-
-            setState({
-                user,
-                token,
-                isAuthenticated: true,
-                isLoading: false,
-                error: null,
-            });
-        } catch (error: any) {
+            hydrateSession(response.user);
+        } catch (error: unknown) {
             setState((prev) => ({
                 ...prev,
                 isLoading: false,
-                error: error.message || 'Login failed',
+                error: error instanceof Error ? error.message : 'Login failed',
             }));
             throw error;
         }
@@ -266,50 +142,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const response = await authService.loginSuperAdmin(credentials);
-            // Handle deeply nested token: response.data.data.accessToken
-            const token = response.token ||
-                response.accessToken ||
-                response.access_token ||
-                response.data?.data?.accessToken ||
-                response.data?.accessToken;
-
-            if (!token) {
-                console.error("Login response structure:", response);
-                throw new Error("No access token received from server");
-            }
-
-            let user = response.user;
-            if (!user) {
-                const decoded = parseJwt(token);
-                if (!decoded?.role) {
-                    throw new Error('Invalid session: token is missing a role.');
-                }
-                user = {
-                    id: decoded.sub || decoded.id || decoded.userId,
-                    email: decoded.email,
-                    firstName: decoded.firstName || 'Admin', // Fallback if not in token
-                    lastName: decoded.lastName || 'User',
-                    role: decoded.role as UserRole,
-                    phoneNumber: decoded.phoneNumber || '',
-                };
-            }
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-
-            setState({
-                user,
-                token,
-                isAuthenticated: true,
-                isLoading: false,
-                error: null,
-            });
-        } catch (error: any) {
+            hydrateSession(response.user);
+        } catch (error: unknown) {
             console.error("Login error details:", error);
             setState((prev) => ({
                 ...prev,
                 isLoading: false,
-                error: error.message || 'Login failed',
+                error: error instanceof Error ? error.message : 'Login failed',
             }));
             throw error;
         }
@@ -318,34 +157,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const signup = async (credentials: SignupCredentials) => {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
-            const response = await authService.signup(credentials);
-            const token = response.token || response.accessToken || response.access_token;
-            const user = response.user;
-
-            // Optional: Token might not be returned on signup request if OTP is required first
-            if (token) {
-                localStorage.setItem('token', token);
-                // Also set user if token is present
-                if (user) localStorage.setItem('user', JSON.stringify(user));
-            }
-            // If user is returned but no token, we might still want to set it?
-            // Usually signup logic handled inside component for OTP flow, but here we just update state
-            if (user && token) {
-                setState({
-                    user,
-                    token,
-                    isAuthenticated: true,
-                    isLoading: false,
-                    error: null,
-                });
-            } else {
-                setState((prev) => ({ ...prev, isLoading: false }));
-            }
-        } catch (error: any) {
+            // Only requests an OTP — no session exists yet. verifyCandidate()
+            // (after the user enters the OTP) is what actually logs them in.
+            await authService.signup(credentials);
+            setState((prev) => ({ ...prev, isLoading: false }));
+        } catch (error: unknown) {
             setState((prev) => ({
                 ...prev,
                 isLoading: false,
-                error: error.message || 'Signup failed',
+                error: error instanceof Error ? error.message : 'Signup failed',
             }));
             throw error;
         }
@@ -355,48 +175,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const response = await authService.verifyCandidate(credentials);
-            const token = response.token ||
-                response.accessToken ||
-                response.access_token ||
-                response.data?.data?.accessToken ||
-                response.data?.accessToken;
-
-            if (!token) {
-                console.error("Verification response structure:", response);
-                throw new Error("No access token received from server");
-            }
-
-            let user = response.user;
-            if (!user) {
-                const decoded = parseJwt(token);
-                if (!decoded?.role) {
-                    throw new Error('Invalid session: token is missing a role.');
-                }
-                user = {
-                    id: decoded.sub || decoded.id,
-                    email: decoded.email,
-                    firstName: decoded.firstName || 'Candidate',
-                    lastName: decoded.lastName || '',
-                    role: decoded.role as UserRole,
-                    phoneNumber: decoded.phoneNumber || credentials.phoneNumber,
-                };
-            }
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-
-            setState({
-                user,
-                token,
-                isAuthenticated: true,
-                isLoading: false,
-                error: null,
-            });
-        } catch (error: any) {
+            hydrateSession(response.user);
+        } catch (error: unknown) {
             setState((prev) => ({
                 ...prev,
                 isLoading: false,
-                error: error.message || 'Verification failed',
+                error: error instanceof Error ? error.message : 'Verification failed',
             }));
             throw error;
         }
@@ -408,9 +192,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } catch (error) {
             console.error("Logout error", error);
         } finally {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            localStorage.removeItem('examScheduleInfo');
+            clearStoredSession();
 
             // Reset language to English (LTR) on logout
             i18n.changeLanguage('en');
@@ -419,23 +201,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
             setState({
                 user: null,
-                token: null,
                 isAuthenticated: false,
                 isLoading: false,
                 error: null,
             });
-            setExamScheduleInfo(null);
+            queryClient.removeQueries({ queryKey: authKeys.examSchedule() });
         }
     };
 
     const checkExamSchedule = async () => {
-        try {
-            const examInfo = await authService.checkExamScheduled();
-            setExamScheduleInfo(examInfo);
-            localStorage.setItem('examScheduleInfo', JSON.stringify(examInfo));
-        } catch (error) {
-            console.error('Failed to check exam schedule:', error);
-        }
+        await examScheduleQuery.refetch();
     };
 
     const value = {

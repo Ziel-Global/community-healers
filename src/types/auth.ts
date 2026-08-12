@@ -45,17 +45,24 @@ export interface SignupCredentials {
     password?: string;
 }
 
+/**
+ * Shape returned by authService's login/signup/verify/getMe functions once
+ * the response interceptor (src/services/api.ts) has already unwrapped the
+ * backend's envelope. The session token itself lives in an httpOnly cookie
+ * now (never in this body) — this is just the non-sensitive profile.
+ */
 export interface AuthResponse {
     user: User;
-    token?: string;
-    accessToken?: string;
-    access_token?: string;
-    data?: any;
+}
+
+/** `/auth/signup/request` only requests an OTP — no session exists yet. */
+export interface SignupOtpRequestResponse {
+    sent: boolean;
+    otp?: string;
 }
 
 export interface AuthState {
     user: User | null;
-    token: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
