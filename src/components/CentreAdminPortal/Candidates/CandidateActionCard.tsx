@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,15 +20,7 @@ import { useUpdateCandidateStatus } from "@/hooks/queries/useCenterAdminQueries"
 import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
-import { getDocumentPreviewUrl, getSampleDocumentUrl } from "@/utils/sampleDocuments";
-
-interface CandidateDocument {
-    id: string;
-    name?: string;
-    type: string;
-    uploadDate?: string;
-    fileUrl?: string | null;
-}
+import { centerAdminService, CandidateDocument } from "@/services/centerAdminService";
 
 interface Candidate {
     id: string;
@@ -57,14 +49,12 @@ const EXPECTED_DOC_TYPES = [
     "cnicBack",
 ] as const;
 
-function isImageUrl(url?: string | null) {
-    if (!url) return false;
-    return /\.(jpe?g|png|gif|webp|bmp)(\?|$)/i.test(url) || url.includes("image");
+function isImageFile(fileType?: string | null) {
+    return !!fileType?.startsWith("image/");
 }
 
-function isPdfUrl(url?: string | null) {
-    if (!url) return false;
-    return /\.pdf(\?|$)/i.test(url);
+function isPdfFile(fileType?: string | null) {
+    return fileType === "application/pdf";
 }
 
 export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
@@ -74,8 +64,11 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
     const loading = updateCandidateStatus.isPending;
     const [previewDoc, setPreviewDoc] = useState<{
         label: string;
-        fileUrl: string;
+        type: string;
+        fileType?: string | null;
     } | null>(null);
+    const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
     const [checklist, setChecklist] = useState({
         present: false,
         faceMatch: false,
@@ -83,6 +76,14 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
     });
 
     const isVerified = checklist.present && checklist.faceMatch && checklist.cnicMatch;
+
+    // Revoke the previous blob URL whenever it's replaced or the component
+    // unmounts — object URLs otherwise leak memory for the life of the page.
+    useEffect(() => {
+        return () => {
+            if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
+        };
+    }, [previewBlobUrl]);
 
     const documentRows = useMemo(() => {
         const uploaded = candidate?.documents || [];
@@ -94,17 +95,38 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
 
         return EXPECTED_DOC_TYPES.map((type) => {
             const found = byType.get(type);
-            const sampleUrl = getSampleDocumentUrl(type);
-            const fileUrl = getDocumentPreviewUrl(type);
-            const uploaded = !!sampleUrl || !!found?.fileUrl;
             return {
                 type,
                 label: DOC_LABELS[type] || type,
-                uploaded,
-                fileUrl: fileUrl,
+                uploaded: !!found?.fileUrl,
+                fileType: found?.fileType,
             };
         });
     }, [candidate?.documents]);
+
+    const handleViewDocument = async (doc: { type: string; label: string; fileType?: string | null }) => {
+        if (!candidate?.id) return;
+        setPreviewDoc(doc);
+        setPreviewLoading(true);
+        try {
+            const blob = await centerAdminService.getCandidateDocumentBlob(candidate.id, doc.type);
+            setPreviewBlobUrl(URL.createObjectURL(blob));
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Preview unavailable",
+                description: getApiErrorMessage(error, "Could not load this document."),
+            });
+            setPreviewDoc(null);
+        } finally {
+            setPreviewLoading(false);
+        }
+    };
+
+    const closePreview = () => {
+        setPreviewDoc(null);
+        setPreviewBlobUrl(null);
+    };
 
     const handleVerifyAndUnlock = () => {
         if (!candidate?.id) return;
@@ -255,11 +277,9 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                 <button
                                     key={doc.type}
                                     type="button"
-                                    disabled={!doc.uploaded || !doc.fileUrl}
+                                    disabled={!doc.uploaded}
                                     onClick={() => {
-                                        if (doc.fileUrl) {
-                                            setPreviewDoc({ label: doc.label, fileUrl: doc.fileUrl });
-                                        }
+                                        if (doc.uploaded) handleViewDocument(doc);
                                     }}
                                     className={cn(
                                         "flex items-center justify-between p-4 rounded-xl border transition-all text-left group",
@@ -348,7 +368,7 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                 </CardContent>
             </Card>
 
-            <Dialog open={!!previewDoc} onOpenChange={() => setPreviewDoc(null)}>
+            <Dialog open={!!previewDoc} onOpenChange={(open) => { if (!open) closePreview(); }}>
                 <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
@@ -356,36 +376,43 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                             {previewDoc?.label}
                         </DialogTitle>
                     </DialogHeader>
-                    {previewDoc?.fileUrl && (
-                        <div className="overflow-auto max-h-[70vh] rounded-lg bg-secondary/30 p-2">
-                            {isImageUrl(previewDoc.fileUrl) && (
-                                <img
-                                    src={previewDoc.fileUrl}
-                                    alt={previewDoc.label}
-                                    className="max-w-full h-auto mx-auto rounded-md"
-                                />
-                            )}
-                            {isPdfUrl(previewDoc.fileUrl) && (
-                                <iframe
-                                    src={previewDoc.fileUrl}
-                                    title={previewDoc.label}
-                                    className="w-full h-[65vh] rounded-md border-0"
-                                />
-                            )}
-                            {!isImageUrl(previewDoc.fileUrl) && !isPdfUrl(previewDoc.fileUrl) && (
-                                <div className="flex flex-col items-center justify-center gap-3 py-12">
-                                    <FileText className="w-10 h-10 text-muted-foreground" />
-                                    <p className="text-sm text-muted-foreground">Preview not available for this file type</p>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => window.open(previewDoc.fileUrl, "_blank")}
-                                    >
-                                        Open in new tab
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    <div className="overflow-auto max-h-[70vh] rounded-lg bg-secondary/30 p-2">
+                        {previewLoading && (
+                            <div className="p-12 text-center">
+                                <Loader2 className="w-8 h-8 text-muted-foreground mx-auto animate-spin" />
+                            </div>
+                        )}
+                        {!previewLoading && previewBlobUrl && (
+                            <>
+                                {isImageFile(previewDoc?.fileType) && (
+                                    <img
+                                        src={previewBlobUrl}
+                                        alt={previewDoc?.label}
+                                        className="max-w-full h-auto mx-auto rounded-md"
+                                    />
+                                )}
+                                {isPdfFile(previewDoc?.fileType) && (
+                                    <iframe
+                                        src={previewBlobUrl}
+                                        title={previewDoc?.label}
+                                        className="w-full h-[65vh] rounded-md border-0"
+                                    />
+                                )}
+                                {!isImageFile(previewDoc?.fileType) && !isPdfFile(previewDoc?.fileType) && (
+                                    <div className="flex flex-col items-center justify-center gap-3 py-12">
+                                        <FileText className="w-10 h-10 text-muted-foreground" />
+                                        <p className="text-sm text-muted-foreground">Preview not available for this file type</p>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => window.open(previewBlobUrl, "_blank")}
+                                        >
+                                            Open in new tab
+                                        </Button>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
                 </DialogContent>
             </Dialog>
         </>

@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X, RefreshCw } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X, RefreshCw, Loader2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useCandidateMe } from "@/hooks/queries/useCandidateQueries";
 import { useAuth } from "@/context/AuthContext";
 import { CertificateCard } from "./CertificateCard";
 import { useTranslation } from "react-i18next";
 import { formatTimeLabel } from "@/utils/time";
-import { getDocumentPreviewUrl, getSampleDocumentUrl } from "@/utils/sampleDocuments";
+import { candidateService } from "@/services/candidateService";
+import { useToast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/errors";
 
 interface UploadedDocument {
   id: string;
@@ -19,7 +21,7 @@ interface UploadedDocument {
   isMandatory: boolean;
   status: "pending" | "uploading" | "complete" | "error";
   fileName?: string;
-  fileData?: string;
+  /** Mime type from the backend (see CandidateDocument.fileType) — the download itself has no extension to sniff. */
   fileType?: string;
 }
 
@@ -29,24 +31,6 @@ interface ProfileViewProps {
   examCompleted?: boolean;
   examScore?: number;
   certificateNumber?: string;
-}
-
-function fileNameFromUrl(url: string) {
-  try {
-    const path = url.split("?")[0];
-    return decodeURIComponent(path.split("/").pop() || "document");
-  } catch {
-    return "document";
-  }
-}
-
-function detectFileType(url?: string | null): string {
-  if (!url) return "application/octet-stream";
-  const clean = url.split("?")[0].toLowerCase();
-  if (clean.endsWith(".pdf")) return "application/pdf";
-  if (/\.(jpe?g|png|gif|webp|bmp)$/i.test(clean)) return "image/jpeg";
-  // Cloud/object URLs often omit extensions — treat as image by default for preview
-  return "image/jpeg";
 }
 
 function isImageFile(fileType?: string, url?: string) {
@@ -70,9 +54,20 @@ export function ProfileView({
   certificateNumber
 }: ProfileViewProps) {
   const [previewDoc, setPreviewDoc] = useState<UploadedDocument | null>(null);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const { data: candidateData, isLoading: loading } = useCandidateMe();
   const { examScheduleInfo } = useAuth();
   const { t } = useTranslation();
+  const { toast } = useToast();
+
+  // Revoke the previous blob URL whenever it's replaced or the component unmounts —
+  // object URLs otherwise leak memory for the life of the page.
+  useEffect(() => {
+    return () => {
+      if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
+    };
+  }, [previewBlobUrl]);
 
   // Map API documents to UploadedDocument interface
   const uploadedDocuments: UploadedDocument[] = (() => {
@@ -92,11 +87,7 @@ export function ProfileView({
 
     expectedDocs.forEach(expected => {
       const found = documents.find((document) => document.type === expected.id);
-      const sampleUrl = getSampleDocumentUrl(expected.id);
-      // Preview always uses frontend static files — never backend /uploads
-      const previewUrl = getDocumentPreviewUrl(expected.id);
-      const isComplete = !!sampleUrl || !!found?.fileUrl;
-      const fileType = detectFileType(previewUrl || undefined);
+      const isComplete = !!found?.fileUrl;
 
       apiDocs.push({
         id: found?.id || expected.id,
@@ -104,13 +95,8 @@ export function ProfileView({
         type: found?.type || expected.id,
         isMandatory: expected.isMandatory && !isComplete,
         status: isComplete ? "complete" : "pending",
-        fileName: sampleUrl
-          ? sampleUrl.split("/").pop()
-          : found?.fileUrl
-            ? fileNameFromUrl(found.fileUrl)
-            : undefined,
-        fileData: previewUrl || undefined,
-        fileType,
+        fileName: isComplete ? t("profile.uploaded") : undefined,
+        fileType: found?.fileType || undefined,
       });
     });
 
@@ -120,9 +106,27 @@ export function ProfileView({
   const completedDocs = uploadedDocuments.filter(doc => doc.status === "complete");
   const pendingDocs = uploadedDocuments.filter(doc => doc.status === "pending" && doc.isMandatory);
 
-  const handleViewDocument = (doc: UploadedDocument) => {
-    if (!doc.fileData) return;
+  const handleViewDocument = async (doc: UploadedDocument) => {
     setPreviewDoc(doc);
+    setPreviewLoading(true);
+    try {
+      const blob = await candidateService.getDocumentBlob(doc.type);
+      setPreviewBlobUrl(URL.createObjectURL(blob));
+    } catch (error) {
+      toast({
+        title: t("profile.previewNotAvailable"),
+        description: getApiErrorMessage(error, t("profile.previewNotAvailable")),
+        variant: "destructive",
+      });
+      setPreviewDoc(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const closePreview = () => {
+    setPreviewDoc(null);
+    setPreviewBlobUrl(null);
   };
 
   const hasCertificate = !!candidateData?.certificate;
@@ -570,7 +574,7 @@ export function ProfileView({
       </Card>
 
       {/* Document Preview Modal */}
-      <Dialog open={!!previewDoc} onOpenChange={() => setPreviewDoc(null)}>
+      <Dialog open={!!previewDoc} onOpenChange={(open) => { if (!open) closePreview(); }}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -579,24 +583,29 @@ export function ProfileView({
             </DialogTitle>
           </DialogHeader>
           <div className="mt-4 max-h-[70vh] overflow-auto rounded-lg border border-border/40 bg-muted/20 p-2">
-            {previewDoc?.fileData && (
+            {previewLoading && (
+              <div className="p-12 text-center">
+                <Loader2 className="w-8 h-8 text-muted-foreground mx-auto animate-spin" />
+              </div>
+            )}
+            {!previewLoading && previewBlobUrl && (
               <>
-                {isImageFile(previewDoc.fileType, previewDoc.fileData) && (
+                {isImageFile(previewDoc?.fileType, previewBlobUrl) && (
                   <img
-                    src={previewDoc.fileData}
-                    alt={t(previewDoc.nameKey)}
+                    src={previewBlobUrl}
+                    alt={previewDoc ? t(previewDoc.nameKey) : ""}
                     className="w-full h-auto object-contain rounded-md"
                   />
                 )}
-                {isPdfFile(previewDoc.fileType, previewDoc.fileData) && (
+                {isPdfFile(previewDoc?.fileType, previewBlobUrl) && (
                   <iframe
-                    src={previewDoc.fileData}
-                    title={t(previewDoc.nameKey)}
+                    src={previewBlobUrl}
+                    title={previewDoc ? t(previewDoc.nameKey) : ""}
                     className="w-full h-[65vh] rounded-md border-0"
                   />
                 )}
-                {!isImageFile(previewDoc.fileType, previewDoc.fileData) &&
-                  !isPdfFile(previewDoc.fileType, previewDoc.fileData) && (
+                {!isImageFile(previewDoc?.fileType, previewBlobUrl) &&
+                  !isPdfFile(previewDoc?.fileType, previewBlobUrl) && (
                   <div className="p-8 text-center space-y-3">
                     <FileText className="w-12 h-12 text-muted-foreground mx-auto" />
                     <p className="text-sm text-muted-foreground">
@@ -604,7 +613,7 @@ export function ProfileView({
                     </p>
                     <Button
                       variant="outline"
-                      onClick={() => window.open(previewDoc.fileData, "_blank")}
+                      onClick={() => window.open(previewBlobUrl, "_blank")}
                     >
                       {t("profile.view")}
                     </Button>
@@ -614,15 +623,15 @@ export function ProfileView({
             )}
           </div>
           <div className="flex justify-end gap-2 mt-4">
-            {previewDoc?.fileData && (
+            {previewBlobUrl && (
               <Button
                 variant="outline"
-                onClick={() => window.open(previewDoc.fileData, "_blank")}
+                onClick={() => window.open(previewBlobUrl, "_blank")}
               >
                 {t("profile.view")}
               </Button>
             )}
-            <Button variant="outline" onClick={() => setPreviewDoc(null)}>
+            <Button variant="outline" onClick={closePreview}>
               {t("profile.close")}
             </Button>
           </div>

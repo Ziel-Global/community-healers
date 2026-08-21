@@ -9,6 +9,8 @@ export interface CandidateDocument {
     id?: string;
     type: string;
     fileUrl?: string | null;
+    /** Mime type, e.g. "image/png" or "application/pdf" — derived server-side from the stored file, used to pick <img> vs <iframe> for preview. */
+    fileType?: string | null;
     reviewStatus?: string;
     createdAt?: string;
     updatedAt?: string;
@@ -67,13 +69,25 @@ export interface DocumentValidationResult {
 }
 
 export interface PaymentStatus {
-    status: string;
-    transactionId?: string;
+    hasPayment?: boolean;
+    status: string | null;
+    amount?: number | null;
+    paidAt?: string | null;
+    qrCodeBase64?: string | null;
+    expiresAt?: string | null;
+    transactionId?: string | null;
+    orderId?: string | null;
+    canProceedToExam?: boolean;
 }
 
 export interface InitiatePaymentResponse {
+    paymentId: string;
     qrCodeBase64: string;
+    amount: number;
+    expiresAt: string;
     transactionId: string;
+    orderId: string;
+    status: string;
 }
 
 export interface ExamQuestionOption {
@@ -100,6 +114,7 @@ export interface ExamQuestionsResponse {
 export interface UploadDocumentResponse {
     type: string;
     url: string;
+    fileType?: string | null;
     status: string;
 }
 

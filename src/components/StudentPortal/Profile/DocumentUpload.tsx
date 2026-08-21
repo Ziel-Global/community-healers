@@ -54,7 +54,11 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                     return {
                         ...doc,
                         status: isComplete ? "complete" : "pending",
-                        fileName: uploadedDoc.fileUrl ? uploadedDoc.fileUrl.split('/').pop() : undefined,
+                        // fileUrl is a backend download route now, not a filename-bearing
+                        // path (e.g. /candidates/me/documents/photo/download) — there's
+                        // no real filename left to parse out of it, so show a status
+                        // label on reload instead of the literal word "download".
+                        fileName: uploadedDoc.fileUrl ? t('profile.uploaded') : undefined,
                         fileUrl: uploadedDoc.fileUrl
                     };
                 }

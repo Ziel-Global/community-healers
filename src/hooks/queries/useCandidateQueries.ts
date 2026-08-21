@@ -28,11 +28,15 @@ export function useDocumentValidation(options?: { enabled?: boolean }) {
     });
 }
 
-export function usePaymentStatus(options?: { enabled?: boolean }) {
+export function usePaymentStatus(options?: {
+    enabled?: boolean;
+    refetchInterval?: number | false;
+}) {
     return useQuery({
         queryKey: candidateKeys.paymentStatus(),
         queryFn: candidateService.getPaymentStatus,
         enabled: options?.enabled,
+        refetchInterval: options?.refetchInterval,
     });
 }
 
@@ -133,6 +137,7 @@ export function useConfirmPayment() {
             candidateService.confirmPayment(transactionId, bankTransactionRef),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: candidateKeys.me() });
+            queryClient.invalidateQueries({ queryKey: candidateKeys.paymentStatus() });
         },
     });
 }

@@ -8,16 +8,18 @@ import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Cale
 import { cn } from "@/lib/utils";
 import { useTodayCandidates } from "@/hooks/queries/useCenterAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
+import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
 import { formatTimeLabel } from "@/utils/time";
-import { getDocumentPreviewUrl } from "@/utils/sampleDocuments";
+import { centerAdminService } from "@/services/centerAdminService";
 
 interface Document {
     id: string;
     name: string;
     type: string;
     uploadDate: string;
-    fileUrl: string;
+    fileUrl: string | null;
+    fileType?: string | null;
 }
 
 interface Candidate {
@@ -63,11 +65,45 @@ export function CandidateTable({
     canVerify = false
 }: CandidateTableProps) {
     const navigate = useNavigate();
+    const { toast } = useToast();
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+    const [pendingDocId, setPendingDocId] = useState<string | null>(null);
 
     // Default to today if not provided
     const targetDate = examDate || new Date().toISOString().split('T')[0];
     const { data, isLoading: loading, isError, error: queryError } = useTodayCandidates(targetDate);
+
+    // Fetches the document as a blob rather than using doc.fileUrl directly as
+    // a link target — the backend requires the X-Requested-With header on
+    // cookie-authenticated requests (CSRF protection), which window.open()/an
+    // <a> tag can never send. Revoking is delayed since both consumers below
+    // read the blob URL asynchronously (new tab / download) right after this
+    // returns, not synchronously.
+    const handleOpenDocument = async (doc: Document, mode: "view" | "download") => {
+        if (!doc.fileUrl || !selectedCandidate) return;
+        setPendingDocId(doc.id);
+        try {
+            const blob = await centerAdminService.getCandidateDocumentBlob(selectedCandidate.id, doc.type);
+            const blobUrl = URL.createObjectURL(blob);
+            if (mode === "view") {
+                window.open(blobUrl, "_blank");
+            } else {
+                const link = document.createElement("a");
+                link.href = blobUrl;
+                link.download = doc.name;
+                link.click();
+            }
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 30_000);
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: getApiErrorMessage(error, "Could not load this document."),
+            });
+        } finally {
+            setPendingDocId(null);
+        }
+    };
 
     const candidates: Candidate[] = useMemo(() => {
         // Data is already unwrapped by the service
@@ -97,7 +133,8 @@ export function CandidateTable({
                     name: typeLabels[d.type] || d.name || d.type || "Document",
                     type: d.type,
                     uploadDate: d.createdAt || d.uploadDate || "",
-                    fileUrl: getDocumentPreviewUrl(d.type) || "",
+                    fileUrl: d.fileUrl ?? null,
+                    fileType: d.fileType ?? null,
                 };
             });
 
@@ -372,25 +409,21 @@ export function CandidateTable({
                                                         size="sm"
                                                         variant="ghost"
                                                         className="h-8 w-8 p-0"
-                                                        disabled={!doc.fileUrl}
-                                                        onClick={() => {
-                                                            if (doc.fileUrl) window.open(doc.fileUrl, '_blank');
-                                                        }}
+                                                        disabled={!doc.fileUrl || pendingDocId === doc.id}
+                                                        onClick={() => handleOpenDocument(doc, "view")}
                                                     >
-                                                        <ExternalLink className="w-4 h-4" />
+                                                        {pendingDocId === doc.id ? (
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                        ) : (
+                                                            <ExternalLink className="w-4 h-4" />
+                                                        )}
                                                     </Button>
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
                                                         className="h-8 w-8 p-0"
-                                                        disabled={!doc.fileUrl}
-                                                        onClick={() => {
-                                                            if (!doc.fileUrl) return;
-                                                            const link = document.createElement('a');
-                                                            link.href = doc.fileUrl;
-                                                            link.download = doc.name;
-                                                            link.click();
-                                                        }}
+                                                        disabled={!doc.fileUrl || pendingDocId === doc.id}
+                                                        onClick={() => handleOpenDocument(doc, "download")}
                                                     >
                                                         <Download className="w-4 h-4" />
                                                     </Button>

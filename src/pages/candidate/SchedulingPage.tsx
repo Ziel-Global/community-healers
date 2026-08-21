@@ -59,7 +59,7 @@ export default function SchedulingPage() {
                             type="exam"
                             amount={2000}
                             isPaid={false}
-                            onPay={() => console.log("Pay clicked")}
+                            onGenerateQR={() => console.log("Generate QR clicked")}
                         />
                     </div>
                 </div>

@@ -16,6 +16,13 @@ export function getApiErrorMessage(error: unknown, fallback: string = DEFAULT_ER
         if (typeof backendMessage === "string" && backendMessage.trim()) {
             return backendMessage;
         }
+        // NestJS's ValidationPipe returns `message` as a string[] (one entry
+        // per failed field), not a string — without this branch every
+        // validation error falls through to Axios's generic
+        // "Request failed with status code NNN" instead of the actual reason.
+        if (Array.isArray(backendMessage) && backendMessage.length > 0) {
+            return backendMessage.filter((m) => typeof m === "string").join(" ");
+        }
         if (error.message) {
             return error.message;
         }

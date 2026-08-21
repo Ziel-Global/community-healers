@@ -51,6 +51,21 @@ export const validateDocuments = async (): Promise<DocumentValidationResult> => 
     }
 };
 
+/**
+ * Fetches the actual document bytes for preview/download. Deliberately goes
+ * through `api` (axios) rather than using the download route directly as an
+ * <img>/<iframe> src — the backend requires the X-Requested-With header on
+ * cookie-authenticated requests (CSRF protection), which a plain browser
+ * resource-loading tag can never send. This blob then gets wrapped in
+ * `URL.createObjectURL()` by the caller.
+ */
+export const getDocumentBlob = async (type: string): Promise<Blob> => {
+    const response = await api.get(`/candidates/me/documents/${type}/download`, {
+        responseType: 'blob',
+    });
+    return response.data;
+};
+
 /** Builds the multipart form body internally — callers just pass the type + file. */
 export const uploadDocument = async (type: string, file: File): Promise<UploadDocumentResponse> => {
     try {
@@ -149,6 +164,7 @@ export const candidateService = {
     updateMe,
     validateDocuments,
     uploadDocument,
+    getDocumentBlob,
     scheduleExam,
     getExamStatus,
     getExamQuestions,

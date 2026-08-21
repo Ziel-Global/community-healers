@@ -3,7 +3,9 @@ import { api } from './api';
 export interface CandidateDocument {
     id: string;
     type: string;
-    fileUrl: string;
+    fileUrl: string | null;
+    /** Mime type, e.g. "image/png" or "application/pdf" — the download route has no extension to sniff. */
+    fileType?: string | null;
     reviewStatus?: string;
     createdAt?: string;
     updatedAt?: string;
@@ -97,6 +99,20 @@ export const getTodayCandidates = async (examDate: string): Promise<Candidate[]>
         console.error('Error fetching candidates:', error);
         throw error;
     }
+};
+
+/**
+ * Fetches a specific candidate's document bytes for the center admin's
+ * verification checklist/detail view. Goes through `api` (axios), not a
+ * direct <img>/<iframe> src — same reason as the candidate-side equivalent:
+ * the backend requires X-Requested-With on cookie-authenticated requests
+ * (CSRF protection), which a browser resource-loading tag can never send.
+ */
+export const getCandidateDocumentBlob = async (candidateId: string, type: string): Promise<Blob> => {
+    const response = await api.get(`/center-admin/candidates/${candidateId}/documents/${type}/download`, {
+        responseType: 'blob',
+    });
+    return response.data;
 };
 
 export const updateCandidateStatus = async (id: string, status: 'VERIFIED' | 'REJECTED'): Promise<ExamSessionRecord> => {
@@ -196,6 +212,7 @@ export const updateTrainingTimings = async (
 
 export const centerAdminService = {
     getTodayCandidates,
+    getCandidateDocumentBlob,
     updateCandidateStatus,
     getCenterDetails,
     getReports,

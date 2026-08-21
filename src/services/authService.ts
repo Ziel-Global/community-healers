@@ -59,7 +59,19 @@ const loginSuperAdmin = async (credentials: SuperAdminLoginCredentials): Promise
 
 const signup = async (credentials: SignupCredentials): Promise<SignupOtpRequestResponse> => {
     try {
-        const response = await api.post('/auth/signup/request', credentials);
+        // Built explicitly (not `credentials` spread as-is) because callers
+        // pass through the raw Zod-parsed registration form, which still
+        // carries `confirmPassword` — a client-only field the backend's
+        // SignupDto doesn't declare. With forbidNonWhitelisted validation,
+        // sending it rejects the entire request with a 400.
+        const { firstName, lastName, email, phoneNumber, password } = credentials;
+        const response = await api.post('/auth/signup/request', {
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+            password,
+        });
         return response.data;
     } catch (error: unknown) {
         console.error('Signup error:', error);
