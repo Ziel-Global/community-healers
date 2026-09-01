@@ -69,7 +69,12 @@ export function useBulkIssueCertificates() {
     return useMutation({
         mutationFn: (candidateIds: string[]) => ministryService.bulkIssueCertificates(candidateIds),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ministryKeys.eligibleCandidates() });
+            // Issuing certificates moves the needle on every ministry view at
+            // once (Authority Hub stats/trend, registry, logs, eligible
+            // list) — invalidate the whole "ministry" key group rather than
+            // just eligibleCandidates, which previously left the dashboard
+            // stale until a hard refresh re-fetched everything.
+            queryClient.invalidateQueries({ queryKey: ministryKeys.all });
         },
     });
 }
@@ -79,7 +84,7 @@ export function useIssueCertificate() {
     return useMutation({
         mutationFn: (candidateId: string) => ministryService.issueCertificate(candidateId),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ministryKeys.eligibleCandidates() });
+            queryClient.invalidateQueries({ queryKey: ministryKeys.all });
         },
     });
 }
