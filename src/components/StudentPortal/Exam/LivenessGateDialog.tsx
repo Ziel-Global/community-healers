@@ -3,18 +3,22 @@ import { FaceLivenessDetector } from "@aws-amplify/ui-react-liveness";
 import "@aws-amplify/ui-react-liveness/styles.css";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, ShieldCheck } from "lucide-react";
-import { centerAdminService, VerifyFaceLivenessResult } from "@/services/centerAdminService";
+import { candidateService, VerifyLivenessResult } from "@/services/candidateService";
 import { useToast } from "@/hooks/use-toast";
 import { getApiErrorMessage } from "@/lib/errors";
 
-interface LivenessCheckDialogProps {
+interface LivenessGateDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    candidateId: string;
-    onResult: (result: VerifyFaceLivenessResult) => void;
+    onResult: (result: VerifyLivenessResult) => void;
 }
 
-export function LivenessCheckDialog({ open, onOpenChange, candidateId, onResult }: LivenessCheckDialogProps) {
+/**
+ * Exam-start face verification — a lighter-weight anti-impersonation check
+ * (50% match threshold) than the center-admin's check-in photo verify (95%).
+ * Two failed attempts blocks this exam sitting entirely (see backend).
+ */
+export function LivenessGateDialog({ open, onOpenChange, onResult }: LivenessGateDialogProps) {
     const { toast } = useToast();
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -27,27 +31,23 @@ export function LivenessCheckDialog({ open, onOpenChange, candidateId, onResult 
             return;
         }
         setLoading(true);
-        centerAdminService
-            .createLivenessSession(candidateId)
+        candidateService
+            .createLivenessSession()
             .then((res) => setSessionId(res.sessionId))
-            .catch((err) => setError(getApiErrorMessage(err, "Could not start liveness session.")))
+            .catch((err) => setError(getApiErrorMessage(err, "Could not start face verification.")))
             .finally(() => setLoading(false));
-    }, [open, candidateId]);
+    }, [open]);
 
-    // Called by the widget once AWS finishes analyzing the challenge on its
-    // end — the actual pass/fail + face match only comes from our own
-    // verify-face-liveness call right after, which fetches the result and
-    // runs the match against the candidate's registered photo.
     const handleAnalysisComplete = async () => {
         if (!sessionId) return;
         try {
-            const result = await centerAdminService.verifyFaceLiveness(candidateId, sessionId);
+            const result = await candidateService.verifyLiveness(sessionId);
             onResult(result);
         } catch (err) {
             toast({
                 variant: "destructive",
-                title: "Liveness Check Failed",
-                description: getApiErrorMessage(err, "Could not verify liveness result."),
+                title: "Verification Failed",
+                description: getApiErrorMessage(err, "Could not verify your face. Please try again."),
             });
         } finally {
             onOpenChange(false);
@@ -57,8 +57,8 @@ export function LivenessCheckDialog({ open, onOpenChange, candidateId, onResult 
     const handleError = (livenessError: { error?: { message?: string } }) => {
         toast({
             variant: "destructive",
-            title: "Liveness Error",
-            description: livenessError?.error?.message || "Camera challenge failed. Please retry.",
+            title: "Camera Error",
+            description: livenessError?.error?.message || "Face verification challenge failed. Please retry.",
         });
         onOpenChange(false);
     };
@@ -68,9 +68,12 @@ export function LivenessCheckDialog({ open, onOpenChange, candidateId, onResult 
             <DialogContent className="max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <ShieldCheck className="w-5 h-5 text-primary" /> Liveness Check
+                        <ShieldCheck className="w-5 h-5 text-primary" /> Face Verification Required
                     </DialogTitle>
                 </DialogHeader>
+                <p className="text-sm text-muted-foreground -mt-2">
+                    Please look at your camera and follow the on-screen instructions to confirm your identity before starting the exam.
+                </p>
                 <div className="h-[520px]">
                     {loading && (
                         <div className="h-full flex items-center justify-center">

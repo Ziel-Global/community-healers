@@ -5,19 +5,24 @@ import { CBTInterface } from "@/components/StudentPortal/Exam/CBTInterface";
 import { Button } from "@/components/ui/button";
 import { parseISO, format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, LogOut, Loader2, AlertCircle, Ban, CheckCircle, FileText, Clock, MonitorSmartphone } from "lucide-react";
+import { BookOpen, LogOut, Loader2, AlertCircle, Ban, CheckCircle, FileText, Clock, MonitorSmartphone, ShieldAlert } from "lucide-react";
 import { useExamStatus, useExamQuestions } from "@/hooks/queries/useCandidateQueries";
 import { authService } from "@/services/authService";
 import { CandidateStatus, ExamScheduledResponse } from "@/types/auth";
 import { useAuth } from "@/context/AuthContext";
 import { getExamOnOtherDeviceMessage, isExamOnOtherDeviceError } from "@/utils/examSession";
 import { getApiErrorMessage } from "@/lib/errors";
+import { useToast } from "@/hooks/use-toast";
+import { LivenessGateDialog } from "@/components/StudentPortal/Exam/LivenessGateDialog";
+import { VerifyLivenessResult } from "@/services/candidateService";
+
+const LIVENESS_REQUIRED_ERROR = "LIVENESS_VERIFICATION_REQUIRED";
 
 export default function ExamPortal() {
     const navigate = useNavigate();
     const { i18n } = useTranslation();
     const { logout } = useAuth();
-    const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress" | "other-device" | "questions-error">("loading");
+    const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress" | "other-device" | "questions-error" | "liveness-blocked">("loading");
     const [countdown, setCountdown] = useState(3);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [scheduledExam, setScheduledExam] = useState<ExamScheduledResponse | null>(null);
@@ -26,6 +31,8 @@ export default function ExamPortal() {
     const [questionsErrorMessage, setQuestionsErrorMessage] = useState<string | null>(null);
     const [examEndTime, setExamEndTime] = useState<string | null>(null);
     const [draftAnswers, setDraftAnswers] = useState<Record<string, number>>({});
+    const [showLivenessDialog, setShowLivenessDialog] = useState(false);
+    const { toast } = useToast();
 
     const statusQuery = useExamStatus();
     const questionsQuery = useExamQuestions();
@@ -44,6 +51,33 @@ export default function ExamPortal() {
         questionsQuery.refetch();
     };
 
+    // "Begin Examination" click — skip straight to the exam if liveness was
+    // already passed for this sitting (e.g. gate already cleared once this
+    // page load), otherwise show the face-verification gate first.
+    const handleBeginExamClick = () => {
+        if (candidateStatus?.livenessVerified) {
+            beginExam();
+        } else {
+            setShowLivenessDialog(true);
+        }
+    };
+
+    const handleLivenessResult = (result: VerifyLivenessResult) => {
+        if (result.passed) {
+            beginExam();
+            return;
+        }
+        if (result.blocked) {
+            setExamState("liveness-blocked");
+            return;
+        }
+        toast({
+            variant: "destructive",
+            title: "Face Did Not Match",
+            description: `${result.attemptsRemaining} attempt${result.attemptsRemaining === 1 ? "" : "s"} remaining. Click "Begin Examination" to retry.`,
+        });
+    };
+
     // React to the candidate-status query resolving — drives the initial
     // exam-state transition exactly like the old fetchCandidateStatus did.
     useEffect(() => {
@@ -56,8 +90,13 @@ export default function ExamPortal() {
                 if (statusData.examInProgress) {
                     // Candidate already started the exam (e.g. before a refresh) —
                     // resume silently instead of showing "Begin Examination" again.
+                    // Liveness was already required to reach this point, so no
+                    // re-check needed on resume.
                     console.log("Status: VERIFIED, exam already in progress — resuming");
                     beginExam({ isResume: true });
+                } else if (statusData.livenessBlocked) {
+                    console.log("Status: VERIFIED, but liveness blocked");
+                    setExamState("liveness-blocked");
                 } else {
                     console.log("Status: VERIFIED");
                     setExamState("verified");
@@ -157,6 +196,14 @@ export default function ExamPortal() {
         if (isExamOnOtherDeviceError(err)) {
             setOtherDeviceMessage(getExamOnOtherDeviceMessage(err));
             setExamState("other-device");
+            return;
+        }
+        // Safety net: the proactive livenessVerified check above should
+        // normally prevent this, but if it ever slips through (stale state,
+        // race condition), open the gate instead of showing a raw error.
+        if (getApiErrorMessage(err, "").includes(LIVENESS_REQUIRED_ERROR)) {
+            setExamState("verified");
+            setShowLivenessDialog(true);
             return;
         }
         // All attempts exhausted with no usable questions.
@@ -302,6 +349,60 @@ export default function ExamPortal() {
                                 <p className="text-xs text-muted-foreground">
                                     Please contact your examination center for more details about the rejection reason.
                                     You may need to reapply through the candidate portal.
+                                </p>
+                            </div>
+                            <Button onClick={handleLogout} variant="outline" disabled={isLoggingOut} className="w-full">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <LogOut className="w-4 h-4 mr-2" />}
+                                {isLoggingOut ? "Logging out..." : "Return to Portal"}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
+    // Liveness blocked - 2 failed face-verification attempts at exam start
+    if (examState === "liveness-blocked") {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <header className="border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
+                                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+                                </div>
+                                <div>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Examination Portal</h1>
+                                    <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut} className="gap-1 sm:gap-2">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <Card className="w-full max-w-md border-destructive/40 shadow-royal text-center">
+                        <CardHeader className="space-y-4">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/20 flex items-center justify-center">
+                                <ShieldAlert className="w-8 h-8 text-destructive" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-xl sm:text-2xl font-display text-destructive">Face Verification Failed</CardTitle>
+                                <CardDescription className="mt-2">
+                                    Your face could not be verified after two attempts. Exam access has been blocked.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="bg-destructive/10 rounded-lg p-4 text-left">
+                                <p className="text-sm text-foreground font-medium mb-2">What happens next?</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Please contact your center administrator to resolve this before attempting the exam again.
                                 </p>
                             </div>
                             <Button onClick={handleLogout} variant="outline" disabled={isLoggingOut} className="w-full">
@@ -698,7 +799,7 @@ export default function ExamPortal() {
                         {/* Start Button */}
                         <div className="pt-4">
                             <Button
-                                onClick={() => beginExam()}
+                                onClick={handleBeginExamClick}
                                 disabled={isFetchingQuestions}
                                 className="w-full h-12 sm:h-14 text-base sm:text-lg gradient-primary text-white font-semibold"
                             >
@@ -712,6 +813,12 @@ export default function ExamPortal() {
                     </CardContent>
                 </Card>
             </main>
+
+            <LivenessGateDialog
+                open={showLivenessDialog}
+                onOpenChange={setShowLivenessDialog}
+                onResult={handleLivenessResult}
+            />
         </div>
     );
 }

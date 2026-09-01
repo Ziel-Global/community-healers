@@ -113,6 +113,36 @@ export const getExamQuestions = async (): Promise<ExamQuestionsResponse> => {
     }
 };
 
+export interface VerifyLivenessResult {
+    livenessConfidence: number;
+    livenessPass: boolean;
+    matched: boolean;
+    faceMatchConfidence: number;
+    passed: boolean;
+    attemptsRemaining: number;
+    blocked: boolean;
+}
+
+export const createLivenessSession = async (): Promise<{ sessionId: string }> => {
+    try {
+        const response = await api.post('/candidates/me/liveness-session');
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Create liveness session error:', error);
+        throw error;
+    }
+};
+
+export const verifyLiveness = async (sessionId: string): Promise<VerifyLivenessResult> => {
+    try {
+        const response = await api.post('/candidates/me/verify-liveness', { sessionId });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Verify liveness error:', error);
+        throw error;
+    }
+};
+
 export const autosaveAnswer = (questionId: string, selectedOptionNumber: number): Promise<AxiosResponse<SaveAnswerResponse>> => {
     return api.patch('/candidates/me/exam/answer', { questionId, selectedOptionNumber });
 };
@@ -173,4 +203,6 @@ export const candidateService = {
     getPaymentStatus,
     initiatePayment,
     confirmPayment,
+    createLivenessSession,
+    verifyLiveness,
 };

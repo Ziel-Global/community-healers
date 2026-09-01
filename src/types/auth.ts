@@ -82,6 +82,8 @@ export interface CandidateStatusResponse {
     examSessionId: string;
     examInProgress?: boolean;
     examEndTime?: string;
+    livenessVerified?: boolean;
+    livenessBlocked?: boolean;
 }
 
 export interface ExamScheduledResponse {
