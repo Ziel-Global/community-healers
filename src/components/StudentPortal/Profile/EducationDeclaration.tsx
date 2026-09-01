@@ -12,9 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 
 interface EducationDeclarationProps {
     candidateData: any;
+    /** Notified on every toggle so the parent step can adapt its own copy (button label, step count) without owning this state itself. */
+    onToggle?: (value: boolean) => void;
 }
 
-export function EducationDeclaration({ candidateData }: EducationDeclarationProps) {
+export function EducationDeclaration({ candidateData, onToggle }: EducationDeclarationProps) {
     const { t } = useTranslation();
     const { toast } = useToast();
     const [hasSixteenYears, setHasSixteenYears] = useState(false);
@@ -37,6 +39,15 @@ export function EducationDeclaration({ candidateData }: EducationDeclarationProp
             setHasSixteenYears(saved);
         }
     }, [candidateData]);
+
+    // Fires on both the initial load-derived value and every manual toggle,
+    // so the parent step (which owns the "Continue to Payment" vs "Submit
+    // for Review" button label) always reflects the current choice without
+    // needing its own copy of this state.
+    useEffect(() => {
+        onToggle?.(hasSixteenYears);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [hasSixteenYears]);
 
     const handleToggle = (value: boolean) => {
         setHasSixteenYears(value);

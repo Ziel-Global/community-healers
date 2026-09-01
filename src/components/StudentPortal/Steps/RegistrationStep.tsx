@@ -26,6 +26,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
   const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
 
   const { data: candidateData } = useCandidateMe();
+  const [hasSixteenYears, setHasSixteenYears] = useState(false);
   const {
     data: documentValidation,
     isLoading: isValidatingDocs,
@@ -167,7 +168,6 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       // (not optional like it is for the normal exam path) — this is the
       // whole basis of their application before we route them off the
       // payment/scheduling flow entirely.
-      const hasSixteenYears = localStorage.getItem("has16YearsEducation") === "true";
       const degreeDoc = candidateData?.documents?.find((d) => d.type === 'degreeTranscript');
       if (hasSixteenYears && !degreeDoc?.fileUrl) {
         toast({
@@ -234,7 +234,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           errors={formErrors}
         />
         <DocumentUpload candidateData={candidateData} />
-        <EducationDeclaration candidateData={candidateData} />
+        <EducationDeclaration candidateData={candidateData} onToggle={setHasSixteenYears} />
       </div>
 
       {/* Missing Documents Alert */}
@@ -262,7 +262,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       {/* Navigation */}
       <div className="flex items-center justify-between pt-6 border-t border-border/60">
         <div className="text-sm text-muted-foreground">
-          {t('registration.stepInfo')}
+          {hasSixteenYears ? t('registration.stepInfoDegree') : t('registration.stepInfo')}
         </div>
         <Button
           onClick={handleSubmit}
@@ -277,7 +277,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
             </>
           ) : (
             <>
-              {t('registration.continueToPayment')}
+              {hasSixteenYears ? t('registration.submitForReview') : t('registration.continueToPayment')}
               <ChevronRight className="w-4 h-4 ms-2 rtl:-scale-x-100 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
             </>
           )}

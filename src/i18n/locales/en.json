@@ -21,6 +21,8 @@
     "title": "Complete Your Registration",
     "description": "Fill in your personal information, upload required documents, and declare your education",
     "stepInfo": "Step 1 of 4 • Registration",
+    "stepInfoDegree": "Step 1 of 1 • Registration",
+    "submitForReview": "Submit for Ministry Review",
     "saving": "Saving...",
     "continueToPayment": "Continue to Payment",
     "missingDocumentsTitle": "Missing Required Documents",
