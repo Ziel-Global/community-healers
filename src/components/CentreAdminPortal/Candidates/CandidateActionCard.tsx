@@ -66,7 +66,7 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
     const verifyFace = useVerifyFace();
     const loading = updateCandidateStatus.isPending;
     const faceInputRef = useRef<HTMLInputElement>(null);
-    const [faceCheckResult, setFaceCheckResult] = useState<{ matched: boolean; confidence: number } | null>(null);
+    const [faceCheckResult, setFaceCheckResult] = useState<{ matched: boolean; confidence: number; conflict?: { candidateName: string; cnic: string | null } | null } | null>(null);
     const [showCameraDialog, setShowCameraDialog] = useState(false);
     const [previewDoc, setPreviewDoc] = useState<{
         label: string;
@@ -141,13 +141,22 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
             { candidateId: candidate.id, photo: file },
             {
                 onSuccess: (result) => {
-                    setFaceCheckResult({ matched: result.matched, confidence: result.confidence });
+                    setFaceCheckResult({ matched: result.matched, confidence: result.confidence, conflict: result.conflict });
                     setChecklist((prev) => ({ ...prev, faceMatch: result.matched }));
-                    toast({
-                        title: result.matched ? "Face Matched" : "Face Did Not Match",
-                        description: `Confidence: ${result.confidence.toFixed(1)}%${result.matched ? "" : " — retry or override manually"}`,
-                        variant: result.matched ? "default" : "destructive",
-                    });
+
+                    if (result.conflict) {
+                        toast({
+                            title: "Face Belongs to Another Candidate",
+                            description: `This photo matches ${result.conflict.candidateName}${result.conflict.cnic ? ` (CNIC: ${result.conflict.cnic})` : ""} at ${result.confidence.toFixed(1)}% confidence — not this candidate. Possible duplicate registration or identity mismatch. Do not override without confirming in person.`,
+                            variant: "destructive",
+                        });
+                    } else {
+                        toast({
+                            title: result.matched ? "Face Matched" : "Face Did Not Match",
+                            description: `Confidence: ${result.confidence.toFixed(1)}%${result.matched ? "" : " — retry or override manually"}`,
+                            variant: result.matched ? "default" : "destructive",
+                        });
+                    }
                 },
                 onError: (error) => {
                     toast({
@@ -295,7 +304,9 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                     </span>
                                     {faceCheckResult && (
                                         <span className={cn("text-[11px] block", faceCheckResult.matched ? "text-emerald-600" : "text-destructive")}>
-                                            {faceCheckResult.matched ? "Matched" : "No match"} — {faceCheckResult.confidence.toFixed(1)}% confidence
+                                            {faceCheckResult.conflict
+                                                ? `Registered to ${faceCheckResult.conflict.candidateName}${faceCheckResult.conflict.cnic ? ` (CNIC: ${faceCheckResult.conflict.cnic})` : ""} — ${faceCheckResult.confidence.toFixed(1)}% confidence`
+                                                : `${faceCheckResult.matched ? "Matched" : "No match"} — ${faceCheckResult.confidence.toFixed(1)}% confidence`}
                                         </span>
                                     )}
                                 </div>

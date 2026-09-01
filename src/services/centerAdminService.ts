@@ -136,6 +136,8 @@ export interface VerifyFaceResult {
     matched: boolean;
     confidence: number;
     autoVerified: boolean;
+    /** Set when the photo is a high-confidence match for a DIFFERENT already-registered candidate. */
+    conflict?: { candidateName: string; cnic: string | null } | null;
 }
 
 export const verifyFace = async (candidateId: string, photo: File): Promise<VerifyFaceResult> => {
