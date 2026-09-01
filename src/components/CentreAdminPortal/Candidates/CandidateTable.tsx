@@ -69,8 +69,13 @@ export function CandidateTable({
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [pendingDocId, setPendingDocId] = useState<string | null>(null);
 
-    // Default to today if not provided
-    const targetDate = examDate || new Date().toISOString().split('T')[0];
+    // Default to today if not provided — local date components, not
+    // toISOString(), which converts to UTC first and silently returns
+    // "yesterday" for any timezone ahead of UTC (e.g. PKT) between midnight
+    // and the UTC day rollover.
+    const now = new Date();
+    const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const targetDate = examDate || localToday;
     const { data, isLoading: loading, isError, error: queryError } = useTodayCandidates(targetDate);
 
     // Fetches the document as a blob rather than using doc.fileUrl directly as

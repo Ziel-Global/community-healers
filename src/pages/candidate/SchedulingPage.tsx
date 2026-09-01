@@ -16,7 +16,13 @@ export default function SchedulingPage() {
     const handleSchedule = () => {
         if (!selectedDate) return;
 
-        const examDate = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        // Local date components, not toISOString() — the Calendar gives a Date
+        // at local midnight for the clicked day, and toISOString() converts to
+        // UTC first, which silently shifts the date back a day for any
+        // timezone ahead of UTC (e.g. PKT, UTC+5) — the candidate would be
+        // scheduled for a different day than the one they clicked and the
+        // confirmation toast (which does use local time) shows them.
+        const examDate = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
         scheduleExamMutation.mutate(examDate, {
             onSuccess: () => {
                 setIsScheduled(true);
