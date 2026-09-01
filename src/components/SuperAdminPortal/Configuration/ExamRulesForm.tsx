@@ -12,6 +12,7 @@ import { getApiErrorMessage } from "@/lib/errors";
 export function ExamRulesForm() {
     const [duration, setDuration] = useState(0);
     const [questions, setQuestions] = useState(0);
+    const [passingPercentage, setPassingPercentage] = useState(50);
 
     const { data: settings, isLoading } = useExamSettings();
     const updateExamSettingsMutation = useUpdateExamSettings();
@@ -21,6 +22,7 @@ export function ExamRulesForm() {
             {
                 durationMinutes: Number(duration),
                 numberOfQuestions: Number(questions),
+                passingPercentage: Number(passingPercentage),
             },
             {
                 onSuccess: () => {
@@ -37,6 +39,7 @@ export function ExamRulesForm() {
         if (settings) {
             if (settings.durationMinutes) setDuration(settings.durationMinutes);
             if (settings.numberOfQuestions) setQuestions(settings.numberOfQuestions);
+            if (settings.passingPercentage) setPassingPercentage(settings.passingPercentage);
         }
     }, [settings]);
 
@@ -85,6 +88,20 @@ export function ExamRulesForm() {
                                     className="h-11 bg-white/50 border-border/60"
                                 />
                                 <p className="text-[10px] text-muted-foreground italic">Randomly pulled from the active question bank.</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="passingPercentage" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Passing Marks (%)</Label>
+                                <Input
+                                    id="passingPercentage"
+                                    type="number"
+                                    min={1}
+                                    max={100}
+                                    value={passingPercentage}
+                                    onChange={(e) => setPassingPercentage(Number(e.target.value))}
+                                    className="h-11 bg-white/50 border-border/60"
+                                />
+                                <p className="text-[10px] text-muted-foreground italic">Minimum percentage score a candidate must obtain to pass and become eligible for certification.</p>
                             </div>
                         </div>
 

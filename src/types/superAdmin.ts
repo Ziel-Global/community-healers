@@ -1,6 +1,7 @@
 export interface ExamSettings {
     durationMinutes: number;
     numberOfQuestions: number;
+    passingPercentage: number;
 }
 
 export interface City {
