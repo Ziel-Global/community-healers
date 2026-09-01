@@ -52,10 +52,35 @@ export interface EligibleCandidate {
     createdAt: string;
     updatedAt: string;
     documents?: MinistryCandidateDocument[];
-    obtainedScore: number;
-    totalScore: number;
-    scorePercentage: string;
-    examTime: string;
+    obtainedScore: number | null;
+    totalScore: number | null;
+    scorePercentage: string | null;
+    examTime: string | null;
+    /** EXAM (passed a CBT) or DEGREE (Ministry-approved 14-year education transcript, no exam taken). */
+    eligibilityBasis?: 'EXAM' | 'DEGREE';
+}
+
+export interface DegreeReviewCandidate {
+    documentId: string;
+    candidateId: string;
+    submittedAt: string;
+    candidate: {
+        userId: string;
+        cnic: string;
+        fatherName: string;
+        dob: string;
+        address: string;
+        user: {
+            firstName: string;
+            lastName: string;
+            email: string;
+            phoneNumber: string;
+        };
+        city: {
+            id: string;
+            name: string;
+        } | null;
+    };
 }
 
 export interface IssuanceCandidate {

@@ -1,5 +1,5 @@
 import { api } from './api';
-import { MinistryCenter, EligibleCandidate, RegistryCertificate, IssuanceLog, IssuedCertificate, BulkIssueCertificatesResponse } from '../types/ministry';
+import { MinistryCenter, EligibleCandidate, RegistryCertificate, IssuanceLog, IssuedCertificate, BulkIssueCertificatesResponse, DegreeReviewCandidate } from '../types/ministry';
 
 export interface DashboardStats {
     totalIssued?: number;
@@ -103,6 +103,43 @@ export const getIssuanceLogs = async (): Promise<IssuanceLog[]> => {
     }
 };
 
+export const getDegreeReviewQueue = async (): Promise<DegreeReviewCandidate[]> => {
+    try {
+        const response = await api.get('/ministry/degree-reviews');
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error fetching degree review queue:', error);
+        throw error;
+    }
+};
+
+export const getDegreeDocumentBlob = async (candidateId: string): Promise<Blob> => {
+    const response = await api.get(`/ministry/degree-reviews/${candidateId}/download`, {
+        responseType: 'blob',
+    });
+    return response.data;
+};
+
+export const approveDegreeDocument = async (candidateId: string) => {
+    try {
+        const response = await api.post(`/ministry/degree-reviews/${candidateId}/approve`);
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error approving degree document:', error);
+        throw error;
+    }
+};
+
+export const rejectDegreeDocument = async (candidateId: string, reason?: string) => {
+    try {
+        const response = await api.post(`/ministry/degree-reviews/${candidateId}/reject`, { reason });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error rejecting degree document:', error);
+        throw error;
+    }
+};
+
 export const ministryService = {
     getDashboardStats,
     getIssuanceTrend,
@@ -112,4 +149,8 @@ export const ministryService = {
     issueCertificate,
     getRegistry,
     getIssuanceLogs,
+    getDegreeReviewQueue,
+    getDegreeDocumentBlob,
+    approveDegreeDocument,
+    rejectDegreeDocument,
 };

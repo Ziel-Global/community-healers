@@ -366,7 +366,19 @@
     "transcriptDesc": "Drag and drop your degree or click to browse",
     "uploadTranscript": "Upload Degree Transcript / Certificate",
     "selectFile": "Select File",
-    "uploading": "Uploading..."
+    "uploading": "Uploading...",
+    "transcriptRequiredTitle": "Degree Transcript Required",
+    "transcriptRequiredDesc": "Please upload your degree transcript to continue — it's required for this certification path.",
+    "underReviewTitle": "Documents Under Review",
+    "underReviewDesc": "Your degree transcript has been submitted and is awaiting Ministry review. You'll see your certificate here once it's approved and issued — no exam or center visit is needed for this path.",
+    "approvedPendingTitle": "Degree Approved — Certificate Pending",
+    "approvedPendingDesc": "Your degree transcript has been approved by the Ministry. Your certificate will appear here once it's issued.",
+    "rejectedTitle": "Degree Transcript Rejected",
+    "rejectedDesc": "The Ministry could not approve your submitted transcript.",
+    "rejectedReasonLabel": "Reason",
+    "reuploadButton": "Re-upload Document",
+    "switchToExamButton": "Take the Exam Instead",
+    "switchToExamConfirm": "This will move you to the regular exam path — you'll need to pay the exam fee and schedule a training center visit. Continue?"
   },
   "candidatePortal": {
     "examSubmittedTitle": "Training Submitted Successfully",

@@ -36,6 +36,7 @@ const AuditPage = lazy(() => import("./pages/admin/AuditPage"));
 const MinistryPortal = lazy(() => import("./pages/MinistryPortal"));
 const ReviewPage = lazy(() => import("./pages/ministry/ReviewPage"));
 const RegistryPage = lazy(() => import("./pages/ministry/RegistryPage"));
+const DegreeReviewPage = lazy(() => import("./pages/ministry/DegreeReviewPage"));
 const LogsPage = lazy(() => import("./pages/ministry/LogsPage"));
 const CenterOversightPage = lazy(() => import("./pages/ministry/CentersPage"));
 
@@ -115,6 +116,7 @@ export function AppRoutes() {
                 <Route path="/ministry" element={<ProtectedRoute portalType="ministry"><MinistryPortal /></ProtectedRoute>} />
                 <Route path="/ministry/review" element={<ProtectedRoute portalType="ministry"><ReviewPage /></ProtectedRoute>} />
                 <Route path="/ministry/registry" element={<ProtectedRoute portalType="ministry"><RegistryPage /></ProtectedRoute>} />
+                <Route path="/ministry/degree-review" element={<ProtectedRoute portalType="ministry"><DegreeReviewPage /></ProtectedRoute>} />
                 <Route path="/ministry/logs" element={<ProtectedRoute portalType="ministry"><LogsPage /></ProtectedRoute>} />
                 <Route path="/ministry/centers" element={<ProtectedRoute portalType="ministry"><CenterOversightPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

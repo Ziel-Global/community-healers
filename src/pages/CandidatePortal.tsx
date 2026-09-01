@@ -14,6 +14,7 @@ import { parseISO } from "date-fns";
 import { useCandidateMe } from "@/hooks/queries/useCandidateQueries";
 import { CertificateCard } from "@/components/StudentPortal/CertificateCard";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { DegreeStatusScreen } from "@/components/StudentPortal/DegreeStatusScreen";
 
 export default function CandidatePortal() {
   const { t, i18n } = useTranslation();
@@ -46,6 +47,9 @@ export default function CandidatePortal() {
 
   const certificate = candidateData?.certificate ?? null;
   const isPaid = !!candidateData?.payment?.isPaid;
+  const isDegreePath = candidateData?.certificationPath === 'DEGREE';
+  const degreeDoc = candidateData?.documents?.find((d) => d.type === 'degreeTranscript');
+  const degreeDocStatus = degreeDoc?.reviewStatus;
 
   useEffect(() => {
     if (candidateData?.requiresRepayment) {
@@ -68,7 +72,16 @@ export default function CandidatePortal() {
     }
   }, [examScheduleInfo?.requiresRepayment]);
 
-  const wizardSteps = requiresRepayment
+  const wizardSteps = isDegreePath
+    ? [
+        {
+          id: 1,
+          title: t('wizard.registration'),
+          description: t('wizard.completeProfile'),
+          component: RegistrationStep,
+        },
+      ]
+    : requiresRepayment
     ? [
         {
           id: 2,
@@ -146,6 +159,22 @@ export default function CandidatePortal() {
         <div className="max-w-3xl mx-auto">
           <CertificateCard certificate={certificate} />
         </div>
+      );
+    }
+
+    // 0.5. Degree path: once they've submitted a transcript, this takes over
+    // entirely — no exam session ever exists for this candidate, so none of
+    // the exam-based branches below apply.
+    if (isDegreePath && degreeDocStatus && degreeDocStatus !== 'PENDING') {
+      return (
+        <DegreeStatusScreen
+          status={degreeDocStatus as 'UPLOADED' | 'APPROVED' | 'REJECTED'}
+          reviewNote={degreeDoc?.reviewNote}
+          onSwitchedToExam={() => {
+            setIsRegistrationComplete(false);
+            setCurrentWizardStep(0);
+          }}
+        />
       );
     }
 

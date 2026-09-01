@@ -13,6 +13,7 @@ export const ministryKeys = {
             ? ([...ministryKeys.all, "eligibleCandidates", centerId] as const)
             : ([...ministryKeys.all, "eligibleCandidates"] as const),
     issuanceTrend: (timeFilter?: string) => [...ministryKeys.all, "issuanceTrend", timeFilter] as const,
+    degreeReviews: () => [...ministryKeys.all, "degreeReviews"] as const,
 };
 
 export function useIssuanceLogs() {
@@ -85,6 +86,36 @@ export function useIssueCertificate() {
         mutationFn: (candidateId: string) => ministryService.issueCertificate(candidateId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ministryKeys.all });
+        },
+    });
+}
+
+export function useDegreeReviewQueue() {
+    return useQuery({
+        queryKey: ministryKeys.degreeReviews(),
+        queryFn: ministryService.getDegreeReviewQueue,
+    });
+}
+
+export function useApproveDegreeDocument() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (candidateId: string) => ministryService.approveDegreeDocument(candidateId),
+        onSuccess: () => {
+            // Approval moves them into the eligible-candidates list, so
+            // refresh the whole ministry key group same as issuance.
+            queryClient.invalidateQueries({ queryKey: ministryKeys.all });
+        },
+    });
+}
+
+export function useRejectDegreeDocument() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ candidateId, reason }: { candidateId: string; reason?: string }) =>
+            ministryService.rejectDegreeDocument(candidateId, reason),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ministryKeys.degreeReviews() });
         },
     });
 }

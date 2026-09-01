@@ -9,7 +9,8 @@ import {
   Users,
   Building2,
   TrendingUp,
-  Loader2
+  Loader2,
+  GraduationCap
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,11 @@ export const ministryNavItems = [
     label: "Candidate Review",
     href: "/ministry/review",
     icon: <Users className="w-4 h-4" />,
+  },
+  {
+    label: "Degree Review",
+    href: "/ministry/degree-review",
+    icon: <GraduationCap className="w-4 h-4" />,
   },
   {
     label: "Certificate Registry",

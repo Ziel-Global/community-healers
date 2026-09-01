@@ -46,21 +46,26 @@ interface Candidate {
     photo?: string;
     documents: MinistryCandidateDocument[];
     certificateIssued: boolean;
+    eligibilityBasis: 'EXAM' | 'DEGREE';
 }
 
 function toDisplayCandidate(apiCandidate: EligibleCandidate): Candidate {
+    const isDegree = apiCandidate.eligibilityBasis === 'DEGREE';
     return {
         id: apiCandidate.userId,
         name: `${apiCandidate.user.firstName} ${apiCandidate.user.lastName}`,
         cnic: apiCandidate.cnic,
-        score: `${apiCandidate.obtainedScore}/${apiCandidate.totalScore}`,
-        date: new Date(apiCandidate.examTime).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        }),
+        score: isDegree ? "Exempt (Degree)" : `${apiCandidate.obtainedScore}/${apiCandidate.totalScore}`,
+        date: apiCandidate.examTime
+            ? new Date(apiCandidate.examTime).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            })
+            : "—",
         center: apiCandidate.city?.name || "N/A",
         status: apiCandidate.certificateIssued ? "Certificate Issued" : "Passed",
+        eligibilityBasis: apiCandidate.eligibilityBasis || 'EXAM',
         phone: apiCandidate.user.phoneNumber,
         email: apiCandidate.user.email,
         address: apiCandidate.address,
@@ -345,7 +350,7 @@ export function PassedCandidateTable() {
                                         <div className="space-y-1.5">
                                             <p className="text-xs sm:text-sm font-bold text-foreground">{candidate.score}</p>
                                             <Badge variant="success" className="text-[7px] sm:text-[8px] h-3 sm:h-3.5 px-1 uppercase font-bold tracking-tight">
-                                                Passed
+                                                {candidate.eligibilityBasis === 'DEGREE' ? 'Degree' : 'Passed'}
                                             </Badge>
                                         </div>
                                     </td>

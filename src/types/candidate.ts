@@ -12,6 +12,8 @@ export interface CandidateDocument {
     /** Mime type, e.g. "image/png" or "application/pdf" — derived server-side from the stored file, used to pick <img> vs <iframe> for preview. */
     fileType?: string | null;
     reviewStatus?: string;
+    /** Ministry's reason when reviewStatus is REJECTED. */
+    reviewNote?: string | null;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -53,6 +55,8 @@ export interface CandidateMe {
     };
     address: string;
     has16YearsEducation: boolean;
+    /** Which route to certification this candidate is on — EXAM (default) or DEGREE (skips payment/scheduling/exam). */
+    certificationPath?: 'EXAM' | 'DEGREE';
     certificateIssued: boolean;
     createdAt: string;
     updatedAt: string;
