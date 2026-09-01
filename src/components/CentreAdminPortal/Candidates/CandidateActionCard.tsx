@@ -15,14 +15,16 @@ import {
     Eye,
     AlertCircle,
     Camera,
+    Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUpdateCandidateStatus, useVerifyFace } from "@/hooks/queries/useCenterAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
-import { centerAdminService, CandidateDocument } from "@/services/centerAdminService";
+import { centerAdminService, CandidateDocument, VerifyFaceLivenessResult } from "@/services/centerAdminService";
 import { CameraCaptureDialog } from "./CameraCaptureDialog";
+import { LivenessCheckDialog } from "./LivenessCheckDialog";
 
 interface Candidate {
     id: string;
@@ -66,8 +68,13 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
     const verifyFace = useVerifyFace();
     const loading = updateCandidateStatus.isPending;
     const faceInputRef = useRef<HTMLInputElement>(null);
-    const [faceCheckResult, setFaceCheckResult] = useState<{ matched: boolean; confidence: number } | null>(null);
+    const [faceCheckResult, setFaceCheckResult] = useState<{
+        matched: boolean;
+        confidence: number;
+        liveness?: { pass: boolean; confidence: number };
+    } | null>(null);
     const [showCameraDialog, setShowCameraDialog] = useState(false);
+    const [showLivenessDialog, setShowLivenessDialog] = useState(false);
     const [previewDoc, setPreviewDoc] = useState<{
         label: string;
         type: string;
@@ -145,7 +152,7 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                     setChecklist((prev) => ({ ...prev, faceMatch: result.matched }));
                     toast({
                         title: result.matched ? "Face Matched" : "Face Did Not Match",
-                        description: `Confidence: ${result.confidence.toFixed(1)}%${result.matched ? " — candidate auto-verified" : " — retry or override manually"}`,
+                        description: `Confidence: ${result.confidence.toFixed(1)}%${result.matched ? "" : " — retry or override manually"}`,
                         variant: result.matched ? "default" : "destructive",
                     });
                 },
@@ -158,6 +165,30 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                 },
             }
         );
+    };
+
+    const handleLivenessResult = (result: VerifyFaceLivenessResult) => {
+        // Both gates matter here: liveness proves a real person is present
+        // (anti-spoofing), the match proves it's this candidate. Only tick
+        // the checklist when both hold.
+        const passed = result.livenessPass && result.matched;
+        setFaceCheckResult({
+            matched: passed,
+            confidence: result.faceMatchConfidence,
+            liveness: { pass: result.livenessPass, confidence: result.livenessConfidence },
+        });
+        setChecklist((prev) => ({ ...prev, faceMatch: passed }));
+        toast({
+            title: !result.livenessPass
+                ? "Liveness Check Failed"
+                : result.matched
+                    ? "Liveness Passed & Face Matched"
+                    : "Liveness Passed but Face Did Not Match",
+            description: !result.livenessPass
+                ? `Liveness confidence: ${result.livenessConfidence.toFixed(1)}% — possible spoofing, retry or override manually`
+                : `Face match confidence: ${result.faceMatchConfidence.toFixed(1)}%${result.matched ? "" : " — retry or override manually"}`,
+            variant: passed ? "default" : "destructive",
+        });
     };
 
     const handleFacePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -294,28 +325,44 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                         Face matches Registration Photo
                                     </span>
                                     {faceCheckResult && (
-                                        <span className={cn("text-[11px]", faceCheckResult.matched ? "text-emerald-600" : "text-destructive")}>
+                                        <span className={cn("text-[11px] block", faceCheckResult.matched ? "text-emerald-600" : "text-destructive")}>
                                             {faceCheckResult.matched ? "Matched" : "No match"} — {faceCheckResult.confidence.toFixed(1)}% confidence
+                                            {faceCheckResult.liveness && (
+                                                <> · Liveness {faceCheckResult.liveness.pass ? "passed" : "failed"} ({faceCheckResult.liveness.confidence.toFixed(1)}%)</>
+                                            )}
                                         </span>
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2 flex-shrink-0">
                                     <div className="flex flex-col items-end gap-0.5">
-                                        <Button
-                                            type="button"
-                                            size="sm"
-                                            variant="outline"
-                                            disabled={verifyFace.isPending}
-                                            onClick={() => setShowCameraDialog(true)}
-                                            className="h-8"
-                                        >
-                                            {verifyFace.isPending ? (
-                                                <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                                            ) : (
-                                                <Camera className="w-3.5 h-3.5 mr-1.5" />
-                                            )}
-                                            {faceCheckResult ? "Retry" : "Verify"}
-                                        </Button>
+                                        <div className="flex gap-1.5">
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="outline"
+                                                disabled={verifyFace.isPending}
+                                                onClick={() => setShowCameraDialog(true)}
+                                                className="h-8"
+                                            >
+                                                {verifyFace.isPending ? (
+                                                    <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                                                ) : (
+                                                    <Camera className="w-3.5 h-3.5 mr-1.5" />
+                                                )}
+                                                {faceCheckResult ? "Retry" : "Verify"}
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => setShowLivenessDialog(true)}
+                                                className="h-8"
+                                                title="Stronger anti-spoofing check via live camera challenge"
+                                            >
+                                                <Video className="w-3.5 h-3.5 mr-1.5" />
+                                                Liveness
+                                            </Button>
+                                        </div>
                                         <button
                                             type="button"
                                             disabled={verifyFace.isPending}
@@ -525,6 +572,15 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                 onOpenChange={setShowCameraDialog}
                 onCapture={runFaceVerification}
             />
+
+            {candidate?.id && (
+                <LivenessCheckDialog
+                    open={showLivenessDialog}
+                    onOpenChange={setShowLivenessDialog}
+                    candidateId={candidate.id}
+                    onResult={handleLivenessResult}
+                />
+            )}
         </>
     );
 }

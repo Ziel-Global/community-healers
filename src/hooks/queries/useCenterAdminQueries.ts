@@ -65,6 +65,19 @@ export function useVerifyFace() {
     });
 }
 
+export function useCreateLivenessSession() {
+    return useMutation({
+        mutationFn: (candidateId: string) => centerAdminService.createLivenessSession(candidateId),
+    });
+}
+
+export function useVerifyFaceLiveness() {
+    return useMutation({
+        mutationFn: ({ candidateId, sessionId }: { candidateId: string; sessionId: string }) =>
+            centerAdminService.verifyFaceLiveness(candidateId, sessionId),
+    });
+}
+
 export function useCloseVerification() {
     const queryClient = useQueryClient();
     return useMutation({

@@ -148,6 +148,34 @@ export const verifyFace = async (candidateId: string, photo: File): Promise<Veri
     }
 };
 
+export const createLivenessSession = async (candidateId: string): Promise<{ sessionId: string }> => {
+    try {
+        const response = await api.post(`/center-admin/candidates/${candidateId}/liveness-session`);
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error creating liveness session:', error);
+        throw error;
+    }
+};
+
+export interface VerifyFaceLivenessResult {
+    livenessConfidence: number;
+    livenessPass: boolean;
+    matched: boolean;
+    faceMatchConfidence: number;
+    autoVerified: boolean;
+}
+
+export const verifyFaceLiveness = async (candidateId: string, sessionId: string): Promise<VerifyFaceLivenessResult> => {
+    try {
+        const response = await api.post(`/center-admin/candidates/${candidateId}/verify-face-liveness`, { sessionId });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error verifying face liveness:', error);
+        throw error;
+    }
+};
+
 type CenterDetailsRawResponse = CenterDetails[] | { centers?: CenterDetails[] } | CenterDetails | null | undefined;
 
 export const getCenterDetails = async (): Promise<CenterDetails | null> => {
@@ -241,4 +269,6 @@ export const centerAdminService = {
     getDashboardStats,
     updateTrainingTimings,
     verifyFace,
+    createLivenessSession,
+    verifyFaceLiveness,
 };
