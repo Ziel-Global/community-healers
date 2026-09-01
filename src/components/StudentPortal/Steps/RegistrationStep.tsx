@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { WizardStepProps } from "../CandidateWizard";
 import { PersonalInfoForm } from "../Profile/PersonalInfoForm";
@@ -50,9 +50,15 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
     address: "",
   });
 
-  // Seed the controlled form from the candidate's saved profile once it loads.
+  // Seed the controlled form from the candidate's saved profile once it
+  // loads — guarded to run only the first time. Without the guard, this
+  // effect re-fires on every /candidates/me refetch, including the ones
+  // DocumentUpload's mutation triggers after each file upload, silently
+  // overwriting whatever the user had typed but not yet submitted here.
+  const hasHydratedRef = useRef(false);
   useEffect(() => {
-    if (!candidateData) return;
+    if (!candidateData || hasHydratedRef.current) return;
+    hasHydratedRef.current = true;
     const dob = candidateData.dob ? new Date(candidateData.dob).toISOString().split('T')[0] : "";
     setPersonalInfo({
       fatherName: candidateData.fatherName || "",
