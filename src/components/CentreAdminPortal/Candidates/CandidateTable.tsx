@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Calendar, FileText, Download, ExternalLink, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Calendar, FileText, Download, ExternalLink, Loader2, ShieldAlert, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTodayCandidates } from "@/hooks/queries/useCenterAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
@@ -36,7 +36,36 @@ interface Candidate {
     dob?: string;
     fatherName?: string;
     documents?: Document[];
+    livenessVerified?: boolean;
+    livenessAttempts?: number;
+    livenessBlocked?: boolean;
 }
+
+/**
+ * Exam-start liveness state is separate from candidateStatus (the admin's
+ * check-in verification) — a candidate can be "Verified" at check-in but
+ * still stuck, failing, or blocked at the face-check gate right before
+ * their exam actually starts. Only rendered once check-in verification has
+ * happened, since liveness only matters after that point.
+ */
+const LivenessIndicator = ({ candidate }: { candidate: Candidate }) => {
+    if (candidate.status !== "Verified" || candidate.livenessVerified) return null;
+    if (candidate.livenessBlocked) {
+        return (
+            <Badge variant="destructive" className="gap-1 text-[9px] sm:text-[10px]">
+                <ShieldAlert className="w-3 h-3" /> Exam Blocked — Face Verification Failed
+            </Badge>
+        );
+    }
+    if ((candidate.livenessAttempts ?? 0) > 0) {
+        return (
+            <Badge variant="secondary" className="gap-1 text-[9px] sm:text-[10px] bg-amber-100 text-amber-700 border-amber-200">
+                <AlertTriangle className="w-3 h-3" /> Liveness Failed ({candidate.livenessAttempts}/2)
+            </Badge>
+        );
+    }
+    return null;
+};
 
 const StatusBadge = ({ status }: { status: string }) => {
     switch (status) {
@@ -167,6 +196,9 @@ export function CandidateTable({
                 dob: item.dob,
                 fatherName: item.fatherName,
                 documents,
+                livenessVerified: item.livenessVerified,
+                livenessAttempts: item.livenessAttempts,
+                livenessBlocked: item.livenessBlocked,
             };
         });
     }, [data]);
@@ -258,7 +290,10 @@ export function CandidateTable({
                                         </Badge>
                                     </td>
                                     <td className="p-3 sm:p-4">
-                                        <StatusBadge status={c.status} />
+                                        <div className="flex flex-col items-start gap-1">
+                                            <StatusBadge status={c.status} />
+                                            <LivenessIndicator candidate={c} />
+                                        </div>
                                     </td>
                                     <td className="p-3 sm:p-4 text-right">
                                         <Button
@@ -308,6 +343,7 @@ export function CandidateTable({
                                     <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-1">{selectedCandidate.id}</p>
                                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
                                         <StatusBadge status={selectedCandidate.status} />
+                                        <LivenessIndicator candidate={selectedCandidate} />
                                         <Badge variant={selectedCandidate.payment === "Paid" ? "success" : "destructive"}>
                                             {selectedCandidate.payment}
                                         </Badge>

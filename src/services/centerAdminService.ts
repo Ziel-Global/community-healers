@@ -20,6 +20,11 @@ export interface Candidate {
     candidateStatus: string | null;
     examDate: string | null;
     examStartTime: string;
+    /** Exam-start liveness check the candidate does themselves — separate
+     * from candidateStatus (admin's check-in verification). */
+    livenessVerified?: boolean;
+    livenessAttempts?: number;
+    livenessBlocked?: boolean;
     user: {
         id: string;
         firstName: string;
