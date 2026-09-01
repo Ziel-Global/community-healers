@@ -22,6 +22,7 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
 import { centerAdminService, CandidateDocument } from "@/services/centerAdminService";
+import { CameraCaptureDialog } from "./CameraCaptureDialog";
 
 interface Candidate {
     id: string;
@@ -66,6 +67,7 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
     const loading = updateCandidateStatus.isPending;
     const faceInputRef = useRef<HTMLInputElement>(null);
     const [faceCheckResult, setFaceCheckResult] = useState<{ matched: boolean; confidence: number } | null>(null);
+    const [showCameraDialog, setShowCameraDialog] = useState(false);
     const [previewDoc, setPreviewDoc] = useState<{
         label: string;
         type: string;
@@ -132,10 +134,8 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
         setPreviewBlobUrl(null);
     };
 
-    const handleFacePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        e.target.value = ""; // allow re-selecting the same file on retry
-        if (!file || !candidate?.id) return;
+    const runFaceVerification = (file: File) => {
+        if (!candidate?.id) return;
 
         verifyFace.mutate(
             { candidateId: candidate.id, photo: file },
@@ -158,6 +158,12 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                 },
             }
         );
+    };
+
+    const handleFacePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = ""; // allow re-selecting the same file on retry
+        if (file) runFaceVerification(file);
     };
 
     const handleVerifyAndUnlock = () => {
@@ -294,21 +300,31 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2 flex-shrink-0">
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="outline"
-                                        disabled={verifyFace.isPending}
-                                        onClick={() => faceInputRef.current?.click()}
-                                        className="h-8"
-                                    >
-                                        {verifyFace.isPending ? (
-                                            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                                        ) : (
-                                            <Camera className="w-3.5 h-3.5 mr-1.5" />
-                                        )}
-                                        {faceCheckResult ? "Retry" : "Verify"}
-                                    </Button>
+                                    <div className="flex flex-col items-end gap-0.5">
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="outline"
+                                            disabled={verifyFace.isPending}
+                                            onClick={() => setShowCameraDialog(true)}
+                                            className="h-8"
+                                        >
+                                            {verifyFace.isPending ? (
+                                                <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                                            ) : (
+                                                <Camera className="w-3.5 h-3.5 mr-1.5" />
+                                            )}
+                                            {faceCheckResult ? "Retry" : "Verify"}
+                                        </Button>
+                                        <button
+                                            type="button"
+                                            disabled={verifyFace.isPending}
+                                            onClick={() => faceInputRef.current?.click()}
+                                            className="text-[10px] text-muted-foreground underline hover:text-foreground"
+                                        >
+                                            or upload a file
+                                        </button>
+                                    </div>
                                     <button
                                         type="button"
                                         title="Manual override"
@@ -503,6 +519,12 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            <CameraCaptureDialog
+                open={showCameraDialog}
+                onOpenChange={setShowCameraDialog}
+                onCapture={runFaceVerification}
+            />
         </>
     );
 }
