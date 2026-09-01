@@ -236,7 +236,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                             type="file"
                                             ref={el => fileInputRefs.current[doc.id] = el}
                                             className="hidden"
-                                            accept={doc.type.includes('Image') ? 'image/*,application/pdf' : 'application/pdf'}
+                                            accept={doc.id === 'photo' ? 'image/jpeg,image/png' : 'image/*,application/pdf'}
                                             onChange={(e) => handleFileSelect(doc.id, e.target.files?.[0] || null)}
                                         />
                                         <Button

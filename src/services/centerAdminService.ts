@@ -127,6 +127,27 @@ export const updateCandidateStatus = async (id: string, status: 'VERIFIED' | 'RE
     }
 };
 
+export interface VerifyFaceResult {
+    matched: boolean;
+    confidence: number;
+    autoVerified: boolean;
+}
+
+export const verifyFace = async (candidateId: string, photo: File): Promise<VerifyFaceResult> => {
+    try {
+        const formData = new FormData();
+        formData.append('photo', photo);
+
+        const response = await api.post(`/center-admin/candidates/${candidateId}/verify-face`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error verifying face:', error);
+        throw error;
+    }
+};
+
 type CenterDetailsRawResponse = CenterDetails[] | { centers?: CenterDetails[] } | CenterDetails | null | undefined;
 
 export const getCenterDetails = async (): Promise<CenterDetails | null> => {
@@ -219,4 +240,5 @@ export const centerAdminService = {
     closeVerification,
     getDashboardStats,
     updateTrainingTimings,
+    verifyFace,
 };

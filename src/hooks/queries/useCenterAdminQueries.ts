@@ -52,6 +52,19 @@ export function useUpdateCandidateStatus() {
     });
 }
 
+export function useVerifyFace() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ candidateId, photo }: { candidateId: string; photo: File }) =>
+            centerAdminService.verifyFace(candidateId, photo),
+        onSuccess: (result) => {
+            if (result.autoVerified) {
+                queryClient.invalidateQueries({ queryKey: centerAdminKeys.todayCandidates() });
+            }
+        },
+    });
+}
+
 export function useCloseVerification() {
     const queryClient = useQueryClient();
     return useMutation({

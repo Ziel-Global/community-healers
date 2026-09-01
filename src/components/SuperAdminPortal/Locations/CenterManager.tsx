@@ -19,7 +19,7 @@ import { getApiErrorMessage } from "@/lib/errors";
 export function CenterManager() {
     const { toast } = useToast();
     const { data: centers = [], isLoading: isLoadingCenters, error: centersError } = useSuperAdminCenters();
-    const { data: cities = [], error: citiesError } = useCities();
+    const { data: cities = [], isLoading: isLoadingCities, error: citiesError, refetch: refetchCities } = useCities();
     const createCenterMutation = useCreateCenter();
     const createCityMutation = useCreateCity();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -275,7 +275,13 @@ export function CenterManager() {
             )}
 
             {/* Add New Center Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog
+                open={isDialogOpen}
+                onOpenChange={(open) => {
+                    setIsDialogOpen(open);
+                    if (open) refetchCities();
+                }}
+            >
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -325,7 +331,15 @@ export function CenterManager() {
                                             <SelectValue placeholder="Select city" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {cities.length > 0 ? (
+                                            {isLoadingCities ? (
+                                                <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                                                    Loading cities...
+                                                </div>
+                                            ) : citiesError ? (
+                                                <div className="px-2 py-6 text-center text-sm text-destructive">
+                                                    Failed to load cities. Please try again.
+                                                </div>
+                                            ) : cities.length > 0 ? (
                                                 cities.map((city) => (
                                                     <SelectItem key={city.id} value={city.id}>
                                                         {city.name}
@@ -333,7 +347,7 @@ export function CenterManager() {
                                                 ))
                                             ) : (
                                                 <div className="px-2 py-6 text-center text-sm text-muted-foreground">
-                                                    Loading cities...
+                                                    No cities yet — add one first.
                                                 </div>
                                             )}
                                         </SelectContent>

@@ -16,12 +16,13 @@ export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 
 export const MAX_DOCUMENT_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
+const PHOTO_MIME_TYPES = ["image/jpeg", "image/png"];
 const ACCEPTED_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
 const ACCEPTED_DOCUMENT_MIME_TYPES = [...ACCEPTED_IMAGE_MIME_TYPES, "application/pdf"];
 
-/** "photo" must be an image; every other document type also accepts a PDF. */
+/** "photo" must be a JPG/JPEG/PNG image; every other document type also accepts a PDF or other image formats. */
 function allowedMimeTypesFor(type: DocumentType): string[] {
-    return type === "photo" ? ACCEPTED_IMAGE_MIME_TYPES : ACCEPTED_DOCUMENT_MIME_TYPES;
+    return type === "photo" ? PHOTO_MIME_TYPES : ACCEPTED_DOCUMENT_MIME_TYPES;
 }
 
 export const documentMetadataSchema = z

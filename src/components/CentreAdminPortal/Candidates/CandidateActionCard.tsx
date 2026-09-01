@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,10 @@ import {
     FileText,
     Eye,
     AlertCircle,
+    Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useUpdateCandidateStatus } from "@/hooks/queries/useCenterAdminQueries";
+import { useUpdateCandidateStatus, useVerifyFace } from "@/hooks/queries/useCenterAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
@@ -61,7 +62,10 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
     const navigate = useNavigate();
     const { toast } = useToast();
     const updateCandidateStatus = useUpdateCandidateStatus();
+    const verifyFace = useVerifyFace();
     const loading = updateCandidateStatus.isPending;
+    const faceInputRef = useRef<HTMLInputElement>(null);
+    const [faceCheckResult, setFaceCheckResult] = useState<{ matched: boolean; confidence: number } | null>(null);
     const [previewDoc, setPreviewDoc] = useState<{
         label: string;
         type: string;
@@ -126,6 +130,34 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
     const closePreview = () => {
         setPreviewDoc(null);
         setPreviewBlobUrl(null);
+    };
+
+    const handleFacePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = ""; // allow re-selecting the same file on retry
+        if (!file || !candidate?.id) return;
+
+        verifyFace.mutate(
+            { candidateId: candidate.id, photo: file },
+            {
+                onSuccess: (result) => {
+                    setFaceCheckResult({ matched: result.matched, confidence: result.confidence });
+                    setChecklist((prev) => ({ ...prev, faceMatch: result.matched }));
+                    toast({
+                        title: result.matched ? "Face Matched" : "Face Did Not Match",
+                        description: `Confidence: ${result.confidence.toFixed(1)}%${result.matched ? " — candidate auto-verified" : " — retry or override manually"}`,
+                        variant: result.matched ? "default" : "destructive",
+                    });
+                },
+                onError: (error) => {
+                    toast({
+                        variant: "destructive",
+                        title: "Verification Failed",
+                        description: getApiErrorMessage(error, "Could not verify face. Please try again."),
+                    });
+                },
+            }
+        );
     };
 
     const handleVerifyAndUnlock = () => {
@@ -234,10 +266,66 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                             <UserCheck className="w-4 h-4 text-primary" /> Verification Checklist
                         </h4>
 
+                        <input
+                            type="file"
+                            accept="image/jpeg,image/png"
+                            capture="environment"
+                            ref={faceInputRef}
+                            className="hidden"
+                            onChange={handleFacePhotoSelected}
+                        />
                         <div className="grid gap-3">
+                            <div
+                                className={cn(
+                                    "flex items-center justify-between p-4 rounded-xl border transition-all",
+                                    checklist.faceMatch
+                                        ? "bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/20"
+                                        : "bg-secondary text-muted-foreground border-border/40"
+                                )}
+                            >
+                                <div className="min-w-0">
+                                    <span className={cn("text-sm font-medium transition-colors block", checklist.faceMatch ? "text-emerald-700" : "text-muted-foreground")}>
+                                        Face matches Registration Photo
+                                    </span>
+                                    {faceCheckResult && (
+                                        <span className={cn("text-[11px]", faceCheckResult.matched ? "text-emerald-600" : "text-destructive")}>
+                                            {faceCheckResult.matched ? "Matched" : "No match"} — {faceCheckResult.confidence.toFixed(1)}% confidence
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={verifyFace.isPending}
+                                        onClick={() => faceInputRef.current?.click()}
+                                        className="h-8"
+                                    >
+                                        {verifyFace.isPending ? (
+                                            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                                        ) : (
+                                            <Camera className="w-3.5 h-3.5 mr-1.5" />
+                                        )}
+                                        {faceCheckResult ? "Retry" : "Verify"}
+                                    </Button>
+                                    <button
+                                        type="button"
+                                        title="Manual override"
+                                        onClick={() => setChecklist((prev) => ({ ...prev, faceMatch: !prev.faceMatch }))}
+                                        className={cn(
+                                            "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
+                                            checklist.faceMatch
+                                                ? "bg-emerald-500 border-emerald-500 scale-110"
+                                                : "border-border/60 hover:border-primary/40"
+                                        )}
+                                    >
+                                        {checklist.faceMatch && <CheckCircle2 className="w-4 h-4 text-white" />}
+                                    </button>
+                                </div>
+                            </div>
                             {[
                                 { id: 'present', label: 'Candidate is Physically Present' },
-                                { id: 'faceMatch', label: 'Face matches Registration Photo' },
                                 { id: 'cnicMatch', label: 'CNIC matches system Record' }
                             ].map((item) => (
                                 <button
