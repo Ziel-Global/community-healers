@@ -25,7 +25,10 @@ interface ActivePaymentDetails {
 export function PaymentStep({ onNext, onBack, isFirstStep, isRepayment = false }: WizardStepProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const isLocalDev = import.meta.env.DEV;
+  // DEV covers local `vite dev`; VITE_ENABLE_PAYMENT_SIMULATION is the
+  // build-time opt-in for staging/test deployments that need the same
+  // bypass without a real bank payment. Never set it on a production build.
+  const isLocalDev = import.meta.env.DEV || import.meta.env.VITE_ENABLE_PAYMENT_SIMULATION === "true";
 
   const [isPaid, setIsPaid] = useState(false);
   const [isQRGenerated, setIsQRGenerated] = useState(false);
