@@ -84,6 +84,9 @@ export interface CandidateStatusResponse {
     examEndTime?: string;
     livenessVerified?: boolean;
     livenessBlocked?: boolean;
+    /** Present when there's no exam session at all — distinguishes a degree-path candidate from one who just hasn't scheduled yet. */
+    certificationPath?: 'EXAM' | 'DEGREE';
+    degreeReviewStatus?: 'PENDING' | 'UPLOADED' | 'APPROVED' | 'REJECTED' | null;
 }
 
 export interface ExamScheduledResponse {

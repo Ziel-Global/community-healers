@@ -22,7 +22,7 @@ export default function ExamPortal() {
     const navigate = useNavigate();
     const { i18n } = useTranslation();
     const { logout } = useAuth();
-    const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress" | "other-device" | "questions-error" | "liveness-blocked">("loading");
+    const [examState, setExamState] = useState<"loading" | "pending" | "verified" | "rejected" | "absent" | "submitted" | "countdown" | "in-progress" | "other-device" | "questions-error" | "liveness-blocked" | "degree-path">("loading");
     const [countdown, setCountdown] = useState(3);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [scheduledExam, setScheduledExam] = useState<ExamScheduledResponse | null>(null);
@@ -119,8 +119,13 @@ export default function ExamPortal() {
                 setExamState("submitted");
                 break;
             default:
-                console.log("Status: Unknown, defaulting to PENDING");
-                setExamState("pending");
+                if (statusData.certificationPath === 'DEGREE') {
+                    console.log("Status: no exam session — candidate is on the degree path");
+                    setExamState("degree-path");
+                } else {
+                    console.log("Status: Unknown, defaulting to PENDING");
+                    setExamState("pending");
+                }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [statusQuery.isSuccess, statusQuery.data]);
@@ -300,6 +305,64 @@ export default function ExamPortal() {
                                     <li>• Do not refresh or close this page</li>
                                 </ul>
                             </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
+    // Degree path — no exam session exists for this candidate at all, since
+    // they never schedule one. Distinct from "pending" so they aren't told
+    // to wait for a test that will never start.
+    if (examState === "degree-path") {
+        const degreeStatus = candidateStatus?.degreeReviewStatus;
+        const degreeMessage =
+            degreeStatus === "REJECTED"
+                ? "The Ministry could not approve your submitted transcript. Please check your Candidate Portal for details."
+                : degreeStatus === "APPROVED"
+                    ? "Your degree transcript has been approved. Your certificate will appear on your Candidate Portal once it's issued."
+                    : "Your degree transcript is under Ministry review. No exam or training center visit is required for this path.";
+
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <header className="border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
+                                    <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+                                </div>
+                                <div>
+                                    <h1 className="alumni-sans-title text-lg sm:text-xl text-foreground">Training Portal</h1>
+                                    <p className="text-xs text-muted-foreground hidden sm:block">Computer Based Testing</p>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut} className="gap-1 sm:gap-2">
+                                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                            </Button>
+                        </div>
+                    </div>
+                </header>
+
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <Card className="w-full max-w-md border-border/40 shadow-royal text-center">
+                        <CardHeader className="space-y-4">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                                <FileText className="w-8 h-8 text-primary" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-xl sm:text-2xl font-display">No Exam Required</CardTitle>
+                                <CardDescription className="mt-2">
+                                    {degreeMessage}
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <Button className="w-full gradient-primary text-white" onClick={() => navigate("/candidate")}>
+                                Go to Candidate Portal
+                            </Button>
                         </CardContent>
                     </Card>
                 </div>
