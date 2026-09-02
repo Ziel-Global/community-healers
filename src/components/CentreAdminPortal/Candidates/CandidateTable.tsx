@@ -4,9 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Calendar, FileText, Download, ExternalLink, Loader2, ShieldAlert, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTodayCandidates } from "@/hooks/queries/useCenterAdminQueries";
+import { useTodayCandidates, useOverrideLiveness } from "@/hooks/queries/useCenterAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
@@ -97,6 +98,9 @@ export function CandidateTable({
     const { toast } = useToast();
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [pendingDocId, setPendingDocId] = useState<string | null>(null);
+    const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
+    const [overrideReason, setOverrideReason] = useState("");
+    const overrideLivenessMutation = useOverrideLiveness();
 
     // Default to today if not provided — local date components, not
     // toISOString(), which converts to UTC first and silently returns
@@ -213,6 +217,31 @@ export function CandidateTable({
             navigate("/center/verification");
         }
         setSelectedCandidate(null);
+    };
+
+    const handleOverrideLiveness = () => {
+        if (!selectedCandidate || overrideReason.trim().length < 5) return;
+        overrideLivenessMutation.mutate(
+            { candidateId: selectedCandidate.id, reason: overrideReason.trim() },
+            {
+                onSuccess: () => {
+                    toast({
+                        title: "Liveness check overridden",
+                        description: `${selectedCandidate.name} can now start the exam.`,
+                    });
+                    setOverrideDialogOpen(false);
+                    setOverrideReason("");
+                    setSelectedCandidate(null);
+                },
+                onError: (error) => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: getApiErrorMessage(error, "Failed to override liveness check."),
+                    });
+                },
+            }
+        );
     };
 
     // Filter candidates by status
@@ -480,6 +509,16 @@ export function CandidateTable({
                                 <Button variant="outline" onClick={() => setSelectedCandidate(null)}>
                                     Close
                                 </Button>
+                                {canVerify && selectedCandidate.livenessBlocked && (
+                                    <Button
+                                        variant="outline"
+                                        className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                                        onClick={() => setOverrideDialogOpen(true)}
+                                    >
+                                        <ShieldAlert className="w-4 h-4 mr-2" />
+                                        Verify Manually & Unblock
+                                    </Button>
+                                )}
                                 {canVerify && selectedCandidate.status === "Pending" && (
                                     <Button
                                         onClick={handleVerify}
@@ -491,6 +530,53 @@ export function CandidateTable({
                             </div>
                         </div>
                     )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Manual Liveness Override — bypasses the automated face check for a
+                candidate blocked after 2 failed attempts. Requires a reason since
+                this skips biometric verification and needs a paper trail. */}
+            <Dialog
+                open={overrideDialogOpen}
+                onOpenChange={(open) => {
+                    setOverrideDialogOpen(open);
+                    if (!open) setOverrideReason("");
+                }}
+            >
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <ShieldAlert className="w-5 h-5 text-destructive" />
+                            Verify Manually & Unblock
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground">
+                            This skips the automated face check for <span className="font-medium text-foreground">{selectedCandidate?.name}</span> and lets them start the exam. Only do this after physically verifying their identity (face + CNIC) yourself.
+                        </p>
+                        <Textarea
+                            placeholder="Reason for override (e.g. camera lighting issue, verified CNIC + face in person)"
+                            value={overrideReason}
+                            onChange={(e) => setOverrideReason(e.target.value)}
+                            rows={3}
+                        />
+                        {overrideReason.trim().length > 0 && overrideReason.trim().length < 5 && (
+                            <p className="text-xs text-destructive">Reason must be at least 5 characters.</p>
+                        )}
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <Button variant="outline" onClick={() => setOverrideDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            disabled={overrideReason.trim().length < 5 || overrideLivenessMutation.isPending}
+                            onClick={handleOverrideLiveness}
+                        >
+                            {overrideLivenessMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                            Confirm Override
+                        </Button>
+                    </div>
                 </DialogContent>
             </Dialog>
         </>

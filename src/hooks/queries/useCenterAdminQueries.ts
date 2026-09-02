@@ -65,6 +65,17 @@ export function useVerifyFace() {
     });
 }
 
+export function useOverrideLiveness() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ candidateId, reason }: { candidateId: string; reason: string }) =>
+            centerAdminService.overrideLiveness(candidateId, reason),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: centerAdminKeys.todayCandidates() });
+        },
+    });
+}
+
 export function useCloseVerification() {
     const queryClient = useQueryClient();
     return useMutation({

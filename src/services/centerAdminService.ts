@@ -155,6 +155,16 @@ export const verifyFace = async (candidateId: string, photo: File): Promise<Veri
     }
 };
 
+export const overrideLiveness = async (candidateId: string, reason: string): Promise<{ livenessVerified: boolean }> => {
+    try {
+        const response = await api.post(`/center-admin/candidates/${candidateId}/override-liveness`, { reason });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error overriding liveness check:', error);
+        throw error;
+    }
+};
+
 type CenterDetailsRawResponse = CenterDetails[] | { centers?: CenterDetails[] } | CenterDetails | null | undefined;
 
 export const getCenterDetails = async (): Promise<CenterDetails | null> => {
@@ -248,4 +258,5 @@ export const centerAdminService = {
     getDashboardStats,
     updateTrainingTimings,
     verifyFace,
+    overrideLiveness,
 };
