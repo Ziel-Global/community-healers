@@ -25,8 +25,18 @@ export function EducationDeclaration({ candidateData, onToggle }: EducationDecla
     const fileInputRef = useRef<HTMLInputElement>(null);
     const uploadDocumentMutation = useUploadDocument();
 
+    // Hydrate the toggle from the server/localStorage only once. Without this
+    // guard, uploading the transcript triggers a /candidates/me refetch (see
+    // useUploadDocument's invalidation) whose has16YearsEducation is still
+    // false — it's only persisted at final submit, not by this toggle — so
+    // the effect would immediately flip hasSixteenYears back off and collapse
+    // the whole upload section right after a successful upload.
+    const hasHydratedRef = useRef(false);
     useEffect(() => {
+        if (hasHydratedRef.current) return;
+
         if (candidateData) {
+            hasHydratedRef.current = true;
             setHasSixteenYears(candidateData.has16YearsEducation || false);
 
             const degreeDoc = candidateData.documents?.find((d: any) => d.type === 'degreeTranscript');
@@ -39,6 +49,18 @@ export function EducationDeclaration({ candidateData, onToggle }: EducationDecla
             setHasSixteenYears(saved);
         }
     }, [candidateData]);
+
+    // The upload endpoint always upserts the document row, so once it
+    // succeeds we can trust candidateData's document list going forward
+    // (e.g. after a reject-then-reupload cycle) without re-touching the
+    // hydration guard above.
+    useEffect(() => {
+        const degreeDoc = candidateData?.documents?.find((d: any) => d.type === 'degreeTranscript');
+        if (degreeDoc && degreeDoc.fileUrl) {
+            setIsUploaded(true);
+            setUploadedFileName(degreeDoc.fileUrl.split('/').pop() || "Uploaded");
+        }
+    }, [candidateData?.documents]);
 
     // Fires on both the initial load-derived value and every manual toggle,
     // so the parent step (which owns the "Continue to Payment" vs "Submit
