@@ -31,6 +31,16 @@ export const getCities = async (): Promise<City[]> => {
     }
 };
 
+export const getAllCities = async (): Promise<City[]> => {
+    try {
+        const response = await api.get('/super-admin/cities/all');
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Get All Cities error:', error);
+        throw new Error(getApiErrorMessage(error, 'Failed to fetch cities.'));
+    }
+};
+
 export const createCity = async (name: string): Promise<City> => {
     try {
         const response = await api.post('/super-admin/city', { name });
@@ -166,6 +176,7 @@ export const superAdminService = {
     updateExamSettings,
     getExamSettings,
     getCities,
+    getAllCities,
     createCity,
     createCenter,
     getCenters,
