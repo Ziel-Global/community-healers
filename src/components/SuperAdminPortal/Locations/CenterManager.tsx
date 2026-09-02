@@ -206,6 +206,30 @@ export function CenterManager() {
                 </div>
             </div>
 
+            <div className="space-y-2">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    Cities ({cities.length})
+                </p>
+                {isLoadingCities ? (
+                    <p className="text-xs text-muted-foreground">Loading cities...</p>
+                ) : cities.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No cities yet — click "Add New City" to create one.</p>
+                ) : (
+                    <div className="flex flex-wrap gap-2">
+                        {cities.map((city) => (
+                            <Badge
+                                key={city.id}
+                                variant="outline"
+                                className="gap-1.5 h-8 px-3 bg-card/60 border-border/60 text-sm font-normal"
+                            >
+                                <MapPin className="w-3 h-3 text-primary" />
+                                {city.name}
+                            </Badge>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             {isLoadingCenters ? (
                 <div className="flex items-center justify-center py-12">
                     <div className="flex flex-col items-center gap-3">
