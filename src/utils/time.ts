@@ -42,6 +42,31 @@ export function formatTimeLabel(
   }
 }
 
+const PKT_OFFSET_MINUTES = 5 * 60;
+
+function shiftHHMM(hhmm: string, deltaMinutes: number): string {
+  const [h, m] = hhmm.split(":").map(Number);
+  const total = (((h * 60 + m + deltaMinutes) % (24 * 60)) + 24 * 60) % (24 * 60);
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+/**
+ * Center training-hours ("HH:MM") are stored and computed server-side as
+ * literal UTC wall-clock time — the server has no Pakistan-timezone
+ * awareness, so "09:00" in the database has always actually meant 9 AM UTC
+ * (2 PM PKT) when the backend builds real exam-start timestamps from it.
+ * These convert only for display/input on the center-admin settings page,
+ * so an admin can type and read genuine Pakistan hours while the stored
+ * value (and everything the backend does with it) stays exactly as before.
+ */
+export function utcHHMMToPkt(hhmm: string): string {
+  return shiftHHMM(hhmm, PKT_OFFSET_MINUTES);
+}
+
+export function pktHHMMToUtc(hhmm: string): string {
+  return shiftHHMM(hhmm, -PKT_OFFSET_MINUTES);
+}
+
 export function isRepaymentRequiredMessage(message?: string): boolean {
   if (!message) return false;
   return /pay.*(again|exam fee)|repay|fee again|must pay/i.test(message);

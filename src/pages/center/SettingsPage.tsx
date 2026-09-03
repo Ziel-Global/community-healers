@@ -8,11 +8,21 @@ import { TimePicker } from "@/components/ui/time-picker";
 import { Clock, Loader2, Save } from "lucide-react";
 import { useCenterDetails, useUpdateTrainingTimings } from "@/hooks/queries/useCenterAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
-import { toTimeInputValue } from "@/utils/time";
+import { toTimeInputValue, utcHHMMToPkt, pktHHMMToUtc } from "@/utils/time";
 import { toast } from "sonner";
 
-const DEFAULT_START = "09:00";
-const DEFAULT_END = "17:00";
+// The server stores and computes training hours as literal UTC wall-clock
+// time (no Pakistan-timezone awareness at all) — "09:00"/"17:00" here is
+// the true raw default the backend falls back to.
+const RAW_DEFAULT_START = "09:00";
+const RAW_DEFAULT_END = "17:00";
+
+// This page displays/edits in Pakistan time throughout — everything below
+// converts at the load/save boundary so the admin only ever sees and types
+// genuine PKT hours, while the value sent to/received from the API stays
+// in the raw UTC-labeled form the backend already expects.
+const DEFAULT_START = utcHHMMToPkt(RAW_DEFAULT_START);
+const DEFAULT_END = utcHHMMToPkt(RAW_DEFAULT_END);
 
 export default function SettingsPage() {
   const [trainingStartTime, setTrainingStartTime] = useState(DEFAULT_START);
@@ -36,8 +46,8 @@ export default function SettingsPage() {
   // in-progress edits the user hasn't saved yet.
   useEffect(() => {
     if (!isLoading && centerData?.id && !initialized) {
-      const start = toTimeInputValue(centerData.trainingStartTime, DEFAULT_START);
-      const end = toTimeInputValue(centerData.trainingEndTime, DEFAULT_END);
+      const start = utcHHMMToPkt(toTimeInputValue(centerData.trainingStartTime, RAW_DEFAULT_START));
+      const end = utcHHMMToPkt(toTimeInputValue(centerData.trainingEndTime, RAW_DEFAULT_END));
       setTrainingStartTime(start);
       setTrainingEndTime(end);
       setSavedStartTime(start);
@@ -67,12 +77,15 @@ export default function SettingsPage() {
       return;
     }
 
+    const rawStart = pktHHMMToUtc(trainingStartTime);
+    const rawEnd = pktHHMMToUtc(trainingEndTime);
+
     updateTimings.mutate(
-      { centerId, timings: { trainingStartTime, trainingEndTime } },
+      { centerId, timings: { trainingStartTime: rawStart, trainingEndTime: rawEnd } },
       {
         onSuccess: (updated) => {
-          const start = toTimeInputValue(updated?.trainingStartTime, trainingStartTime);
-          const end = toTimeInputValue(updated?.trainingEndTime, trainingEndTime);
+          const start = utcHHMMToPkt(toTimeInputValue(updated?.trainingStartTime, rawStart));
+          const end = utcHHMMToPkt(toTimeInputValue(updated?.trainingEndTime, rawEnd));
           setTrainingStartTime(start);
           setTrainingEndTime(end);
           setSavedStartTime(start);
