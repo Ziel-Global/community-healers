@@ -15,7 +15,6 @@ export const superAdminKeys = {
         [...superAdminKeys.all, "centerRegisteredCandidates", centerId, date] as const,
     questions: () => [...superAdminKeys.all, "questions"] as const,
     centerAdmins: () => [...superAdminKeys.all, "centerAdmins"] as const,
-    allCities: () => [...superAdminKeys.all, "allCities"] as const,
 };
 
 export function useDashboardStats() {
@@ -103,31 +102,14 @@ export function useCreateCenter() {
     });
 }
 
-/**
- * Cities are shared reference data — see useReferenceQueries.useCities,
- * also read by the candidate-facing PersonalInfoForm. That query only
- * returns cities with at least one center (not a valid choice for a
- * candidate otherwise), so a freshly-created city won't appear there
- * until it has one — invalidate the super-admin-only unfiltered list too
- * so it shows up immediately for whoever's about to establish that city's
- * first center.
- */
+/** Cities are shared reference data — see useReferenceQueries.useCities, also read by the candidate-facing PersonalInfoForm. */
 export function useCreateCity() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (name: string) => superAdminService.createCity(name),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: referenceKeys.cities() });
-            queryClient.invalidateQueries({ queryKey: superAdminKeys.allCities() });
         },
-    });
-}
-
-/** All cities regardless of whether they have a center yet — for super-admin management (e.g. picking a city while establishing its first center). */
-export function useAllCities() {
-    return useQuery({
-        queryKey: superAdminKeys.allCities(),
-        queryFn: superAdminService.getAllCities,
     });
 }
 

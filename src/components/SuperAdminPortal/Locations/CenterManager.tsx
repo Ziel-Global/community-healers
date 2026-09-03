@@ -12,16 +12,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { CenterDetail } from "./CenterDetail";
 import { SuperAdminCenter } from "@/types/superAdmin";
-import { useSuperAdminCenters, useCreateCenter, useCreateCity, useAllCities } from "@/hooks/queries/useSuperAdminQueries";
+import { useSuperAdminCenters, useCreateCenter, useCreateCity } from "@/hooks/queries/useSuperAdminQueries";
+import { useCities } from "@/hooks/queries/useReferenceQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 
 export function CenterManager() {
     const { toast } = useToast();
     const { data: centers = [], isLoading: isLoadingCenters, error: centersError } = useSuperAdminCenters();
-    // Unfiltered — unlike the candidate-facing city picker, a super admin
-    // needs to see a city here even before it has a center, since that's
-    // exactly the state right after adding one.
-    const { data: cities = [], isLoading: isLoadingCities, error: citiesError, refetch: refetchCities } = useAllCities();
+    const { data: cities = [], isLoading: isLoadingCities, error: citiesError, refetch: refetchCities } = useCities();
     const createCenterMutation = useCreateCenter();
     const createCityMutation = useCreateCity();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
