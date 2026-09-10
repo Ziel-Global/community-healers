@@ -12,10 +12,24 @@ const DEFAULT_CENTER = { lat: 33.6844, lng: 73.0479 }; // Islamabad — used unt
 
 const mapContainerStyle = { width: "100%", height: "320px", borderRadius: "0.75rem" };
 
+// Same preference order as the backend's reverse-geocode extraction — kept in
+// sync since Places Autocomplete results are parsed client-side, unlike pin
+// drops/searches which go through our backend's Geocoding proxy.
+const CITY_COMPONENT_TYPES = ["locality", "administrative_area_level_2", "administrative_area_level_1"];
+
+function extractCityFromComponents(components: google.maps.GeocoderAddressComponent[] | undefined): string | null {
+  if (!components) return null;
+  for (const type of CITY_COMPONENT_TYPES) {
+    const match = components.find((c) => c.types.includes(type));
+    if (match) return match.long_name;
+  }
+  return null;
+}
+
 interface LocationPickerProps {
   latitude: number | null;
   longitude: number | null;
-  onLocationChange: (lat: number, lng: number, address: string | null) => void;
+  onLocationChange: (lat: number, lng: number, address: string | null, city: string | null) => void;
 }
 
 export function LocationPicker({ latitude, longitude, onLocationChange }: LocationPickerProps) {
@@ -25,6 +39,7 @@ export function LocationPicker({ latitude, longitude, onLocationChange }: Locati
   });
 
   const [address, setAddress] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
   const [placeName, setPlaceName] = useState<string | null>(null);
   const [resolving, setResolving] = useState(false);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
@@ -41,10 +56,12 @@ export function LocationPicker({ latitude, longitude, onLocationChange }: Locati
       try {
         const result = await centerOnboardingService.reverseGeocode(lat, lng);
         setAddress(result.formattedAddress);
+        setCity(result.city);
         setPlaceName(null);
-        onLocationChange(lat, lng, result.formattedAddress);
+        onLocationChange(lat, lng, result.formattedAddress, result.city);
       } catch {
         setAddress(null);
+        setCity(null);
       } finally {
         setResolving(false);
       }
@@ -54,10 +71,10 @@ export function LocationPicker({ latitude, longitude, onLocationChange }: Locati
 
   const handlePick = useCallback(
     (lat: number, lng: number) => {
-      onLocationChange(lat, lng, address);
+      onLocationChange(lat, lng, address, city);
       void reverseGeocode(lat, lng);
     },
-    [onLocationChange, address, reverseGeocode],
+    [onLocationChange, address, city, reverseGeocode],
   );
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
@@ -76,8 +93,10 @@ export function LocationPicker({ latitude, longitude, onLocationChange }: Locati
     if (!loc) return;
     const lat = loc.lat();
     const lng = loc.lng();
-    onLocationChange(lat, lng, place.formatted_address ?? null);
+    const detectedCity = extractCityFromComponents(place.address_components);
+    onLocationChange(lat, lng, place.formatted_address ?? null, detectedCity);
     setAddress(place.formatted_address ?? null);
+    setCity(detectedCity);
     setPlaceName(place.name ?? null);
     mapRef.current?.panTo({ lat, lng });
     mapRef.current?.setZoom(16);
@@ -137,7 +156,16 @@ export function LocationPicker({ latitude, longitude, onLocationChange }: Locati
                 <Loader2 className="w-3 h-3 animate-spin" /> Looking up address…
               </p>
             ) : (
-              <p className="text-muted-foreground">{address ?? `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`}</p>
+              <>
+                <p className="text-muted-foreground">{address ?? `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`}</p>
+                {city ? (
+                  <p className="text-xs text-muted-foreground mt-0.5">City: <span className="font-medium text-foreground">{city}</span></p>
+                ) : (
+                  <p className="text-xs text-destructive mt-0.5">
+                    Couldn't detect a city for this pin — try dropping it closer to a populated area.
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>

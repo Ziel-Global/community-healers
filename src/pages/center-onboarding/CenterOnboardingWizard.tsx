@@ -13,7 +13,6 @@ import {
   centerOnboardingService,
   type CenterApplication,
   type ChecklistItem,
-  type City,
   type StaffCategory,
   type StaffMember,
 } from "@/services/centerOnboardingService";
@@ -67,12 +66,11 @@ export default function CenterOnboardingWizard() {
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [application, setApplication] = useState<CenterApplication | null>(null);
 
-  const [cities, setCities] = useState<City[]>([]);
   const [centerName, setCenterName] = useState("");
   const [address, setAddress] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const [cityId, setCityId] = useState("");
+  const [city, setCity] = useState<string | null>(null);
   const [staff, setStaff] = useState<StaffMember[]>([{ name: "", cnic: "", category: "INSTRUCTOR" }]);
 
   useEffect(() => {
@@ -83,14 +81,6 @@ export default function CenterOnboardingWizard() {
       .finally(() => setChecklistLoading(false));
   }, []);
 
-  useEffect(() => {
-    if (step !== "details") return;
-    centerOnboardingService
-      .getCities()
-      .then(setCities)
-      .catch((error) => toast.error(getApiErrorMessage(error, "Failed to load cities")));
-  }, [step]);
-
   const allAcknowledged = checklist.every((item) => acknowledged[item.id]);
 
   const goToStepForStatus = (app: CenterApplication) => {
@@ -100,7 +90,7 @@ export default function CenterOnboardingWizard() {
       if (app.address) setAddress(app.address);
       if (app.latitude != null) setLatitude(app.latitude);
       if (app.longitude != null) setLongitude(app.longitude);
-      if (app.cityId) setCityId(app.cityId);
+      if (app.city) setCity(app.city);
       if (app.staff && app.staff.length > 0) {
         setStaff(app.staff.map((s) => ({ name: s.name, cnic: s.cnic, category: s.category })));
       }
@@ -171,9 +161,15 @@ export default function CenterOnboardingWizard() {
     setStaff((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleLocationChange = (lat: number, lng: number, geocodedAddress: string | null) => {
+  const handleLocationChange = (
+    lat: number,
+    lng: number,
+    geocodedAddress: string | null,
+    detectedCity: string | null,
+  ) => {
     setLatitude(lat);
     setLongitude(lng);
+    setCity(detectedCity);
     // Only auto-fill from the geocoder if the applicant hasn't typed their own address yet.
     setAddress((prev) => (prev.trim() ? prev : geocodedAddress ?? prev));
   };
@@ -182,12 +178,16 @@ export default function CenterOnboardingWizard() {
     e.preventDefault();
     if (!applicationId || !sessionToken) return;
 
-    if (!centerName.trim() || !address.trim() || !cityId) {
-      toast.error("Please fill in center name, address, and city");
+    if (!centerName.trim() || !address.trim()) {
+      toast.error("Please fill in center name and address");
       return;
     }
     if (latitude == null || longitude == null) {
       toast.error("Please pick your center's location on the map");
+      return;
+    }
+    if (!city) {
+      toast.error("Couldn't detect a city for this pin — try a location closer to a populated area");
       return;
     }
     if (staff.length === 0) {
@@ -208,7 +208,7 @@ export default function CenterOnboardingWizard() {
         address: address.trim(),
         latitude,
         longitude,
-        cityId,
+        city,
         staff,
       });
       setApplication(result);
@@ -362,21 +362,6 @@ export default function CenterOnboardingWizard() {
                 <div className="space-y-2">
                   <Label htmlFor="address">Address</Label>
                   <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>City</Label>
-                  <Select value={cityId} onValueChange={setCityId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cities.map((city) => (
-                        <SelectItem key={city.id} value={city.id}>
-                          {city.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Location</Label>

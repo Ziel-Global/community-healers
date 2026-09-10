@@ -18,11 +18,6 @@ export interface ChecklistItem {
     sortOrder: number;
 }
 
-export interface City {
-    id: string;
-    name: string;
-}
-
 export interface VerifyLicenseResult {
     applicationId: string;
     phone: string;
@@ -50,6 +45,7 @@ export interface CenterApplication {
     latitude: number | null;
     longitude: number | null;
     cityId: string | null;
+    city?: string | null;
     staff?: ApplicationStaffRow[];
 }
 
@@ -63,7 +59,7 @@ export interface SubmitDetailsPayload {
     address: string;
     latitude: number;
     longitude: number;
-    cityId: string;
+    city: string;
     staff: StaffMember[];
 }
 
@@ -72,12 +68,10 @@ const getChecklist = async (): Promise<ChecklistItem[]> => {
     return response.data;
 };
 
-const getCities = async (): Promise<City[]> => {
-    const response = await api.get('/center-onboarding/cities');
-    return response.data;
-};
-
-const reverseGeocode = async (lat: number, lng: number): Promise<{ formattedAddress: string | null }> => {
+const reverseGeocode = async (
+    lat: number,
+    lng: number,
+): Promise<{ formattedAddress: string | null; city: string | null }> => {
     const response = await api.get('/center-onboarding/geocode/reverse', { params: { lat, lng } });
     return response.data;
 };
@@ -120,7 +114,6 @@ const submitDetails = async (
 
 export const centerOnboardingService = {
     getChecklist,
-    getCities,
     reverseGeocode,
     verifyLicense,
     resendOtp,
