@@ -3,9 +3,9 @@
  * (ministry_backend/src/utils/enums.ts) exactly, since these values come
  * straight from the JWT `role` claim issued by that backend.
  */
-export type UserRole = 'SUPER_ADMIN' | 'CANDIDATE' | 'CENTER_ADMIN' | 'MINISTRY';
+export type UserRole = 'SUPER_ADMIN' | 'CANDIDATE' | 'CENTER_ADMIN' | 'MINISTRY' | 'INSPECTOR';
 
-export type PortalType = 'candidate' | 'center' | 'admin' | 'ministry' | 'exam';
+export type PortalType = 'candidate' | 'center' | 'admin' | 'ministry' | 'exam' | 'inspector';
 
 /**
  * Which roles may access each portal. SUPER_ADMIN is included everywhere
@@ -20,6 +20,7 @@ export const PORTAL_ALLOWED_ROLES: Record<PortalType, UserRole[]> = {
     center: ['CENTER_ADMIN', 'SUPER_ADMIN'],
     ministry: ['MINISTRY', 'SUPER_ADMIN'],
     admin: ['SUPER_ADMIN'],
+    inspector: ['INSPECTOR', 'SUPER_ADMIN'],
 };
 
 /** Where to send a logged-in user who hits a portal their role can't access. */
@@ -28,4 +29,5 @@ export const ROLE_HOME_PATH: Record<UserRole, string> = {
     CENTER_ADMIN: '/center',
     MINISTRY: '/ministry',
     SUPER_ADMIN: '/admin',
+    INSPECTOR: '/inspector',
 };

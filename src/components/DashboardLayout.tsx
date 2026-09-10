@@ -17,7 +17,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
   subtitle?: string;
-  portalType: "candidate" | "center" | "admin" | "ministry";
+  portalType: "candidate" | "center" | "admin" | "ministry" | "inspector";
   navItems: NavItem[];
 }
 
@@ -26,6 +26,7 @@ const portalColors = {
   center: "from-emerald-500 to-teal-500",
   admin: "from-violet-500 to-purple-500",
   ministry: "from-primary to-royal-700",
+  inspector: "from-amber-500 to-orange-500",
 };
 
 const portalLabels = {
@@ -33,6 +34,7 @@ const portalLabels = {
   center: "Center Admin",
   admin: "Admin",
   ministry: "Ministry",
+  inspector: "Inspector",
 };
 
 export function DashboardLayout({
@@ -58,6 +60,8 @@ export function DashboardLayout({
         return "/ministry/auth";
       case "admin":
         return "/admin/auth";
+      case "inspector":
+        return "/inspector/auth";
       default:
         return "/";
     }
@@ -73,6 +77,8 @@ export function DashboardLayout({
         return "/ministry";
       case "admin":
         return "/admin";
+      case "inspector":
+        return "/inspector";
       default:
         return "/";
     }

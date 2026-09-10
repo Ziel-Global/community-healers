@@ -2,7 +2,7 @@ import axios from 'axios';
 import { api } from './api';
 import { getApiErrorMessage } from '../lib/errors';
 import i18n from '../i18n';
-import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, SignupCredentials, AuthResponse, SignupOtpRequestResponse, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
+import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, InspectorLoginCredentials, SignupCredentials, AuthResponse, SignupOtpRequestResponse, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 
 /**
  * Role-mismatch logins (valid credentials, wrong portal) come back as 403,
@@ -54,6 +54,16 @@ const loginSuperAdmin = async (credentials: SuperAdminLoginCredentials): Promise
     } catch (error: unknown) {
         console.error('Super Admin Login error:', error);
         throw new Error(loginErrorMessage(error, 'Super Admin Login failed. Please check your credentials.'));
+    }
+};
+
+const loginInspector = async (credentials: InspectorLoginCredentials): Promise<AuthResponse> => {
+    try {
+        const response = await api.post('/auth/login/inspector', credentials);
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Inspector Login error:', error);
+        throw new Error(loginErrorMessage(error, 'Inspector Login failed. Please check your credentials.'));
     }
 };
 
@@ -124,6 +134,7 @@ export const authService = {
     loginCenterAdmin,
     loginMinistry,
     loginSuperAdmin,
+    loginInspector,
     signup,
     verifyCandidate,
     logout,

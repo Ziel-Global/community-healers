@@ -45,7 +45,13 @@ const CenterAdminAuth = lazy(() => import("./pages/auth/CenterAdminAuth"));
 const SuperAdminAuth = lazy(() => import("./pages/auth/SuperAdminAuth"));
 const MinistryAuth = lazy(() => import("./pages/auth/MinistryAuth"));
 const ExamAuth = lazy(() => import("./pages/auth/ExamAuth"));
+const InspectorAuth = lazy(() => import("./pages/auth/InspectorAuth"));
 const ExamPortal = lazy(() => import("./pages/ExamPortal"));
+
+const InspectorPortal = lazy(() => import("./pages/InspectorPortal"));
+const InspectorApplicationDetailPage = lazy(() => import("./pages/inspector/ApplicationDetailPage"));
+
+const CenterOnboardingWizard = lazy(() => import("./pages/center-onboarding/CenterOnboardingWizard"));
 
 export function AppRoutes() {
     return (
@@ -58,6 +64,14 @@ export function AppRoutes() {
                 <Route path="/admin/auth" element={<SuperAdminAuth />} />
                 <Route path="/ministry/auth" element={<MinistryAuth />} />
                 <Route path="/training/auth" element={<ExamAuth />} />
+                <Route path="/inspector/auth" element={<InspectorAuth />} />
+
+                {/* Center Onboarding — public, no login (applicant has no account until approved).
+                    Deliberately NOT "/center-onboarding": that path is also the API proxy
+                    prefix for this feature's backend routes, and a hard navigation here
+                    (the whole point of this being a public link) would otherwise be
+                    swallowed by the proxy instead of reaching this page. */}
+                <Route path="/apply-center" element={<CenterOnboardingWizard />} />
 
 
 
@@ -119,6 +133,10 @@ export function AppRoutes() {
                 <Route path="/ministry/degree-review" element={<ProtectedRoute portalType="ministry"><DegreeReviewPage /></ProtectedRoute>} />
                 <Route path="/ministry/logs" element={<ProtectedRoute portalType="ministry"><LogsPage /></ProtectedRoute>} />
                 <Route path="/ministry/centers" element={<ProtectedRoute portalType="ministry"><CenterOversightPage /></ProtectedRoute>} />
+
+                {/* Inspector Portal Routes (protected) */}
+                <Route path="/inspector" element={<ProtectedRoute portalType="inspector"><InspectorPortal /></ProtectedRoute>} />
+                <Route path="/inspector/applications/:applicationId" element={<ProtectedRoute portalType="inspector"><InspectorApplicationDetailPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
             </Routes>

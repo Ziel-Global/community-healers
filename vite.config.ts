@@ -35,6 +35,14 @@ export default defineConfig(({ mode }) => {
           target: backendUrl,
           changeOrigin: true,
         },
+        "/center-onboarding": {
+          target: backendUrl,
+          changeOrigin: true,
+        },
+        "/inspections": {
+          target: backendUrl,
+          changeOrigin: true,
+        },
       },
     },
     plugins: [react()].filter(Boolean),

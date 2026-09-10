@@ -96,7 +96,14 @@ api.interceptors.response.use(
             const isAuthRequest = requestUrl.includes('/auth/login') ||
                                  requestUrl.includes('/auth/signup') ||
                                  requestUrl.includes('/auth/verify') ||
-                                 requestUrl.includes('/auth/me');
+                                 requestUrl.includes('/auth/me') ||
+                                 // Center onboarding uses its own short-lived, per-application
+                                 // Bearer token (not the cookie session) — a 401 here means "your
+                                 // application session expired, re-verify," which the wizard
+                                 // handles inline. It must never trigger the global
+                                 // logged-in-user redirect, since an applicant has no account/role
+                                 // to redirect based on in the first place.
+                                 requestUrl.includes('/center-onboarding/');
 
             if (isAuthRequest) {
                 // Just pass the error through for login attempts

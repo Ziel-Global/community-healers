@@ -37,6 +37,11 @@ export interface SuperAdminLoginCredentials {
     password: string;
 }
 
+export interface InspectorLoginCredentials {
+    email: string;
+    password: string;
+}
+
 export interface SignupCredentials {
     firstName: string;
     lastName: string;
