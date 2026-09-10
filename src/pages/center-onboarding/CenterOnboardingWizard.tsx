@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Building2, CheckCircle2, Loader2, MapPin, Plus, Trash2 } from "lucide-react";
+import { Building2, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LocationPicker } from "@/components/LocationPicker";
 import { getApiErrorMessage } from "@/lib/errors";
 import {
   centerOnboardingService,
@@ -69,8 +70,8 @@ export default function CenterOnboardingWizard() {
   const [cities, setCities] = useState<City[]>([]);
   const [centerName, setCenterName] = useState("");
   const [address, setAddress] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [cityId, setCityId] = useState("");
   const [staff, setStaff] = useState<StaffMember[]>([{ name: "", cnic: "", category: "INSTRUCTOR" }]);
 
@@ -97,8 +98,8 @@ export default function CenterOnboardingWizard() {
     if (app.status === "DETAILS_PENDING") {
       if (app.centerName) setCenterName(app.centerName);
       if (app.address) setAddress(app.address);
-      if (app.latitude != null) setLatitude(String(app.latitude));
-      if (app.longitude != null) setLongitude(String(app.longitude));
+      if (app.latitude != null) setLatitude(app.latitude);
+      if (app.longitude != null) setLongitude(app.longitude);
       if (app.cityId) setCityId(app.cityId);
       if (app.staff && app.staff.length > 0) {
         setStaff(app.staff.map((s) => ({ name: s.name, cnic: s.cnic, category: s.category })));
@@ -170,6 +171,13 @@ export default function CenterOnboardingWizard() {
     setStaff((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleLocationChange = (lat: number, lng: number, geocodedAddress: string | null) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    // Only auto-fill from the geocoder if the applicant hasn't typed their own address yet.
+    setAddress((prev) => (prev.trim() ? prev : geocodedAddress ?? prev));
+  };
+
   const handleSubmitDetails = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!applicationId || !sessionToken) return;
@@ -178,10 +186,8 @@ export default function CenterOnboardingWizard() {
       toast.error("Please fill in center name, address, and city");
       return;
     }
-    const lat = Number(latitude);
-    const lng = Number(longitude);
-    if (Number.isNaN(lat) || Number.isNaN(lng)) {
-      toast.error("Please enter valid latitude and longitude");
+    if (latitude == null || longitude == null) {
+      toast.error("Please pick your center's location on the map");
       return;
     }
     if (staff.length === 0) {
@@ -200,8 +206,8 @@ export default function CenterOnboardingWizard() {
       const result = await centerOnboardingService.submitDetails(applicationId, sessionToken, {
         centerName: centerName.trim(),
         address: address.trim(),
-        latitude: lat,
-        longitude: lng,
+        latitude,
+        longitude,
         cityId,
         staff,
       });
@@ -372,33 +378,14 @@ export default function CenterOnboardingWizard() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="latitude" className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" /> Latitude
-                    </Label>
-                    <Input
-                      id="latitude"
-                      inputMode="decimal"
-                      value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
-                      placeholder="33.6844"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="longitude">Longitude</Label>
-                    <Input
-                      id="longitude"
-                      inputMode="decimal"
-                      value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
-                      placeholder="73.0479"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label>Location</Label>
+                  <LocationPicker
+                    latitude={latitude}
+                    longitude={longitude}
+                    onLocationChange={handleLocationChange}
+                  />
                 </div>
-                <p className="text-xs text-muted-foreground -mt-2">
-                  Map pin-drop isn't available yet — enter coordinates manually for now.
-                </p>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
