@@ -77,6 +77,11 @@ const getCities = async (): Promise<City[]> => {
     return response.data;
 };
 
+const reverseGeocode = async (lat: number, lng: number): Promise<{ formattedAddress: string | null }> => {
+    const response = await api.get('/center-onboarding/geocode/reverse', { params: { lat, lng } });
+    return response.data;
+};
+
 const verifyLicense = async (cnic: string, licenseNumber: string): Promise<VerifyLicenseResult> => {
     const response = await api.post('/center-onboarding/verify-license', { cnic, licenseNumber });
     return response.data;
@@ -116,6 +121,7 @@ const submitDetails = async (
 export const centerOnboardingService = {
     getChecklist,
     getCities,
+    reverseGeocode,
     verifyLicense,
     resendOtp,
     verifyOtp,

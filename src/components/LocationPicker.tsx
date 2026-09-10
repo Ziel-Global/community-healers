@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { GoogleMap, Marker, Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import { MapPin, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { centerOnboardingService } from "@/services/centerOnboardingService";
 
 // Must be a stable reference — useJsApiLoader reloads the script if this
 // array's identity changes on every render.
@@ -26,31 +27,35 @@ export function LocationPicker({ latitude, longitude, onLocationChange }: Locati
   const [address, setAddress] = useState<string | null>(null);
   const [placeName, setPlaceName] = useState<string | null>(null);
   const [resolving, setResolving] = useState(false);
-  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const position =
     latitude != null && longitude != null ? { lat: latitude, lng: longitude } : null;
 
-  const reverseGeocode = useCallback((lat: number, lng: number) => {
-    if (!geocoderRef.current) geocoderRef.current = new google.maps.Geocoder();
-    setResolving(true);
-    geocoderRef.current.geocode({ location: { lat, lng } }, (results, status) => {
-      setResolving(false);
-      if (status === "OK" && results && results[0]) {
-        setAddress(results[0].formatted_address);
+  // Reverse geocoding goes through our backend, which holds a separate,
+  // server-side-only Geocoding API key — the browser never sees it.
+  const reverseGeocode = useCallback(
+    async (lat: number, lng: number) => {
+      setResolving(true);
+      try {
+        const result = await centerOnboardingService.reverseGeocode(lat, lng);
+        setAddress(result.formattedAddress);
         setPlaceName(null);
-      } else {
+        onLocationChange(lat, lng, result.formattedAddress);
+      } catch {
         setAddress(null);
+      } finally {
+        setResolving(false);
       }
-    });
-  }, []);
+    },
+    [onLocationChange],
+  );
 
   const handlePick = useCallback(
     (lat: number, lng: number) => {
       onLocationChange(lat, lng, address);
-      reverseGeocode(lat, lng);
+      void reverseGeocode(lat, lng);
     },
     [onLocationChange, address, reverseGeocode],
   );
@@ -81,7 +86,7 @@ export function LocationPicker({ latitude, longitude, onLocationChange }: Locati
   if (loadError) {
     return (
       <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/5 text-sm text-destructive">
-        Could not load Google Maps. Check the API key and that Maps JavaScript API / Geocoding API
+        Could not load Google Maps. Check the API key and that Maps JavaScript API / Places API
         are enabled.
       </div>
     );
