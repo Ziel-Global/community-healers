@@ -22,7 +22,7 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
 import { centerAdminService, CandidateDocument } from "@/services/centerAdminService";
-import { CameraCaptureDialog } from "./CameraCaptureDialog";
+import { CameraCaptureDialog } from "@/components/CameraCaptureDialog";
 
 interface Candidate {
     id: string;
@@ -535,6 +535,7 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                 open={showCameraDialog}
                 onOpenChange={setShowCameraDialog}
                 onCapture={runFaceVerification}
+                title="Capture Candidate Photo"
             />
         </>
     );

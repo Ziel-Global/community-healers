@@ -14,7 +14,9 @@ import {
   Database,
   BarChart3,
   TrendingUp,
-  Loader2
+  Loader2,
+  ClipboardCheck,
+  UserRound
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,16 @@ export const superAdminNavItems = [
     label: "Centers & Locations",
     href: "/admin/centers",
     icon: <MapPin className="w-4 h-4" />,
+  },
+  {
+    label: "Center Applications",
+    href: "/admin/applications",
+    icon: <ClipboardCheck className="w-4 h-4" />,
+  },
+  {
+    label: "Inspectors",
+    href: "/admin/inspectors",
+    icon: <UserRound className="w-4 h-4" />,
   },
   {
     label: "Admin Management",

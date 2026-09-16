@@ -340,6 +340,8 @@
     "identityRequirementTitle": "Required for payment",
     "identityRequirementDesc": "Upload photo, passport, and either CNIC (front + back) or visa.",
     "uploadButton": "Upload",
+    "takePhoto": "Take Photo",
+    "cameraOnlyHint": "Must be taken live with your camera — gallery uploads aren't accepted for this photo",
     "uploading": "Uploading...",
     "removeFile": "Change File",
     "dragDrop": "Please ensure all documents are clearly legible. Blurry or incorrect documents may lead to registration rejection",

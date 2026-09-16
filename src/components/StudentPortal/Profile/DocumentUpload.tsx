@@ -2,12 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, FileCheck, X, AlertCircle, FileText } from "lucide-react";
+import { Upload, FileCheck, X, AlertCircle, FileText, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useUploadDocument } from "@/hooks/queries/useCandidateQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 import { DOCUMENT_ERROR_CODES, DocumentType, documentMetadataSchema } from "@/schemas/documentSchemas";
+import { CameraCaptureDialog } from "@/components/CameraCaptureDialog";
+
+/** This field alone must be a live capture — gallery/file uploads would defeat the point of an identity photo. */
+const CAMERA_ONLY_DOC_ID = "photo";
 
 interface Document {
     id: string;
@@ -40,6 +44,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
     const [documents, setDocuments] = useState<Document[]>(initialDocuments);
     const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
     const uploadDocumentMutation = useUploadDocument();
+    const [showCameraDialog, setShowCameraDialog] = useState(false);
 
     useEffect(() => {
         if (candidateData && candidateData.documents) {
@@ -215,7 +220,8 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                     <p className="text-xs text-muted-foreground truncate">
                                         {doc.status === "complete" ? doc.fileName :
                                             doc.status === "uploading" ? t('documents.uploading') :
-                                                `${t('profile.format')}: ${doc.type}`}
+                                                doc.id === CAMERA_ONLY_DOC_ID ? t('documents.cameraOnlyHint') :
+                                                    `${t('profile.format')}: ${doc.type}`}
                                     </p>
                                 </div>
                             </div>
@@ -230,13 +236,24 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                     >
                                         <X className="w-4 h-4" />
                                     </Button>
+                                ) : doc.id === CAMERA_ONLY_DOC_ID ? (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-8 gap-2"
+                                        onClick={() => setShowCameraDialog(true)}
+                                        disabled={doc.status === "uploading"}
+                                    >
+                                        <Camera className="w-3.5 h-3.5" />
+                                        {doc.status === "uploading" ? t('documents.uploading') : t('documents.takePhoto')}
+                                    </Button>
                                 ) : (
                                     <>
                                         <input
                                             type="file"
                                             ref={el => fileInputRefs.current[doc.id] = el}
                                             className="hidden"
-                                            accept={doc.id === 'photo' ? 'image/jpeg,image/png' : 'image/*,application/pdf'}
+                                            accept="image/*,application/pdf"
                                             onChange={(e) => handleFileSelect(doc.id, e.target.files?.[0] || null)}
                                         />
                                         <Button
@@ -263,6 +280,14 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                     </p>
                 </div>
             </CardContent>
+
+            <CameraCaptureDialog
+                open={showCameraDialog}
+                onOpenChange={setShowCameraDialog}
+                onCapture={(file) => handleFileSelect(CAMERA_ONLY_DOC_ID, file)}
+                title={t('documents.takePhoto')}
+                allowFileFallbackHint={false}
+            />
         </Card>
     );
 }

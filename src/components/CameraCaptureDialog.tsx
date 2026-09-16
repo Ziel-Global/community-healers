@@ -2,15 +2,33 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Camera, RotateCcw, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface CameraCaptureDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onCapture: (file: File) => void;
+    /** Dialog title — callers with a different context (e.g. candidate self-photo vs admin face verification) pass their own. */
+    title?: string;
+    /** Front ("user") or rear ("environment") camera. Defaults to front, since most callers are capturing a person's face. */
+    facingMode?: "user" | "environment";
+    /**
+     * Whether the camera-unavailable error suggests falling back to file upload. Set false for
+     * fields (like a candidate's own identity photo) that intentionally have no file-upload
+     * fallback — suggesting one there would be misleading.
+     */
+    allowFileFallbackHint?: boolean;
 }
 
-/** Live webcam capture for laptops/desktops — mobile still uses the file-picker's native camera via `capture="environment"`. */
-export function CameraCaptureDialog({ open, onOpenChange, onCapture }: CameraCaptureDialogProps) {
+/** Live webcam/device-camera capture — uses getUserMedia directly, so unlike a file input there is no way to pick an existing photo from a gallery. */
+export function CameraCaptureDialog({
+    open,
+    onOpenChange,
+    onCapture,
+    title = "Capture Photo",
+    facingMode = "user",
+    allowFileFallbackHint = true,
+}: CameraCaptureDialogProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const [capturedUrl, setCapturedUrl] = useState<string | null>(null);
@@ -29,7 +47,7 @@ export function CameraCaptureDialog({ open, onOpenChange, onCapture }: CameraCap
             return;
         }
         navigator.mediaDevices
-            .getUserMedia({ video: { facingMode: "user" }, audio: false })
+            .getUserMedia({ video: { facingMode }, audio: false })
             .then((stream) => {
                 streamRef.current = stream;
                 if (videoRef.current) {
@@ -37,7 +55,11 @@ export function CameraCaptureDialog({ open, onOpenChange, onCapture }: CameraCap
                 }
             })
             .catch(() => {
-                setError("Could not access the camera. Check browser permissions, or use file upload instead.");
+                setError(
+                    allowFileFallbackHint
+                        ? "Could not access the camera. Check browser permissions, or use file upload instead."
+                        : "Could not access the camera. Please allow camera access in your browser settings and try again."
+                );
             });
     };
 
@@ -85,7 +107,7 @@ export function CameraCaptureDialog({ open, onOpenChange, onCapture }: CameraCap
 
     const handleConfirm = () => {
         if (!capturedBlob) return;
-        onCapture(new File([capturedBlob], `verify-face-${Date.now()}.jpg`, { type: "image/jpeg" }));
+        onCapture(new File([capturedBlob], `capture-${Date.now()}.jpg`, { type: "image/jpeg" }));
         onOpenChange(false);
     };
 
@@ -94,21 +116,21 @@ export function CameraCaptureDialog({ open, onOpenChange, onCapture }: CameraCap
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Camera className="w-5 h-5 text-primary" /> Capture Candidate Photo
+                        <Camera className="w-5 h-5 text-primary" /> {title}
                     </DialogTitle>
                 </DialogHeader>
 
                 {error ? (
                     <p className="text-sm text-destructive py-8 text-center">{error}</p>
                 ) : capturedUrl ? (
-                    <img src={capturedUrl} alt="Captured candidate" className="w-full rounded-lg" />
+                    <img src={capturedUrl} alt="Captured" className="w-full rounded-lg" />
                 ) : (
                     <video
                         ref={videoRef}
                         autoPlay
                         playsInline
                         muted
-                        className="w-full rounded-lg bg-black scale-x-[-1]"
+                        className={cn("w-full rounded-lg bg-black", facingMode === "user" && "scale-x-[-1]")}
                     />
                 )}
 

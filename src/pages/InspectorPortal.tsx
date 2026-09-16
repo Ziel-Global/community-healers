@@ -1,59 +1,61 @@
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, History } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
-import { useAssignedApplications } from "@/hooks/queries/useInspectorQueries";
 import { Loader2 } from "lucide-react";
+import { useAssignedApplications } from "@/hooks/queries/useInspectorQueries";
+import { InspectorStats } from "@/components/InspectorPortal/InspectorStats";
+import { InspectionCard } from "@/components/InspectorPortal/InspectionCard";
 
 export const inspectorNavItems = [
-  { label: "Assigned Inspections", href: "/inspector", icon: <ClipboardCheck className="w-4 h-4" /> },
+  { label: "Dashboard", href: "/inspector", icon: <ClipboardCheck className="w-4 h-4" /> },
+  { label: "Inspection History", href: "/inspector/history", icon: <History className="w-4 h-4" /> },
 ];
 
-const STATUS_LABELS: Record<string, string> = {
-  INSPECTION_IN_PROGRESS: "In Progress",
-  UNDER_REVIEW: "Submitted — Under Review",
-};
-
 export default function InspectorPortal() {
-  const navigate = useNavigate();
   const { data: applications = [], isLoading } = useAssignedApplications();
+  const activeApplications = applications.filter((a) => a.status === "INSPECTION_IN_PROGRESS");
 
   return (
     <DashboardLayout
-      title="Assigned Inspections"
-      subtitle="Center applications assigned to you for physical inspection"
+      title="Inspector Dashboard"
+      subtitle="Your assigned inspections at a glance"
       portalType="inspector"
       navItems={inspectorNavItems}
     >
-      <div className="max-w-4xl mx-auto space-y-4">
+      <div className="max-w-[1600px] mx-auto space-y-6 pb-12">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-        ) : applications.length === 0 ? (
-          <div className="text-center py-16">
-            <ClipboardCheck className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-muted-foreground">No applications assigned to you yet</p>
-          </div>
         ) : (
-          applications.map((app) => (
-            <Card
-              key={app.id}
-              className="border-border/40 hover:border-primary/40 transition-colors cursor-pointer"
-              onClick={() => navigate(`/inspector/applications/${app.id}`)}
-            >
-              <CardContent className="p-5 flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg">{app.centerName || "Unnamed Center"}</h3>
-                  <p className="text-sm text-muted-foreground">{app.address}</p>
+          <>
+            <InspectorStats applications={applications} />
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 px-1">
+                <h2 className="text-sm font-bold text-foreground/80 uppercase tracking-wide">
+                  Active Inspections
+                </h2>
+                <span className="text-[11px] text-muted-foreground font-semibold bg-secondary/70 rounded-full min-w-[20px] text-center px-1.5 py-0.5">
+                  {activeApplications.length}
+                </span>
+              </div>
+              {activeApplications.length === 0 ? (
+                <div className="text-center py-16 bg-secondary/10 rounded-2xl border border-dashed border-border/50">
+                  <ClipboardCheck className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+                  <p className="text-muted-foreground">No active inspections right now</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">
+                    New assignments from the Super Admin will show up here
+                  </p>
                 </div>
-                <Badge variant={app.status === "UNDER_REVIEW" ? "secondary" : "outline"}>
-                  {STATUS_LABELS[app.status] || app.status}
-                </Badge>
-              </CardContent>
-            </Card>
-          ))
+              ) : (
+                <div className="space-y-3">
+                  {activeApplications.map((app) => (
+                    <InspectionCard key={app.id} application={app} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </DashboardLayout>

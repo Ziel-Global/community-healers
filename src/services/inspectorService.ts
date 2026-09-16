@@ -5,7 +5,14 @@ export interface InspectorApplication {
     centerName: string | null;
     address: string | null;
     status: string;
+    cnic: string;
+    licenseNumber: string;
     inspectionAssignedAt: string | null;
+    inspectionCompletedAt: string | null;
+    reviewedAt: string | null;
+    rejectionReason: string | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface InspectorChecklistItem {

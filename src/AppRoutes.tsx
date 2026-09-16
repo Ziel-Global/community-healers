@@ -28,6 +28,9 @@ const SettingsPage = lazy(() => import("./pages/center/SettingsPage"));
 const SuperAdminPortal = lazy(() => import("./pages/SuperAdminPortal"));
 const ConfigPage = lazy(() => import("./pages/admin/ConfigPage"));
 const CentersPage = lazy(() => import("./pages/admin/CentersPage"));
+const CenterApplicationsPage = lazy(() => import("./pages/admin/CenterApplicationsPage"));
+const CenterApplicationDetailPage = lazy(() => import("./pages/admin/CenterApplicationDetailPage"));
+const InspectorsPage = lazy(() => import("./pages/admin/InspectorsPage"));
 const UsersPage = lazy(() => import("./pages/admin/UsersPage"));
 const QuestionsPage = lazy(() => import("./pages/admin/QuestionsPage"));
 const AcademyPage = lazy(() => import("./pages/admin/AcademyPage"));
@@ -50,6 +53,7 @@ const ExamPortal = lazy(() => import("./pages/ExamPortal"));
 
 const InspectorPortal = lazy(() => import("./pages/InspectorPortal"));
 const InspectorApplicationDetailPage = lazy(() => import("./pages/inspector/ApplicationDetailPage"));
+const InspectionHistoryPage = lazy(() => import("./pages/inspector/InspectionHistoryPage"));
 
 const CenterOnboardingWizard = lazy(() => import("./pages/center-onboarding/CenterOnboardingWizard"));
 
@@ -117,6 +121,9 @@ export function AppRoutes() {
                 <Route path="/admin" element={<ProtectedRoute portalType="admin"><SuperAdminPortal /></ProtectedRoute>} />
                 <Route path="/admin/config" element={<ProtectedRoute portalType="admin"><ConfigPage /></ProtectedRoute>} />
                 <Route path="/admin/centers" element={<ProtectedRoute portalType="admin"><CentersPage /></ProtectedRoute>} />
+                <Route path="/admin/applications" element={<ProtectedRoute portalType="admin"><CenterApplicationsPage /></ProtectedRoute>} />
+                <Route path="/admin/applications/:applicationId" element={<ProtectedRoute portalType="admin"><CenterApplicationDetailPage /></ProtectedRoute>} />
+                <Route path="/admin/inspectors" element={<ProtectedRoute portalType="admin"><InspectorsPage /></ProtectedRoute>} />
                 <Route path="/admin/users" element={<ProtectedRoute portalType="admin"><UsersPage /></ProtectedRoute>} />
                 <Route path="/admin/questions" element={<ProtectedRoute portalType="admin"><QuestionsPage /></ProtectedRoute>} />
                 <Route path="/admin/content" element={<ProtectedRoute portalType="admin"><AcademyPage /></ProtectedRoute>} />
@@ -137,6 +144,7 @@ export function AppRoutes() {
                 {/* Inspector Portal Routes (protected) */}
                 <Route path="/inspector" element={<ProtectedRoute portalType="inspector"><InspectorPortal /></ProtectedRoute>} />
                 <Route path="/inspector/applications/:applicationId" element={<ProtectedRoute portalType="inspector"><InspectorApplicationDetailPage /></ProtectedRoute>} />
+                <Route path="/inspector/history" element={<ProtectedRoute portalType="inspector"><InspectionHistoryPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
             </Routes>
