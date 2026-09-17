@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -32,7 +32,9 @@ const FORGOT_PASSWORD_ENABLED = false;
 
 export default function CandidateAuth() {
   const { t } = useTranslation();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [searchParams] = useSearchParams();
+  // Lets the marketing landing page's "Get started" link deep-link straight into signup.
+  const [isSignUp, setIsSignUp] = useState(() => searchParams.get("mode") === "signup");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);

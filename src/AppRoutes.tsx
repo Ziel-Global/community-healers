@@ -2,7 +2,6 @@ import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { LoadingSpinner } from "./components/LoadingSpinner";
-import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AppErrorBoundary } from "./errors/ErrorBoundary";
 
@@ -67,12 +66,14 @@ const DoCentersPage = lazy(() => import("./pages/director-operations/CentersPage
 
 const CenterOnboardingWizard = lazy(() => import('./pages/center-onboarding/CenterOnboardingWizard'));
 const LandingTest = lazy(() => import('./pages/LandingTest'));
+const LinksPage = lazy(() => import('./pages/LinksPage'));
 
 export function AppRoutes() {
     return (
         <Suspense fallback={<LoadingSpinner />}>
             <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<LandingTest />} />
+                <Route path="/links" element={<LinksPage />} />
                 {/* Auth Routes (public) */}
                 <Route path="/candidate/auth" element={<CandidateAuth />} />
                 <Route path="/center/auth" element={<CenterAdminAuth />} />
@@ -168,7 +169,6 @@ export function AppRoutes() {
                 <Route path="/director-operations/applications/:applicationId" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationDetailPage /></ProtectedRoute>} />
                 <Route path="/director-operations/centers" element={<ProtectedRoute portalType="director-operations"><DoCentersPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="/landing-test" element={<LandingTest />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </Suspense>

@@ -14,6 +14,8 @@ import {
   Award,
   Users,
   BookOpen,
+  ClipboardCheck,
+  Briefcase,
 } from "lucide-react";
 
 // Portals Interface is missing (Type Safety)
@@ -74,6 +76,28 @@ const portals = [
       { label: "Pending Review", value: "892" },
     ],
   },
+  {
+    title: "Approval Committee",
+    description:
+      "Inspect and approve or reject center applications submitted through the onboarding pipeline.",
+    icon: ClipboardCheck,
+    href: "/committee/auth",
+    stats: [
+      { label: "Applications Reviewed", value: "312" },
+      { label: "Centers Approved", value: "86" },
+    ],
+  },
+  {
+    title: "Director of Operations",
+    description:
+      "Oversee the center application pipeline, assign committees, and monitor every training center.",
+    icon: Briefcase,
+    href: "/director-operations/auth",
+    stats: [
+      { label: "Applications In Flight", value: "48" },
+      { label: "Committees", value: "6" },
+    ],
+  },
 ];
 
 const features = [
@@ -99,14 +123,14 @@ const features = [
   },
 ];
 
-export default function Index() {
+export default function LinksPage() {
   const { logout, isAuthenticated } = useAuth();
 
-  // Clear session when landing page is accessed
+  // Clear session when this page is accessed
   useEffect(() => {
     if (isAuthenticated) {
       logout().catch((error) => {
-        console.error("Failed to clear session on landing page:", error);
+        console.error("Failed to clear session on links page:", error);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,23 +159,16 @@ export default function Index() {
             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-6xl alumni-sans-title text-foreground mb-4 sm:mb-6 leading-tight px-2">
-              Digital Certification &{" "}
-              <span className="text-gradient">Training</span> Platform
+              Every Portal, <span className="text-gradient">One Place</span>
             </h1>
 
             <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2">
-              End-to-end digital solution managing candidate journeys from
-              registration to government certificate issuance, with secure CBT
-              Trainings and full compliance.
+              Candidates should head to the main site — everyone else, pick your portal below.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">
-              <Button variant="forest" size="lg" className="w-full sm:w-auto">
-                Get Started
-                <ArrowRight className="w-5 h-5 ml-1" />
-              </Button>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Learn More
+              <Button variant="forest" size="lg" className="w-full sm:w-auto" asChild>
+                <a href="/">Back to main site<ArrowRight className="w-5 h-5 ml-1" /></a>
               </Button>
             </div>
           </div>
@@ -179,7 +196,7 @@ export default function Index() {
             ))}
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-12 sm:mb-20">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-20">
             {portals.map((portal) => (
               <PortalCard key={portal.title} {...portal} />
             ))}
