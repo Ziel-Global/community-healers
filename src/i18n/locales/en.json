@@ -135,6 +135,7 @@
   "profile": {
     "candidateId": "Candidate ID",
     "loading": "Loading profile...",
+    "fileComplaint": "File a Complaint",
     "examScheduled": "Training Scheduled",
     "examScheduledDesc": "Your training has been scheduled",
     "examDate": "Training Date",

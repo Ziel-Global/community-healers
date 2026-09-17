@@ -3,11 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X, RefreshCw, Loader2 } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, Calendar, Award, CheckCircle2, Clock, Download, Share2, Eye, AlertCircle, X, RefreshCw, Loader2, MessageSquareWarning } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useCandidateMe } from "@/hooks/queries/useCandidateQueries";
 import { useAuth } from "@/context/AuthContext";
 import { CertificateCard } from "./CertificateCard";
+import { ComplaintsPanel } from "./Complaints/ComplaintsPanel";
 import { useTranslation } from "react-i18next";
 import { formatTimeLabel } from "@/utils/time";
 import { candidateService } from "@/services/candidateService";
@@ -56,6 +57,7 @@ export function ProfileView({
   const [previewDoc, setPreviewDoc] = useState<UploadedDocument | null>(null);
   const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [complaintOpen, setComplaintOpen] = useState(false);
   const { data: candidateData, isLoading: loading } = useCandidateMe();
   const { examScheduleInfo } = useAuth();
   const { t } = useTranslation();
@@ -162,6 +164,15 @@ export function ProfileView({
                     </span>
                   </p>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10"
+                  onClick={() => setComplaintOpen(true)}
+                >
+                  <MessageSquareWarning className="w-4 h-4" />
+                  {t("profile.fileComplaint")}
+                </Button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mt-4">
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-sm">
@@ -632,6 +643,19 @@ export function ProfileView({
               {t("profile.close")}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Complaint Modal */}
+      <Dialog open={complaintOpen} onOpenChange={setComplaintOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquareWarning className="w-5 h-5 text-primary" />
+              {t("profile.fileComplaint")}
+            </DialogTitle>
+          </DialogHeader>
+          <ComplaintsPanel />
         </DialogContent>
       </Dialog>
     </div >

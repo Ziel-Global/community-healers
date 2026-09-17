@@ -135,6 +135,7 @@
   "profile": {
     "candidateId": "امیدوار آئی ڈی",
     "loading": "پروفائل لوڈ ہو رہا ہے...",
+    "fileComplaint": "شکایت درج کریں",
     "examScheduled": "تربیت شیڈول ہو گئی",
     "examScheduledDesc": "آپ کی تربیت کا شیڈول بن گیا ہے",
     "examDate": "تربیت کی تاریخ",
