@@ -212,11 +212,6 @@ export default function CenterApplicationDetailPage() {
                     </div>
                 )}
 
-                <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
-                    <CardContent className="p-5">
-                        <CommentThread applicationId={applicationId} canPost={false} />
-                    </CardContent>
-                </Card>
             </div>
 
             <AssignCommitteeDialog application={assignTarget} onClose={() => setAssignTarget(null)} onAssigned={() => setAssignTarget(null)} />

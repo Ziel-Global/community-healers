@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, UserCheck, UserX, Clock } from "lucide-react";
+import { Users, UserCheck, UserX, Clock, MessageSquare } from "lucide-react";
 import type { AttendanceEntry } from "@/services/centerApplicationService";
 
 function formatDateTime(iso: string): string {
@@ -37,8 +37,14 @@ export function CommitteeAttendanceCard({ attendance }: { attendance: Attendance
                                     </div>
                                     <div className="min-w-0">
                                         <p className="text-sm font-medium text-foreground truncate">{entry.memberName}</p>
-                                        {entry.attending === false && entry.reason && (
-                                            <p className="text-xs text-muted-foreground mt-0.5">{entry.reason}</p>
+                                        {entry.reason && (
+                                            <div className="mt-1.5 mb-1 flex items-start gap-1.5 border-l-2 border-primary/30 bg-secondary/40 rounded-r-md px-2 py-1.5">
+                                                <MessageSquare className="w-3 h-3 text-muted-foreground shrink-0 mt-[1.5px]" />
+                                                <p className="text-[12px] text-muted-foreground leading-relaxed break-words">
+                                                    <span className="font-medium opacity-80 mr-1">Note:</span>
+                                                    {entry.reason}
+                                                </p>
+                                            </div>
                                         )}
                                         <p className="text-[11px] text-muted-foreground/70 flex items-center gap-1 mt-1">
                                             <Clock className="w-3 h-3" /> {formatDateTime(entry.updatedAt)}

@@ -43,7 +43,7 @@ export function CommitteeStats({ applications }: { applications: CommitteeApplic
                 value={total}
                 icon={ClipboardList}
                 description="Total applications ever assigned"
-                iconBg="gradient-primary"
+                iconBg="bg-primary"
                 glow="bg-primary/20"
             />
             <Stat
@@ -51,24 +51,24 @@ export function CommitteeStats({ applications }: { applications: CommitteeApplic
                 value={active}
                 icon={PlayCircle}
                 description="Inspections in progress"
-                iconBg="bg-sky-500"
-                glow="bg-sky-500/20"
+                iconBg="bg-primary"
+                glow="bg-primary/20"
             />
             <Stat
                 title="Centers Inspected"
                 value={inspected}
                 icon={CheckCircle2}
                 description="Inspections you've submitted"
-                iconBg="bg-amber-500"
-                glow="bg-amber-500/20"
+                iconBg="bg-primary"
+                glow="bg-primary/20"
             />
             <Stat
                 title="Approved"
                 value={approved}
                 icon={Award}
                 description="Went on to become live centers"
-                iconBg="bg-emerald-500"
-                glow="bg-emerald-500/20"
+                iconBg="bg-primary"
+                glow="bg-primary/20"
             />
         </div>
     );
