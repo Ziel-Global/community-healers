@@ -15,6 +15,7 @@ const SchedulingPage = lazy(() => import("./pages/candidate/SchedulingPage"));
 const TrainingPage = lazy(() => import("./pages/candidate/TrainingPage"));
 const CertificatesPage = lazy(() => import("./pages/candidate/CertificatesPage"));
 const NotificationsPage = lazy(() => import("./pages/candidate/NotificationsPage"));
+const ComplaintsPage = lazy(() => import("./pages/candidate/ComplaintsPage"));
 const ProfilePage = lazy(() => import("./pages/candidate/ProfilePage"));
 
 const CenterAdminPortal = lazy(() => import("./pages/CenterAdminPortal"));
@@ -33,6 +34,7 @@ const CenterApplicationsPage = lazy(() => import("./pages/admin/CenterApplicatio
 const CenterApplicationDetailPage = lazy(() => import("./pages/admin/CenterApplicationDetailPage"));
 const CommitteePage = lazy(() => import("./pages/admin/CommitteePage"));
 const UsersPage = lazy(() => import("./pages/admin/UsersPage"));
+const AdminComplaintsPage = lazy(() => import("./pages/admin/ComplaintsPage"));
 const QuestionsPage = lazy(() => import("./pages/admin/QuestionsPage"));
 const AcademyPage = lazy(() => import("./pages/admin/AcademyPage"));
 const AuditPage = lazy(() => import("./pages/admin/AuditPage"));
@@ -108,6 +110,7 @@ export function AppRoutes() {
                 <Route path="/candidate/training" element={<ProtectedRoute portalType="candidate"><TrainingPage /></ProtectedRoute>} />
                 <Route path="/candidate/certificates" element={<ProtectedRoute portalType="candidate"><CertificatesPage /></ProtectedRoute>} />
                 <Route path="/candidate/notifications" element={<ProtectedRoute portalType="candidate"><NotificationsPage /></ProtectedRoute>} />
+                <Route path="/candidate/complaints" element={<ProtectedRoute portalType="candidate"><ComplaintsPage /></ProtectedRoute>} />
                 <Route path="/candidate/profile" element={<ProtectedRoute portalType="candidate"><ProfilePage /></ProtectedRoute>} />
 
 
@@ -133,6 +136,7 @@ export function AppRoutes() {
                 <Route path="/admin/applications/:applicationId" element={<ProtectedRoute portalType="admin"><CenterApplicationDetailPage /></ProtectedRoute>} />
                 <Route path="/admin/committee" element={<ProtectedRoute portalType="admin"><CommitteePage /></ProtectedRoute>} />
                 <Route path="/admin/users" element={<ProtectedRoute portalType="admin"><UsersPage /></ProtectedRoute>} />
+                <Route path="/admin/complaints" element={<ProtectedRoute portalType="admin"><AdminComplaintsPage /></ProtectedRoute>} />
                 <Route path="/admin/questions" element={<ProtectedRoute portalType="admin"><QuestionsPage /></ProtectedRoute>} />
                 <Route path="/admin/content" element={<ProtectedRoute portalType="admin"><AcademyPage /></ProtectedRoute>} />
                 <Route path="/admin/audit" element={<ProtectedRoute portalType="admin"><AuditPage /></ProtectedRoute>} />

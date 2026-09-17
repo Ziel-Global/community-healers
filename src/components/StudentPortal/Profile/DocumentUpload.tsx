@@ -18,20 +18,17 @@ interface Document {
     nameKey: string;
     type: string;
     isMandatory: boolean;
-    /** Counts toward identity: CNIC front+back OR visa */
-    identityOption?: boolean;
     status: "pending" | "uploading" | "complete" | "error";
     fileName?: string;
     fileType?: string;
     fileUrl?: string;
 }
 
+/** Registration collects exactly these three — passport, visa and degree transcript are no longer accepted. */
 const initialDocuments: Document[] = [
     { id: "photo", nameKey: "documents.candidatePhoto", type: "Image", isMandatory: true, status: "pending" },
-    { id: "passport", nameKey: "documents.passport", type: "Image/PDF", isMandatory: true, status: "pending" },
-    { id: "visa", nameKey: "documents.visa", type: "Image/PDF", isMandatory: false, identityOption: true, status: "pending" },
-    { id: "cnicFront", nameKey: "documents.cnicFront", type: "Image/PDF", isMandatory: false, identityOption: true, status: "pending" },
-    { id: "cnicBack", nameKey: "documents.cnicBack", type: "Image/PDF", isMandatory: false, identityOption: true, status: "pending" },
+    { id: "cnicFront", nameKey: "documents.cnicFront", type: "Image/PDF", isMandatory: true, status: "pending" },
+    { id: "cnicBack", nameKey: "documents.cnicBack", type: "Image/PDF", isMandatory: true, status: "pending" },
 ];
 
 interface DocumentUploadProps {
@@ -206,16 +203,6 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                                 {t('documents.mandatoryLabel')}
                                             </span>
                                         )}
-                                        {!doc.isMandatory && doc.identityOption && (
-                                            <span className="text-[10px] font-bold text-primary uppercase">
-                                                {t('documents.identityOptionLabel')}
-                                            </span>
-                                        )}
-                                        {!doc.isMandatory && !doc.identityOption && (
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                                                {t('documents.optionalLabel')}
-                                            </span>
-                                        )}
                                     </div>
                                     <p className="text-xs text-muted-foreground truncate">
                                         {doc.status === "complete" ? doc.fileName :
@@ -237,16 +224,36 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                         <X className="w-4 h-4" />
                                     </Button>
                                 ) : doc.id === CAMERA_ONLY_DOC_ID ? (
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-8 gap-2"
-                                        onClick={() => setShowCameraDialog(true)}
-                                        disabled={doc.status === "uploading"}
-                                    >
-                                        <Camera className="w-3.5 h-3.5" />
-                                        {doc.status === "uploading" ? t('documents.uploading') : t('documents.takePhoto')}
-                                    </Button>
+                                    <>
+                                        <input
+                                            type="file"
+                                            ref={el => fileInputRefs.current[doc.id] = el}
+                                            className="hidden"
+                                            accept="image/jpeg,image/png"
+                                            onChange={(e) => handleFileSelect(doc.id, e.target.files?.[0] || null)}
+                                        />
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-8 gap-2"
+                                            onClick={() => setShowCameraDialog(true)}
+                                            disabled={doc.status === "uploading"}
+                                        >
+                                            <Camera className="w-3.5 h-3.5" />
+                                            {doc.status === "uploading" ? t('documents.uploading') : t('documents.takePhoto')}
+                                        </Button>
+                                        {/* Temporary fallback while camera-captured photos are failing face indexing — remove once that's fixed. */}
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-8 gap-2"
+                                            onClick={() => fileInputRefs.current[doc.id]?.click()}
+                                            disabled={doc.status === "uploading"}
+                                        >
+                                            <Upload className="w-3.5 h-3.5" />
+                                            {doc.status === "uploading" ? t('documents.uploading') : t('documents.uploadButton')}
+                                        </Button>
+                                    </>
                                 ) : (
                                     <>
                                         <input

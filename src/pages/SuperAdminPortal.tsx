@@ -16,7 +16,8 @@ import {
   TrendingUp,
   Loader2,
   ClipboardCheck,
-  UserCog
+  UserCog,
+  MessageSquareWarning
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,11 @@ export const superAdminNavItems = [
     label: "Admin Management",
     href: "/admin/users",
     icon: <Users className="w-4 h-4" />,
+  },
+  {
+    label: "Complaints",
+    href: "/admin/complaints",
+    icon: <MessageSquareWarning className="w-4 h-4" />,
   },
   {
     label: "Question Bank",

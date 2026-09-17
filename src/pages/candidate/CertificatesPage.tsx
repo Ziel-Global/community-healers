@@ -22,12 +22,19 @@ export default function CertificatesPage() {
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />
                     </div>
                 ) : certificate ? (
-                    <CertificatePreviewCard
-                        certNumber={certificate.certificate_number}
-                        issuedDate={certificate.issuedDate}
-                        score={certificate.score}
-                        fetchPdf={candidateService.getMyCertificatePdfBlob}
-                    />
+                    <div className="space-y-3">
+                        {certificate.isExpired && (
+                            <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm text-destructive text-center">
+                                This certificate expired on {new Date(certificate.expiryDate!).toLocaleDateString()}.
+                            </div>
+                        )}
+                        <CertificatePreviewCard
+                            certNumber={certificate.certificateNumber}
+                            issuedDate={certificate.issuedDate}
+                            score={certificate.score}
+                            fetchPdf={candidateService.getMyCertificatePdfBlob}
+                        />
+                    </div>
                 ) : (
                     <Card className="border-border/40 shadow-sm">
                         <CardContent className="p-10 text-center space-y-4">
@@ -37,7 +44,7 @@ export default function CertificatesPage() {
                             <div className="space-y-2">
                                 <h3 className="text-lg font-bold text-foreground">Certificate Pending</h3>
                                 <p className="text-muted-foreground max-w-sm mx-auto text-sm">
-                                    Your certificate will be generated automatically once the ministry verifies your exam results.
+                                    Your certificate is issued automatically the moment you pass your exam.
                                 </p>
                             </div>
                         </CardContent>

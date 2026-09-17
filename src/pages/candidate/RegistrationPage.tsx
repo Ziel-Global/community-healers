@@ -3,7 +3,7 @@ import { PersonalInfoForm } from "@/components/StudentPortal/Profile/PersonalInf
 import { DocumentUpload } from "@/components/StudentPortal/Profile/DocumentUpload";
 import { EducationDeclaration } from "@/components/StudentPortal/Profile/EducationDeclaration";
 import { ProfileStatusTracker } from "@/components/StudentPortal/Profile/ProfileStatusTracker";
-import { LayoutDashboard, FileText, Calendar, BookOpen, Award, User, Bell } from "lucide-react";
+import { LayoutDashboard, FileText, Calendar, BookOpen, Award, User, Bell, MessageSquareWarning } from "lucide-react";
 import { useCandidateMe } from "@/hooks/queries/useCandidateQueries";
 
 export const candidateNavItems = [
@@ -36,6 +36,11 @@ export const candidateNavItems = [
         label: "Notifications",
         href: "/candidate/notifications",
         icon: <Bell className="w-4 h-4" />,
+    },
+    {
+        label: "Complaints",
+        href: "/candidate/complaints",
+        icon: <MessageSquareWarning className="w-4 h-4" />,
     },
     {
         label: "Profile",

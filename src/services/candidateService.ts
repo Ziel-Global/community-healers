@@ -189,24 +189,23 @@ export const confirmPayment = async (transactionId: string, bankTransactionRef: 
     }
 };
 
-export interface CertificateMeta {
+export interface CertificateView {
     id: string;
-    certificate_number: string;
+    certificateNumber: string;
     issuedDate: string;
     expiryDate: string | null;
     score: number;
     status: string;
+    isExpired: boolean;
+    downloadUrl: string | null;
+    /** True when issued automatically on passing the exam — the normal path now; false only for the handful issued the old manual way. */
+    autoIssued: boolean;
 }
 
-/** Returns null (not thrown) when no certificate has been issued yet — that's a normal, expected state here. */
-export const getMyCertificate = async (): Promise<CertificateMeta | null> => {
-    try {
-        const response = await api.get('/candidates/me/certificate');
-        return response.data;
-    } catch (error) {
-        if ((error as { response?: { status?: number } })?.response?.status === 404) return null;
-        throw error;
-    }
+/** A candidate without a certificate yet gets `{hasCertificate: false}` and a 200 — not a 404. */
+export const getMyCertificate = async (): Promise<CertificateView | null> => {
+    const response = await api.get('/candidates/me/certificate');
+    return response.data.certificate;
 };
 
 /** See getDocumentBlob's comment — same CSRF-header reason for going through `api` instead of a raw <iframe src>. */

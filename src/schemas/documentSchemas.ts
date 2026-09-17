@@ -11,7 +11,8 @@ export const DOCUMENT_ERROR_CODES = {
     UNSUPPORTED_TYPE: "unsupported_type",
 } as const;
 
-export const DOCUMENT_TYPES = ["photo", "passport", "visa", "cnicFront", "cnicBack"] as const;
+/** Registration collects exactly these three — passport, visa and degree transcript are no longer accepted candidate-side. */
+export const DOCUMENT_TYPES = ["photo", "cnicFront", "cnicBack"] as const;
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 
 export const MAX_DOCUMENT_FILE_SIZE_BYTES = 5 * 1024 * 1024;

@@ -11,12 +11,14 @@ import { authService } from "@/services/authService";
 import { CandidateStatus, ExamScheduledResponse } from "@/types/auth";
 import { useAuth } from "@/context/AuthContext";
 import { getExamOnOtherDeviceMessage, isExamOnOtherDeviceError } from "@/utils/examSession";
-import { getApiErrorMessage } from "@/lib/errors";
+import { getApiErrorMessage, getApiErrorCode } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { LivenessGateDialog } from "@/components/StudentPortal/Exam/LivenessGateDialog";
 import { VerifyLivenessResult } from "@/services/candidateService";
 
 const LIVENESS_REQUIRED_ERROR = "LIVENESS_VERIFICATION_REQUIRED";
+const EXAM_NOT_RELEASED_ERROR = "EXAM_NOT_RELEASED";
+const EXAM_LOCKED_ERROR = "EXAM_NOT_YET_UNLOCKED";
 
 export default function ExamPortal() {
     const navigate = useNavigate();
@@ -201,6 +203,21 @@ export default function ExamPortal() {
         if (isExamOnOtherDeviceError(err)) {
             setOtherDeviceMessage(getExamOnOtherDeviceMessage(err));
             setExamState("other-device");
+            return;
+        }
+        // Safety net: the proactive canStartExam gate below should normally
+        // prevent this, but if it ever slips through (stale state, race
+        // condition), re-fetch status and drop back to the gated "verified"
+        // screen instead of showing a raw error — never match on message text.
+        const code = getApiErrorCode(err);
+        if (code === EXAM_NOT_RELEASED_ERROR || code === EXAM_LOCKED_ERROR) {
+            toast({
+                variant: "destructive",
+                title: code === EXAM_NOT_RELEASED_ERROR ? "Test not released yet" : "Test still locked",
+                description: getApiErrorMessage(err, "Your test isn't available yet."),
+            });
+            statusQuery.refetch();
+            setExamState("verified");
             return;
         }
         // Safety net: the proactive livenessVerified check above should
@@ -859,19 +876,48 @@ export default function ExamPortal() {
                             </ul>
                         </div>
 
-                        {/* Start Button */}
+                        {/* Start Button — gated on both centre release and the post-verification wait */}
                         <div className="pt-4">
-                            <Button
-                                onClick={handleBeginExamClick}
-                                disabled={isFetchingQuestions}
-                                className="w-full h-12 sm:h-14 text-base sm:text-lg gradient-primary text-white font-semibold"
-                            >
-                                {isFetchingQuestions ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
-                                {isFetchingQuestions ? "Loading Questions..." : "Begin Examination"}
-                            </Button>
-                            <p className="text-center text-xs text-muted-foreground mt-3">
-                                By clicking above, you confirm that you have read and understood the rules
-                            </p>
+                            {candidateStatus?.canStartExam === false ? (
+                                <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-center space-y-3">
+                                    <Clock className="w-6 h-6 text-amber-600 mx-auto" />
+                                    {!candidateStatus.examReleased ? (
+                                        <p className="text-sm font-medium text-amber-800">
+                                            Waiting for centre staff to release your test. This happens once you're checked in.
+                                        </p>
+                                    ) : (
+                                        <p className="text-sm font-medium text-amber-800">
+                                            Your test unlocks {candidateStatus.examUnlockDelayHours ?? 6} hours after check-in
+                                            {candidateStatus.examUnlocksAt
+                                                ? ` — available at ${format(parseISO(candidateStatus.examUnlocksAt), "h:mm a 'on' MMM d")}.`
+                                                : "."}
+                                        </p>
+                                    )}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => statusQuery.refetch()}
+                                        disabled={statusQuery.isFetching}
+                                    >
+                                        {statusQuery.isFetching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                        Check Again
+                                    </Button>
+                                </div>
+                            ) : (
+                                <>
+                                    <Button
+                                        onClick={handleBeginExamClick}
+                                        disabled={isFetchingQuestions}
+                                        className="w-full h-12 sm:h-14 text-base sm:text-lg gradient-primary text-white font-semibold"
+                                    >
+                                        {isFetchingQuestions ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
+                                        {isFetchingQuestions ? "Loading Questions..." : "Begin Examination"}
+                                    </Button>
+                                    <p className="text-center text-xs text-muted-foreground mt-3">
+                                        By clicking above, you confirm that you have read and understood the rules
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
