@@ -280,7 +280,10 @@ export default function CandidateAuth() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5 sm:space-y-2">
-                    <Label htmlFor="firstName" className="text-sm">{t("candidateAuth.firstName")}</Label>
+                    <div className="flex items-center justify-between w-full" dir="ltr">
+                      <Label htmlFor="firstName" className="text-sm">{t("candidateAuth.firstName", { lng: "en" })}</Label>
+                      <Label htmlFor="firstName" className="text-sm" dir="rtl">{t("candidateAuth.firstName", { lng: "ur" })}</Label>
+                    </div>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       <Input
@@ -296,7 +299,10 @@ export default function CandidateAuth() {
                   </div>
 
                   <div className="space-y-1.5 sm:space-y-2">
-                    <Label htmlFor="lastName" className="text-sm">{t("candidateAuth.lastName")}</Label>
+                    <div className="flex items-center justify-between w-full" dir="ltr">
+                      <Label htmlFor="lastName" className="text-sm">{t("candidateAuth.lastName", { lng: "en" })}</Label>
+                      <Label htmlFor="lastName" className="text-sm" dir="rtl">{t("candidateAuth.lastName", { lng: "ur" })}</Label>
+                    </div>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       <Input
@@ -313,7 +319,10 @@ export default function CandidateAuth() {
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="email" className="text-sm">{t("candidateAuth.email")}</Label>
+                  <div className="flex items-center justify-between w-full" dir="ltr">
+                    <Label htmlFor="email" className="text-sm">{t("candidateAuth.email", { lng: "en" })}</Label>
+                    <Label htmlFor="email" className="text-sm" dir="rtl">{t("candidateAuth.email", { lng: "ur" })}</Label>
+                  </div>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     <Input
@@ -332,7 +341,10 @@ export default function CandidateAuth() {
             )}
 
             <div className="space-y-1.5 sm:space-y-2">
-              <Label htmlFor="phone" className="text-sm">{t("candidateAuth.phone")}</Label>
+              <div className="flex items-center justify-between w-full" dir="ltr">
+                <Label htmlFor="phone" className="text-sm">{t("candidateAuth.phone", { lng: "en" })}</Label>
+                <Label htmlFor="phone" className="text-sm" dir="rtl">{t("candidateAuth.phone", { lng: "ur" })}</Label>
+              </div>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
@@ -351,7 +363,10 @@ export default function CandidateAuth() {
             {isSignUp && (
               <>
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="password" className="text-sm">{t("candidateAuth.password")}</Label>
+                  <div className="flex items-center justify-between w-full" dir="ltr">
+                    <Label htmlFor="password" className="text-sm">{t("candidateAuth.password", { lng: "en" })}</Label>
+                    <Label htmlFor="password" className="text-sm" dir="rtl">{t("candidateAuth.password", { lng: "ur" })}</Label>
+                  </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
                     <PasswordInput
@@ -373,7 +388,10 @@ export default function CandidateAuth() {
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm">{t("candidateAuth.confirmPassword")}</Label>
+                  <div className="flex items-center justify-between w-full" dir="ltr">
+                    <Label htmlFor="confirmPassword" className="text-sm">{t("candidateAuth.confirmPassword", { lng: "en" })}</Label>
+                    <Label htmlFor="confirmPassword" className="text-sm" dir="rtl">{t("candidateAuth.confirmPassword", { lng: "ur" })}</Label>
+                  </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
                     <PasswordInput
@@ -392,9 +410,12 @@ export default function CandidateAuth() {
 
             {!isSignUp && (
               <div className="space-y-1.5 sm:space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm">{t("candidateAuth.password")}</Label>
-                  {/* Forgot Password trigger — hidden alongside the modal below, see the comment there. */}
+                <div className="flex items-center justify-between w-full" dir="ltr">
+                  <Label htmlFor="password" className="text-sm">{t("candidateAuth.password", { lng: "en" })}</Label>
+                  <div className="flex items-center gap-2">
+                    {/* Forgot Password trigger — hidden alongside the modal below, see the comment there. */}
+                    <Label htmlFor="password" className="text-sm" dir="rtl">{t("candidateAuth.password", { lng: "ur" })}</Label>
+                  </div>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
