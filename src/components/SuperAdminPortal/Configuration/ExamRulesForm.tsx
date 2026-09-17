@@ -13,6 +13,8 @@ export function ExamRulesForm() {
     const [duration, setDuration] = useState(0);
     const [questions, setQuestions] = useState(0);
     const [passingPercentage, setPassingPercentage] = useState(50);
+    const [validityYears, setValidityYears] = useState(0);
+    const [validityMonths, setValidityMonths] = useState(0);
 
     const { data: settings, isLoading } = useExamSettings();
     const updateExamSettingsMutation = useUpdateExamSettings();
@@ -23,6 +25,8 @@ export function ExamRulesForm() {
                 durationMinutes: Number(duration),
                 numberOfQuestions: Number(questions),
                 passingPercentage: Number(passingPercentage),
+                certificateValidityYears: Number(validityYears),
+                certificateValidityMonths: Number(validityMonths),
             },
             {
                 onSuccess: () => {
@@ -40,6 +44,8 @@ export function ExamRulesForm() {
             if (settings.durationMinutes) setDuration(settings.durationMinutes);
             if (settings.numberOfQuestions) setQuestions(settings.numberOfQuestions);
             if (settings.passingPercentage) setPassingPercentage(settings.passingPercentage);
+            setValidityYears(settings.certificateValidityYears ?? 0);
+            setValidityMonths(settings.certificateValidityMonths ?? 0);
         }
     }, [settings]);
 
@@ -105,6 +111,40 @@ export function ExamRulesForm() {
                             </div>
                         </div>
 
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <Label className="text-lg alumni-sans-subtitle uppercase tracking-wider">Certificate Validity</Label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="validityYears" className="text-xs text-muted-foreground">Years</Label>
+                                        <Input
+                                            id="validityYears"
+                                            type="number"
+                                            min={0}
+                                            max={50}
+                                            value={validityYears}
+                                            onChange={(e) => setValidityYears(Number(e.target.value))}
+                                            className="h-11 bg-white/50 border-border/60"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="validityMonths" className="text-xs text-muted-foreground">Months</Label>
+                                        <Input
+                                            id="validityMonths"
+                                            type="number"
+                                            min={0}
+                                            max={11}
+                                            value={validityMonths}
+                                            onChange={(e) => setValidityMonths(Number(e.target.value))}
+                                            className="h-11 bg-white/50 border-border/60"
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground italic">
+                                    How long an issued certificate stays valid. 0 years and 0 months together mean it never expires. Applies only to certificates issued after this is saved.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 )}
 

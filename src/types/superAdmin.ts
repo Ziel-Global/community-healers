@@ -2,6 +2,10 @@ export interface ExamSettings {
     durationMinutes: number;
     numberOfQuestions: number;
     passingPercentage: number;
+    /** Whole-years part of certificate validity. 0 years + 0 months = never expires. */
+    certificateValidityYears?: number;
+    /** 0-11 month remainder on top of certificateValidityYears. */
+    certificateValidityMonths?: number;
 }
 
 export interface City {
