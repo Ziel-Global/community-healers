@@ -68,6 +68,7 @@ export interface CenterApplication {
     centerName: string | null;
     address: string | null;
     centerPhone: string | null;
+    email: string | null;
     latitude: number | null;
     longitude: number | null;
     cityId: string | null;
@@ -100,6 +101,7 @@ export interface CenterInfoPayload {
     centerName: string;
     address: string;
     centerPhone: string;
+    email: string;
     latitude: number;
     longitude: number;
     city: string;

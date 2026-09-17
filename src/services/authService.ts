@@ -125,6 +125,17 @@ const getMe = async (): Promise<AuthResponse> => {
     return response.data;
 };
 
+/** Redeems the token from a "set your password" email — see CommitteeMemberService.approveInspection (backend). */
+const setPassword = async (token: string, password: string): Promise<{ message: string }> => {
+    try {
+        const response = await api.post('/auth/set-password', { token, password });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Set password error:', error);
+        throw new Error(getApiErrorMessage(error, 'Could not set your password. The link may be invalid or expired.'));
+    }
+};
+
 const checkExamScheduled = async (): Promise<ExamScheduledResponse> => {
     try {
         const response = await api.get('/candidates/me/exam-scheduled');
@@ -151,4 +162,5 @@ export const authService = {
     logout,
     getMe,
     checkExamScheduled,
+    setPassword,
 };

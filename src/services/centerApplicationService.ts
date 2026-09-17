@@ -39,6 +39,7 @@ export interface CenterApplicationSummary {
     centerName: string | null;
     address: string | null;
     centerPhone: string | null;
+    email: string | null;
     phone: string | null;
     cityId: string | null;
     committeeId: string | null;

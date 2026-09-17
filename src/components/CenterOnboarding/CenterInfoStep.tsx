@@ -1,4 +1,4 @@
-import { Building2, Loader2, Phone, ArrowLeft, CheckCircle2, ShieldQuestion } from "lucide-react";
+import { Building2, Loader2, Phone, Mail, ArrowLeft, CheckCircle2, ShieldQuestion } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ export interface CenterInfoFormState {
     centerName: string;
     address: string;
     centerPhone: string;
+    email: string;
     latitude: number | null;
     longitude: number | null;
     city: string | null;
@@ -62,6 +63,22 @@ export function CenterInfoStep({ value, onChange, onLocationChange, onSubmit, on
                 <div className="space-y-2">
                     <Label htmlFor="address">Address</Label>
                     <Input id="address" value={value.address} onChange={(e) => onChange({ address: e.target.value })} />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-muted-foreground" /> Center Email
+                    </Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@yourcenter.com"
+                        value={value.email}
+                        onChange={(e) => onChange({ email: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                        Once approved, we'll email this address a link to set your center admin password.
+                    </p>
                 </div>
 
                 <div className="space-y-2">

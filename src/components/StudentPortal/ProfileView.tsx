@@ -78,11 +78,8 @@ export function ProfileView({
     // Define expected document types to ensure we display all required slots even if not uploaded
     const expectedDocs = [
       { id: "photo", nameKey: "profile.candidatePhoto", isMandatory: true },
-      { id: "passport", nameKey: "profile.passport", isMandatory: true },
-      { id: "visa", nameKey: "profile.visa", isMandatory: false },
-      { id: "cnicFront", nameKey: "profile.cnicFront", isMandatory: false },
-      { id: "cnicBack", nameKey: "profile.cnicBack", isMandatory: false },
-      { id: "degreeTranscript", nameKey: "profile.degreeTranscript", isMandatory: false },
+      { id: "cnicFront", nameKey: "profile.cnicFront", isMandatory: true },
+      { id: "cnicBack", nameKey: "profile.cnicBack", isMandatory: true },
     ];
 
     expectedDocs.forEach(expected => {

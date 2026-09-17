@@ -84,6 +84,7 @@ const emptyCenterInfo: CenterInfoFormState = {
   centerName: "",
   address: "",
   centerPhone: "",
+  email: "",
   latitude: null,
   longitude: null,
   city: null,
@@ -178,6 +179,7 @@ export default function CenterOnboardingWizard() {
       centerName: app.centerName ?? "",
       address: app.address ?? "",
       centerPhone: app.centerPhone ?? "",
+      email: app.email ?? "",
       latitude: app.latitude,
       longitude: app.longitude,
       city: app.city ?? null,
@@ -382,6 +384,10 @@ export default function CenterOnboardingWizard() {
       toast.error("Please provide the center's phone number");
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(centerInfo.email.trim())) {
+      toast.error("Please provide a valid email — we'll send your password setup link there");
+      return;
+    }
     if (centerInfo.latitude == null || centerInfo.longitude == null) {
       toast.error("Please pick your center's location on the map");
       return;
@@ -401,6 +407,7 @@ export default function CenterOnboardingWizard() {
         centerName: centerInfo.centerName.trim(),
         address: centerInfo.address.trim(),
         centerPhone: centerInfo.centerPhone.trim(),
+        email: centerInfo.email.trim(),
         latitude: centerInfo.latitude,
         longitude: centerInfo.longitude,
         city: centerInfo.city,

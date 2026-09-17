@@ -48,6 +48,7 @@ const CenterOversightPage = lazy(() => import("./pages/ministry/CentersPage"));
 
 const CandidateAuth = lazy(() => import("./pages/auth/CandidateAuth"));
 const CenterAdminAuth = lazy(() => import("./pages/auth/CenterAdminAuth"));
+const CenterSetPasswordPage = lazy(() => import("./pages/auth/CenterSetPasswordPage"));
 const SuperAdminAuth = lazy(() => import("./pages/auth/SuperAdminAuth"));
 const MinistryAuth = lazy(() => import("./pages/auth/MinistryAuth"));
 const ExamAuth = lazy(() => import("./pages/auth/ExamAuth"));
@@ -73,6 +74,7 @@ export function AppRoutes() {
                 {/* Auth Routes (public) */}
                 <Route path="/candidate/auth" element={<CandidateAuth />} />
                 <Route path="/center/auth" element={<CenterAdminAuth />} />
+                <Route path="/center/set-password" element={<CenterSetPasswordPage />} />
                 <Route path="/admin/auth" element={<SuperAdminAuth />} />
                 <Route path="/ministry/auth" element={<MinistryAuth />} />
                 <Route path="/training/auth" element={<ExamAuth />} />
