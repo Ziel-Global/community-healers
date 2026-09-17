@@ -120,15 +120,17 @@
     "repaymentStepInfo": "مرحلہ 2 از 2 • شیڈولنگ",
     "repaymentRequiredTitle": "ادائیگی درکار",
     "repaymentRequiredDesc": "نئی تاریخ شیڈول کرنے سے پہلے امتحان فیس دوبارہ ادا کریں۔",
-    "selectCenter": "تربیتی مرکز منتخب کریں",
-    "selectCenterZoneDesc": "منتخب تاریخ کے لیے اپنے قریب ایک مرکز منتخب کریں",
-    "selectCenterDesc": "منتخب تاریخ کے لیے اپنا تربیتی مرکز منتخب کریں",
-    "loadingCenters": "دستیاب مراکز لوڈ ہو رہے ہیں...",
-    "noCentersForDate": "اس تاریخ کے لیے کوئی مرکز دستیاب نہیں۔ براہ کرم دوسری تاریخ منتخب کریں۔",
+    "selectCity": "تربیتی شہر منتخب کریں",
+    "selectCityZoneDesc": "منتخب تاریخ کے لیے اپنے قریب ایک شہر منتخب کریں",
+    "selectCityDesc": "منتخب تاریخ کے لیے اپنا تربیتی شہر منتخب کریں",
+    "selectCityWidenedDesc": "قریبی شہروں میں گنجائش نہیں — دور دراز شہر دکھائے جا رہے ہیں",
+    "loadingCities": "دستیاب شہر لوڈ ہو رہے ہیں...",
+    "failedToLoadCities": "شہر لوڈ نہیں ہو سکے۔ دوبارہ کوشش کریں۔",
+    "noCitiesForDate": "اس تاریخ کے لیے کوئی شہر دستیاب نہیں۔ براہ کرم دوسری تاریخ منتخب کریں۔",
     "centerFull": "بھر گیا",
     "slotsAvailable": "{{count}} جگہ دستیاب",
     "slotsAvailable_other": "{{count}} جگہیں دستیاب",
-    "pleaseSelectCenter": "جاری رکھنے کے لیے براہ کرم ایک تربیتی مرکز منتخب کریں"
+    "pleaseSelectCity": "جاری رکھنے کے لیے براہ کرم ایک تربیتی شہر منتخب کریں"
   },
   "profile": {
     "candidateId": "امیدوار آئی ڈی",

@@ -138,23 +138,23 @@ export interface UploadDocumentResponse {
     status: string;
 }
 
-/** One row from GET /candidates/me/centers?date=... */
-export interface EligibleCenter {
-    centerId: string;
-    name: string;
+/** One row from GET /candidates/me/cities?date=... — the candidate picks a CITY, never a center directly; booking auto-assigns the best center within it. */
+export interface EligibleCity {
     cityId: string;
-    cityName: string | null;
-    address: string | null;
-    /** Straight-line distance from the candidate's city, in km. Null when not zone-matched (falls back to exact-city — see `zoneMatched` on the parent response) but the center is still in the candidate's own city. */
+    cityName: string;
+    /** Straight-line distance from the candidate's own city, in km. 0 for their own city. Null when not zone-matched. */
     distanceKm: number | null;
+    /** Aggregate bookable capacity across every active center in this city, for the requested date. */
     availableSlots: number;
 }
 
-export interface EligibleCentersResponse {
-    /** False when the candidate's city has no coordinates yet — `centers` is then the same exact-city set scheduling itself would use. */
+export interface EligibleCitiesResponse {
+    /** False when the candidate's city has no coordinates yet — `cities` is then just their own exact city. */
     zoneMatched: boolean;
     radiusKm: number | null;
-    centers: EligibleCenter[];
+    /** True when the normal zone had no bookable capacity and the search widened to a larger radius. */
+    widened: boolean;
+    cities: EligibleCity[];
 }
 
 export interface ScheduleExamResponse {
