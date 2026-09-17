@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon, Home, AlertCircle, Landmark, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCities, useProvinces, useDistricts, useTehsils } from "@/hooks/queries/useReferenceQueries";
+import { useProvinces, useDistricts, useTehsils } from "@/hooks/queries/useReferenceQueries";
 import { PERSONAL_INFO_ERROR_CODES, dobFieldSchema } from "@/schemas/registrationSchemas";
 
 interface PersonalInfo {
@@ -14,9 +14,7 @@ interface PersonalInfo {
     cnic: string;
     dob: string;
     phone: string;
-    /** Exam-centre city — drives training-centre matching. Unrelated to the residential fields below. */
-    city: string;
-    /** Residential address hierarchy: Province > District > Tehsil/City > Address. Independent of `city`. */
+    /** Residential address hierarchy: Province > District > Tehsil/City > Address. The exam-centre city is auto-derived server-side from `tehsil` — not set here. */
     province: string;
     district: string;
     tehsil: string;
@@ -50,12 +48,8 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
         }
     }, [data.dob, t]);
 
-    // Fetch cities from the shared reference-data cache
-    const { data: citiesData } = useCities();
-    const cities = Array.isArray(citiesData) ? citiesData : [];
-
-    // Residential address hierarchy — separate reference data from `cities`
-    // above. Districts are scoped to whichever province is currently picked.
+    // Residential address hierarchy. Districts are scoped to whichever
+    // province is currently picked.
     const { data: provincesData } = useProvinces();
     const provinces = Array.isArray(provincesData) ? provincesData : [];
     const { data: districtsData, isFetching: isFetchingDistricts } = useDistricts(data.province || undefined);
@@ -174,31 +168,11 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                             />
                         </div>
                     </div>
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="city">{t('personalInfo.city')}</Label>
-                        <div className="relative">
-                            <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                            <Select
-                                value={data.city}
-                                onValueChange={(value) => handleChange("city", value)}
-                            >
-                                <SelectTrigger id="city" className={cn("pl-10", errors.city && "border-destructive focus-visible:ring-destructive")}>
-                                    <SelectValue placeholder={t('personalInfo.selectCity')} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {cities.map((city) => (
-                                        <SelectItem key={city.id} value={city.id}>
-                                            {city.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
                 </div>
 
-                {/* Residential address — a separate hierarchy from the exam-centre
-                    city above; visually grouped so the distinction is obvious. */}
+                {/* Residential address — Province/District/Tehsil/Address. The
+                    exam-centre city is auto-derived server-side from the tehsil
+                    picked here; there is no separate city field to set. */}
                 <div className="pt-2 border-t border-border/40">
                     <h4 className="text-sm font-semibold text-foreground mt-4 mb-4 flex items-center gap-2">
                         <Map className="w-4 h-4 text-primary" />

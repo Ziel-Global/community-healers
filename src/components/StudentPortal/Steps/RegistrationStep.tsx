@@ -16,8 +16,6 @@ interface PersonalInfo {
   cnic: string;
   dob: string;
   phone: string;
-  /** Exam-centre city — unrelated to the residential fields below. */
-  city: string;
   province: string;
   district: string;
   tehsil: string;
@@ -51,7 +49,6 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
     cnic: "",
     dob: "",
     phone: "",
-    city: "",
     province: "",
     district: "",
     tehsil: "",
@@ -73,10 +70,6 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       cnic: candidateData.cnic || "",
       dob,
       phone: candidateData.user?.phoneNumber || "",
-      // `cityId` isn't part of the CandidateMe shape (city comes back as
-      // `{ id, name }`) — preserved as-is from the pre-migration behavior,
-      // where this always resolved to "" via the same implicit-any lookup.
-      city: (candidateData as unknown as { cityId?: string }).cityId || "",
       province: candidateData.province?.id || "",
       district: candidateData.district?.id || "",
       tehsil: candidateData.tehsil?.id || "",
@@ -136,7 +129,6 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
             fatherName: t('personalInfo.fatherName'),
             cnic: t('personalInfo.cnic'),
             dob: t('personalInfo.dob'),
-            city: t('personalInfo.city'),
             province: t('personalInfo.province'),
             district: t('personalInfo.district'),
             tehsil: t('personalInfo.tehsil'),
@@ -186,7 +178,6 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
         cnic: personalInfo.cnic,
         dob: personalInfo.dob,
         address: personalInfo.address,
-        city: personalInfo.city,
         province: personalInfo.province,
         district: personalInfo.district,
         tehsil: personalInfo.tehsil,

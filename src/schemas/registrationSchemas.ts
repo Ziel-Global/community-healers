@@ -45,12 +45,12 @@ export const personalInfoSchema = z.object({
     fatherName: z.string().trim().min(1, PERSONAL_INFO_ERROR_CODES.REQUIRED),
     cnic: cnicFieldSchema,
     dob: dobFieldSchema,
-    city: z.string().trim().min(1, PERSONAL_INFO_ERROR_CODES.REQUIRED),
-    // Residential address hierarchy — independent of `city` above, which is
-    // the exam-centre pick. Required for a new registration to complete;
-    // existing candidates who already finished registration before this
-    // shipped are never forced back through this screen, since the backend
-    // itself leaves these three optional (see UpdateProfileDto).
+    // Residential address hierarchy. The exam-centre city is auto-derived
+    // server-side from `tehsil` — there is no separate city field here.
+    // Required for a new registration to complete; existing candidates who
+    // already finished registration before this shipped are never forced
+    // back through this screen, since the backend itself leaves these three
+    // optional (see UpdateProfileDto).
     province: z.string().trim().min(1, PERSONAL_INFO_ERROR_CODES.REQUIRED),
     district: z.string().trim().min(1, PERSONAL_INFO_ERROR_CODES.REQUIRED),
     tehsil: z.string().trim().min(1, PERSONAL_INFO_ERROR_CODES.REQUIRED),
