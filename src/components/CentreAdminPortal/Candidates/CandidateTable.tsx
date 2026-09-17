@@ -181,11 +181,8 @@ export function CandidateTable({
             const documents = (item.documents || []).map((d: any) => {
                 const typeLabels: Record<string, string> = {
                     photo: "Candidate Photo",
-                    passport: "Passport",
-                    visa: "Visa",
                     cnicFront: "CNIC Front",
                     cnicBack: "CNIC Back",
-                    degreeTranscript: "Degree/Transcript",
                 };
                 return {
                     id: d.id,
