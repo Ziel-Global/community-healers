@@ -67,7 +67,6 @@ const DoCentersPage = lazy(() => import("./pages/director-operations/CentersPage
 const CenterOnboardingWizard = lazy(() => import('./pages/center-onboarding/CenterOnboardingWizard'));
 const LandingTest = lazy(() => import('./pages/LandingTest'));
 const LinksPage = lazy(() => import('./pages/LinksPage'));
-//const TrainingTest = lazy(() => import('./pages/TrainingTest'));
 
 export function AppRoutes() {
     return (
@@ -170,8 +169,6 @@ export function AppRoutes() {
                 <Route path="/director-operations/applications/:applicationId" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationDetailPage /></ProtectedRoute>} />
                 <Route path="/director-operations/centers" element={<ProtectedRoute portalType="director-operations"><DoCentersPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="/landing-test" element={<LandingTest />} />
-                {/* <Route path="/training-test" element={<TrainingTest />} /> */}
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </Suspense>
