@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { CandidateWizard } from "@/components/StudentPortal/CandidateWizard";
 import { ProfileView } from "@/components/StudentPortal/ProfileView";
-import { TrainingScheduleScreen } from "@/components/StudentPortal/TrainingScheduleScreen";
+import { RegistrationCompleteScreen } from "@/components/StudentPortal/RegistrationCompleteScreen";
 import { RegistrationStep } from "@/components/StudentPortal/Steps/RegistrationStep";
 import { PaymentStep } from "@/components/StudentPortal/Steps/PaymentStep";
 import { SchedulingStep } from "@/components/StudentPortal/Steps/SchedulingStep";
@@ -222,11 +222,10 @@ export default function CandidatePortal() {
       const displayDate = examDateStr ? parseISO(examDateStr) : (scheduledExamDate || new Date());
 
       return (
-        <TrainingScheduleScreen
+        <RegistrationCompleteScreen
           examDate={displayDate}
           centerName={examScheduleInfo?.centerName || t('candidatePortal.yourAssignedCenter')}
-          centerId={examScheduleInfo?.centerLicenseNumber || ""}
-          centerAddress={examScheduleInfo?.centerAddress}
+          centerId={examScheduleInfo?.centerName?.split(' ').map(w => w[0]).join('') || "CENTER"}
           centerPhone={examScheduleInfo?.centerPhone}
           examStartTime={examScheduleInfo?.examStartTime}
           arriveByTime={examScheduleInfo?.arriveByTime}
