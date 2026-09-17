@@ -195,20 +195,16 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                         <FileText className="w-5 h-5" />
                                     )}
                                 </div>
-                                <div className="min-w-0 flex flex-col gap-1 w-full text-left" dir="ltr">
-                                    <div className="flex flex-wrap items-center gap-1.5">
-                                        <p className="text-sm font-semibold text-foreground">{t(doc.nameKey, { lng: 'en' })}</p>
-                                        <span className="text-muted-foreground/40 font-light px-0.5">|</span>
-                                        <p className="text-[13px] font-medium text-muted-foreground opacity-75" dir="rtl">{t(doc.nameKey, { lng: 'ur' })}</p>
-                                    </div>
+                                <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2">
+                                        <p className="text-sm font-semibold text-foreground">{t(doc.nameKey)}</p>
                                         {doc.isMandatory && (
                                             <span className="text-[10px] font-bold text-destructive uppercase">
                                                 {t('documents.mandatoryLabel')}
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                    <p className="text-xs text-muted-foreground truncate">
                                         {doc.status === "complete" ? doc.fileName :
                                             doc.status === "uploading" ? t('documents.uploading') :
                                                 doc.id === CAMERA_ONLY_DOC_ID ? t('documents.cameraOnlyHint') :
@@ -228,7 +224,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                         <X className="w-4 h-4" />
                                     </Button>
                                 ) : doc.id === CAMERA_ONLY_DOC_ID ? (
-                                    <div className="flex flex-col gap-2 min-w-[130px] shrink-0">
+                                    <>
                                         <input
                                             type="file"
                                             ref={el => fileInputRefs.current[doc.id] = el}
@@ -239,25 +235,25 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="h-8 gap-2 w-full justify-center px-3"
+                                            className="h-8 gap-2"
                                             onClick={() => setShowCameraDialog(true)}
                                             disabled={doc.status === "uploading"}
                                         >
-                                            <Camera className="w-3.5 h-3.5 shrink-0" />
+                                            <Camera className="w-3.5 h-3.5" />
                                             {doc.status === "uploading" ? t('documents.uploading') : t('documents.takePhoto')}
                                         </Button>
                                         {/* Temporary fallback while camera-captured photos are failing face indexing — remove once that's fixed. */}
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="h-8 gap-2 w-full justify-center px-3"
+                                            className="h-8 gap-2"
                                             onClick={() => fileInputRefs.current[doc.id]?.click()}
                                             disabled={doc.status === "uploading"}
                                         >
-                                            <Upload className="w-3.5 h-3.5 shrink-0" />
+                                            <Upload className="w-3.5 h-3.5" />
                                             {doc.status === "uploading" ? t('documents.uploading') : t('documents.uploadButton')}
                                         </Button>
-                                    </div>
+                                    </>
                                 ) : (
                                     <>
                                         <input
