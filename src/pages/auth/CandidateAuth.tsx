@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail, KeyRound, CheckCircle2, ShieldCheck } from "lucide-react";
+import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail, KeyRound, CheckCircle2, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import i18n from "@/i18n";
@@ -33,6 +33,7 @@ const FORGOT_PASSWORD_ENABLED = false;
 export default function CandidateAuth() {
   const { t } = useTranslation();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
@@ -98,14 +99,9 @@ export default function CandidateAuth() {
           setLoading(false);
           return;
         }
-        // Register
-        await signup(result.data);
-        setShowOtpModal(true);
-        setLoading(false); // Stop loading to show OTP modal
-        toast({
-          title: "Registration Successful",
-          description: "An OTP has been sent to your phone.",
-        });
+        // Show confirmation modal instead of signing up immediately
+        setShowConfirmModal(true);
+        setLoading(false);
       } else {
         const result = candidateLoginSchema.safeParse({
           phoneNumber: formData.phoneNumber,
@@ -134,6 +130,29 @@ export default function CandidateAuth() {
       toast({
         variant: "destructive",
         title: isSignUp ? "Registration Failed" : "Login Failed",
+        description: error.message || "An error occurred. Please try again.",
+      });
+    }
+  };
+
+  const handleConfirmSignup = async () => {
+    setLoading(true);
+    try {
+      const result = candidateSignupSchema.safeParse(formData);
+      if (!result.success) return;
+      await signup(result.data);
+      setShowConfirmModal(false);
+      setShowOtpModal(true);
+      setLoading(false);
+      toast({
+        title: "Registration Successful",
+        description: "An OTP has been sent to your phone.",
+      });
+    } catch (error: any) {
+      setLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
         description: error.message || "An error occurred. Please try again.",
       });
     }
@@ -456,6 +475,68 @@ export default function CandidateAuth() {
           </p>
         </div>
       </div>
+
+      
+      {/* Confirm Registration Modal */}
+      <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+        <DialogContent className="sm:max-w-md [&>button]:hidden">
+          <div className="flex flex-col items-center text-center space-y-4 pt-2">
+            <TriangleAlert className="w-14 h-14 text-[#ea580c]" strokeWidth={2.5} />
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-slate-800">Confirm Registration</h2>
+              <p className="text-slate-700 text-[15px]">
+                Once registered, the following details cannot be changed:
+              </p>
+            </div>
+            
+            <div className="bg-slate-50 rounded-xl p-5 w-full text-[15px] space-y-3 my-2">
+              <div className="flex justify-center gap-2">
+                <span className="font-bold text-slate-900">Name:</span>
+                <span className="text-slate-700">{formData.firstName} {formData.lastName}</span>
+              </div>
+              <div className="flex justify-center gap-2">
+                <span className="font-bold text-slate-900">Mobile Number:</span>
+                <span className="text-slate-700">{formData.phoneNumber}</span>
+              </div>
+              <div className="flex justify-center gap-2">
+                <span className="font-bold text-slate-900">Email:</span>
+                <span className="text-slate-700">{formData.email}</span>
+              </div>
+            </div>
+
+            <p className="text-slate-800 text-[15px] font-medium pb-2">
+              Are you sure you want to continue?
+            </p>
+
+            <div className="flex gap-4 w-full">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 h-11 text-base text-slate-700 border-slate-300"
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="flex-1 h-11 text-base bg-[#0f7a3d] hover:bg-[#0c6130]"
+                onClick={handleConfirmSignup}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Processing...
+                  </>
+                ) : (
+                  "Yes, Continue"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* OTP Modal */}
       <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
