@@ -119,7 +119,16 @@
     "repaymentDescription": "After payment, select a new training date.",
     "repaymentStepInfo": "Step 2 of 2 • Scheduling",
     "repaymentRequiredTitle": "Payment Required",
-    "repaymentRequiredDesc": "Please pay the exam fee again before scheduling a new date."
+    "repaymentRequiredDesc": "Please pay the exam fee again before scheduling a new date.",
+    "selectCenter": "Select Training Center",
+    "selectCenterZoneDesc": "Choose a center near you for the selected date",
+    "selectCenterDesc": "Choose your training center for the selected date",
+    "loadingCenters": "Loading available centers...",
+    "noCentersForDate": "No centers available for this date. Please choose another date.",
+    "centerFull": "Full",
+    "slotsAvailable": "{{count}} slot available",
+    "slotsAvailable_other": "{{count}} slots available",
+    "pleaseSelectCenter": "Please select a training center to continue"
   },
   "profile": {
     "candidateId": "Candidate ID",
@@ -327,9 +336,18 @@
     "phone": "Contact Number",
     "city": "City / Area",
     "selectCity": "Select your city",
+    "residentialAddress": "Residential Address",
+    "province": "Province",
+    "selectProvince": "Select your province",
+    "district": "District",
+    "selectDistrict": "Select your district",
+    "selectDistrictFirst": "Select a province first",
+    "tehsil": "Tehsil / City",
+    "selectTehsil": "Select your tehsil/city",
+    "selectTehsilFirst": "Select a district first",
     "address": "Address",
     "addressPlaceholder": "House #, Street #, Sector/Area",
-    "ageWarning": "You must be at least 16 years old to register."
+    "ageWarning": "You must be at least 13 years old to register."
   },
   "documents": {
     "title": "Document Upload",

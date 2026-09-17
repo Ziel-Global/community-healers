@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { superAdminService } from "@/services/superAdminService";
-import { CreateQuestionRequest, ExamSettings, CreateCenterRequest } from "@/types/superAdmin";
+import { CreateQuestionRequest, ExamSettings, CreateCenterRequest, UpdateCityLocationRequest } from "@/types/superAdmin";
 import { referenceKeys } from "./useReferenceQueries";
 
 export const superAdminKeys = {
@@ -135,6 +135,18 @@ export function useCreateCity() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (name: string) => superAdminService.createCity(name),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: referenceKeys.cities() });
+        },
+    });
+}
+
+/** Sets a city's zone-matching coordinates/radius — see UpdateCityLocationRequest. */
+export function useUpdateCityLocation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ cityId, payload }: { cityId: string; payload: UpdateCityLocationRequest }) =>
+            superAdminService.updateCityLocation(cityId, payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: referenceKeys.cities() });
         },

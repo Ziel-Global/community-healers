@@ -119,7 +119,16 @@
     "repaymentDescription": "ادائیگی کے بعد نئی تربیت کی تاریخ منتخب کریں۔",
     "repaymentStepInfo": "مرحلہ 2 از 2 • شیڈولنگ",
     "repaymentRequiredTitle": "ادائیگی درکار",
-    "repaymentRequiredDesc": "نئی تاریخ شیڈول کرنے سے پہلے امتحان فیس دوبارہ ادا کریں۔"
+    "repaymentRequiredDesc": "نئی تاریخ شیڈول کرنے سے پہلے امتحان فیس دوبارہ ادا کریں۔",
+    "selectCenter": "تربیتی مرکز منتخب کریں",
+    "selectCenterZoneDesc": "منتخب تاریخ کے لیے اپنے قریب ایک مرکز منتخب کریں",
+    "selectCenterDesc": "منتخب تاریخ کے لیے اپنا تربیتی مرکز منتخب کریں",
+    "loadingCenters": "دستیاب مراکز لوڈ ہو رہے ہیں...",
+    "noCentersForDate": "اس تاریخ کے لیے کوئی مرکز دستیاب نہیں۔ براہ کرم دوسری تاریخ منتخب کریں۔",
+    "centerFull": "بھر گیا",
+    "slotsAvailable": "{{count}} جگہ دستیاب",
+    "slotsAvailable_other": "{{count}} جگہیں دستیاب",
+    "pleaseSelectCenter": "جاری رکھنے کے لیے براہ کرم ایک تربیتی مرکز منتخب کریں"
   },
   "profile": {
     "candidateId": "امیدوار آئی ڈی",
@@ -327,9 +336,18 @@
     "phone": "رابطہ نمبر",
     "city": "شہر / علاقہ",
     "selectCity": "اپنا شہر منتخب کریں",
+    "residentialAddress": "رہائشی پتہ",
+    "province": "صوبہ",
+    "selectProvince": "اپنا صوبہ منتخب کریں",
+    "district": "ضلع",
+    "selectDistrict": "اپنا ضلع منتخب کریں",
+    "selectDistrictFirst": "پہلے صوبہ منتخب کریں",
+    "tehsil": "تحصیل / شہر",
+    "selectTehsil": "اپنی تحصیل/شہر منتخب کریں",
+    "selectTehsilFirst": "پہلے ضلع منتخب کریں",
     "address": "پتہ",
     "addressPlaceholder": "مکان نمبر، گلی نمبر، سیکٹر/علاقہ",
-    "ageWarning": "رجسٹریشن کے لیے آپ کی عمر کم از کم 16 سال ہونی چاہیے۔"
+    "ageWarning": "رجسٹریشن کے لیے آپ کی عمر کم از کم 13 سال ہونی چاہیے۔"
   },
   "documents": {
     "title": "دستاویزات اپ لوڈ",

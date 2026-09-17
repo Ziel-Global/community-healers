@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, Users, Activity, Plus, Search, MoreHorizontal, Phone, Mail, User, Lock } from "lucide-react";
+import { Building2, MapPin, Users, Activity, Plus, Search, MoreHorizontal, Phone, Mail, User, Lock, Pencil, Radius } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { CenterDetail } from "./CenterDetail";
-import { SuperAdminCenter } from "@/types/superAdmin";
-import { useSuperAdminCenters, useCreateCenter, useCreateCity } from "@/hooks/queries/useSuperAdminQueries";
+import { City, SuperAdminCenter } from "@/types/superAdmin";
+import { useSuperAdminCenters, useCreateCenter, useCreateCity, useUpdateCityLocation } from "@/hooks/queries/useSuperAdminQueries";
 import { useCities } from "@/hooks/queries/useReferenceQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 
@@ -22,12 +22,17 @@ export function CenterManager() {
     const { data: cities = [], isLoading: isLoadingCities, error: citiesError, refetch: refetchCities } = useCities();
     const createCenterMutation = useCreateCenter();
     const createCityMutation = useCreateCity();
+    const updateCityLocationMutation = useUpdateCityLocation();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isCityDialogOpen, setIsCityDialogOpen] = useState(false);
+    const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
     const [selectedCenter, setSelectedCenter] = useState<SuperAdminCenter | null>(null);
     const [newCityName, setNewCityName] = useState("");
+    const [editingCity, setEditingCity] = useState<City | null>(null);
+    const [locationForm, setLocationForm] = useState({ latitude: "", longitude: "", radiusKm: "" });
     const isSubmitting = createCenterMutation.isPending;
     const isSubmittingCity = createCityMutation.isPending;
+    const isSubmittingLocation = updateCityLocationMutation.isPending;
     const [formData, setFormData] = useState({
         name: "",
         cityId: "",
@@ -177,6 +182,83 @@ export function CenterManager() {
         });
     };
 
+    const openLocationDialog = (city: City) => {
+        setEditingCity(city);
+        setLocationForm({
+            latitude: city.latitude != null ? String(city.latitude) : "",
+            longitude: city.longitude != null ? String(city.longitude) : "",
+            radiusKm: city.radiusKm != null ? String(city.radiusKm) : "",
+        });
+        setIsLocationDialogOpen(true);
+    };
+
+    const handleLocationSubmit = async () => {
+        if (!editingCity) return;
+
+        const { latitude, longitude, radiusKm } = locationForm;
+
+        // Coordinates travel together — a city with only one set can't be
+        // distance-matched against anything, so require both or neither.
+        if ((latitude.trim() === "") !== (longitude.trim() === "")) {
+            toast({
+                title: "Incomplete Coordinates",
+                description: "Enter both latitude and longitude, or leave both blank.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const payload: { latitude?: number; longitude?: number; radiusKm?: number } = {};
+
+        if (latitude.trim() !== "") {
+            const lat = Number(latitude);
+            if (Number.isNaN(lat) || lat < -90 || lat > 90) {
+                toast({ title: "Invalid Latitude", description: "Latitude must be a number between -90 and 90.", variant: "destructive" });
+                return;
+            }
+            payload.latitude = lat;
+        }
+
+        if (longitude.trim() !== "") {
+            const lng = Number(longitude);
+            if (Number.isNaN(lng) || lng < -180 || lng > 180) {
+                toast({ title: "Invalid Longitude", description: "Longitude must be a number between -180 and 180.", variant: "destructive" });
+                return;
+            }
+            payload.longitude = lng;
+        }
+
+        if (radiusKm.trim() !== "") {
+            const radius = Number(radiusKm);
+            if (!Number.isInteger(radius) || radius < 1 || radius > 1000) {
+                toast({ title: "Invalid Radius", description: "Radius must be a whole number between 1 and 1000 km.", variant: "destructive" });
+                return;
+            }
+            payload.radiusKm = radius;
+        }
+
+        updateCityLocationMutation.mutate(
+            { cityId: editingCity.id, payload },
+            {
+                onSuccess: () => {
+                    toast({
+                        title: "City Location Updated",
+                        description: `${editingCity.name}'s zone settings have been saved.`,
+                    });
+                    setIsLocationDialogOpen(false);
+                    setEditingCity(null);
+                },
+                onError: (error) => {
+                    toast({
+                        title: "Failed to Update City Location",
+                        description: getApiErrorMessage(error, "An error occurred while updating the city's location."),
+                        variant: "destructive",
+                    });
+                },
+            }
+        );
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -216,16 +298,33 @@ export function CenterManager() {
                     <p className="text-xs text-muted-foreground">No cities yet — click "Add New City" to create one.</p>
                 ) : (
                     <div className="flex flex-wrap gap-2">
-                        {cities.map((city) => (
-                            <Badge
-                                key={city.id}
-                                variant="outline"
-                                className="gap-1.5 h-8 px-3 bg-card/60 border-border/60 text-sm font-normal"
-                            >
-                                <MapPin className="w-3 h-3 text-primary" />
-                                {city.name}
-                            </Badge>
-                        ))}
+                        {cities.map((city) => {
+                            const hasCoordinates = city.latitude != null && city.longitude != null;
+                            return (
+                                <Badge
+                                    key={city.id}
+                                    variant="outline"
+                                    className="gap-1.5 h-8 pl-3 pr-1.5 bg-card/60 border-border/60 text-sm font-normal"
+                                >
+                                    <MapPin className="w-3 h-3 text-primary" />
+                                    {city.name}
+                                    {hasCoordinates && (
+                                        <Radius
+                                            className="w-3 h-3 text-emerald-500"
+                                            aria-label={`Zone radius set (${city.radiusKm ?? "default"} km)`}
+                                        />
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => openLocationDialog(city)}
+                                        className="h-5 w-5 rounded-md flex items-center justify-center hover:bg-primary/10 transition-colors"
+                                        title="Edit zone location & radius"
+                                    >
+                                        <Pencil className="w-3 h-3 text-muted-foreground" />
+                                    </button>
+                                </Badge>
+                            );
+                        })}
                     </div>
                 )}
             </div>
@@ -582,6 +681,109 @@ export function CenterManager() {
                                 <>
                                     <Plus className="w-4 h-4" />
                                     Add City
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit City Location Dialog — sets the coordinates/radius that drive zone-based centre matching */}
+            <Dialog
+                open={isLocationDialogOpen}
+                onOpenChange={(open) => {
+                    setIsLocationDialogOpen(open);
+                    if (!open) setEditingCity(null);
+                }}
+            >
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                            <Radius className="w-6 h-6 text-primary" />
+                            Zone Location — {editingCity?.name}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Candidates in this city are matched to training centers within the radius below.
+                            Leave coordinates blank to keep this city matched by exact city only (no zone).
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="cityLatitude">Latitude</Label>
+                                <Input
+                                    id="cityLatitude"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g., 31.5204"
+                                    value={locationForm.latitude}
+                                    onChange={(e) => setLocationForm({ ...locationForm, latitude: e.target.value })}
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="cityLongitude">Longitude</Label>
+                                <Input
+                                    id="cityLongitude"
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g., 74.3587"
+                                    value={locationForm.longitude}
+                                    onChange={(e) => setLocationForm({ ...locationForm, longitude: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="cityRadiusKm">Zone Radius (km)</Label>
+                            <div className="relative">
+                                <Radius className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    id="cityRadiusKm"
+                                    type="number"
+                                    min="1"
+                                    max="1000"
+                                    placeholder="Leave blank to use the global default (100 km)"
+                                    className="pl-10"
+                                    value={locationForm.radiusKm}
+                                    onChange={(e) => setLocationForm({ ...locationForm, radiusKm: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                            <p className="text-xs text-blue-700">
+                                Centers within this radius of {editingCity?.name ?? "this city"} — in any city that
+                                also has coordinates set — become available to candidates registered here, in
+                                addition to centers in their own city.
+                            </p>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsLocationDialogOpen(false)}
+                            disabled={isSubmittingLocation}
+                            className="flex-1"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleLocationSubmit}
+                            disabled={isSubmittingLocation}
+                            className="gradient-primary text-white gap-2 flex-1"
+                        >
+                            {isSubmittingLocation ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Pencil className="w-4 h-4" />
+                                    Save Location
                                 </>
                             )}
                         </Button>

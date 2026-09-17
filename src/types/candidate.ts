@@ -49,10 +49,26 @@ export interface CandidateMe {
     cnic: string;
     fatherName: string;
     dob: string;
+    /** Exam-centre city — drives training-centre matching. Unrelated to the residential fields below. */
     city: {
         id: string;
         name: string;
-    };
+    } | null;
+    /** Residential address hierarchy: Province > District > Tehsil/City > Address. Independent of `city` above. */
+    province: {
+        id: string;
+        name: string;
+    } | null;
+    district: {
+        id: string;
+        name: string;
+        provinceId: string;
+    } | null;
+    tehsil: {
+        id: string;
+        name: string;
+        districtId: string;
+    } | null;
     address: string;
     has16YearsEducation: boolean;
     /** Which route to certification this candidate is on — EXAM (default) or DEGREE (skips payment/scheduling/exam). */
@@ -120,6 +136,25 @@ export interface UploadDocumentResponse {
     url: string;
     fileType?: string | null;
     status: string;
+}
+
+/** One row from GET /candidates/me/centers?date=... */
+export interface EligibleCenter {
+    centerId: string;
+    name: string;
+    cityId: string;
+    cityName: string | null;
+    address: string | null;
+    /** Straight-line distance from the candidate's city, in km. Null when not zone-matched (falls back to exact-city — see `zoneMatched` on the parent response) but the center is still in the candidate's own city. */
+    distanceKm: number | null;
+    availableSlots: number;
+}
+
+export interface EligibleCentersResponse {
+    /** False when the candidate's city has no coordinates yet — `centers` is then the same exact-city set scheduling itself would use. */
+    zoneMatched: boolean;
+    radiusKm: number | null;
+    centers: EligibleCenter[];
 }
 
 export interface ScheduleExamResponse {

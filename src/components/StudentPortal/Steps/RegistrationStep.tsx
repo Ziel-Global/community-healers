@@ -16,7 +16,11 @@ interface PersonalInfo {
   cnic: string;
   dob: string;
   phone: string;
+  /** Exam-centre city — unrelated to the residential fields below. */
   city: string;
+  province: string;
+  district: string;
+  tehsil: string;
   address: string;
 }
 
@@ -48,6 +52,9 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
     dob: "",
     phone: "",
     city: "",
+    province: "",
+    district: "",
+    tehsil: "",
     address: "",
   });
 
@@ -70,6 +77,9 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       // `{ id, name }`) — preserved as-is from the pre-migration behavior,
       // where this always resolved to "" via the same implicit-any lookup.
       city: (candidateData as unknown as { cityId?: string }).cityId || "",
+      province: candidateData.province?.id || "",
+      district: candidateData.district?.id || "",
+      tehsil: candidateData.tehsil?.id || "",
       address: candidateData.address || "",
     });
   }, [candidateData]);
@@ -127,6 +137,9 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
             cnic: t('personalInfo.cnic'),
             dob: t('personalInfo.dob'),
             city: t('personalInfo.city'),
+            province: t('personalInfo.province'),
+            district: t('personalInfo.district'),
+            tehsil: t('personalInfo.tehsil'),
             address: t('personalInfo.address')
           };
           const missingFieldLabels = Object.keys(newErrors)
@@ -174,6 +187,9 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
         dob: personalInfo.dob,
         address: personalInfo.address,
         city: personalInfo.city,
+        province: personalInfo.province,
+        district: personalInfo.district,
+        tehsil: personalInfo.tehsil,
       };
 
       await updateCandidateMeMutation.mutateAsync(profilePayload);
