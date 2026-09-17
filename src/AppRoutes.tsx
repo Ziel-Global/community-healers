@@ -63,6 +63,7 @@ const CommitteeInspectionHistoryPage = lazy(() => import("./pages/committee/Insp
 const DirectorOperationsPortal = lazy(() => import("./pages/DirectorOperationsPortal"));
 const DoCenterApplicationsPage = lazy(() => import("./pages/director-operations/CenterApplicationsPage"));
 const DoCenterApplicationDetailPage = lazy(() => import("./pages/director-operations/CenterApplicationDetailPage"));
+const DoCentersPage = lazy(() => import("./pages/director-operations/CentersPage"));
 
 const CenterOnboardingWizard = lazy(() => import("./pages/center-onboarding/CenterOnboardingWizard"));
 
@@ -164,6 +165,7 @@ export function AppRoutes() {
                 <Route path="/director-operations" element={<ProtectedRoute portalType="director-operations"><DirectorOperationsPortal /></ProtectedRoute>} />
                 <Route path="/director-operations/applications" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationsPage /></ProtectedRoute>} />
                 <Route path="/director-operations/applications/:applicationId" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationDetailPage /></ProtectedRoute>} />
+                <Route path="/director-operations/centers" element={<ProtectedRoute portalType="director-operations"><DoCentersPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
             </Routes>

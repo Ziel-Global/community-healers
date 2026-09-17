@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Briefcase, ClipboardList, Users, Loader2, LayoutDashboard } from "lucide-react";
+import { Briefcase, ClipboardList, Users, Loader2, LayoutDashboard, Building2 } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import { APPLICATION_STATUS_META, KANBAN_STATUSES } from "@/components/DirectorO
 export const directorOperationsNavItems = [
   { label: "Dashboard", href: "/director-operations", icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: "Center Applications", href: "/director-operations/applications", icon: <ClipboardList className="w-4 h-4" /> },
+  { label: "Centers", href: "/director-operations/centers", icon: <Building2 className="w-4 h-4" /> },
 ];
 
 export default function DirectorOperationsPortal() {
