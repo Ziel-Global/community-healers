@@ -46,12 +46,17 @@ const EXPECTED_DOC_TYPES = [
     "cnicBack",
 ] as const;
 
-function isImageFile(fileType?: string | null) {
-    return !!fileType?.startsWith("image/");
+function isImageFile(fileType?: string | null, url?: string | null) {
+    if (fileType?.startsWith("image/")) return true;
+    if (!url) return false;
+    const clean = url.split("?")[0].toLowerCase();
+    return /\.(jpe?g|png|gif|webp|bmp)$/i.test(clean);
 }
 
-function isPdfFile(fileType?: string | null) {
-    return fileType === "application/pdf";
+function isPdfFile(fileType?: string | null, url?: string | null) {
+    if (fileType === "application/pdf") return true;
+    if (!url) return false;
+    return url.split("?")[0].toLowerCase().endsWith(".pdf");
 }
 
 export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
@@ -494,21 +499,21 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                         )}
                         {!previewLoading && previewBlobUrl && (
                             <>
-                                {isImageFile(previewDoc?.fileType) && (
+                                {isImageFile(previewDoc?.fileType, previewBlobUrl) && (
                                     <img
                                         src={previewBlobUrl}
                                         alt={previewDoc?.label}
                                         className="max-w-full h-auto mx-auto rounded-md"
                                     />
                                 )}
-                                {isPdfFile(previewDoc?.fileType) && (
+                                {isPdfFile(previewDoc?.fileType, previewBlobUrl) && (
                                     <iframe
                                         src={previewBlobUrl}
                                         title={previewDoc?.label}
                                         className="w-full h-[65vh] rounded-md border-0"
                                     />
                                 )}
-                                {!isImageFile(previewDoc?.fileType) && !isPdfFile(previewDoc?.fileType) && (
+                                {!isImageFile(previewDoc?.fileType, previewBlobUrl) && !isPdfFile(previewDoc?.fileType, previewBlobUrl) && (
                                     <div className="flex flex-col items-center justify-center gap-3 py-12">
                                         <FileText className="w-10 h-10 text-muted-foreground" />
                                         <p className="text-sm text-muted-foreground">Preview not available for this file type</p>
