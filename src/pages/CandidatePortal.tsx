@@ -4,12 +4,12 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { CandidateWizard } from "@/components/StudentPortal/CandidateWizard";
 import { ProfileView } from "@/components/StudentPortal/ProfileView";
-import { TrainingScheduleScreen } from "@/components/StudentPortal/TrainingScheduleScreen";
+import { RegistrationCompleteScreen } from "@/components/StudentPortal/RegistrationCompleteScreen";
 import { RegistrationStep } from "@/components/StudentPortal/Steps/RegistrationStep";
 import { PaymentStep } from "@/components/StudentPortal/Steps/PaymentStep";
 import { SchedulingStep } from "@/components/StudentPortal/Steps/SchedulingStep";
 import { Button } from "@/components/ui/button";
-import { User, FileText, Shield, LogOut, Loader2, CalendarCheck } from "lucide-react";
+import { User, FileText, Shield, LogOut, Loader2 } from "lucide-react";
 import { parseISO } from "date-fns";
 import { useCandidateMe } from "@/hooks/queries/useCandidateQueries";
 import { CertificateCard } from "@/components/StudentPortal/CertificateCard";
@@ -21,10 +21,10 @@ export default function CandidatePortal() {
   const { logout, examScheduleInfo, checkExamSchedule } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = (searchParams.get("tab") as "profile" | "application" | "training") || "application";
+  const activeTab = (searchParams.get("tab") as "profile" | "application") || "application";
   const currentWizardStep = parseInt(searchParams.get("step") || "0", 10);
 
-  const setActiveTab = (tab: "profile" | "application" | "training") => {
+  const setActiveTab = (tab: "profile" | "application") => {
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev);
       newParams.set("tab", tab);
@@ -148,23 +148,6 @@ export default function CandidatePortal() {
         />
       );
     }
-    
-    if (activeTab === "training") {
-      const examDateStr = examScheduleInfo?.examDate;
-      const displayDate = examDateStr ? parseISO(examDateStr) : (scheduledExamDate || new Date());
-      return (
-        <TrainingScheduleScreen
-          examDate={displayDate}
-          centerName={examScheduleInfo?.centerName || t('candidatePortal.yourAssignedCenter')}
-          centerId={examScheduleInfo?.centerName?.split(' ').map(w => w[0]).join('') || "CENTER"}
-          examStartTime={examScheduleInfo?.examStartTime}
-          arriveByTime={examScheduleInfo?.arriveByTime}
-          verificationMessage={examScheduleInfo?.verificationMessage}
-          wasAutoRescheduled={examScheduleInfo?.wasAutoRescheduled}
-          onGoToProfile={() => setActiveTab("profile")}
-        />
-      );
-    }
 
     if (loading) {
       return <div className="p-8 text-center text-muted-foreground">{t('candidatePortal.loading')}</div>;
@@ -239,7 +222,7 @@ export default function CandidatePortal() {
       const displayDate = examDateStr ? parseISO(examDateStr) : (scheduledExamDate || new Date());
 
       return (
-        <TrainingScheduleScreen
+        <RegistrationCompleteScreen
           examDate={displayDate}
           centerName={examScheduleInfo?.centerName || t('candidatePortal.yourAssignedCenter')}
           centerId={examScheduleInfo?.centerName?.split(' ').map(w => w[0]).join('') || "CENTER"}
@@ -257,8 +240,6 @@ export default function CandidatePortal() {
 
     // 4. "Already Scheduled" View - Shown after user has moved off the success screen
     if (examScheduled && candidateStatus !== "ABSENT" && candidateStatus !== "REJECTED") {
-      // Show Training Schedule Screen here too, instead of the basic "Already Scheduled" View.
-      // Wait, let's keep it simple. If we want it as a tab, let's just make the tab change.
       return (
         <div className="max-w-3xl mx-auto">
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
@@ -272,8 +253,8 @@ export default function CandidatePortal() {
                 ? t('candidatePortal.autoRescheduledDesc')
                 : t('candidatePortal.examAlreadyScheduledDesc')}
             </p>
-            <Button onClick={() => setActiveTab("training")} variant="default">
-              {t('candidatePortal.goToProfile', 'View Training details')}
+            <Button onClick={() => setActiveTab("profile")} variant="default">
+              {t('candidatePortal.goToProfile')}
             </Button>
           </div>
         </div>
@@ -359,17 +340,6 @@ export default function CandidatePortal() {
                   <FileText className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">{t('nav.application')}</span>
                 </Button>
-                {(examScheduleInfo?.examScheduled || isRegistrationComplete) && (
-                  <Button
-                    variant={activeTab === "training" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setActiveTab("training")}
-                    className={`px-2 sm:px-3 ${activeTab === "training" ? "shadow-md" : ""}`}
-                  >
-                    <CalendarCheck className="w-4 h-4 sm:mr-2" />
-                    <span className="hidden sm:inline">{t('nav.training', 'My Training')}</span>
-                  </Button>
-                )}
               </div>
 
               {/* Language Switcher */}

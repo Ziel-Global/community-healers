@@ -237,7 +237,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
           errors={formErrors}
         />
         <DocumentUpload candidateData={candidateData} />
-        {/* <EducationDeclaration candidateData={candidateData} onToggle={setHasSixteenYears} /> */}
+        <EducationDeclaration candidateData={candidateData} onToggle={setHasSixteenYears} />
       </div>
 
       {/* Missing Documents Alert */}
