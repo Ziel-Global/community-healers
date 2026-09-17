@@ -141,7 +141,8 @@ export interface VerifyLivenessResult {
     matched: boolean;
     faceMatchConfidence: number;
     passed: boolean;
-    attemptsRemaining: number;
+    /** Retries are unlimited — this is informational only, not a countdown. */
+    attemptsMade: number;
     blocked: boolean;
 }
 

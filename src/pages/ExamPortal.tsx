@@ -76,7 +76,7 @@ export default function ExamPortal() {
         toast({
             variant: "destructive",
             title: "Face Did Not Match",
-            description: `${result.attemptsRemaining} attempt${result.attemptsRemaining === 1 ? "" : "s"} remaining. Click "Begin Examination" to retry.`,
+            description: `Please try again. Click "Begin Examination" to retry.`,
         });
     };
 

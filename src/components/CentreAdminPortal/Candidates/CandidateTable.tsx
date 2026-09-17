@@ -63,7 +63,7 @@ const LivenessIndicator = ({ candidate }: { candidate: Candidate }) => {
     if ((candidate.livenessAttempts ?? 0) > 0) {
         return (
             <Badge variant="secondary" className="gap-1 text-[9px] sm:text-[10px] bg-amber-100 text-amber-700 border-amber-200">
-                <AlertTriangle className="w-3 h-3" /> Liveness Failed ({candidate.livenessAttempts}/2)
+                <AlertTriangle className="w-3 h-3" /> Liveness Failed ({candidate.livenessAttempts} attempt{candidate.livenessAttempts === 1 ? "" : "s"}) — retries unlimited
             </Badge>
         );
     }
