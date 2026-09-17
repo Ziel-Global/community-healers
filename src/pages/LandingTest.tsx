@@ -2,7 +2,7 @@ import {useState,useEffect,useRef} from 'react';
 import {useNavigate} from 'react-router-dom';
 import './LandingTest.css';
 import {JourneyMotion,CentreMotion,TrainingMotion} from './ProcessMotion';
-import {ArrowUpRight,ArrowRight,ArrowLeft,Check,CheckCheck,MessageCircle,Users,Globe2,Lightbulb,Wallet,HeartHandshake,BookOpen,GraduationCap,UserRound,ShieldCheck,Play,Pause,Volume2,Languages,Menu,X,ChevronRight,Eye,EyeOff,LockKeyhole,Smartphone,CalendarCheck,ClipboardCheck,Award,BriefcaseBusiness,Clock3,Info,Film,ExternalLink,MoveUpRight,MapPin,Building2,Monitor,CalendarDays} from 'lucide-react';
+import {TriangleAlert,ArrowUpRight,ArrowRight,ArrowLeft,Check,CheckCheck,MessageCircle,Users,Globe2,Lightbulb,Wallet,HeartHandshake,BookOpen,GraduationCap,UserRound,ShieldCheck,Play,Pause,Volume2,Languages,Menu,X,ChevronRight,Eye,EyeOff,LockKeyhole,Smartphone,CalendarCheck,ClipboardCheck,Award,BriefcaseBusiness,Clock3,Info,Film,ExternalLink,MoveUpRight,MapPin,Building2,Monitor,CalendarDays} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Tabs,TabsList,TabsTrigger,TabsContent} from '@/components/ui/tabs';
@@ -18,7 +18,7 @@ export default function CandidateSite(){
  const {loginCandidate,signup,verifyCandidate} = useAuth();
  const [ur,setUr]=useState(false),[menu,setMenu]=useState(false),[modal,setModal]=useState<'guide'|null>(null),[mode,setMode]=useState<'register'|'login'>('register'),[showPassword,setShowPassword]=useState(false),[formMessage,setFormMessage]=useState(''),[loading,setLoading]=useState(false);
  const [formData,setFormData]=useState({firstName:'',lastName:'',email:'',phoneNumber:'',password:'',confirmPassword:''});
- const [showOtpModal,setShowOtpModal]=useState(false),[otp,setOtp]=useState(['','','','','','']);
+ const [showOtpModal,setShowOtpModal]=useState(false),[showConfirmModal,setShowConfirmModal]=useState(false),[otp,setOtp]=useState(['','','','','','']);
  const otpRefs=useRef<(HTMLInputElement|null)[]>([]);
  const t=(en:string,urdu:string)=>ur?urdu:en;
  useEffect(()=>{const value=localStorage.getItem('softskills-language')==='ur';setUr(value);if(new URLSearchParams(location.search).get('mode')==='login')setMode('login')},[]);
@@ -58,10 +58,7 @@ export default function CandidateSite(){
   if(mode==='register'){
    const result=candidateSignupSchema.safeParse(formData);
    if(!result.success){setFormMessage(result.error.issues[0].message);return}
-   setLoading(true);
-   try{await signup(result.data);setShowOtpModal(true)}
-   catch(error:any){setFormMessage(error.message||t('Something went wrong. Please try again.','کچھ مسئلہ ہوا۔ دوبارہ کوشش کریں۔'))}
-   finally{setLoading(false)}
+   setShowConfirmModal(true);
   }else{
    const result=candidateLoginSchema.safeParse({phoneNumber:formData.phoneNumber,password:formData.password});
    if(!result.success){setFormMessage(result.error.issues[0].message);return}
@@ -69,6 +66,14 @@ export default function CandidateSite(){
    try{await loginCandidate(result.data);navigate('/candidate')}
    catch(error:any){setFormMessage(error.message||t('Invalid phone number or password.','فون نمبر یا پاس ورڈ درست نہیں۔'));setLoading(false)}
   }
+ };
+ const handleConfirmSignup=async()=>{
+  setLoading(true);
+  const result=candidateSignupSchema.safeParse(formData);
+  if(!result.success){setLoading(false);return}
+  try{await signup(result.data);setShowConfirmModal(false);setShowOtpModal(true)}
+  catch(error:any){setFormMessage(error.message||t('Something went wrong. Please try again.','کچھ مسئلہ ہوا۔ دوبارہ کوشش کریں۔'));setShowConfirmModal(false)}
+  finally{setLoading(false)}
  };
  const handleOtpChange=(index:number,value:string)=>{
   if(value.length>1)value=value.slice(-1);
@@ -112,6 +117,7 @@ export default function CandidateSite(){
  </main>}
  <footer className="footer shell"><div className="footer-main"><a className="brand" href="/"><span className="brand-symbol"><span/><span/><span/></span><span>Soft<span className="brand-light">Skills</span></span></a><p>{t('Practical skills. Greater confidence. A step forward.','عملی مہارتیں۔ زیادہ اعتماد۔ آگے کی طرف ایک قدم۔')}</p><nav><a href="/#how">{t('How it works','طریقہ کار')}</a><a href="/#faq">{t('FAQs','سوالات')}</a><a href={loginHref}>{t('Candidate login','امیدوار لاگ اِن')}</a></nav></div><div className="footer-bottom"><span>© 2026 SoftSkills</span><span>{t('Made for your next step.','آپ کے اگلے قدم کے لیے۔')}</span><button onClick={()=>setUr(!ur)}>{ur?'English':'اردو میں دیکھیں'}<Languages size={15}/></button></div></footer>
  <Dialog open={modal!==null} onOpenChange={open=>!open&&setModal(null)}><DialogContent className={`guide-dialog ${ur?'urdu':''}`} dir={ur?'rtl':'ltr'} hideClose><DialogTitle>{t('Your journey, step by step','آپ کا سفر، مرحلہ وار')}</DialogTitle><DialogDescription>{t('The Urdu explainer video will appear here when available. You can follow this simple guide now.','اردو کی وضاحتی ویڈیو دستیاب ہونے پر یہاں نظر آئے گی۔ ابھی یہ آسان رہنمائی پڑھ سکتے ہیں۔')}</DialogDescription><ol>{steps.map((s,i)=><li key={i}><span>{i+1}</span><div><h3>{s.title}</h3><p>{s.text}</p></div></li>)}</ol><DialogClose asChild><Button className="button">{t('Got it','سمجھ گیا')}</Button></DialogClose></DialogContent></Dialog>
+ <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}><DialogContent className={`guide-dialog ${ur?'urdu':''} [&>button]:hidden`} dir={ur?'rtl':'ltr'} style={{maxWidth:'400px'}}><div style={{display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',paddingTop:'0.5rem',gap:'1rem'}}><TriangleAlert size={56} style={{color:'#ea580c'}} strokeWidth={2.5}/><DialogTitle style={{fontSize:'1.25rem',fontWeight:'bold',color:'#1e293b',margin:0}}>{t('Confirm Registration','رجسٹریشن کی تصدیق کریں')}</DialogTitle><DialogDescription style={{color:'#334155',fontSize:'15px',margin:0}}>{t('Once registered, the following details cannot be changed:','رجسٹریشن کے بعد درج ذیل معلومات تبدیل نہیں کی جا سکیں گی:')}</DialogDescription><div style={{backgroundColor:'#f8fafc',borderRadius:'0.75rem',padding:'1.25rem',width:'100%',fontSize:'15px',display:'flex',flexDirection:'column',gap:'0.75rem'}}><div style={{display:'flex',justifyContent:'center',gap:'0.5rem'}}><span style={{fontWeight:'bold',color:'#0f172a'}}>{t('Name:','نام:')}</span><span style={{color:'#334155'}}>{formData.firstName} {formData.lastName}</span></div><div style={{display:'flex',justifyContent:'center',gap:'0.5rem'}}><span style={{fontWeight:'bold',color:'#0f172a'}}>{t('Mobile Number:','موبائل نمبر:')}</span><span style={{color:'#334155'}} dir="ltr">{formData.phoneNumber}</span></div><div style={{display:'flex',justifyContent:'center',gap:'0.5rem'}}><span style={{fontWeight:'bold',color:'#0f172a'}}>{t('Email:','ای میل:')}</span><span style={{color:'#334155'}}>{formData.email}</span></div></div><p style={{color:'#1e293b',fontSize:'15px',fontWeight:500,margin:0,paddingBottom:'0.5rem'}}>{t('Are you sure you want to continue?','کیا آپ واقعی آگے بڑھنا چاہتے ہیں؟')}</p><div style={{display:'flex',gap:'1rem',width:'100%'}}><Button type="button" variant="outline" onClick={()=>setShowConfirmModal(false)} disabled={loading} style={{flex:1,height:'2.75rem',fontSize:'1rem',color:'#334155',borderColor:'#cbd5e1'}}>{t('Cancel','منسوخ کریں')}</Button><Button type="button" onClick={handleConfirmSignup} disabled={loading} style={{flex:1,height:'2.75rem',fontSize:'1rem',backgroundColor:'#0f7a3d',color:'white'}}>{loading?t('Wait…','انتظار…'):t('Yes, Continue','ہاں، آگے بڑھیں')}</Button></div></div></DialogContent></Dialog>
  <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}><DialogContent className={`guide-dialog ${ur?'urdu':''}`} dir={ur?'rtl':'ltr'}><DialogTitle>{t('Verify your number','اپنا نمبر تصدیق کریں')}</DialogTitle><DialogDescription>{t('Enter the 6-digit code sent to your phone.','آپ کے فون پر بھیجا گیا 6 ہندسوں کا کوڈ درج کریں۔')}</DialogDescription><form onSubmit={handleOtpSubmit} className="otp-form"><div className="otp-row" dir="ltr">{otp.map((digit,index)=><Input key={index} ref={el=>otpRefs.current[index]=el} type="text" inputMode="numeric" value={digit} onChange={e=>handleOtpChange(index,e.target.value)} onKeyDown={e=>handleOtpKeyDown(index,e)} maxLength={1} required autoFocus={index===0} className="otp-digit"/>)}</div>{formMessage&&<div className="form-message" role="status"><Info size={20}/><p>{formMessage}</p></div>}<Button type="submit" className="button wide" disabled={loading}>{loading?t('Verifying…','تصدیق ہو رہی ہے…'):t('Verify','تصدیق کریں')}</Button></form></DialogContent></Dialog>
  </div>
 }
