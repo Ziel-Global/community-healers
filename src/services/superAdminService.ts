@@ -172,9 +172,55 @@ export const getCenterRegisteredCandidates = async (centerId: string, date: stri
     }
 };
 
+export interface CertificateSettings {
+    dgName: string;
+    hasSignature: boolean;
+}
+
+export const getCertificateSettings = async (): Promise<CertificateSettings> => {
+    const response = await api.get('/super-admin/certificate-settings');
+    return response.data;
+};
+
+export const updateCertificateDgName = async (dgName: string): Promise<CertificateSettings> => {
+    const response = await api.put('/super-admin/certificate-settings/dg-name', { dgName });
+    return response.data;
+};
+
+export const updateCertificateSignature = async (file: File): Promise<CertificateSettings> => {
+    const formData = new FormData();
+    formData.append('signature', file);
+    const response = await api.post('/super-admin/certificate-settings/signature', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};
+
+/**
+ * Fetches the current signature image bytes for an inline preview. Goes through `api`
+ * (axios) rather than a raw <img src> — same CSRF-header reason as every other blob
+ * fetch in this app: cookie-authenticated requests require X-Requested-With, which a
+ * plain browser resource-loading tag can never send. Returns null if none is set yet.
+ */
+export const getCertificateSignatureBlob = async (): Promise<Blob | null> => {
+    try {
+        const response = await api.get('/super-admin/certificate-settings/signature', {
+            responseType: 'blob',
+        });
+        return response.data;
+    } catch (error) {
+        if ((error as { response?: { status?: number } })?.response?.status === 404) return null;
+        throw error;
+    }
+};
+
 export const superAdminService = {
     updateExamSettings,
     getExamSettings,
+    getCertificateSettings,
+    updateCertificateDgName,
+    updateCertificateSignature,
+    getCertificateSignatureBlob,
     getCities,
     getAllCities,
     createCity,

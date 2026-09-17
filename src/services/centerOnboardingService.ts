@@ -1,11 +1,12 @@
 import { api } from './api';
+import type { ApplicationComment } from './centerApplicationCommentService';
 
 /**
  * The applicant has no user account (none exists until Super Admin
  * approves), so these endpoints authenticate with a short-lived, per-application
  * Bearer token returned by verify-otp — not the cookie session every other
  * portal uses. It's attached manually per request rather than through a
- * global header since it only applies to these two calls.
+ * global header since it only applies to these calls.
  */
 function withSession(sessionToken: string) {
     return { headers: { Authorization: `Bearer ${sessionToken}` } };
@@ -25,27 +26,48 @@ export interface VerifyLicenseResult {
 }
 
 export type StaffCategory = 'INSTRUCTOR' | 'STAFF' | 'MAINTENANCE';
+export type BuildingOwnership = 'RENTED' | 'OWNED';
 
 export interface StaffMember {
     name: string;
     cnic: string;
     category: StaffCategory;
+    qualification?: string;
 }
 
 export interface ApplicationStaffRow extends StaffMember {
     id: string;
+    documentObjectKey?: string | null;
 }
 
 export interface CenterApplication {
     id: string;
     status: string;
     phone: string;
+    /** Which of the 3 details sub-steps to resume at: 1 = Building, 2 = Staff, 3 = Center Info. */
+    detailsStep: number;
+
+    buildingArea: number | null;
+    buildingCapacity: number | null;
+    buildingOwnership: BuildingOwnership | null;
+    receptionAvailable: boolean | null;
+    requiredSystemsAvailable: boolean | null;
+    camerasAvailable: boolean | null;
+    camerasInfo: string | null;
+
     centerName: string | null;
     address: string | null;
+    centerPhone: string | null;
     latitude: number | null;
     longitude: number | null;
     cityId: string | null;
     city?: string | null;
+
+    isJointVenture: boolean;
+    jointVentureLicenseNumber: string | null;
+
+    scheduledInspectionDate: string | null;
+    rejectionReason?: string | null;
     staff?: ApplicationStaffRow[];
 }
 
@@ -54,13 +76,25 @@ export interface VerifyOtpResult {
     application: CenterApplication;
 }
 
-export interface SubmitDetailsPayload {
+export interface BuildingDetailsPayload {
+    buildingArea: number;
+    buildingCapacity: number;
+    buildingOwnership: BuildingOwnership;
+    receptionAvailable: boolean;
+    requiredSystemsAvailable: boolean;
+    camerasAvailable: boolean;
+    camerasInfo?: string;
+}
+
+export interface CenterInfoPayload {
     centerName: string;
     address: string;
+    centerPhone: string;
     latitude: number;
     longitude: number;
     city: string;
-    staff: StaffMember[];
+    isJointVenture: boolean;
+    jointVentureLicenseNumber?: string;
 }
 
 const getChecklist = async (): Promise<ChecklistItem[]> => {
@@ -99,13 +133,69 @@ const getApplication = async (applicationId: string, sessionToken: string): Prom
     return response.data;
 };
 
-const submitDetails = async (
+const submitBuildingDetails = async (
     applicationId: string,
     sessionToken: string,
-    payload: SubmitDetailsPayload,
+    payload: BuildingDetailsPayload,
 ): Promise<CenterApplication> => {
     const response = await api.post(
-        `/center-onboarding/applications/${applicationId}/details`,
+        `/center-onboarding/applications/${applicationId}/building`,
+        payload,
+        withSession(sessionToken),
+    );
+    return response.data;
+};
+
+const submitStaff = async (
+    applicationId: string,
+    sessionToken: string,
+    staff: StaffMember[],
+): Promise<CenterApplication> => {
+    const response = await api.post(
+        `/center-onboarding/applications/${applicationId}/staff`,
+        { staff },
+        withSession(sessionToken),
+    );
+    return response.data;
+};
+
+const uploadStaffDocument = async (
+    applicationId: string,
+    sessionToken: string,
+    staffId: string,
+    file: File,
+): Promise<ApplicationStaffRow> => {
+    const formData = new FormData();
+    formData.append('document', file);
+    const response = await api.post(
+        `/center-onboarding/applications/${applicationId}/staff/${staffId}/document`,
+        formData,
+        {
+            headers: {
+                Authorization: `Bearer ${sessionToken}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        },
+    );
+    return response.data;
+};
+
+/** So the applicant can see the committee's scheduled inspection date and comments. */
+const getComments = async (applicationId: string, sessionToken: string): Promise<ApplicationComment[]> => {
+    const response = await api.get(
+        `/center-onboarding/applications/${applicationId}/comments`,
+        withSession(sessionToken),
+    );
+    return response.data;
+};
+
+const submitCenterInfo = async (
+    applicationId: string,
+    sessionToken: string,
+    payload: CenterInfoPayload,
+): Promise<CenterApplication> => {
+    const response = await api.post(
+        `/center-onboarding/applications/${applicationId}/center-info`,
         payload,
         withSession(sessionToken),
     );
@@ -119,5 +209,9 @@ export const centerOnboardingService = {
     resendOtp,
     verifyOtp,
     getApplication,
-    submitDetails,
+    submitBuildingDetails,
+    submitStaff,
+    uploadStaffDocument,
+    submitCenterInfo,
+    getComments,
 };

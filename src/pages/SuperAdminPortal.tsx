@@ -16,7 +16,7 @@ import {
   TrendingUp,
   Loader2,
   ClipboardCheck,
-  UserRound
+  UserCog
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,9 +46,9 @@ export const superAdminNavItems = [
     icon: <ClipboardCheck className="w-4 h-4" />,
   },
   {
-    label: "Inspectors",
-    href: "/admin/inspectors",
-    icon: <UserRound className="w-4 h-4" />,
+    label: "Approval Committee",
+    href: "/admin/committee",
+    icon: <UserCog className="w-4 h-4" />,
   },
   {
     label: "Admin Management",

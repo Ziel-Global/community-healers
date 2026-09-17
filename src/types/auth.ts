@@ -37,7 +37,12 @@ export interface SuperAdminLoginCredentials {
     password: string;
 }
 
-export interface InspectorLoginCredentials {
+export interface CommitteeMemberLoginCredentials {
+    email: string;
+    password: string;
+}
+
+export interface DirectorOperationsLoginCredentials {
     email: string;
     password: string;
 }

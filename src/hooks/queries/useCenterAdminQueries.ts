@@ -11,6 +11,7 @@ export const centerAdminKeys = {
             ? ([...centerAdminKeys.all, "todayCandidates", examDate] as const)
             : ([...centerAdminKeys.all, "todayCandidates"] as const),
     historicalReports: () => [...centerAdminKeys.all, "historicalReports"] as const,
+    certificates: () => [...centerAdminKeys.all, "certificates"] as const,
 };
 
 export function useCenterAdminStats() {
@@ -38,6 +39,13 @@ export function useHistoricalReports() {
     return useQuery({
         queryKey: centerAdminKeys.historicalReports(),
         queryFn: centerAdminService.getReports,
+    });
+}
+
+export function useCenterCertificates() {
+    return useQuery({
+        queryKey: centerAdminKeys.certificates(),
+        queryFn: centerAdminService.getCertificates,
     });
 }
 

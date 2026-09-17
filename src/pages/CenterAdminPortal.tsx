@@ -13,6 +13,7 @@ import {
   Users,
   FileText,
   Settings,
+  Award,
 } from "lucide-react";
 import { useCenterDetails, useCloseVerification } from "@/hooks/queries/useCenterAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
@@ -29,6 +30,11 @@ export const centerNavItems = [
     label: "Candidates",
     href: "/center/candidates",
     icon: <Users className="w-4 h-4" />,
+  },
+  {
+    label: "Certificates",
+    href: "/center/certificates",
+    icon: <Award className="w-4 h-4" />,
   },
   {
     label: "Reports",

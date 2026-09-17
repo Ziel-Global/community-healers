@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Award, CheckCircle2, Download, Share2 } from "lucide-react";
+import { Award, CheckCircle2, Download, Loader2, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { candidateService } from "@/services/candidateService";
+import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/errors";
 
 interface CertificateData {
     certificate_number: string;
@@ -19,6 +23,24 @@ interface CertificateCardProps {
 
 export function CertificateCard({ certificate }: CertificateCardProps) {
     const { t } = useTranslation();
+    const [downloading, setDownloading] = useState(false);
+
+    const handleDownload = async () => {
+        setDownloading(true);
+        try {
+            const blob = await candidateService.getMyCertificatePdfBlob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `certificate-${certificate.certificate_number}.pdf`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            toast.error(getApiErrorMessage(error, "Failed to download certificate"));
+        } finally {
+            setDownloading(false);
+        }
+    };
 
     return (
         <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-green-500/5 to-emerald-500/5">
@@ -66,8 +88,8 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                    <Button size="lg" className="flex-1 gap-2 shadow-lg" disabled={!certificate.downloadUrl}>
-                        <Download className="w-4 h-4" />
+                    <Button size="lg" className="flex-1 gap-2 shadow-lg" disabled={downloading} onClick={handleDownload}>
+                        {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                         {t('certificate.downloadPDF')}
                     </Button>
                     <Button variant="outline" size="lg" className="gap-2">

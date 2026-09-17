@@ -189,6 +189,34 @@ export const confirmPayment = async (transactionId: string, bankTransactionRef: 
     }
 };
 
+export interface CertificateMeta {
+    id: string;
+    certificate_number: string;
+    issuedDate: string;
+    expiryDate: string | null;
+    score: number;
+    status: string;
+}
+
+/** Returns null (not thrown) when no certificate has been issued yet — that's a normal, expected state here. */
+export const getMyCertificate = async (): Promise<CertificateMeta | null> => {
+    try {
+        const response = await api.get('/candidates/me/certificate');
+        return response.data;
+    } catch (error) {
+        if ((error as { response?: { status?: number } })?.response?.status === 404) return null;
+        throw error;
+    }
+};
+
+/** See getDocumentBlob's comment — same CSRF-header reason for going through `api` instead of a raw <iframe src>. */
+export const getMyCertificatePdfBlob = async (): Promise<Blob> => {
+    const response = await api.get('/candidates/me/certificate/pdf', {
+        responseType: 'blob',
+    });
+    return response.data;
+};
+
 export const candidateService = {
     getMe,
     updateMe,
@@ -205,4 +233,6 @@ export const candidateService = {
     confirmPayment,
     createLivenessSession,
     verifyLiveness,
+    getMyCertificate,
+    getMyCertificatePdfBlob,
 };

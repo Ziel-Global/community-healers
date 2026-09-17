@@ -120,6 +120,31 @@ export const getCandidateDocumentBlob = async (candidateId: string, type: string
     return response.data;
 };
 
+export interface CenterCertificate {
+    id: string;
+    certificateNumber: string;
+    issuedDate: string;
+    status: string;
+    score: number;
+    candidateId: string;
+    candidateName: string | null;
+    cnic: string | null;
+}
+
+/** Every certificate issued to a candidate who was ever scheduled at this admin's center(s). */
+export const getCertificates = async (): Promise<CenterCertificate[]> => {
+    const response = await api.get('/center-admin/certificates');
+    return response.data;
+};
+
+/** Same CSRF-header reason as getCandidateDocumentBlob — goes through `api`, not a raw <iframe src>. */
+export const getCertificatePdfBlob = async (candidateId: string): Promise<Blob> => {
+    const response = await api.get(`/center-admin/certificates/${candidateId}/pdf`, {
+        responseType: 'blob',
+    });
+    return response.data;
+};
+
 export const updateCandidateStatus = async (id: string, status: 'VERIFIED' | 'REJECTED'): Promise<ExamSessionRecord> => {
     try {
         const response = await api.patch(`/center-admin/exam-session/${id}/candidate-status`, {
@@ -259,4 +284,6 @@ export const centerAdminService = {
     updateTrainingTimings,
     verifyFace,
     overrideLiveness,
+    getCertificates,
+    getCertificatePdfBlob,
 };

@@ -6,18 +6,22 @@ export type CenterApplicationStatus =
     | 'DETAILS_PENDING'
     | 'INSPECTION_PENDING'
     | 'INSPECTION_IN_PROGRESS'
+    | 'SCHEDULED'
     | 'UNDER_REVIEW'
     | 'APPROVED'
     | 'REJECTED';
 
-export interface CenterApplicationInspector {
+export interface CommitteeMemberSummary {
     id: string;
     firstName: string | null;
     lastName: string | null;
     email: string;
-    phoneNumber: string | null;
-    status: "ACTIVE" | "INACTIVE";
-    createdAt: string;
+}
+
+export interface CommitteeSummary {
+    id: string;
+    name: string;
+    members: CommitteeMemberSummary[];
 }
 
 export interface CenterApplicationCity {
@@ -33,13 +37,17 @@ export interface CenterApplicationSummary {
     status: CenterApplicationStatus;
     centerName: string | null;
     address: string | null;
+    centerPhone: string | null;
     phone: string | null;
     cityId: string | null;
-    inspectorId: string | null;
+    committeeId: string | null;
+    scheduledInspectionDate: string | null;
     inspectionAssignedAt: string | null;
     inspectionCompletedAt: string | null;
     reviewedAt: string | null;
     rejectionReason: string | null;
+    isJointVenture: boolean;
+    jointVentureLicenseNumber: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -49,6 +57,8 @@ export interface CenterApplicationStaffMember {
     name: string;
     cnic: string;
     category: 'INSTRUCTOR' | 'STAFF' | 'MAINTENANCE';
+    qualification: string | null;
+    documentObjectKey: string | null;
 }
 
 export interface ChecklistEvidenceItem {
@@ -68,75 +78,68 @@ export interface ChecklistResultDetail {
 export interface CenterApplicationDetail {
     application: CenterApplicationSummary & {
         staff: CenterApplicationStaffMember[];
-        inspector: CenterApplicationInspector | null;
+        committee: CommitteeSummary | null;
         city: CenterApplicationCity | null;
     };
     checklistResults: ChecklistResultDetail[];
 }
 
-const listApplications = async (): Promise<CenterApplicationSummary[]> => {
-    const response = await api.get('/super-admin/center-applications');
-    return response.data;
-};
-
-const getApplicationDetail = async (id: string): Promise<CenterApplicationDetail> => {
-    const response = await api.get(`/super-admin/center-applications/${id}`);
-    return response.data;
-};
-
-const assignInspector = async (applicationId: string, inspectorId: string): Promise<CenterApplicationSummary> => {
-    const response = await api.post(`/super-admin/center-applications/${applicationId}/assign-inspector`, { inspectorId });
-    return response.data;
-};
-
-const approveApplication = async (applicationId: string) => {
-    const response = await api.post(`/super-admin/center-applications/${applicationId}/approve`);
-    return response.data;
-};
-
-const rejectApplication = async (applicationId: string, reason: string): Promise<CenterApplicationSummary> => {
-    const response = await api.post(`/super-admin/center-applications/${applicationId}/reject`, { reason });
-    return response.data;
-};
-
-const listInspectors = async (): Promise<CenterApplicationInspector[]> => {
-    const response = await api.get('/super-admin/inspectors');
-    return response.data;
-};
-
-export interface CreateInspectorRequest {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName?: string;
-    phoneNumber?: string;
+/**
+ * Shared read/download surface — Director of Operations gets the full write
+ * API on top of this (see below); Super Admin only ever gets this read-only
+ * slice, bound to `/super-admin/center-applications` instead.
+ */
+function createCenterApplicationReadApi(prefix: string) {
+    return {
+        listApplications: async (): Promise<CenterApplicationSummary[]> => {
+            const response = await api.get(prefix);
+            return response.data;
+        },
+        getApplicationDetail: async (id: string): Promise<CenterApplicationDetail> => {
+            const response = await api.get(`${prefix}/${id}`);
+            return response.data;
+        },
+        /**
+         * Evidence photos require X-Requested-With on cookie-authenticated requests
+         * (CSRF protection) — a plain <img> tag can't send that header, so this goes
+         * through `api` (axios) as a blob and the caller turns it into an object URL.
+         * Same pattern as `centerAdminService.getCandidateDocumentBlob`.
+         */
+        getEvidenceBlob: async (evidenceId: string): Promise<Blob> => {
+            const response = await api.get(`${prefix}/evidence/${evidenceId}/download`, { responseType: 'blob' });
+            return response.data;
+        },
+        getStaffDocumentBlob: async (staffId: string): Promise<Blob> => {
+            const response = await api.get(`${prefix}/staff/${staffId}/document/download`, { responseType: 'blob' });
+            return response.data;
+        },
+    };
 }
 
-const createInspector = async (request: CreateInspectorRequest): Promise<CenterApplicationInspector> => {
-    const response = await api.post('/super-admin/inspectors', request);
-    return response.data;
-};
+/** Super Admin — view only, per the Approval Committee workflow. No assign/approve/reject. */
+export const superAdminCenterApplicationService = createCenterApplicationReadApi('/super-admin/center-applications');
 
 /**
- * Evidence photos require X-Requested-With on cookie-authenticated requests
- * (CSRF protection) — a plain <img> tag can't send that header, so this goes
- * through `api` (axios) as a blob and the caller turns it into an object URL.
- * Same pattern as `centerAdminService.getCandidateDocumentBlob`.
+ * Director of Operations — full read/write access to the pipeline. Lives under `/internal` on
+ * the backend (not `/director-operations`) specifically so it can't collide with the frontend's
+ * own `/director-operations/*` page routes once that prefix is added to the Vite dev proxy —
+ * same reason Center Onboarding's public page is `/apply-center`, not `/center-onboarding`.
  */
-const getEvidenceBlob = async (evidenceId: string): Promise<Blob> => {
-    const response = await api.get(`/super-admin/center-applications/evidence/${evidenceId}/download`, {
-        responseType: 'blob',
-    });
-    return response.data;
-};
+const DO_CENTER_APPLICATIONS_PREFIX = '/internal/director-operations/center-applications';
 
-export const centerApplicationService = {
-    listApplications,
-    getApplicationDetail,
-    assignInspector,
-    approveApplication,
-    rejectApplication,
-    listInspectors,
-    createInspector,
-    getEvidenceBlob,
+export const directorOperationsCenterApplicationService = {
+    ...createCenterApplicationReadApi(DO_CENTER_APPLICATIONS_PREFIX),
+
+    assignCommittee: async (applicationId: string, committeeId: string): Promise<CenterApplicationSummary> => {
+        const response = await api.post(`${DO_CENTER_APPLICATIONS_PREFIX}/${applicationId}/assign-committee`, { committeeId });
+        return response.data;
+    },
+    approveApplication: async (applicationId: string) => {
+        const response = await api.post(`${DO_CENTER_APPLICATIONS_PREFIX}/${applicationId}/approve`);
+        return response.data;
+    },
+    rejectApplication: async (applicationId: string, reason: string): Promise<CenterApplicationSummary> => {
+        const response = await api.post(`${DO_CENTER_APPLICATIONS_PREFIX}/${applicationId}/reject`, { reason });
+        return response.data;
+    },
 };

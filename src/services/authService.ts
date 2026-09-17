@@ -2,7 +2,7 @@ import axios from 'axios';
 import { api } from './api';
 import { getApiErrorMessage } from '../lib/errors';
 import i18n from '../i18n';
-import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, InspectorLoginCredentials, SignupCredentials, AuthResponse, SignupOtpRequestResponse, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
+import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, CommitteeMemberLoginCredentials, DirectorOperationsLoginCredentials, SignupCredentials, AuthResponse, SignupOtpRequestResponse, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 
 /**
  * Role-mismatch logins (valid credentials, wrong portal) come back as 403,
@@ -57,13 +57,23 @@ const loginSuperAdmin = async (credentials: SuperAdminLoginCredentials): Promise
     }
 };
 
-const loginInspector = async (credentials: InspectorLoginCredentials): Promise<AuthResponse> => {
+const loginCommitteeMember = async (credentials: CommitteeMemberLoginCredentials): Promise<AuthResponse> => {
     try {
-        const response = await api.post('/auth/login/inspector', credentials);
+        const response = await api.post('/auth/login/committee-member', credentials);
         return response.data;
     } catch (error: unknown) {
-        console.error('Inspector Login error:', error);
-        throw new Error(loginErrorMessage(error, 'Inspector Login failed. Please check your credentials.'));
+        console.error('Committee Member Login error:', error);
+        throw new Error(loginErrorMessage(error, 'Committee Member Login failed. Please check your credentials.'));
+    }
+};
+
+const loginDirectorOperations = async (credentials: DirectorOperationsLoginCredentials): Promise<AuthResponse> => {
+    try {
+        const response = await api.post('/auth/login/director-operations', credentials);
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Director of Operations Login error:', error);
+        throw new Error(loginErrorMessage(error, 'Director of Operations Login failed. Please check your credentials.'));
     }
 };
 
@@ -134,7 +144,8 @@ export const authService = {
     loginCenterAdmin,
     loginMinistry,
     loginSuperAdmin,
-    loginInspector,
+    loginCommitteeMember,
+    loginDirectorOperations,
     signup,
     verifyCandidate,
     logout,

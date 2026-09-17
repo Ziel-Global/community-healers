@@ -93,6 +93,14 @@ export const getRegistry = async (): Promise<RegistryCertificate[]> => {
     }
 };
 
+/** Same CSRF-header reason as getDegreeDocumentBlob — goes through `api`, not a raw <iframe src>. */
+export const getCertificatePdfBlob = async (certificateId: string): Promise<Blob> => {
+    const response = await api.get(`/ministry/certificates/${certificateId}/pdf`, {
+        responseType: 'blob',
+    });
+    return response.data;
+};
+
 export const getIssuanceLogs = async (): Promise<IssuanceLog[]> => {
     try {
         const response = await api.get('/ministry/certificates/issuance-logs');
@@ -148,6 +156,7 @@ export const ministryService = {
     bulkIssueCertificates,
     issueCertificate,
     getRegistry,
+    getCertificatePdfBlob,
     getIssuanceLogs,
     getDegreeReviewQueue,
     getDegreeDocumentBlob,
