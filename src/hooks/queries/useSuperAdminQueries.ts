@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { superAdminService } from "@/services/superAdminService";
+import { superAdminService, UpdateCertificateDetailsPayload } from "@/services/superAdminService";
 import { CreateQuestionRequest, ExamSettings, CreateCenterRequest, UpdateCityLocationRequest } from "@/types/superAdmin";
 import { referenceKeys } from "./useReferenceQueries";
 
@@ -53,20 +53,30 @@ export function useCertificateSettings() {
     });
 }
 
-export function useUpdateCertificateDgName() {
+export function useUpdateCertificateDetails() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (dgName: string) => superAdminService.updateCertificateDgName(dgName),
+        mutationFn: (payload: UpdateCertificateDetailsPayload) => superAdminService.updateCertificateDetails(payload),
         onSuccess: (data) => {
             queryClient.setQueryData(superAdminKeys.certificateSettings(), data);
         },
     });
 }
 
-export function useUpdateCertificateSignature() {
+export function useUpdateCertificateSignature1() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (file: File) => superAdminService.updateCertificateSignature(file),
+        mutationFn: (file: File) => superAdminService.updateCertificateSignature1(file),
+        onSuccess: (data) => {
+            queryClient.setQueryData(superAdminKeys.certificateSettings(), data);
+        },
+    });
+}
+
+export function useUpdateCertificateSignature2() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (file: File) => superAdminService.updateCertificateSignature2(file),
         onSuccess: (data) => {
             queryClient.setQueryData(superAdminKeys.certificateSettings(), data);
         },

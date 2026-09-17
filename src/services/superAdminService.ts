@@ -225,8 +225,21 @@ export const getCenterRegisteredCandidates = async (centerId: string, date: stri
 };
 
 export interface CertificateSettings {
-    dgName: string;
-    hasSignature: boolean;
+    signature1Name: string;
+    signature1Title: string;
+    hasSignature1: boolean;
+    signature2Name: string;
+    signature2Title: string;
+    hasSignature2: boolean;
+    trainingDuration: string;
+}
+
+export interface UpdateCertificateDetailsPayload {
+    signature1Name?: string;
+    signature1Title?: string;
+    signature2Name?: string;
+    signature2Title?: string;
+    trainingDuration?: string;
 }
 
 export const getCertificateSettings = async (): Promise<CertificateSettings> => {
@@ -234,29 +247,34 @@ export const getCertificateSettings = async (): Promise<CertificateSettings> => 
     return response.data;
 };
 
-export const updateCertificateDgName = async (dgName: string): Promise<CertificateSettings> => {
-    const response = await api.put('/super-admin/certificate-settings/dg-name', { dgName });
+export const updateCertificateDetails = async (
+    payload: UpdateCertificateDetailsPayload,
+): Promise<CertificateSettings> => {
+    const response = await api.put('/super-admin/certificate-settings/details', payload);
     return response.data;
 };
 
-export const updateCertificateSignature = async (file: File): Promise<CertificateSettings> => {
+const updateCertificateSignatureImage = async (which: 1 | 2, file: File): Promise<CertificateSettings> => {
     const formData = new FormData();
     formData.append('signature', file);
-    const response = await api.post('/super-admin/certificate-settings/signature', formData, {
+    const response = await api.post(`/super-admin/certificate-settings/signature${which}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
 };
 
+export const updateCertificateSignature1 = (file: File) => updateCertificateSignatureImage(1, file);
+export const updateCertificateSignature2 = (file: File) => updateCertificateSignatureImage(2, file);
+
 /**
- * Fetches the current signature image bytes for an inline preview. Goes through `api`
+ * Fetches signature 1/2 image bytes for an inline preview. Goes through `api`
  * (axios) rather than a raw <img src> — same CSRF-header reason as every other blob
  * fetch in this app: cookie-authenticated requests require X-Requested-With, which a
  * plain browser resource-loading tag can never send. Returns null if none is set yet.
  */
-export const getCertificateSignatureBlob = async (): Promise<Blob | null> => {
+const getCertificateSignatureBlob = async (which: 1 | 2): Promise<Blob | null> => {
     try {
-        const response = await api.get('/super-admin/certificate-settings/signature', {
+        const response = await api.get(`/super-admin/certificate-settings/signature${which}`, {
             responseType: 'blob',
         });
         return response.data;
@@ -266,13 +284,18 @@ export const getCertificateSignatureBlob = async (): Promise<Blob | null> => {
     }
 };
 
+export const getCertificateSignature1Blob = () => getCertificateSignatureBlob(1);
+export const getCertificateSignature2Blob = () => getCertificateSignatureBlob(2);
+
 export const superAdminService = {
     updateExamSettings,
     getExamSettings,
     getCertificateSettings,
-    updateCertificateDgName,
-    updateCertificateSignature,
-    getCertificateSignatureBlob,
+    updateCertificateDetails,
+    updateCertificateSignature1,
+    updateCertificateSignature2,
+    getCertificateSignature1Blob,
+    getCertificateSignature2Blob,
     getCities,
     getAllCities,
     getProvinces,
