@@ -198,9 +198,13 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                         <FileText className="w-5 h-5" />
                                     )}
                                 </div>
-                                <div className="min-w-0">
+                                <div className="min-w-0 flex flex-col gap-1 w-full text-left" dir="ltr">
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        <p className="text-sm font-semibold text-foreground">{t(doc.nameKey, { lng: 'en' })}</p>
+                                        <span className="text-muted-foreground/40 font-light px-0.5">|</span>
+                                        <p className="text-[13px] font-medium text-muted-foreground opacity-75" dir="rtl">{t(doc.nameKey, { lng: 'ur' })}</p>
+                                    </div>
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <p className="text-sm font-semibold text-foreground">{t(doc.nameKey)}</p>
                                         {doc.isMandatory && (
                                             <span className="text-[10px] font-bold text-destructive uppercase">
                                                 {t('documents.mandatoryLabel')}
@@ -217,7 +221,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground truncate">
+                                    <p className="text-xs text-muted-foreground truncate mt-0.5">
                                         {doc.status === "complete" ? doc.fileName :
                                             doc.status === "uploading" ? t('documents.uploading') :
                                                 doc.id === CAMERA_ONLY_DOC_ID ? t('documents.cameraOnlyHint') :

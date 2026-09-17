@@ -70,7 +70,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <div className="space-y-2">
-                        <Label htmlFor="fatherName">{t('personalInfo.fatherName')}</Label>
+                        <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="fatherName">{t('personalInfo.fatherName', { lng: 'en' })}</Label><Label htmlFor="fatherName" dir="rtl">{t('personalInfo.fatherName', { lng: 'ur' })}</Label></div>
                         <div className="relative">
                             <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -83,7 +83,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="cnic">{t('personalInfo.cnic')}</Label>
+                        <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="cnic">{t('personalInfo.cnic', { lng: 'en' })}</Label><Label htmlFor="cnic" dir="rtl">{t('personalInfo.cnic', { lng: 'ur' })}</Label></div>
                         <div className="relative">
                             <CreditCard className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -99,7 +99,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="dob">{t('personalInfo.dob')}</Label>
+                        <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="dob">{t('personalInfo.dob', { lng: 'en' })}</Label><Label htmlFor="dob" dir="rtl">{t('personalInfo.dob', { lng: 'ur' })}</Label></div>
                         <div className="relative">
                             <CalendarIcon className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -121,7 +121,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                         )}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="phone">{t('personalInfo.phone')}</Label>
+                        <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="phone">{t('personalInfo.phone', { lng: 'en' })}</Label><Label htmlFor="phone" dir="rtl">{t('personalInfo.phone', { lng: 'ur' })}</Label></div>
                         <div className="relative">
                             <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -134,7 +134,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="city">{t('personalInfo.city')}</Label>
+                        <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="city">{t('personalInfo.city', { lng: 'en' })}</Label><Label htmlFor="city" dir="rtl">{t('personalInfo.city', { lng: 'ur' })}</Label></div>
                         <div className="relative">
                             <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Select
@@ -155,7 +155,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                         </div>
                     </div>
                     <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="address">{t('personalInfo.address')}</Label>
+                        <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="address">{t('personalInfo.address', { lng: 'en' })}</Label><Label htmlFor="address" dir="rtl">{t('personalInfo.address', { lng: 'ur' })}</Label></div>
                         <div className="relative">
                             <Home className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -172,3 +172,4 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
         </Card>
     );
 }
+
