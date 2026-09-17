@@ -65,31 +65,6 @@ export function useIssuanceTrend(timeFilter: string) {
     });
 }
 
-export function useBulkIssueCertificates() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (candidateIds: string[]) => ministryService.bulkIssueCertificates(candidateIds),
-        onSuccess: () => {
-            // Issuing certificates moves the needle on every ministry view at
-            // once (Authority Hub stats/trend, registry, logs, eligible
-            // list) — invalidate the whole "ministry" key group rather than
-            // just eligibleCandidates, which previously left the dashboard
-            // stale until a hard refresh re-fetched everything.
-            queryClient.invalidateQueries({ queryKey: ministryKeys.all });
-        },
-    });
-}
-
-export function useIssueCertificate() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (candidateId: string) => ministryService.issueCertificate(candidateId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ministryKeys.all });
-        },
-    });
-}
-
 export function useDegreeReviewQueue() {
     return useQuery({
         queryKey: ministryKeys.degreeReviews(),

@@ -2,15 +2,20 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShieldCheck, History, QrCode, UserCheck, Award } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, ShieldCheck, History, QrCode, UserCheck, Award, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useRegistry } from "@/hooks/queries/useMinistryQueries";
 import { getApiErrorMessage } from "@/lib/errors";
+import { ministryService } from "@/services/ministryService";
+import { CertificatePreviewCard } from "@/components/Certificates/CertificatePreviewCard";
+import type { RegistryCertificate } from "@/types/ministry";
 
 export function VerifiableRegistry() {
     const { data: certificates = [], isLoading, error } = useRegistry();
     const [searchQuery, setSearchQuery] = useState("");
+    const [selected, setSelected] = useState<RegistryCertificate | null>(null);
 
     useEffect(() => {
         if (error) {
@@ -84,7 +89,11 @@ export function VerifiableRegistry() {
             ) : (
                 <div className="divide-y divide-border/30">
                     {filteredCertificates.map((cert) => (
-                        <div key={cert.id} className="p-5 hover:bg-primary/5 transition-colors group flex items-center gap-6">
+                        <div
+                            key={cert.id}
+                            className="p-5 hover:bg-primary/5 transition-colors group flex items-center gap-6 cursor-pointer"
+                            onClick={() => setSelected(cert)}
+                        >
                             <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20">
                                 <QrCode className="w-6 h-6 text-indigo-500" />
                             </div>
@@ -120,6 +129,10 @@ export function VerifiableRegistry() {
                                     <History className="w-3 h-3" /> Issued {formatDate(cert.issuedDate)}
                                 </p>
                             </div>
+
+                            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-muted-foreground group-hover:text-primary">
+                                <Eye className="w-4 h-4" />
+                            </Button>
                         </div>
                     ))}
                 </div>
@@ -129,6 +142,22 @@ export function VerifiableRegistry() {
                     Public verification enabled via QR Code / Link • Total Certificates: {certificates.length}
                 </p>
             </div>
+
+            <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+                <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>{selected?.candidateName || "Certificate"}</DialogTitle>
+                    </DialogHeader>
+                    {selected && (
+                        <CertificatePreviewCard
+                            certNumber={selected.certificateNumber}
+                            issuedDate={selected.issuedDate}
+                            score={selected.score}
+                            fetchPdf={() => ministryService.getCertificatePdfBlob(selected.id)}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </Card>
     );
 }

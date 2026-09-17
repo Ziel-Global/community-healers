@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Calendar, FileText, Download, ExternalLink, Loader2, ShieldAlert, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTodayCandidates, useOverrideLiveness } from "@/hooks/queries/useCenterAdminQueries";
+import { useTodayCandidates, useOverrideLiveness, useReleaseCandidateTest, useRevokeCandidateTestRelease } from "@/hooks/queries/useCenterAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
@@ -40,6 +40,8 @@ interface Candidate {
     livenessVerified?: boolean;
     livenessAttempts?: number;
     livenessBlocked?: boolean;
+    examReleased?: boolean;
+    examReleasedAt?: string | null;
 }
 
 /**
@@ -66,6 +68,23 @@ const LivenessIndicator = ({ candidate }: { candidate: Candidate }) => {
         );
     }
     return null;
+};
+
+/** A verified candidate's test stays locked until the centre explicitly releases it — surface that state up front so it's not missed. */
+const ReleaseIndicator = ({ candidate }: { candidate: Candidate }) => {
+    if (candidate.status !== "Verified") return null;
+    if (candidate.examReleased) {
+        return (
+            <Badge variant="success" className="gap-1 text-[9px] sm:text-[10px]">
+                <CheckCircle2 className="w-3 h-3" /> Test Released
+            </Badge>
+        );
+    }
+    return (
+        <Badge variant="secondary" className="gap-1 text-[9px] sm:text-[10px] bg-amber-100 text-amber-700 border-amber-200">
+            <Clock className="w-3 h-3" /> Test Not Released
+        </Badge>
+    );
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -101,6 +120,8 @@ export function CandidateTable({
     const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
     const [overrideReason, setOverrideReason] = useState("");
     const overrideLivenessMutation = useOverrideLiveness();
+    const releaseTestMutation = useReleaseCandidateTest();
+    const revokeReleaseMutation = useRevokeCandidateTestRelease();
 
     // Default to today if not provided — local date components, not
     // toISOString(), which converts to UTC first and silently returns
@@ -203,6 +224,8 @@ export function CandidateTable({
                 livenessVerified: item.livenessVerified,
                 livenessAttempts: item.livenessAttempts,
                 livenessBlocked: item.livenessBlocked,
+                examReleased: item.examReleased,
+                examReleasedAt: item.examReleasedAt,
             };
         });
     }, [data]);
@@ -242,6 +265,46 @@ export function CandidateTable({
                 },
             }
         );
+    };
+
+    const handleReleaseTest = () => {
+        if (!selectedCandidate) return;
+        releaseTestMutation.mutate(selectedCandidate.id, {
+            onSuccess: () => {
+                toast({
+                    title: "Test released",
+                    description: `${selectedCandidate.name}'s test is now released — it still opens 6 hours after check-in.`,
+                });
+                setSelectedCandidate((prev) => (prev ? { ...prev, examReleased: true } : prev));
+            },
+            onError: (error) => {
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: getApiErrorMessage(error, "Failed to release the test."),
+                });
+            },
+        });
+    };
+
+    const handleRevokeRelease = () => {
+        if (!selectedCandidate) return;
+        revokeReleaseMutation.mutate(selectedCandidate.id, {
+            onSuccess: () => {
+                toast({
+                    title: "Release withdrawn",
+                    description: `${selectedCandidate.name}'s test is no longer released.`,
+                });
+                setSelectedCandidate((prev) => (prev ? { ...prev, examReleased: false } : prev));
+            },
+            onError: (error) => {
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: getApiErrorMessage(error, "Failed to withdraw the release — the exam may already be in progress."),
+                });
+            },
+        });
     };
 
     // Filter candidates by status
@@ -321,6 +384,7 @@ export function CandidateTable({
                                     <td className="p-3 sm:p-4">
                                         <div className="flex flex-col items-start gap-1">
                                             <StatusBadge status={c.status} />
+                                            <ReleaseIndicator candidate={c} />
                                             <LivenessIndicator candidate={c} />
                                         </div>
                                     </td>
@@ -372,6 +436,7 @@ export function CandidateTable({
                                     <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-1">{selectedCandidate.id}</p>
                                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
                                         <StatusBadge status={selectedCandidate.status} />
+                                        <ReleaseIndicator candidate={selectedCandidate} />
                                         <LivenessIndicator candidate={selectedCandidate} />
                                         <Badge variant={selectedCandidate.payment === "Paid" ? "success" : "destructive"}>
                                             {selectedCandidate.payment}
@@ -526,6 +591,28 @@ export function CandidateTable({
                                     >
                                         Verify Candidate
                                     </Button>
+                                )}
+                                {canVerify && selectedCandidate.status === "Verified" && (
+                                    selectedCandidate.examReleased ? (
+                                        <Button
+                                            variant="outline"
+                                            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                                            onClick={handleRevokeRelease}
+                                            disabled={revokeReleaseMutation.isPending}
+                                        >
+                                            {revokeReleaseMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                                            Withdraw Release
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            onClick={handleReleaseTest}
+                                            className="gradient-primary text-white"
+                                            disabled={releaseTestMutation.isPending}
+                                        >
+                                            {releaseTestMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                                            Release Test
+                                        </Button>
+                                    )
                                 )}
                             </div>
                         </div>

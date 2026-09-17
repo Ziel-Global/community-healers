@@ -15,6 +15,7 @@ export const superAdminKeys = {
         [...superAdminKeys.all, "centerRegisteredCandidates", centerId, date] as const,
     questions: () => [...superAdminKeys.all, "questions"] as const,
     centerAdmins: () => [...superAdminKeys.all, "centerAdmins"] as const,
+    certificateSettings: () => [...superAdminKeys.all, "certificateSettings"] as const,
 };
 
 export function useDashboardStats() {
@@ -42,6 +43,33 @@ export function useExamSettings() {
     return useQuery({
         queryKey: superAdminKeys.examSettings(),
         queryFn: superAdminService.getExamSettings,
+    });
+}
+
+export function useCertificateSettings() {
+    return useQuery({
+        queryKey: superAdminKeys.certificateSettings(),
+        queryFn: superAdminService.getCertificateSettings,
+    });
+}
+
+export function useUpdateCertificateDgName() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (dgName: string) => superAdminService.updateCertificateDgName(dgName),
+        onSuccess: (data) => {
+            queryClient.setQueryData(superAdminKeys.certificateSettings(), data);
+        },
+    });
+}
+
+export function useUpdateCertificateSignature() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (file: File) => superAdminService.updateCertificateSignature(file),
+        onSuccess: (data) => {
+            queryClient.setQueryData(superAdminKeys.certificateSettings(), data);
+        },
     });
 }
 

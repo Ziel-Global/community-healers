@@ -3,16 +3,29 @@
  * (ministry_backend/src/utils/enums.ts) exactly, since these values come
  * straight from the JWT `role` claim issued by that backend.
  */
-export type UserRole = 'SUPER_ADMIN' | 'CANDIDATE' | 'CENTER_ADMIN' | 'MINISTRY' | 'INSPECTOR';
+export type UserRole =
+    | 'SUPER_ADMIN'
+    | 'CANDIDATE'
+    | 'CENTER_ADMIN'
+    | 'MINISTRY'
+    | 'COMMITTEE_MEMBER'
+    | 'DIRECTOR_OPERATIONS';
 
-export type PortalType = 'candidate' | 'center' | 'admin' | 'ministry' | 'exam' | 'inspector';
+export type PortalType = 'candidate' | 'center' | 'admin' | 'ministry' | 'exam' | 'committee' | 'director-operations';
 
 /**
- * Which roles may access each portal. SUPER_ADMIN is included everywhere
+ * Which roles may access each portal. SUPER_ADMIN is included on most portals
  * because the backend's own login endpoints let a super admin authenticate
  * through any portal's login route (see `roleBasedLogin` and
  * `loginCandidateByPhone` in the backend), always keeping their real
  * SUPER_ADMIN role in the token rather than masquerading as the portal role.
+ *
+ * Director of Operations is the deliberate exception: it's a fully separate
+ * role from Super Admin, not a Super-Admin-flavored portal. Super Admin only
+ * ever gets read access to that pipeline (the /admin/applications view-only
+ * pages), never the DO portal itself — matched on the backend by
+ * StrictRolesGuard, which (unlike RolesGuard) does not let Super Admin bypass
+ * this check either.
  */
 export const PORTAL_ALLOWED_ROLES: Record<PortalType, UserRole[]> = {
     candidate: ['CANDIDATE', 'SUPER_ADMIN'],
@@ -20,7 +33,8 @@ export const PORTAL_ALLOWED_ROLES: Record<PortalType, UserRole[]> = {
     center: ['CENTER_ADMIN', 'SUPER_ADMIN'],
     ministry: ['MINISTRY', 'SUPER_ADMIN'],
     admin: ['SUPER_ADMIN'],
-    inspector: ['INSPECTOR', 'SUPER_ADMIN'],
+    committee: ['COMMITTEE_MEMBER', 'SUPER_ADMIN'],
+    'director-operations': ['DIRECTOR_OPERATIONS'],
 };
 
 /** Where to send a logged-in user who hits a portal their role can't access. */
@@ -29,5 +43,6 @@ export const ROLE_HOME_PATH: Record<UserRole, string> = {
     CENTER_ADMIN: '/center',
     MINISTRY: '/ministry',
     SUPER_ADMIN: '/admin',
-    INSPECTOR: '/inspector',
+    COMMITTEE_MEMBER: '/committee',
+    DIRECTOR_OPERATIONS: '/director-operations',
 };

@@ -1,5 +1,5 @@
 import { api } from './api';
-import { MinistryCenter, EligibleCandidate, RegistryCertificate, IssuanceLog, IssuedCertificate, BulkIssueCertificatesResponse, DegreeReviewCandidate } from '../types/ministry';
+import { MinistryCenter, EligibleCandidate, RegistryCertificate, IssuanceLog, DegreeReviewCandidate } from '../types/ministry';
 
 export interface DashboardStats {
     totalIssued?: number;
@@ -63,26 +63,6 @@ export const getEligibleCandidates = async (centerId?: string): Promise<Eligible
     }
 };
 
-export const bulkIssueCertificates = async (candidateIds: string[]): Promise<BulkIssueCertificatesResponse> => {
-    try {
-        const response = await api.post('/ministry/certificates/bulk-issue', { candidateIds });
-        return response.data;
-    } catch (error: unknown) {
-        console.error('Error bulk-issuing certificates:', error);
-        throw error;
-    }
-};
-
-export const issueCertificate = async (candidateId: string): Promise<IssuedCertificate> => {
-    try {
-        const response = await api.post('/ministry/certificates', { candidateId });
-        return response.data;
-    } catch (error: unknown) {
-        console.error('Error issuing certificate:', error);
-        throw error;
-    }
-};
-
 export const getRegistry = async (): Promise<RegistryCertificate[]> => {
     try {
         const response = await api.get('/ministry/certificates/registry');
@@ -91,6 +71,14 @@ export const getRegistry = async (): Promise<RegistryCertificate[]> => {
         console.error('Error fetching certificate registry:', error);
         throw error;
     }
+};
+
+/** Same CSRF-header reason as getDegreeDocumentBlob — goes through `api`, not a raw <iframe src>. */
+export const getCertificatePdfBlob = async (certificateId: string): Promise<Blob> => {
+    const response = await api.get(`/ministry/certificates/${certificateId}/pdf`, {
+        responseType: 'blob',
+    });
+    return response.data;
 };
 
 export const getIssuanceLogs = async (): Promise<IssuanceLog[]> => {
@@ -145,9 +133,8 @@ export const ministryService = {
     getIssuanceTrend,
     getCenters,
     getEligibleCandidates,
-    bulkIssueCertificates,
-    issueCertificate,
     getRegistry,
+    getCertificatePdfBlob,
     getIssuanceLogs,
     getDegreeReviewQueue,
     getDegreeDocumentBlob,

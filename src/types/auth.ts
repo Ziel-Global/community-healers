@@ -37,7 +37,12 @@ export interface SuperAdminLoginCredentials {
     password: string;
 }
 
-export interface InspectorLoginCredentials {
+export interface CommitteeMemberLoginCredentials {
+    email: string;
+    password: string;
+}
+
+export interface DirectorOperationsLoginCredentials {
     email: string;
     password: string;
 }
@@ -92,6 +97,31 @@ export interface CandidateStatusResponse {
     /** Present when there's no exam session at all — distinguishes a degree-path candidate from one who just hasn't scheduled yet. */
     certificationPath?: 'EXAM' | 'DEGREE';
     degreeReviewStatus?: 'PENDING' | 'UPLOADED' | 'APPROVED' | 'REJECTED' | null;
+    /** Checked in at the centre — null until verified. */
+    verifiedAt?: string | null;
+    /** When the 6-hour post-verification wait elapses — null until verified. */
+    examUnlocksAt?: string | null;
+    /** Whether the post-verification wait has elapsed. */
+    examUnlocked?: boolean;
+    /** Copy-driving constant, e.g. "opens 6 hours after check-in" — read it, don't hardcode. */
+    examUnlockDelayHours?: number;
+    /** Whether the centre has released this candidate's test — the other exam-start gate. */
+    examReleased?: boolean;
+    examReleasedAt?: string | null;
+    /** True only when both gates (released + unlocked) are clear — drives the "Start test" button. */
+    canStartExam?: boolean;
+}
+
+/** The two new exam-start gate error codes — carried as `error`, not the message string. */
+export const EXAM_NOT_RELEASED_ERROR = "EXAM_NOT_RELEASED";
+export const EXAM_LOCKED_ERROR = "EXAM_NOT_YET_UNLOCKED";
+
+export interface ExamGateError {
+    error: string;
+    message: string;
+    /** Only present on EXAM_NOT_YET_UNLOCKED. */
+    unlocksAt?: string;
+    statusCode: number;
 }
 
 export interface ExamScheduledResponse {
@@ -114,6 +144,13 @@ export interface ExamScheduledResponse {
     numberOfQuestions?: number;
     message?: string;
     candidateStatus?: string;
+    verifiedAt?: string | null;
+    examUnlocksAt?: string | null;
+    examUnlocked?: boolean;
+    examUnlockDelayHours?: number;
+    examReleased?: boolean;
+    examReleasedAt?: string | null;
+    canStartExam?: boolean;
 }
 
 export interface CandidateProfileFlags {

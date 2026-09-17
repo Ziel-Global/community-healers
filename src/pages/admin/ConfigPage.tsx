@@ -1,6 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { superAdminNavItems } from "../SuperAdminPortal";
 import { ExamRulesForm } from "@/components/SuperAdminPortal/Configuration/ExamRulesForm";
+import { CertificateTemplateForm } from "@/components/SuperAdminPortal/Configuration/CertificateTemplateForm";
 
 export default function ConfigPage() {
     return (
@@ -10,8 +11,9 @@ export default function ConfigPage() {
             portalType="admin"
             navItems={superAdminNavItems}
         >
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto space-y-8">
                 <ExamRulesForm />
+                <CertificateTemplateForm />
             </div>
         </DashboardLayout>
     );

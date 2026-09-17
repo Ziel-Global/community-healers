@@ -129,6 +129,10 @@ api.interceptors.response.use(
                         redirectPath = '/ministry/auth';
                     } else if (role === 'admin' || role === 'super_admin' || role === 'super-admin') {
                         redirectPath = '/admin/auth';
+                    } else if (role === 'committee_member' || role === 'committee-member') {
+                        redirectPath = '/committee/auth';
+                    } else if (role === 'director_operations' || role === 'director-operations') {
+                        redirectPath = '/director-operations/auth';
                     }
                 } catch {
                     // malformed stored user — fall through to default redirect

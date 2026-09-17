@@ -164,29 +164,16 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
         return;
       }
 
-      // 3. If they've declared a 14-year degree, the transcript is required
-      // (not optional like it is for the normal exam path) — this is the
-      // whole basis of their application before we route them off the
-      // payment/scheduling flow entirely.
-      const degreeDoc = candidateData?.documents?.find((d) => d.type === 'degreeTranscript');
-      if (hasSixteenYears && !degreeDoc?.fileUrl) {
-        toast({
-          title: t('education.transcriptRequiredTitle'),
-          description: t('education.transcriptRequiredDesc'),
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Construct payload directly from the controlled state
+      // The degree-based certification route is closed to new candidates —
+      // has16YearsEducation/certificationPath are no longer accepted by the
+      // backend at all (forbidNonWhitelisted rejects the whole update if
+      // either is present), so neither is sent here anymore.
       const profilePayload = {
         fatherName: personalInfo.fatherName,
         cnic: personalInfo.cnic,
         dob: personalInfo.dob,
         address: personalInfo.address,
         city: personalInfo.city,
-        has16YearsEducation: hasSixteenYears,
-        certificationPath: hasSixteenYears ? 'DEGREE' : 'EXAM',
       };
 
       await updateCandidateMeMutation.mutateAsync(profilePayload);
