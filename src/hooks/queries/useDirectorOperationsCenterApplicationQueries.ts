@@ -38,18 +38,3 @@ export function useAssignCommittee(applicationId: string) {
     });
 }
 
-export function useApproveApplication(applicationId: string) {
-    const invalidate = useInvalidateApplication(applicationId);
-    return useMutation({
-        mutationFn: () => directorOperationsCenterApplicationService.approveApplication(applicationId),
-        onSuccess: invalidate,
-    });
-}
-
-export function useRejectApplication(applicationId: string) {
-    const invalidate = useInvalidateApplication(applicationId);
-    return useMutation({
-        mutationFn: (reason: string) => directorOperationsCenterApplicationService.rejectApplication(applicationId, reason),
-        onSuccess: invalidate,
-    });
-}

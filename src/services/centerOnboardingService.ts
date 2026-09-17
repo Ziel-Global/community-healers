@@ -12,11 +12,14 @@ function withSession(sessionToken: string) {
     return { headers: { Authorization: `Bearer ${sessionToken}` } };
 }
 
+export type ChecklistCategory = 'OPERATIONS_COMPLIANCE' | 'BUILDING_FACILITIES' | 'STAFF_TRAINERS';
+
 export interface ChecklistItem {
     id: string;
     label: string;
     description: string | null;
     sortOrder: number;
+    category: ChecklistCategory;
 }
 
 export interface VerifyLicenseResult {
@@ -25,7 +28,14 @@ export interface VerifyLicenseResult {
     status: string;
 }
 
-export type StaffCategory = 'INSTRUCTOR' | 'STAFF' | 'MAINTENANCE';
+/** INSTRUCTOR/STAFF/MAINTENANCE are retired — kept only so old rows still type-check. */
+export type StaffCategory =
+    | 'INSTRUCTOR' | 'STAFF' | 'MAINTENANCE'
+    | 'PRINCIPAL' | 'MODERATOR' | 'TRAINER' | 'PSYCHIATRIST'
+    | 'ADMIN_SUPPORT' | 'ACCOUNTS' | 'IT_SUPPORT'
+    | 'SECURITY_OFFICER' | 'SECURITY_GUARD'
+    | 'KITCHEN_STAFF' | 'CLEANING_STAFF'
+    | 'RECEPTIONIST' | 'MEDICAL_PRACTITIONER' | 'HELPLINE_DESK';
 export type BuildingOwnership = 'RENTED' | 'OWNED';
 
 export interface StaffMember {

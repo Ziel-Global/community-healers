@@ -6,13 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     ArrowLeft, Building2, MapPin, Phone, IdCard, Users, UserCheck,
-    CheckCircle2, XCircle, Clock, Loader2, HelpCircle, CalendarClock, FileText,
+    CheckCircle2, Clock, Loader2, CalendarClock, FileText,
 } from "lucide-react";
 import { useCenterApplicationDetail } from "@/hooks/queries/useSuperAdminCenterApplicationQueries";
 import { superAdminCenterApplicationService } from "@/services/centerApplicationService";
-import { EvidenceThumbnail } from "@/components/EvidenceThumbnail";
 import { APPLICATION_STATUS_META } from "@/components/DirectorOperationsPortal/CenterApplications/statusMeta";
 import { CommitteeAttendanceCard } from "@/components/DirectorOperationsPortal/CenterApplications/CommitteeAttendanceCard";
+import { ChecklistResultsSection } from "@/components/DirectorOperationsPortal/CenterApplications/ChecklistResultsSection";
 import { CommentThread } from "@/components/CommentThread";
 
 function formatDateTime(iso: string | null): string {
@@ -160,53 +160,10 @@ export default function CenterApplicationDetailPage() {
 
                 {application.committee && <CommitteeAttendanceCard attendance={attendance} />}
 
-                {checklistResults.length > 0 && (
-                    <div className="space-y-3">
-                        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide px-1">
-                            Inspection Checklist
-                        </h3>
-                        {checklistResults.map((result) => (
-                            <Card key={result.id} className="border-border/40">
-                                <CardHeader className="pb-2">
-                                    <div className="flex items-center justify-between">
-                                        <CardTitle className="text-base">{result.checklistItem.label}</CardTitle>
-                                        {result.passed === null ? (
-                                            <Badge variant="outline" className="gap-1 text-[11px]">
-                                                <HelpCircle className="w-3 h-3" /> Not marked
-                                            </Badge>
-                                        ) : (
-                                            <Badge variant={result.passed ? "success" : "destructive"} className="gap-1 text-[11px]">
-                                                {result.passed ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                                                {result.passed ? "Passed" : "Failed"}
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    {result.checklistItem.description && (
-                                        <p className="text-xs text-muted-foreground">{result.checklistItem.description}</p>
-                                    )}
-                                </CardHeader>
-                                <CardContent className="space-y-3">
-                                    {result.notes && (
-                                        <p className="text-sm bg-secondary/30 rounded-lg p-2.5">{result.notes}</p>
-                                    )}
-                                    {result.evidence.length > 0 ? (
-                                        <div className="flex flex-wrap gap-2">
-                                            {result.evidence.map((evidence) => (
-                                                <EvidenceThumbnail
-                                                    key={evidence.id}
-                                                    evidenceId={evidence.id}
-                                                    fetchBlob={superAdminCenterApplicationService.getEvidenceBlob}
-                                                />
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-xs text-muted-foreground">No evidence photos uploaded.</p>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
+                <ChecklistResultsSection
+                    checklistResults={checklistResults}
+                    getEvidenceBlob={superAdminCenterApplicationService.getEvidenceBlob}
+                />
 
                 {application.status === "REJECTED" && application.rejectionReason && (
                     <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">

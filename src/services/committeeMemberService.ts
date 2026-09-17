@@ -16,12 +16,16 @@ export interface CommitteeApplication {
     updatedAt: string;
 }
 
+export type ChecklistCategory = 'OPERATIONS_COMPLIANCE' | 'BUILDING_FACILITIES' | 'STAFF_TRAINERS';
+
 export interface CommitteeChecklistItem {
     checklistItemId: string;
     label: string;
     description: string | null;
-    passed: boolean | null;
-    notes: string | null;
+    category: ChecklistCategory;
+    /** True for the ~13 "main things" that need a photo; everything else is a plain checkbox. */
+    requiresPhoto: boolean;
+    checked: boolean;
     evidence: { id: string }[];
 }
 
@@ -67,21 +71,22 @@ const uploadEvidence = async (applicationId: string, checklistItemId: string, ph
     return response.data;
 };
 
-const setChecklistResult = async (
-    applicationId: string,
-    checklistItemId: string,
-    passed: boolean,
-    notes?: string,
-) => {
+const setChecklistChecked = async (applicationId: string, checklistItemId: string, checked: boolean) => {
     const response = await api.patch(
         `/internal/committee/applications/${applicationId}/checklist/${checklistItemId}`,
-        { passed, notes },
+        { checked },
     );
     return response.data;
 };
 
-const submitInspection = async (applicationId: string) => {
-    const response = await api.post(`/internal/committee/applications/${applicationId}/submit`);
+/** The committee's own final call — creates the real Center + admin login on approval. */
+const approveInspection = async (applicationId: string) => {
+    const response = await api.post(`/internal/committee/applications/${applicationId}/approve`);
+    return response.data;
+};
+
+const rejectInspection = async (applicationId: string, reason: string) => {
+    const response = await api.post(`/internal/committee/applications/${applicationId}/reject`, { reason });
     return response.data;
 };
 
@@ -101,7 +106,8 @@ export const committeeMemberService = {
     getAssignedApplications,
     getApplicationDetail,
     uploadEvidence,
-    setChecklistResult,
-    submitInspection,
+    setChecklistChecked,
+    approveInspection,
+    rejectInspection,
     setAttendance,
 };

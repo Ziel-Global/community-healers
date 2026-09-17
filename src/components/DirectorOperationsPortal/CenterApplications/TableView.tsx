@@ -4,18 +4,16 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, ExternalLink, UserCheck, CheckCircle2, XCircle, Building2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, UserCheck, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { APPLICATION_STATUS_META, initials } from "./statusMeta";
-import type { CenterApplicationStatus, CenterApplicationSummary } from "@/services/centerApplicationService";
+import type { CenterApplicationSummary } from "@/services/centerApplicationService";
 
 interface TableViewProps {
     applications: CenterApplicationSummary[];
     cityNameById: Map<string, string>;
     committeeNameById: Map<string, string>;
     onRequestAssign: (application: CenterApplicationSummary) => void;
-    onRequestReject: (application: CenterApplicationSummary) => void;
-    onRequestApprove: (application: CenterApplicationSummary) => void;
 }
 
 function formatDate(iso: string | null): string {
@@ -25,7 +23,7 @@ function formatDate(iso: string | null): string {
 
 const headCell = "text-[10px] font-bold uppercase tracking-wider text-muted-foreground";
 
-export function TableView({ applications, cityNameById, committeeNameById, onRequestAssign, onRequestReject, onRequestApprove }: TableViewProps) {
+export function TableView({ applications, cityNameById, committeeNameById, onRequestAssign }: TableViewProps) {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -125,28 +123,6 @@ export function TableView({ applications, cityNameById, committeeNameById, onReq
                                                     >
                                                         <UserCheck className="w-3.5 h-3.5" /> Assign
                                                     </Button>
-                                                )}
-                                                {application.status === "UNDER_REVIEW" && (
-                                                    <>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-600"
-                                                            title="Approve"
-                                                            onClick={() => onRequestApprove(application)}
-                                                        >
-                                                            <CheckCircle2 className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                                            title="Reject"
-                                                            onClick={() => onRequestReject(application)}
-                                                        >
-                                                            <XCircle className="w-4 h-4" />
-                                                        </Button>
-                                                    </>
                                                 )}
                                                 <Button
                                                     variant="ghost"

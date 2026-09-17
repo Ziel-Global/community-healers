@@ -11,11 +11,9 @@ interface KanbanBoardProps {
     cityNameById: Map<string, string>;
     committeeNameById: Map<string, string>;
     onRequestAssign: (application: CenterApplicationSummary) => void;
-    onRequestReject: (application: CenterApplicationSummary) => void;
-    onRequestApprove: (application: CenterApplicationSummary) => void;
 }
 
-export function KanbanBoard({ applications, cityNameById, committeeNameById, onRequestAssign, onRequestReject, onRequestApprove }: KanbanBoardProps) {
+export function KanbanBoard({ applications, cityNameById, committeeNameById, onRequestAssign }: KanbanBoardProps) {
     const { toast } = useToast();
     const [activeApplication, setActiveApplication] = useState<CenterApplicationSummary | null>(null);
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -55,26 +53,13 @@ export function KanbanBoard({ applications, cityNameById, committeeNameById, onR
             return;
         }
 
-        if (toStatus === "REJECTED") {
-            if (fromStatus === "APPROVED") {
-                toast({ variant: "destructive", title: "Can't move there", description: "An approved application can't be rejected." });
-                return;
-            }
-            onRequestReject(application);
-            return;
-        }
-
-        if (toStatus === "APPROVED") {
-            if (fromStatus !== "UNDER_REVIEW") {
-                toast({ variant: "destructive", title: "Can't move there", description: "The inspection must be completed before approval." });
-                return;
-            }
-            onRequestApprove(application);
+        if (toStatus === "REJECTED" || toStatus === "APPROVED") {
+            toast({ title: "Committee decision", description: "The committee approves or rejects directly from the inspection checklist — this moves automatically once they decide." });
             return;
         }
 
         if (toStatus === "UNDER_REVIEW") {
-            toast({ title: "Moves automatically", description: "This card moves here once the committee submits their inspection." });
+            toast({ title: "No longer used", description: "Applications now go straight from Scheduled to Approved/Rejected, decided by the committee." });
             return;
         }
 

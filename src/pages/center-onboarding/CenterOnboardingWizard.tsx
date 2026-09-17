@@ -11,6 +11,7 @@ import {
   centerOnboardingService,
   type CenterApplication,
   type ChecklistItem,
+  type ChecklistCategory,
 } from "@/services/centerOnboardingService";
 import type { ApplicationComment } from "@/services/centerApplicationCommentService";
 import { StepIndicator, type WizardStep } from "@/components/CenterOnboarding/StepIndicator";
@@ -27,6 +28,13 @@ const DETAILS_STEPS: WizardStep[] = [
 ];
 
 const DETAILS_STEP_ORDER: Step[] = ["building", "staff", "center-info"];
+
+const CHECKLIST_CATEGORY_ORDER: ChecklistCategory[] = ["OPERATIONS_COMPLIANCE", "BUILDING_FACILITIES", "STAFF_TRAINERS"];
+const CHECKLIST_CATEGORY_META: Record<ChecklistCategory, { label: string; icon: typeof ClipboardList }> = {
+  OPERATIONS_COMPLIANCE: { label: "Operations & Compliance", icon: ClipboardList },
+  BUILDING_FACILITIES: { label: "Building & Facilities", icon: Building2 },
+  STAFF_TRAINERS: { label: "Staff & Trainers", icon: Users },
+};
 
 const HAS_SCHEDULE_INFO = new Set(["SCHEDULED", "UNDER_REVIEW", "APPROVED", "REJECTED"]);
 
@@ -105,7 +113,7 @@ export default function CenterOnboardingWizard() {
 
   const [building, setBuilding] = useState<BuildingFormState>(emptyBuilding);
   const [staffRows, setStaffRows] = useState<StaffFormRow[]>([
-    { name: "", cnic: "", category: "STAFF", qualification: "" },
+    { name: "", cnic: "", category: "TRAINER", qualification: "" },
   ]);
   const [rosterSaved, setRosterSaved] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
@@ -445,26 +453,47 @@ export default function CenterOnboardingWizard() {
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {checklist.map((item) => (
-                    <label
-                      key={item.id}
-                      className="flex items-start gap-3 p-3 rounded-xl border border-border/40 cursor-pointer hover:bg-secondary/40 transition-colors"
-                    >
-                      <Checkbox
-                        checked={!!acknowledged[item.id]}
-                        onCheckedChange={(checked) =>
-                          setAcknowledged((prev) => ({ ...prev, [item.id]: checked === true }))
-                        }
-                      />
-                      <div>
-                        <p className="text-sm font-medium">{item.label}</p>
-                        {item.description && (
-                          <p className="text-xs text-muted-foreground">{item.description}</p>
-                        )}
+                <div className="space-y-6">
+                  {CHECKLIST_CATEGORY_ORDER.map((category) => {
+                    const items = checklist.filter((item) => item.category === category);
+                    if (items.length === 0) return null;
+                    const meta = CHECKLIST_CATEGORY_META[category];
+                    const Icon = meta.icon;
+                    const confirmedCount = items.filter((item) => acknowledged[item.id]).length;
+
+                    return (
+                      <div key={category} className="space-y-2.5">
+                        <div className="flex items-center gap-2 px-1">
+                          <Icon className="w-4 h-4 text-primary" />
+                          <h3 className="text-sm font-bold text-foreground/80 uppercase tracking-wide">{meta.label}</h3>
+                          <span className="text-[11px] text-muted-foreground font-semibold bg-secondary/70 rounded-full min-w-[36px] text-center px-1.5 py-0.5">
+                            {confirmedCount}/{items.length}
+                          </span>
+                        </div>
+                        <div className="space-y-3">
+                          {items.map((item) => (
+                            <label
+                              key={item.id}
+                              className="flex items-start gap-3 p-3 rounded-xl border border-border/40 cursor-pointer hover:bg-secondary/40 transition-colors"
+                            >
+                              <Checkbox
+                                checked={!!acknowledged[item.id]}
+                                onCheckedChange={(checked) =>
+                                  setAcknowledged((prev) => ({ ...prev, [item.id]: checked === true }))
+                                }
+                              />
+                              <div>
+                                <p className="text-sm font-medium">{item.label}</p>
+                                {item.description && (
+                                  <p className="text-xs text-muted-foreground">{item.description}</p>
+                                )}
+                              </div>
+                            </label>
+                          ))}
+                        </div>
                       </div>
-                    </label>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
               <Button

@@ -33,11 +33,11 @@ export function useUploadEvidence(applicationId: string) {
     });
 }
 
-export function useSetChecklistResult(applicationId: string) {
+export function useSetChecklistChecked(applicationId: string) {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ checklistItemId, passed, notes }: { checklistItemId: string; passed: boolean; notes?: string }) =>
-            committeeMemberService.setChecklistResult(applicationId, checklistItemId, passed, notes),
+        mutationFn: ({ checklistItemId, checked }: { checklistItemId: string; checked: boolean }) =>
+            committeeMemberService.setChecklistChecked(applicationId, checklistItemId, checked),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: committeeMemberKeys.applicationDetail(applicationId) });
         },
@@ -55,10 +55,21 @@ export function useSetAttendance(applicationId: string) {
     });
 }
 
-export function useSubmitInspection(applicationId: string) {
+export function useApproveInspection(applicationId: string) {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: () => committeeMemberService.submitInspection(applicationId),
+        mutationFn: () => committeeMemberService.approveInspection(applicationId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: committeeMemberKeys.applicationDetail(applicationId) });
+            queryClient.invalidateQueries({ queryKey: committeeMemberKeys.applications() });
+        },
+    });
+}
+
+export function useRejectInspection(applicationId: string) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (reason: string) => committeeMemberService.rejectInspection(applicationId, reason),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: committeeMemberKeys.applicationDetail(applicationId) });
             queryClient.invalidateQueries({ queryKey: committeeMemberKeys.applications() });

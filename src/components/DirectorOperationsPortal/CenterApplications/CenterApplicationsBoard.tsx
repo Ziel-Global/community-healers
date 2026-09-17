@@ -8,8 +8,6 @@ import { KanbanBoard } from "./KanbanBoard";
 import { TableView } from "./TableView";
 import { ViewToggle, type ApplicationsView } from "./ViewToggle";
 import { AssignCommitteeDialog } from "./AssignCommitteeDialog";
-import { RejectApplicationDialog } from "./RejectApplicationDialog";
-import { ApproveApplicationDialog } from "./ApproveApplicationDialog";
 import { KANBAN_STATUSES } from "./statusMeta";
 import type { CenterApplicationSummary } from "@/services/centerApplicationService";
 
@@ -22,8 +20,6 @@ export function CenterApplicationsBoard() {
     const [search, setSearch] = useState("");
 
     const [assignTarget, setAssignTarget] = useState<CenterApplicationSummary | null>(null);
-    const [rejectTarget, setRejectTarget] = useState<CenterApplicationSummary | null>(null);
-    const [approveTarget, setApproveTarget] = useState<CenterApplicationSummary | null>(null);
 
     const cityNameById = useMemo(() => new Map(cities.map((c) => [c.id, c.name])), [cities]);
     // There's exactly one committee — a 1-entry map keeps the card/column components unchanged.
@@ -98,8 +94,6 @@ export function CenterApplicationsBoard() {
                     cityNameById={cityNameById}
                     committeeNameById={committeeNameById}
                     onRequestAssign={setAssignTarget}
-                    onRequestReject={setRejectTarget}
-                    onRequestApprove={setApproveTarget}
                 />
             ) : (
                 <TableView
@@ -107,14 +101,10 @@ export function CenterApplicationsBoard() {
                     cityNameById={cityNameById}
                     committeeNameById={committeeNameById}
                     onRequestAssign={setAssignTarget}
-                    onRequestReject={setRejectTarget}
-                    onRequestApprove={setApproveTarget}
                 />
             )}
 
             <AssignCommitteeDialog application={assignTarget} onClose={() => setAssignTarget(null)} onAssigned={() => setAssignTarget(null)} />
-            <RejectApplicationDialog application={rejectTarget} onClose={() => setRejectTarget(null)} onRejected={() => setRejectTarget(null)} />
-            <ApproveApplicationDialog application={approveTarget} onClose={() => setApproveTarget(null)} onApproved={() => setApproveTarget(null)} />
         </div>
     );
 }

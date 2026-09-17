@@ -6,21 +6,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Camera, Loader2, ImageIcon, CalendarClock, UserCheck, UserX, Users } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CheckCircle2, XCircle, Camera, Loader2, ImageIcon, CalendarClock, UserCheck, UserX, Users, ClipboardList, Building2, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import {
   useCommitteeApplicationDetail,
   useUploadEvidence,
-  useSetChecklistResult,
-  useSubmitInspection,
+  useSetChecklistChecked,
+  useApproveInspection,
+  useRejectInspection,
   useSetAttendance,
 } from "@/hooks/queries/useCommitteeMemberQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 import { CommentThread } from "@/components/CommentThread";
 import { ScheduleInspectionDialog } from "@/components/ScheduleInspectionDialog";
 import { CameraCaptureDialog } from "@/components/CameraCaptureDialog";
+import type { CommitteeChecklistItem, ChecklistCategory } from "@/services/committeeMemberService";
 
-const MIN_EVIDENCE = 2;
+/** One clear photo proves an item was inspected — no need for a second angle. */
+const MIN_EVIDENCE = 1;
+
+const CATEGORY_ORDER: ChecklistCategory[] = ["OPERATIONS_COMPLIANCE", "BUILDING_FACILITIES", "STAFF_TRAINERS"];
+const CATEGORY_META: Record<ChecklistCategory, { label: string; icon: typeof ClipboardList }> = {
+  OPERATIONS_COMPLIANCE: { label: "Operations & Compliance", icon: ClipboardList },
+  BUILDING_FACILITIES: { label: "Building & Facilities", icon: Building2 },
+  STAFF_TRAINERS: { label: "Staff & Trainers", icon: GraduationCap },
+};
+
+function isItemComplete(item: CommitteeChecklistItem): boolean {
+  return item.requiresPhoto ? item.evidence.length >= MIN_EVIDENCE : item.checked;
+}
 
 function formatDate(iso: string | null): string | null {
   if (!iso) return null;
@@ -32,15 +48,17 @@ export default function CommitteeApplicationDetailPage() {
   const navigate = useNavigate();
   const { data, isLoading } = useCommitteeApplicationDetail(applicationId);
   const uploadMutation = useUploadEvidence(applicationId);
-  const resultMutation = useSetChecklistResult(applicationId);
-  const submitMutation = useSubmitInspection(applicationId);
+  const checkedMutation = useSetChecklistChecked(applicationId);
+  const approveMutation = useApproveInspection(applicationId);
+  const rejectMutation = useRejectInspection(applicationId);
   const attendanceMutation = useSetAttendance(applicationId);
-  const [notesByItem, setNotesByItem] = useState<Record<string, string>>({});
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [cameraTargetItemId, setCameraTargetItemId] = useState<string | null>(null);
   const [showDeclineReason, setShowDeclineReason] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
   if (isLoading) {
     return (
@@ -57,7 +75,11 @@ export default function CommitteeApplicationDetailPage() {
   const needsScheduling = application.status === "INSPECTION_IN_PROGRESS";
   const isEditable = application.status === "SCHEDULED";
   const isReadOnly = !isEditable;
-  const allMarked = checklist.every((item) => item.passed !== null);
+  const allDocumented = checklist.every(isItemComplete);
+  const groupedChecklist = CATEGORY_ORDER.map((category) => ({
+    category,
+    items: checklist.filter((item) => item.category === category),
+  })).filter((group) => group.items.length > 0);
 
   const handleFileSelected = (checklistItemId: string, file: File | null) => {
     if (!file) return;
@@ -77,11 +99,10 @@ export default function CommitteeApplicationDetailPage() {
     );
   };
 
-  const handleMark = (checklistItemId: string, passed: boolean) => {
-    resultMutation.mutate(
-      { checklistItemId, passed, notes: notesByItem[checklistItemId] },
+  const handleToggleChecked = (checklistItemId: string, checked: boolean) => {
+    checkedMutation.mutate(
+      { checklistItemId, checked },
       {
-        onSuccess: () => toast.success(passed ? "Marked as passed" : "Marked as failed"),
         onError: (error) => toast.error(getApiErrorMessage(error, "Failed to update checklist item")),
       },
     );
@@ -115,13 +136,25 @@ export default function CommitteeApplicationDetailPage() {
     );
   };
 
-  const handleSubmit = () => {
-    submitMutation.mutate(undefined, {
+  const handleApprove = () => {
+    approveMutation.mutate(undefined, {
       onSuccess: () => {
-        toast.success("Inspection submitted — now with Director of Operations");
+        toast.success("Application approved — the center and its admin login are now live");
         navigate("/committee");
       },
-      onError: (error) => toast.error(getApiErrorMessage(error, "Failed to submit inspection")),
+      onError: (error) => toast.error(getApiErrorMessage(error, "Failed to approve application")),
+    });
+  };
+
+  const handleReject = () => {
+    if (!rejectReason.trim()) return;
+    rejectMutation.mutate(rejectReason.trim(), {
+      onSuccess: () => {
+        toast.success("Application rejected");
+        setShowRejectDialog(false);
+        navigate("/committee");
+      },
+      onError: (error) => toast.error(getApiErrorMessage(error, "Failed to reject application")),
     });
   };
 
@@ -264,97 +297,109 @@ export default function CommitteeApplicationDetailPage() {
               </CardContent>
             </Card>
 
-            {checklist.map((item) => {
-              const evidenceCount = item.evidence.length;
-              const canMark = evidenceCount >= MIN_EVIDENCE;
+            {groupedChecklist.map(({ category, items }) => {
+              const meta = CATEGORY_META[category];
+              const Icon = meta.icon;
+              const completeCount = items.filter(isItemComplete).length;
 
               return (
-                <Card key={item.checklistItemId} className="border-border/40">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{item.label}</CardTitle>
-                      {item.passed !== null && (
-                        <Badge variant={item.passed ? "success" : "destructive"}>
-                          {item.passed ? "Passed" : "Failed"}
-                        </Badge>
-                      )}
-                    </div>
-                    {item.description && <p className="text-sm text-muted-foreground">{item.description}</p>}
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <ImageIcon className="w-4 h-4" />
-                        {evidenceCount} / {MIN_EVIDENCE} photos minimum
-                      </div>
-                      {!isReadOnly && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={uploadingItemId === item.checklistItemId}
-                          onClick={() => setCameraTargetItemId(item.checklistItemId)}
-                        >
-                          {uploadingItemId === item.checklistItemId ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Camera className="w-4 h-4 mr-2" />
-                          )}
-                          Upload Photo
-                        </Button>
-                      )}
-                    </div>
+                <div key={category} className="space-y-2.5">
+                  <div className="flex items-center gap-2 px-1">
+                    <Icon className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-bold text-foreground/80 uppercase tracking-wide">{meta.label}</h3>
+                    <span className="text-[11px] text-muted-foreground font-semibold bg-secondary/70 rounded-full min-w-[36px] text-center px-1.5 py-0.5">
+                      {completeCount}/{items.length}
+                    </span>
+                  </div>
 
-                    {!isReadOnly && (
-                      <>
-                        <Textarea
-                          placeholder="Notes (optional)"
-                          defaultValue={item.notes || ""}
-                          onChange={(e) =>
-                            setNotesByItem((prev) => ({ ...prev, [item.checklistItemId]: e.target.value }))
-                          }
-                          rows={2}
+                  {items.map((item) =>
+                    item.requiresPhoto ? (
+                      <Card key={item.checklistItemId} className="border-border/40">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-base">{item.label}</CardTitle>
+                            {isItemComplete(item) && (
+                              <Badge variant="success" className="gap-1">
+                                <CheckCircle2 className="w-3 h-3" /> Documented
+                              </Badge>
+                            )}
+                          </div>
+                          {item.description && <p className="text-sm text-muted-foreground">{item.description}</p>}
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                              <ImageIcon className="w-4 h-4" />
+                              {item.evidence.length} / {MIN_EVIDENCE} photo required
+                            </div>
+                            {!isReadOnly && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={uploadingItemId === item.checklistItemId}
+                                onClick={() => setCameraTargetItemId(item.checklistItemId)}
+                              >
+                                {uploadingItemId === item.checklistItemId ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <Camera className="w-4 h-4 mr-2" />
+                                )}
+                                {isItemComplete(item) ? "Retake / Add Photo" : "Upload Photo"}
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <label
+                        key={item.checklistItemId}
+                        className={`flex items-start gap-3 p-3.5 rounded-xl border border-border/40 bg-card transition-colors ${
+                          isReadOnly ? "" : "cursor-pointer hover:bg-secondary/30"
+                        }`}
+                      >
+                        <Checkbox
+                          checked={item.checked}
+                          disabled={isReadOnly || checkedMutation.isPending}
+                          onCheckedChange={(checked) => handleToggleChecked(item.checklistItemId, checked === true)}
+                          className="mt-0.5"
                         />
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            className="border-emerald-400 text-emerald-700 hover:bg-emerald-50"
-                            disabled={!canMark || resultMutation.isPending}
-                            onClick={() => handleMark(item.checklistItemId, true)}
-                          >
-                            <CheckCircle2 className="w-4 h-4 mr-2" /> Pass
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="border-destructive/40 text-destructive hover:bg-destructive/10"
-                            disabled={!canMark || resultMutation.isPending}
-                            onClick={() => handleMark(item.checklistItemId, false)}
-                          >
-                            <XCircle className="w-4 h-4 mr-2" /> Fail
-                          </Button>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground">{item.label}</p>
+                          {item.description && (
+                            <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                          )}
                         </div>
-                        {!canMark && (
-                          <p className="text-xs text-muted-foreground">
-                            Upload at least {MIN_EVIDENCE} photos before marking this item.
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
+                      </label>
+                    ),
+                  )}
+                </div>
               );
             })}
 
             {isEditable && (
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end gap-2 pt-2">
                 <Button
-                  className="gradient-primary text-white"
-                  disabled={!allMarked || submitMutation.isPending}
-                  onClick={handleSubmit}
+                  variant="outline"
+                  className="border-destructive/40 text-destructive hover:bg-destructive/10 gap-2"
+                  disabled={!allDocumented || rejectMutation.isPending}
+                  onClick={() => setShowRejectDialog(true)}
                 >
-                  {submitMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Submit Inspection
+                  <XCircle className="w-4 h-4" /> Reject
+                </Button>
+                <Button
+                  className="gradient-primary text-white gap-2"
+                  disabled={!allDocumented || approveMutation.isPending}
+                  onClick={handleApprove}
+                >
+                  {approveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  Approve
                 </Button>
               </div>
+            )}
+            {isEditable && !allDocumented && (
+              <p className="text-xs text-muted-foreground text-right -mt-2">
+                Every checklist item must be checked or photographed before you can decide.
+              </p>
             )}
           </>
         )}
@@ -385,6 +430,38 @@ export default function CommitteeApplicationDetailPage() {
         facingMode="environment"
         allowFileFallbackHint={false}
       />
+
+      <Dialog open={showRejectDialog} onOpenChange={(open) => { setShowRejectDialog(open); if (!open) setRejectReason(""); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <XCircle className="w-5 h-5 text-destructive" /> Reject Application
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              This is the committee's final decision — the applicant will be notified of the rejection and the reason below.
+            </p>
+            <Textarea
+              placeholder="Reason for rejection (required)"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              rows={4}
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              disabled={!rejectReason.trim() || rejectMutation.isPending}
+              onClick={handleReject}
+            >
+              {rejectMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Confirm Rejection
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

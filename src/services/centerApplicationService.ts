@@ -1,4 +1,5 @@
 import { api } from './api';
+import type { StaffCategory } from './centerOnboardingService';
 
 /** Mirrors CenterApplicationStatus in ministry_backend/src/utils/enums.ts. */
 export type CenterApplicationStatus =
@@ -56,7 +57,7 @@ export interface CenterApplicationStaffMember {
     id: string;
     name: string;
     cnic: string;
-    category: 'INSTRUCTOR' | 'STAFF' | 'MAINTENANCE';
+    category: StaffCategory;
     qualification: string | null;
     documentObjectKey: string | null;
 }
@@ -66,12 +67,21 @@ export interface ChecklistEvidenceItem {
     createdAt: string;
 }
 
+export type ChecklistCategory = 'OPERATIONS_COMPLIANCE' | 'BUILDING_FACILITIES' | 'STAFF_TRAINERS';
+
 export interface ChecklistResultDetail {
     id: string;
     checklistItemId: string;
+    /** Reused as a plain "done" tick for non-photo items — pass/fail is no longer a concept here. */
     passed: boolean | null;
     notes: string | null;
-    checklistItem: { id: string; label: string; description: string | null };
+    checklistItem: {
+        id: string;
+        label: string;
+        description: string | null;
+        category: ChecklistCategory;
+        requiresPhoto: boolean;
+    };
     evidence: ChecklistEvidenceItem[];
 }
 
@@ -136,19 +146,12 @@ export const superAdminCenterApplicationService = createCenterApplicationReadApi
  */
 const DO_CENTER_APPLICATIONS_PREFIX = '/internal/director-operations/center-applications';
 
+/** Director of Operations assigns a committee — the final approve/reject call belongs to the committee itself now (view-only here). */
 export const directorOperationsCenterApplicationService = {
     ...createCenterApplicationReadApi(DO_CENTER_APPLICATIONS_PREFIX),
 
     assignCommittee: async (applicationId: string, committeeId: string): Promise<CenterApplicationSummary> => {
         const response = await api.post(`${DO_CENTER_APPLICATIONS_PREFIX}/${applicationId}/assign-committee`, { committeeId });
-        return response.data;
-    },
-    approveApplication: async (applicationId: string) => {
-        const response = await api.post(`${DO_CENTER_APPLICATIONS_PREFIX}/${applicationId}/approve`);
-        return response.data;
-    },
-    rejectApplication: async (applicationId: string, reason: string): Promise<CenterApplicationSummary> => {
-        const response = await api.post(`${DO_CENTER_APPLICATIONS_PREFIX}/${applicationId}/reject`, { reason });
         return response.data;
     },
 };

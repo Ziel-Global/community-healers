@@ -18,9 +18,20 @@ export interface StaffFormRow {
 }
 
 const STAFF_CATEGORIES: { value: StaffCategory; label: string }[] = [
-    { value: "INSTRUCTOR", label: "Instructor" },
-    { value: "STAFF", label: "Staff" },
-    { value: "MAINTENANCE", label: "Maintenance" },
+    { value: "PRINCIPAL", label: "Principal" },
+    { value: "MODERATOR", label: "Moderator" },
+    { value: "TRAINER", label: "Trainer" },
+    { value: "PSYCHIATRIST", label: "Psychiatrist" },
+    { value: "ADMIN_SUPPORT", label: "Admin & Support Staff" },
+    { value: "ACCOUNTS", label: "Accounts Staff" },
+    { value: "IT_SUPPORT", label: "IT Support Staff" },
+    { value: "SECURITY_OFFICER", label: "Security Officer" },
+    { value: "SECURITY_GUARD", label: "Security Guard" },
+    { value: "KITCHEN_STAFF", label: "Kitchen Staff" },
+    { value: "CLEANING_STAFF", label: "Cleaning Staff" },
+    { value: "RECEPTIONIST", label: "Receptionist" },
+    { value: "MEDICAL_PRACTITIONER", label: "Male Nurse / Medical Practitioner" },
+    { value: "HELPLINE_DESK", label: "Helpline Desk" },
 ];
 
 interface StaffStepProps {
@@ -54,7 +65,7 @@ export function StaffStep({
     };
 
     const addRow = () => {
-        onRowsChange([...rows, { name: "", cnic: "", category: "STAFF", qualification: "" }]);
+        onRowsChange([...rows, { name: "", cnic: "", category: "TRAINER", qualification: "" }]);
     };
 
     const removeRow = (index: number) => {
@@ -71,7 +82,7 @@ export function StaffStep({
                         </div>
                         <div>
                             <h2 className="text-lg font-semibold text-foreground">Staff Information</h2>
-                            <p className="text-sm text-muted-foreground">Instructor, Staff and Maintenance CNICs are all required.</p>
+                            <p className="text-sm text-muted-foreground">Add every staff member with their role and CNIC.</p>
                         </div>
                     </div>
                     <Button type="button" variant="outline" size="sm" onClick={addRow} className="gap-1.5 shrink-0">
