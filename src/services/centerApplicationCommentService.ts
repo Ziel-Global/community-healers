@@ -9,6 +9,7 @@ export interface ApplicationComment {
         firstName: string | null;
         lastName: string | null;
         email: string;
+        role: string;
     };
 }
 

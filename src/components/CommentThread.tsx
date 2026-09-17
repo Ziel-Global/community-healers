@@ -64,8 +64,13 @@ export function CommentThread({ applicationId, canPost }: CommentThreadProps) {
                             </div>
                             <div className="min-w-0 flex-1 bg-secondary/20 rounded-xl p-3">
                                 <div className="flex items-center justify-between gap-2">
-                                    <p className="text-xs font-semibold text-foreground truncate">
+                                    <p className="text-xs font-semibold text-foreground truncate flex items-center gap-1.5">
                                         {[comment.author.firstName, comment.author.lastName].filter(Boolean).join(" ") || comment.author.email}
+                                        {comment.author.role === "DIRECTOR_OPERATIONS" && (
+                                            <span className="text-[9px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+                                                Director Operations
+                                            </span>
+                                        )}
                                     </p>
                                     <span className="text-[10px] text-muted-foreground shrink-0">{formatTimestamp(comment.createdAt)}</span>
                                 </div>
