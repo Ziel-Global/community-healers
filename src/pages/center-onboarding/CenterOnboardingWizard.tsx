@@ -3,6 +3,7 @@ import { Building2, CalendarClock, CheckCircle2, ClipboardList, Loader2, Message
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,6 +21,15 @@ import { StaffStep, type StaffFormRow } from "@/components/CenterOnboarding/Staf
 import { CenterInfoStep, type CenterInfoFormState } from "@/components/CenterOnboarding/CenterInfoStep";
 
 type Step = "prerequisites" | "verify" | "otp" | "building" | "staff" | "center-info" | "status";
+
+/** Hides most of the number — e.g. "+923001234567" -> "+9230xxxxxxx67" — so the OTP screen doesn't display it in full. */
+function maskPhone(phone: string): string {
+  if (phone.length <= 6) return phone;
+  const visibleStart = phone.slice(0, 4);
+  const visibleEnd = phone.slice(-2);
+  const maskedLength = phone.length - visibleStart.length - visibleEnd.length;
+  return `${visibleStart}${"x".repeat(maskedLength)}${visibleEnd}`;
+}
 
 const DETAILS_STEPS: WizardStep[] = [
   { label: "Building", icon: Building2 },
@@ -556,19 +566,21 @@ export default function CenterOnboardingWizard() {
             <CardContent className="p-6 sm:p-8">
               <h2 className="text-lg font-semibold mb-1">Enter OTP</h2>
               <p className="text-sm text-muted-foreground mb-5">
-                We sent a code to {phone ?? "your registered number"}.
+                We sent a code to {phone ? maskPhone(phone) : "your registered number"}.
               </p>
               <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="otp">One-time code</Label>
-                  <Input
-                    id="otp"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    placeholder="111111"
-                  />
+                  <InputOTP id="otp" maxLength={6} value={otp} onChange={(value) => setOtp(value.replace(/\D/g, ""))}>
+                    <InputOTPGroup className="gap-2">
+                      <InputOTPSlot index={0} className="h-12 w-12 text-lg border-border/60" />
+                      <InputOTPSlot index={1} className="h-12 w-12 text-lg border-border/60" />
+                      <InputOTPSlot index={2} className="h-12 w-12 text-lg border-border/60" />
+                      <InputOTPSlot index={3} className="h-12 w-12 text-lg border-border/60" />
+                      <InputOTPSlot index={4} className="h-12 w-12 text-lg border-border/60" />
+                      <InputOTPSlot index={5} className="h-12 w-12 text-lg border-border/60" />
+                    </InputOTPGroup>
+                  </InputOTP>
                 </div>
                 <Button type="submit" className="w-full gradient-primary text-white h-11" disabled={loading}>
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
