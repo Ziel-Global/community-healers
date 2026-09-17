@@ -1,6 +1,6 @@
 import { api } from './api';
 import { getApiErrorMessage } from '../lib/errors';
-import { ExamSettings, City, CreateCenterRequest, CenterAdmin, Question, CreateQuestionRequest, DashboardStats, AuditLogResponse, ExamParticipationTrend, CenterRegisteredCandidatesResponse, SuperAdminCenter, SuperAdminCenterDetails } from '../types/superAdmin';
+import { ExamSettings, City, UpdateCityLocationRequest, Province, District, Tehsil, CreateCenterRequest, CenterAdmin, Question, CreateQuestionRequest, DashboardStats, AuditLogResponse, ExamParticipationTrend, CenterRegisteredCandidatesResponse, SuperAdminCenter, SuperAdminCenterDetails } from '../types/superAdmin';
 
 export const updateExamSettings = async (settings: ExamSettings): Promise<void> => {
     try {
@@ -41,6 +41,47 @@ export const getAllCities = async (): Promise<City[]> => {
     }
 };
 
+/**
+ * Static reference data for the candidate's residential-address form —
+ * Province > District. Unrelated to the city endpoints above, which are the
+ * exam-centre list.
+ */
+export const getProvinces = async (): Promise<Province[]> => {
+    try {
+        const response = await api.get('/super-admin/provinces');
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Get Provinces error:', error);
+        throw new Error(getApiErrorMessage(error, 'Failed to fetch provinces.'));
+    }
+};
+
+/** Omit `provinceId` to fetch every district. */
+export const getDistricts = async (provinceId?: string): Promise<District[]> => {
+    try {
+        const response = await api.get('/super-admin/districts', {
+            params: provinceId ? { provinceId } : undefined,
+        });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Get Districts error:', error);
+        throw new Error(getApiErrorMessage(error, 'Failed to fetch districts.'));
+    }
+};
+
+/** Omit `districtId` to fetch every tehsil. */
+export const getTehsils = async (districtId?: string): Promise<Tehsil[]> => {
+    try {
+        const response = await api.get('/super-admin/tehsils', {
+            params: districtId ? { districtId } : undefined,
+        });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Get Tehsils error:', error);
+        throw new Error(getApiErrorMessage(error, 'Failed to fetch tehsils.'));
+    }
+};
+
 export const createCity = async (name: string): Promise<City> => {
     try {
         const response = await api.post('/super-admin/city', { name });
@@ -48,6 +89,17 @@ export const createCity = async (name: string): Promise<City> => {
     } catch (error: unknown) {
         console.error('Create City error:', error);
         throw new Error(getApiErrorMessage(error, 'Failed to create city.'));
+    }
+};
+
+/** Sets a city's zone-matching coordinates/radius. Every field in `payload` is optional and independent — see UpdateCityLocationRequest. */
+export const updateCityLocation = async (cityId: string, payload: UpdateCityLocationRequest): Promise<City> => {
+    try {
+        const response = await api.patch(`/super-admin/city/${cityId}/location`, payload);
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Update City Location error:', error);
+        throw new Error(getApiErrorMessage(error, 'Failed to update city location.'));
     }
 };
 
@@ -223,7 +275,11 @@ export const superAdminService = {
     getCertificateSignatureBlob,
     getCities,
     getAllCities,
+    getProvinces,
+    getDistricts,
+    getTehsils,
     createCity,
+    updateCityLocation,
     createCenter,
     getCenters,
     getCenterDetails,

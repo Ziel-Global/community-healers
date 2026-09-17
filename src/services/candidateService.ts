@@ -11,6 +11,7 @@ import {
     SaveAnswerResponse,
     SubmitExamResponse,
     ConfirmPaymentResponse,
+    EligibleCentersResponse,
 } from '../types/candidate';
 import { CandidateStatusResponse } from '../types/auth';
 
@@ -83,12 +84,33 @@ export const uploadDocument = async (type: string, file: File): Promise<UploadDo
     }
 };
 
-export const scheduleExam = async (examDate: string): Promise<ScheduleExamResponse> => {
+/**
+ * `centerId` is optional — omitting it keeps the legacy behaviour of
+ * auto-assigning within the candidate's exact city. Pass the id of a
+ * center picked from `getEligibleCenters` to book that one specifically.
+ */
+export const scheduleExam = async (examDate: string, centerId?: string): Promise<ScheduleExamResponse> => {
     try {
-        const response = await api.post('/candidates/me/schedule', { examDate });
+        const response = await api.post('/candidates/me/schedule', { examDate, centerId });
         return response.data;
     } catch (error: unknown) {
         console.error('Schedule exam error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Centers available for a given date — within the candidate's zone (their
+ * city's radius) when the city has coordinates set, otherwise the same
+ * exact-city set `scheduleExam` itself would use. Read-only; does not book
+ * anything.
+ */
+export const getEligibleCenters = async (examDate: string): Promise<EligibleCentersResponse> => {
+    try {
+        const response = await api.get('/candidates/me/centers', { params: { date: examDate } });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Get eligible centers error:', error);
         throw error;
     }
 };
@@ -223,6 +245,7 @@ export const candidateService = {
     uploadDocument,
     getDocumentBlob,
     scheduleExam,
+    getEligibleCenters,
     getExamStatus,
     getExamQuestions,
     autosaveAnswer,

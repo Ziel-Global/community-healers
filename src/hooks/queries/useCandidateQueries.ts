@@ -9,6 +9,7 @@ export const candidateKeys = {
     documentValidation: () => [...candidateKeys.all, "documentValidation"] as const,
     paymentStatus: () => [...candidateKeys.all, "paymentStatus"] as const,
     examStatus: () => [...candidateKeys.all, "examStatus"] as const,
+    eligibleCenters: (examDate: string) => [...candidateKeys.all, "eligibleCenters", examDate] as const,
     examQuestions: () => [...candidateKeys.all, "examQuestions"] as const,
     certificate: () => [...candidateKeys.all, "certificate"] as const,
 };
@@ -107,10 +108,24 @@ export function useUploadDocument() {
 export function useScheduleExam() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (examDate: string) => candidateService.scheduleExam(examDate),
+        mutationFn: ({ examDate, centerId }: { examDate: string; centerId?: string }) =>
+            candidateService.scheduleExam(examDate, centerId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: authKeys.examSchedule() });
         },
+    });
+}
+
+/**
+ * Centers available for a date, within the candidate's zone when their city
+ * has coordinates set. Disabled until a date is picked — there is nothing
+ * to preview before then.
+ */
+export function useEligibleCenters(examDate: string | undefined) {
+    return useQuery({
+        queryKey: candidateKeys.eligibleCenters(examDate ?? ""),
+        queryFn: () => candidateService.getEligibleCenters(examDate as string),
+        enabled: !!examDate,
     });
 }
 

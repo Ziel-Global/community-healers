@@ -7,6 +7,48 @@ export interface ExamSettings {
 export interface City {
     id: string;
     name: string;
+    /** Null until a super admin sets it via updateCityLocation — see UpdateCityLocationRequest. */
+    latitude?: number | null;
+    longitude?: number | null;
+    /** Overrides ExamSettings.defaultZoneRadiusKm for this city only. Null = use the global default. */
+    radiusKm?: number | null;
+    districtId?: string | null;
+}
+
+/**
+ * Payload for PATCH /super-admin/city/:id/location. Every field is optional
+ * and independent — send only what changed. Powers zone-based centre
+ * matching (docs/ZONE_BASED_CENTER_MATCHING.md in the backend repo): a city
+ * with no latitude/longitude can't be zone-matched yet, and `radiusKm` left
+ * unset falls back to the global default.
+ */
+export interface UpdateCityLocationRequest {
+    latitude?: number;
+    longitude?: number;
+    radiusKm?: number;
+    districtId?: string;
+}
+
+/**
+ * Static reference data for the candidate's residential-address form
+ * (Province > District > Tehsil/City). Unrelated to `City` above, which is
+ * the exam-centre list and drives training-centre matching.
+ */
+export interface Province {
+    id: string;
+    name: string;
+}
+
+export interface District {
+    id: string;
+    name: string;
+    provinceId: string;
+}
+
+export interface Tehsil {
+    id: string;
+    name: string;
+    districtId: string;
 }
 
 export interface CreateCenterRequest {

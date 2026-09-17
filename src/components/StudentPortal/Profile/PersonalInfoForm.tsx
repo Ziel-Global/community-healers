@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon, Home, AlertCircle } from "lucide-react";
+import { User, Phone, MapPin, CreditCard, Calendar as CalendarIcon, Home, AlertCircle, Landmark, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCities } from "@/hooks/queries/useReferenceQueries";
+import { useCities, useProvinces, useDistricts, useTehsils } from "@/hooks/queries/useReferenceQueries";
 import { PERSONAL_INFO_ERROR_CODES, dobFieldSchema } from "@/schemas/registrationSchemas";
 
 interface PersonalInfo {
@@ -14,7 +14,12 @@ interface PersonalInfo {
     cnic: string;
     dob: string;
     phone: string;
+    /** Exam-centre city — drives training-centre matching. Unrelated to the residential fields below. */
     city: string;
+    /** Residential address hierarchy: Province > District > Tehsil/City > Address. Independent of `city`. */
+    province: string;
+    district: string;
+    tehsil: string;
     address: string;
 }
 
@@ -49,9 +54,45 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
     const { data: citiesData } = useCities();
     const cities = Array.isArray(citiesData) ? citiesData : [];
 
+    // Residential address hierarchy — separate reference data from `cities`
+    // above. Districts are scoped to whichever province is currently picked.
+    const { data: provincesData } = useProvinces();
+    const provinces = Array.isArray(provincesData) ? provincesData : [];
+    const { data: districtsData, isFetching: isFetchingDistricts } = useDistricts(data.province || undefined);
+    const districts = Array.isArray(districtsData) ? districtsData : [];
+    const { data: tehsilsData, isFetching: isFetchingTehsils } = useTehsils(data.district || undefined);
+    const tehsils = Array.isArray(tehsilsData) ? tehsilsData : [];
+
     const handleChange = (field: keyof PersonalInfo, value: string) => {
         onUpdate(field, value);
     };
+
+    // A district only belongs to one province — switching province makes the
+    // previously-picked district invalid (the backend rejects the mismatch
+    // outright), so clear it here rather than let the candidate submit a
+    // stale pick and hit a confusing error on save.
+    const previousProvinceRef = useRef(data.province);
+    useEffect(() => {
+        if (previousProvinceRef.current !== data.province) {
+            previousProvinceRef.current = data.province;
+            if (data.district) {
+                handleChange("district", "");
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data.province]);
+
+    // Same reasoning one level down: a tehsil only belongs to one district.
+    const previousDistrictRef = useRef(data.district);
+    useEffect(() => {
+        if (previousDistrictRef.current !== data.district) {
+            previousDistrictRef.current = data.district;
+            if (data.tehsil) {
+                handleChange("tehsil", "");
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data.district]);
 
     return (
         <Card className="border-border/40 shadow-sm">
@@ -133,7 +174,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                             />
                         </div>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="city">{t('personalInfo.city')}</Label>
                         <div className="relative">
                             <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
@@ -154,17 +195,101 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                             </Select>
                         </div>
                     </div>
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="address">{t('personalInfo.address')}</Label>
-                        <div className="relative">
-                            <Home className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                            <Input
-                                id="address"
-                                placeholder={t('personalInfo.addressPlaceholder')}
-                                className={cn("pl-10", errors.address && "border-destructive focus-visible:ring-destructive")}
-                                value={data.address}
-                                onChange={(e) => handleChange("address", e.target.value)}
-                            />
+                </div>
+
+                {/* Residential address — a separate hierarchy from the exam-centre
+                    city above; visually grouped so the distinction is obvious. */}
+                <div className="pt-2 border-t border-border/40">
+                    <h4 className="text-sm font-semibold text-foreground mt-4 mb-4 flex items-center gap-2">
+                        <Map className="w-4 h-4 text-primary" />
+                        {t('personalInfo.residentialAddress')}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="province">{t('personalInfo.province')}</Label>
+                            <div className="relative">
+                                <Landmark className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                <Select
+                                    value={data.province}
+                                    onValueChange={(value) => handleChange("province", value)}
+                                >
+                                    <SelectTrigger id="province" className={cn("pl-10", errors.province && "border-destructive focus-visible:ring-destructive")}>
+                                        <SelectValue placeholder={t('personalInfo.selectProvince')} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {provinces.map((province) => (
+                                            <SelectItem key={province.id} value={province.id}>
+                                                {province.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="district">{t('personalInfo.district')}</Label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                <Select
+                                    value={data.district}
+                                    onValueChange={(value) => handleChange("district", value)}
+                                    disabled={!data.province}
+                                >
+                                    <SelectTrigger id="district" className={cn("pl-10", errors.district && "border-destructive focus-visible:ring-destructive")}>
+                                        <SelectValue placeholder={
+                                            data.province
+                                                ? (isFetchingDistricts ? "..." : t('personalInfo.selectDistrict'))
+                                                : t('personalInfo.selectDistrictFirst')
+                                        } />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {districts.map((district) => (
+                                            <SelectItem key={district.id} value={district.id}>
+                                                {district.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="tehsil">{t('personalInfo.tehsil')}</Label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                <Select
+                                    value={data.tehsil}
+                                    onValueChange={(value) => handleChange("tehsil", value)}
+                                    disabled={!data.district}
+                                >
+                                    <SelectTrigger id="tehsil" className={cn("pl-10", errors.tehsil && "border-destructive focus-visible:ring-destructive")}>
+                                        <SelectValue placeholder={
+                                            data.district
+                                                ? (isFetchingTehsils ? "..." : t('personalInfo.selectTehsil'))
+                                                : t('personalInfo.selectTehsilFirst')
+                                        } />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tehsils.map((tehsil) => (
+                                            <SelectItem key={tehsil.id} value={tehsil.id}>
+                                                {tehsil.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="address">{t('personalInfo.address')}</Label>
+                            <div className="relative">
+                                <Home className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    id="address"
+                                    placeholder={t('personalInfo.addressPlaceholder')}
+                                    className={cn("pl-10", errors.address && "border-destructive focus-visible:ring-destructive")}
+                                    value={data.address}
+                                    onChange={(e) => handleChange("address", e.target.value)}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

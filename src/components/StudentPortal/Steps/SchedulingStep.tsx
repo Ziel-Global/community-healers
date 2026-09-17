@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { WizardStepProps } from "../CandidateWizard";
 import { ExamSlotPicker } from "../Scheduling/ExamSlotPicker";
+import { CenterSelector } from "../Scheduling/CenterSelector";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Calendar, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useScheduleExam } from "@/hooks/queries/useCandidateQueries";
+import { useEligibleCenters, useScheduleExam } from "@/hooks/queries/useCandidateQueries";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { isRepaymentRequiredMessage } from "@/utils/time";
@@ -14,8 +15,26 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
   const { t } = useTranslation();
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedCenterId, setSelectedCenterId] = useState<string | undefined>(undefined);
   const [isScheduled, setIsScheduled] = useState(false);
   const scheduleExamMutation = useScheduleExam();
+
+  const examDateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined;
+  // Shares its cache entry with the same call inside CenterSelector — this
+  // is only here to gate the "proceed" button, not a second request.
+  const centersQuery = useEligibleCenters(examDateStr);
+  const availableCenters = centersQuery.data?.centers ?? [];
+  // A center choice is required only once we know there's something to
+  // choose from. A slow/failed preview or a genuinely empty list never
+  // blocks scheduling — the backend still auto-assigns or reports the
+  // real error either way.
+  const requiresCenterSelection = centersQuery.isSuccess && availableCenters.length > 0;
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    // The previous selection may not exist (or may be full) for a new date.
+    setSelectedCenterId(undefined);
+  };
 
   const handleNext = () => {
     // The schedule control appears in both the picker and the wizard footer.
@@ -23,9 +42,10 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
     // booking succeeds, because the API correctly treats that as a reschedule.
     // `mutation.isPending` (checked via disabled state below) is the dedupe guard now.
     if (!selectedDate || scheduleExamMutation.isPending || isScheduled) return;
+    if (requiresCenterSelection && !selectedCenterId) return;
 
     const examDate = format(selectedDate, 'yyyy-MM-dd');
-    scheduleExamMutation.mutate(examDate, {
+    scheduleExamMutation.mutate({ examDate, centerId: selectedCenterId }, {
       onSuccess: () => {
         setIsScheduled(true);
         toast({
@@ -58,7 +78,7 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
     });
   };
 
-  const canProceed = selectedDate !== undefined;
+  const canProceed = selectedDate !== undefined && (!requiresCenterSelection || !!selectedCenterId);
 
   return (
     <div className="space-y-8">
@@ -83,18 +103,26 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
       <div className="space-y-8">
         <ExamSlotPicker
           selectedDate={selectedDate}
-          onDateSelect={setSelectedDate}
+          onDateSelect={handleDateSelect}
           onSchedule={handleNext}
           isScheduling={scheduleExamMutation.isPending}
           isScheduled={isScheduled}
         />
+
+        {selectedDate && examDateStr && !isScheduled && (
+          <CenterSelector
+            examDate={examDateStr}
+            selectedCenterId={selectedCenterId}
+            onSelectCenter={setSelectedCenterId}
+          />
+        )}
       </div>
 
-      {/* Date Selection Status */}
+      {/* Date / Center Selection Status */}
       {!canProceed && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
           <p className="text-sm text-amber-700 dark:text-amber-400">
-            {t('scheduling.warning')}
+            {selectedDate ? t('scheduling.pleaseSelectCenter') : t('scheduling.warning')}
           </p>
         </div>
       )}
