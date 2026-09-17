@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, InspectorLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
+import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, CommitteeMemberLoginCredentials, DirectorOperationsLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 import { authService } from '../services/authService';
 import i18n from '../i18n';
 import { authKeys, useExamSchedule } from '../hooks/queries/useAuthQueries';
@@ -10,7 +10,8 @@ interface AuthContextType extends AuthState {
     loginCenterAdmin: (credentials: CenterAdminLoginCredentials) => Promise<void>;
     loginMinistry: (credentials: MinistryLoginCredentials) => Promise<void>;
     loginSuperAdmin: (credentials: SuperAdminLoginCredentials) => Promise<void>;
-    loginInspector: (credentials: InspectorLoginCredentials) => Promise<void>;
+    loginCommitteeMember: (credentials: CommitteeMemberLoginCredentials) => Promise<void>;
+    loginDirectorOperations: (credentials: DirectorOperationsLoginCredentials) => Promise<void>;
     signup: (credentials: SignupCredentials) => Promise<void>;
     verifyCandidate: (credentials: CandidateVerificationCredentials) => Promise<void>;
     logout: () => Promise<void>;
@@ -155,10 +156,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    const loginInspector = async (credentials: InspectorLoginCredentials) => {
+    const loginCommitteeMember = async (credentials: CommitteeMemberLoginCredentials) => {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
-            const response = await authService.loginInspector(credentials);
+            const response = await authService.loginCommitteeMember(credentials);
+            hydrateSession(response.user);
+        } catch (error: unknown) {
+            console.error("Login error details:", error);
+            setState((prev) => ({
+                ...prev,
+                isLoading: false,
+                error: error instanceof Error ? error.message : 'Login failed',
+            }));
+            throw error;
+        }
+    };
+
+    const loginDirectorOperations = async (credentials: DirectorOperationsLoginCredentials) => {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const response = await authService.loginDirectorOperations(credentials);
             hydrateSession(response.user);
         } catch (error: unknown) {
             console.error("Login error details:", error);
@@ -236,7 +253,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         loginCenterAdmin,
         loginMinistry,
         loginSuperAdmin,
-        loginInspector,
+        loginCommitteeMember,
+        loginDirectorOperations,
         signup,
         verifyCandidate,
         logout,

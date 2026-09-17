@@ -1,42 +1,56 @@
 import { useEffect, useState } from "react";
-import { Building2, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
+import { Building2, CalendarClock, CheckCircle2, ClipboardList, Loader2, MessageSquare, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LocationPicker } from "@/components/LocationPicker";
 import { getApiErrorMessage } from "@/lib/errors";
 import {
   centerOnboardingService,
   type CenterApplication,
   type ChecklistItem,
-  type StaffCategory,
-  type StaffMember,
 } from "@/services/centerOnboardingService";
+import type { ApplicationComment } from "@/services/centerApplicationCommentService";
+import { StepIndicator, type WizardStep } from "@/components/CenterOnboarding/StepIndicator";
+import { BuildingStep, type BuildingFormState } from "@/components/CenterOnboarding/BuildingStep";
+import { StaffStep, type StaffFormRow } from "@/components/CenterOnboarding/StaffStep";
+import { CenterInfoStep, type CenterInfoFormState } from "@/components/CenterOnboarding/CenterInfoStep";
 
-type Step = "prerequisites" | "verify" | "otp" | "details" | "status";
+type Step = "prerequisites" | "verify" | "otp" | "building" | "staff" | "center-info" | "status";
 
-const STAFF_CATEGORIES: { value: StaffCategory; label: string }[] = [
-  { value: "INSTRUCTOR", label: "Instructor" },
-  { value: "STAFF", label: "Staff" },
-  { value: "MAINTENANCE", label: "Maintenance" },
+const DETAILS_STEPS: WizardStep[] = [
+  { label: "Building", icon: Building2 },
+  { label: "Staff", icon: Users },
+  { label: "Center Info", icon: ClipboardList },
 ];
+
+const DETAILS_STEP_ORDER: Step[] = ["building", "staff", "center-info"];
+
+const HAS_SCHEDULE_INFO = new Set(["SCHEDULED", "UNDER_REVIEW", "APPROVED", "REJECTED"]);
+
+function formatDate(iso: string | null): string | null {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+}
 
 const STATUS_COPY: Record<string, { title: string; body: string }> = {
   INSPECTION_PENDING: {
     title: "Application submitted",
-    body: "Your center details and staff roster have been received. A ministry inspector will be assigned to visit your premises soon.",
+    body: "Your center details and staff roster have been received. An Approval Committee will be assigned to visit your premises soon.",
   },
   INSPECTION_IN_PROGRESS: {
-    title: "Inspection in progress",
-    body: "An inspector has been assigned to your application and is reviewing your premises. You'll be notified once this is complete.",
+    title: "Committee assigned",
+    body: "An Approval Committee has been assigned to your application. They'll schedule a date to visit your premises soon.",
+  },
+  SCHEDULED: {
+    title: "Inspection scheduled",
+    body: "The committee has scheduled your inspection — see the date and their notes below.",
   },
   UNDER_REVIEW: {
-    title: "Under Super Admin review",
-    body: "The inspection is complete and your application is now with the Super Admin for a final decision.",
+    title: "Under review",
+    body: "The inspection is complete and your application is now with the Director of Operations for a final decision.",
   },
   APPROVED: {
     title: "Application approved",
@@ -46,6 +60,27 @@ const STATUS_COPY: Record<string, { title: string; body: string }> = {
     title: "Application rejected",
     body: "Unfortunately your application was not approved. You should have received an SMS with details.",
   },
+};
+
+const emptyBuilding: BuildingFormState = {
+  buildingArea: "",
+  buildingCapacity: "",
+  buildingOwnership: null,
+  receptionAvailable: null,
+  requiredSystemsAvailable: null,
+  camerasAvailable: null,
+  camerasInfo: "",
+};
+
+const emptyCenterInfo: CenterInfoFormState = {
+  centerName: "",
+  address: "",
+  centerPhone: "",
+  latitude: null,
+  longitude: null,
+  city: null,
+  isJointVenture: false,
+  jointVentureLicenseNumber: "",
 };
 
 export default function CenterOnboardingWizard() {
@@ -65,13 +100,16 @@ export default function CenterOnboardingWizard() {
 
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [application, setApplication] = useState<CenterApplication | null>(null);
+  const [comments, setComments] = useState<ApplicationComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
 
-  const [centerName, setCenterName] = useState("");
-  const [address, setAddress] = useState("");
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
-  const [city, setCity] = useState<string | null>(null);
-  const [staff, setStaff] = useState<StaffMember[]>([{ name: "", cnic: "", category: "INSTRUCTOR" }]);
+  const [building, setBuilding] = useState<BuildingFormState>(emptyBuilding);
+  const [staffRows, setStaffRows] = useState<StaffFormRow[]>([
+    { name: "", cnic: "", category: "STAFF", qualification: "" },
+  ]);
+  const [rosterSaved, setRosterSaved] = useState(false);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [centerInfo, setCenterInfo] = useState<CenterInfoFormState>(emptyCenterInfo);
 
   useEffect(() => {
     centerOnboardingService
@@ -83,21 +121,63 @@ export default function CenterOnboardingWizard() {
 
   const allAcknowledged = checklist.every((item) => acknowledged[item.id]);
 
+  // Once the committee has scheduled a date, show the applicant the date + comment thread.
+  useEffect(() => {
+    if (step !== "status" || !applicationId || !sessionToken || !application) return;
+    if (!HAS_SCHEDULE_INFO.has(application.status)) return;
+
+    setCommentsLoading(true);
+    centerOnboardingService
+      .getComments(applicationId, sessionToken)
+      .then(setComments)
+      .catch((error) => toast.error(getApiErrorMessage(error, "Failed to load inspection updates")))
+      .finally(() => setCommentsLoading(false));
+  }, [step, applicationId, sessionToken, application?.status]);
+
   const goToStepForStatus = (app: CenterApplication) => {
     setApplication(app);
-    if (app.status === "DETAILS_PENDING") {
-      if (app.centerName) setCenterName(app.centerName);
-      if (app.address) setAddress(app.address);
-      if (app.latitude != null) setLatitude(app.latitude);
-      if (app.longitude != null) setLongitude(app.longitude);
-      if (app.city) setCity(app.city);
-      if (app.staff && app.staff.length > 0) {
-        setStaff(app.staff.map((s) => ({ name: s.name, cnic: s.cnic, category: s.category })));
-      }
-      setStep("details");
-    } else {
+
+    if (app.status !== "DETAILS_PENDING") {
       setStep("status");
+      return;
     }
+
+    setBuilding({
+      buildingArea: app.buildingArea != null ? String(app.buildingArea) : "",
+      buildingCapacity: app.buildingCapacity != null ? String(app.buildingCapacity) : "",
+      buildingOwnership: app.buildingOwnership,
+      receptionAvailable: app.receptionAvailable,
+      requiredSystemsAvailable: app.requiredSystemsAvailable,
+      camerasAvailable: app.camerasAvailable,
+      camerasInfo: app.camerasInfo ?? "",
+    });
+
+    if (app.staff && app.staff.length > 0) {
+      setStaffRows(
+        app.staff.map((s) => ({
+          id: s.id,
+          name: s.name,
+          cnic: s.cnic,
+          category: s.category,
+          qualification: s.qualification ?? "",
+          documentObjectKey: s.documentObjectKey,
+        })),
+      );
+      setRosterSaved(true);
+    }
+
+    setCenterInfo({
+      centerName: app.centerName ?? "",
+      address: app.address ?? "",
+      centerPhone: app.centerPhone ?? "",
+      latitude: app.latitude,
+      longitude: app.longitude,
+      city: app.city ?? null,
+      isJointVenture: app.isJointVenture,
+      jointVentureLicenseNumber: app.jointVentureLicenseNumber ?? "",
+    });
+
+    setStep(DETAILS_STEP_ORDER[Math.min(Math.max(app.detailsStep, 1), 3) - 1]);
   };
 
   const handleVerifyLicense = async (e: React.FormEvent) => {
@@ -149,52 +229,81 @@ export default function CenterOnboardingWizard() {
     }
   };
 
-  const updateStaffRow = (index: number, patch: Partial<StaffMember>) => {
-    setStaff((prev) => prev.map((row, i) => (i === index ? { ...row, ...patch } : row)));
-  };
-
-  const addStaffRow = () => {
-    setStaff((prev) => [...prev, { name: "", cnic: "", category: "STAFF" }]);
-  };
-
-  const removeStaffRow = (index: number) => {
-    setStaff((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleLocationChange = (
     lat: number,
     lng: number,
     geocodedAddress: string | null,
     detectedCity: string | null,
   ) => {
-    setLatitude(lat);
-    setLongitude(lng);
-    setCity(detectedCity);
-    // Only auto-fill from the geocoder if the applicant hasn't typed their own address yet.
-    setAddress((prev) => (prev.trim() ? prev : geocodedAddress ?? prev));
+    setCenterInfo((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+      city: detectedCity,
+      address: prev.address.trim() ? prev.address : geocodedAddress ?? prev.address,
+    }));
   };
 
-  const handleSubmitDetails = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitBuilding = async () => {
     if (!applicationId || !sessionToken) return;
 
-    if (!centerName.trim() || !address.trim()) {
-      toast.error("Please fill in center name and address");
+    const area = Number(building.buildingArea);
+    const capacity = Number(building.buildingCapacity);
+    if (!area || area <= 0) {
+      toast.error("Enter a valid building area");
       return;
     }
-    if (latitude == null || longitude == null) {
-      toast.error("Please pick your center's location on the map");
+    if (!capacity || capacity <= 0) {
+      toast.error("Enter a valid building capacity");
       return;
     }
-    if (!city) {
-      toast.error("Couldn't detect a city for this pin — try a location closer to a populated area");
+    if (!building.buildingOwnership) {
+      toast.error("Select whether the building is rented or owned");
       return;
     }
-    if (staff.length === 0) {
+    if (
+      building.receptionAvailable === null ||
+      building.requiredSystemsAvailable === null ||
+      building.camerasAvailable === null
+    ) {
+      toast.error("Please answer every question about the building");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await centerOnboardingService.submitBuildingDetails(applicationId, sessionToken, {
+        buildingArea: area,
+        buildingCapacity: capacity,
+        buildingOwnership: building.buildingOwnership,
+        receptionAvailable: building.receptionAvailable,
+        requiredSystemsAvailable: building.requiredSystemsAvailable,
+        camerasAvailable: building.camerasAvailable,
+        camerasInfo: building.camerasInfo.trim() || undefined,
+      });
+      setApplication(result);
+      setStep("staff");
+      toast.success("Building details saved");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to save building details"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStaffRowsChange = (rows: StaffFormRow[]) => {
+    setStaffRows(rows);
+    setRosterSaved(false);
+  };
+
+  const handleSaveRoster = async () => {
+    if (!applicationId || !sessionToken) return;
+
+    if (staffRows.length === 0) {
       toast.error("Add at least one staff member");
       return;
     }
-    for (const member of staff) {
+    for (const member of staffRows) {
       if (!member.name.trim() || !/^\d{13}$/.test(member.cnic)) {
         toast.error("Every staff member needs a name and a 13-digit CNIC");
         return;
@@ -203,23 +312,107 @@ export default function CenterOnboardingWizard() {
 
     setLoading(true);
     try {
-      const result = await centerOnboardingService.submitDetails(applicationId, sessionToken, {
-        centerName: centerName.trim(),
-        address: address.trim(),
-        latitude,
-        longitude,
-        city,
-        staff,
-      });
+      const result = await centerOnboardingService.submitStaff(
+        applicationId,
+        sessionToken,
+        staffRows.map((row) => ({
+          name: row.name.trim(),
+          cnic: row.cnic,
+          category: row.category,
+          qualification: row.qualification.trim() || undefined,
+        })),
+      );
       setApplication(result);
-      setStep("status");
-      toast.success("Details submitted");
+      if (result.staff) {
+        setStaffRows(
+          result.staff.map((s) => ({
+            id: s.id,
+            name: s.name,
+            cnic: s.cnic,
+            category: s.category,
+            qualification: s.qualification ?? "",
+            documentObjectKey: s.documentObjectKey,
+          })),
+        );
+      }
+      setRosterSaved(true);
+      toast.success("Staff roster saved");
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to submit details"));
+      toast.error(getApiErrorMessage(error, "Failed to save staff roster"));
     } finally {
       setLoading(false);
     }
   };
+
+  const handleUploadStaffDocument = async (index: number, file: File) => {
+    if (!applicationId || !sessionToken) return;
+    const row = staffRows[index];
+    if (!row.id) return;
+
+    setUploadingIndex(index);
+    try {
+      const updated = await centerOnboardingService.uploadStaffDocument(applicationId, sessionToken, row.id, file);
+      setStaffRows((prev) =>
+        prev.map((r, i) => (i === index ? { ...r, documentObjectKey: updated.documentObjectKey } : r)),
+      );
+      toast.success("Document uploaded");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to upload document"));
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
+  const handleSubmitCenterInfo = async () => {
+    if (!applicationId || !sessionToken) return;
+
+    if (!centerInfo.centerName.trim() || !centerInfo.address.trim()) {
+      toast.error("Please fill in center name and address");
+      return;
+    }
+    if (!centerInfo.centerPhone.trim()) {
+      toast.error("Please provide the center's phone number");
+      return;
+    }
+    if (centerInfo.latitude == null || centerInfo.longitude == null) {
+      toast.error("Please pick your center's location on the map");
+      return;
+    }
+    if (!centerInfo.city) {
+      toast.error("Couldn't detect a city for this pin — try a location closer to a populated area");
+      return;
+    }
+    if (centerInfo.isJointVenture && !centerInfo.jointVentureLicenseNumber.trim()) {
+      toast.error("Please provide the Joint Venture license number");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await centerOnboardingService.submitCenterInfo(applicationId, sessionToken, {
+        centerName: centerInfo.centerName.trim(),
+        address: centerInfo.address.trim(),
+        centerPhone: centerInfo.centerPhone.trim(),
+        latitude: centerInfo.latitude,
+        longitude: centerInfo.longitude,
+        city: centerInfo.city,
+        isJointVenture: centerInfo.isJointVenture,
+        jointVentureLicenseNumber: centerInfo.isJointVenture
+          ? centerInfo.jointVentureLicenseNumber.trim()
+          : undefined,
+      });
+      setApplication(result);
+      setStep("status");
+      toast.success("Application submitted");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to submit application"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showStepIndicator = DETAILS_STEP_ORDER.includes(step);
+  const currentDetailsStepNumber = DETAILS_STEP_ORDER.indexOf(step) + 1;
 
   return (
     <div className="min-h-screen bg-background flex items-start justify-center py-10 px-4">
@@ -234,9 +427,15 @@ export default function CenterOnboardingWizard() {
           </div>
         </div>
 
+        {showStepIndicator && (
+          <div className="px-2">
+            <StepIndicator steps={DETAILS_STEPS} currentStep={currentDetailsStepNumber} />
+          </div>
+        )}
+
         {step === "prerequisites" && (
-          <Card className="border-border/40">
-            <CardContent className="p-6 space-y-4">
+          <Card className="border-border/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+            <CardContent className="p-6 sm:p-8 space-y-4">
               <h2 className="text-lg font-semibold">Before you apply</h2>
               <p className="text-sm text-muted-foreground">
                 Confirm you meet each requirement below before starting your application.
@@ -250,7 +449,7 @@ export default function CenterOnboardingWizard() {
                   {checklist.map((item) => (
                     <label
                       key={item.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border border-border/40 cursor-pointer hover:bg-secondary/40"
+                      className="flex items-start gap-3 p-3 rounded-xl border border-border/40 cursor-pointer hover:bg-secondary/40 transition-colors"
                     >
                       <Checkbox
                         checked={!!acknowledged[item.id]}
@@ -269,7 +468,7 @@ export default function CenterOnboardingWizard() {
                 </div>
               )}
               <Button
-                className="w-full gradient-primary text-white"
+                className="w-full gradient-primary text-white h-11"
                 disabled={checklistLoading || !allAcknowledged}
                 onClick={() => setStep("verify")}
               >
@@ -280,8 +479,8 @@ export default function CenterOnboardingWizard() {
         )}
 
         {step === "verify" && (
-          <Card className="border-border/40">
-            <CardContent className="p-6">
+          <Card className="border-border/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+            <CardContent className="p-6 sm:p-8">
               <h2 className="text-lg font-semibold mb-1">Verify your license</h2>
               <p className="text-sm text-muted-foreground mb-5">
                 We'll check your CNIC and license number with the Bureau.
@@ -307,7 +506,7 @@ export default function CenterOnboardingWizard() {
                     placeholder="ABC-12345"
                   />
                 </div>
-                <Button type="submit" className="w-full gradient-primary text-white" disabled={loading}>
+                <Button type="submit" className="w-full gradient-primary text-white h-11" disabled={loading}>
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Verify
                 </Button>
@@ -317,8 +516,8 @@ export default function CenterOnboardingWizard() {
         )}
 
         {step === "otp" && (
-          <Card className="border-border/40">
-            <CardContent className="p-6">
+          <Card className="border-border/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+            <CardContent className="p-6 sm:p-8">
               <h2 className="text-lg font-semibold mb-1">Enter OTP</h2>
               <p className="text-sm text-muted-foreground mb-5">
                 We sent a code to {phone ?? "your registered number"}.
@@ -335,7 +534,7 @@ export default function CenterOnboardingWizard() {
                     placeholder="111111"
                   />
                 </div>
-                <Button type="submit" className="w-full gradient-primary text-white" disabled={loading}>
+                <Button type="submit" className="w-full gradient-primary text-white h-11" disabled={loading}>
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Verify OTP
                 </Button>
@@ -347,106 +546,98 @@ export default function CenterOnboardingWizard() {
           </Card>
         )}
 
-        {step === "details" && (
-          <Card className="border-border/40">
-            <CardContent className="p-6">
-              <h2 className="text-lg font-semibold mb-1">Center details</h2>
-              <p className="text-sm text-muted-foreground mb-5">
-                Tell us about your center and its team. Instructor, Staff, and Maintenance CNICs are all required.
-              </p>
-              <form onSubmit={handleSubmitDetails} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="centerName">Center Name</Label>
-                  <Input id="centerName" value={centerName} onChange={(e) => setCenterName(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Location</Label>
-                  <LocationPicker
-                    latitude={latitude}
-                    longitude={longitude}
-                    onLocationChange={handleLocationChange}
-                  />
-                </div>
+        {step === "building" && (
+          <BuildingStep value={building} onChange={(patch) => setBuilding((prev) => ({ ...prev, ...patch }))} onSubmit={handleSubmitBuilding} loading={loading} />
+        )}
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label>Staff Roster</Label>
-                    <Button type="button" variant="outline" size="sm" onClick={addStaffRow}>
-                      <Plus className="w-3.5 h-3.5 mr-1" /> Add
-                    </Button>
-                  </div>
-                  <div className="space-y-3">
-                    {staff.map((member, index) => (
-                      <div key={index} className="grid grid-cols-[1fr_1fr_140px_auto] gap-2 items-start">
-                        <Input
-                          placeholder="Name"
-                          value={member.name}
-                          onChange={(e) => updateStaffRow(index, { name: e.target.value })}
-                        />
-                        <Input
-                          placeholder="CNIC (13 digits)"
-                          inputMode="numeric"
-                          maxLength={13}
-                          value={member.cnic}
-                          onChange={(e) =>
-                            updateStaffRow(index, { cnic: e.target.value.replace(/\D/g, "") })
-                          }
-                        />
-                        <Select
-                          value={member.category}
-                          onValueChange={(value) => updateStaffRow(index, { category: value as StaffCategory })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {STAFF_CATEGORIES.map((cat) => (
-                              <SelectItem key={cat.value} value={cat.value}>
-                                {cat.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          disabled={staff.length === 1}
-                          onClick={() => removeStaffRow(index)}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+        {step === "staff" && (
+          <StaffStep
+            rows={staffRows}
+            onRowsChange={handleStaffRowsChange}
+            onSaveRoster={handleSaveRoster}
+            onUploadDocument={handleUploadStaffDocument}
+            onContinue={() => setStep("center-info")}
+            onBack={() => setStep("building")}
+            saving={loading}
+            uploadingIndex={uploadingIndex}
+            rosterSaved={rosterSaved}
+          />
+        )}
 
-                <Button type="submit" className="w-full gradient-primary text-white" disabled={loading}>
-                  {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Submit Application
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+        {step === "center-info" && (
+          <CenterInfoStep
+            value={centerInfo}
+            onChange={(patch) => setCenterInfo((prev) => ({ ...prev, ...patch }))}
+            onLocationChange={handleLocationChange}
+            onSubmit={handleSubmitCenterInfo}
+            onBack={() => setStep("staff")}
+            loading={loading}
+          />
         )}
 
         {step === "status" && application && (
-          <Card className="border-border/40">
-            <CardContent className="p-6 text-center space-y-3">
-              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
-              <h2 className="text-lg font-semibold">
-                {STATUS_COPY[application.status]?.title ?? application.status}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {STATUS_COPY[application.status]?.body ??
-                  "You can check back later for updates on your application."}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <Card className="border-border/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+              <CardContent className="p-6 sm:p-8 text-center space-y-3">
+                <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
+                <h2 className="text-lg font-semibold">
+                  {STATUS_COPY[application.status]?.title ?? application.status}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {STATUS_COPY[application.status]?.body ??
+                    "You can check back later for updates on your application."}
+                </p>
+              </CardContent>
+            </Card>
+
+            {HAS_SCHEDULE_INFO.has(application.status) && (
+              <>
+                <Card className="border-border/40 rounded-2xl">
+                  <CardContent className="p-5 flex items-center gap-2.5">
+                    <CalendarClock className="w-4 h-4 text-primary shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Scheduled Inspection Date</p>
+                      <p className="text-sm font-semibold text-foreground">
+                        {formatDate(application.scheduledInspectionDate) ?? "Not scheduled yet"}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/40 rounded-2xl">
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-primary" />
+                      <h3 className="text-sm font-semibold text-foreground">Committee Updates</h3>
+                    </div>
+                    {commentsLoading ? (
+                      <div className="flex justify-center py-6">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                      </div>
+                    ) : comments.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No updates yet.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {comments.map((comment) => (
+                          <div key={comment.id} className="p-3 rounded-xl bg-secondary/30 border border-border/40">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <p className="text-xs font-semibold text-foreground">
+                                {comment.author.firstName} {comment.author.lastName}
+                              </p>
+                              <p className="text-[11px] text-muted-foreground">
+                                {formatDate(comment.createdAt)}
+                              </p>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{comment.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </div>
         )}
       </div>
     </div>

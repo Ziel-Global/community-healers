@@ -11,6 +11,7 @@ export const centerAdminKeys = {
             ? ([...centerAdminKeys.all, "todayCandidates", examDate] as const)
             : ([...centerAdminKeys.all, "todayCandidates"] as const),
     historicalReports: () => [...centerAdminKeys.all, "historicalReports"] as const,
+    certificates: () => [...centerAdminKeys.all, "certificates"] as const,
 };
 
 export function useCenterAdminStats() {
@@ -41,6 +42,13 @@ export function useHistoricalReports() {
     });
 }
 
+export function useCenterCertificates() {
+    return useQuery({
+        queryKey: centerAdminKeys.certificates(),
+        queryFn: centerAdminService.getCertificates,
+    });
+}
+
 export function useUpdateCandidateStatus() {
     const queryClient = useQueryClient();
     return useMutation({
@@ -61,6 +69,26 @@ export function useVerifyFace() {
             if (result.autoVerified) {
                 queryClient.invalidateQueries({ queryKey: centerAdminKeys.todayCandidates() });
             }
+        },
+    });
+}
+
+export function useReleaseCandidateTest() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (candidateId: string) => centerAdminService.releaseCandidateTest(candidateId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: centerAdminKeys.todayCandidates() });
+        },
+    });
+}
+
+export function useRevokeCandidateTestRelease() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (candidateId: string) => centerAdminService.revokeCandidateTestRelease(candidateId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: centerAdminKeys.todayCandidates() });
         },
     });
 }

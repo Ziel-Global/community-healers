@@ -5,8 +5,8 @@ import { PassedCandidateTable } from "@/components/MinistryPortal/Review/PassedC
 export default function ReviewPage() {
     return (
         <DashboardLayout
-            title="Certification Authority"
-            subtitle="Review passed candidates and issue official certificates"
+            title="Certification Exceptions"
+            subtitle="Candidates who passed but have no certificate — certificates are now issued automatically on a pass, so anyone listed here indicates a problem"
             portalType="ministry"
             navItems={ministryNavItems}
         >

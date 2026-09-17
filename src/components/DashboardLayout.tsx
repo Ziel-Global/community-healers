@@ -17,7 +17,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
   subtitle?: string;
-  portalType: "candidate" | "center" | "admin" | "ministry" | "inspector";
+  portalType: "candidate" | "center" | "admin" | "ministry" | "committee" | "director-operations";
   navItems: NavItem[];
 }
 
@@ -26,7 +26,8 @@ const portalColors = {
   center: "from-emerald-500 to-teal-500",
   admin: "from-violet-500 to-purple-500",
   ministry: "from-primary to-royal-700",
-  inspector: "from-amber-500 to-orange-500",
+  committee: "from-amber-500 to-orange-500",
+  "director-operations": "from-blue-500 to-indigo-600",
 };
 
 const portalLabels = {
@@ -34,7 +35,8 @@ const portalLabels = {
   center: "Center Admin",
   admin: "Admin",
   ministry: "Ministry",
-  inspector: "Inspector",
+  committee: "Approval Committee",
+  "director-operations": "Director of Operations",
 };
 
 export function DashboardLayout({
@@ -60,8 +62,10 @@ export function DashboardLayout({
         return "/ministry/auth";
       case "admin":
         return "/admin/auth";
-      case "inspector":
-        return "/inspector/auth";
+      case "committee":
+        return "/committee/auth";
+      case "director-operations":
+        return "/director-operations/auth";
       default:
         return "/";
     }
@@ -77,8 +81,10 @@ export function DashboardLayout({
         return "/ministry";
       case "admin":
         return "/admin";
-      case "inspector":
-        return "/inspector";
+      case "committee":
+        return "/committee";
+      case "director-operations":
+        return "/director-operations";
       default:
         return "/";
     }

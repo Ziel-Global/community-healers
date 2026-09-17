@@ -1,0 +1,285 @@
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { DashboardLayout } from "@/components/DashboardLayout";
+import { directorOperationsNavItems } from "../DirectorOperationsPortal";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    ArrowLeft, Building2, MapPin, Phone, IdCard, Users, UserCheck,
+    CheckCircle2, XCircle, Clock, Loader2, HelpCircle, CalendarClock, FileText,
+} from "lucide-react";
+import { useCenterApplicationDetail } from "@/hooks/queries/useDirectorOperationsCenterApplicationQueries";
+import { directorOperationsCenterApplicationService } from "@/services/centerApplicationService";
+import { EvidenceThumbnail } from "@/components/EvidenceThumbnail";
+import { AssignCommitteeDialog } from "@/components/DirectorOperationsPortal/CenterApplications/AssignCommitteeDialog";
+import { RejectApplicationDialog } from "@/components/DirectorOperationsPortal/CenterApplications/RejectApplicationDialog";
+import { ApproveApplicationDialog } from "@/components/DirectorOperationsPortal/CenterApplications/ApproveApplicationDialog";
+import { APPLICATION_STATUS_META } from "@/components/DirectorOperationsPortal/CenterApplications/statusMeta";
+import { CommitteeAttendanceCard } from "@/components/DirectorOperationsPortal/CenterApplications/CommitteeAttendanceCard";
+import { CommentThread } from "@/components/CommentThread";
+import type { CenterApplicationSummary } from "@/services/centerApplicationService";
+
+function formatDateTime(iso: string | null): string {
+    if (!iso) return "—";
+    return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
+function formatDate(iso: string | null): string {
+    if (!iso) return "Not scheduled";
+    return new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" });
+}
+
+export default function CenterApplicationDetailPage() {
+    const { applicationId = "" } = useParams();
+    const navigate = useNavigate();
+    const { data, isLoading } = useCenterApplicationDetail(applicationId);
+
+    const [assignTarget, setAssignTarget] = useState<CenterApplicationSummary | null>(null);
+    const [rejectTarget, setRejectTarget] = useState<CenterApplicationSummary | null>(null);
+    const [approveTarget, setApproveTarget] = useState<CenterApplicationSummary | null>(null);
+
+    if (isLoading) {
+        return (
+            <DashboardLayout title="Loading..." portalType="director-operations" navItems={directorOperationsNavItems}>
+                <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+            </DashboardLayout>
+        );
+    }
+
+    if (!data) {
+        return (
+            <DashboardLayout title="Not found" portalType="director-operations" navItems={directorOperationsNavItems}>
+                <p className="text-sm text-muted-foreground">This application could not be found.</p>
+            </DashboardLayout>
+        );
+    }
+
+    const { application, checklistResults, attendance } = data;
+
+    return (
+        <DashboardLayout
+            title={application.centerName || "Center Application"}
+            subtitle={application.address || undefined}
+            portalType="director-operations"
+            navItems={directorOperationsNavItems}
+        >
+            <div className="max-w-4xl mx-auto space-y-5 pb-12">
+                <div className="flex items-center justify-between">
+                    <Button variant="ghost" size="sm" className="gap-2 -ml-2" onClick={() => navigate("/director-operations/applications")}>
+                        <ArrowLeft className="w-4 h-4" /> Back to board
+                    </Button>
+                    <Badge variant={APPLICATION_STATUS_META[application.status]?.badgeVariant ?? "outline"} className="gap-1.5 text-xs">
+                        <span className={`w-1.5 h-1.5 rounded-full ${APPLICATION_STATUS_META[application.status]?.dot ?? "bg-slate-400"}`} />
+                        {APPLICATION_STATUS_META[application.status]?.label ?? application.status}
+                    </Badge>
+                </div>
+
+                {/* Application info */}
+                <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <Building2 className="w-5 h-5 text-primary" /> Application Details
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                            <IdCard className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="text-muted-foreground">CNIC:</span> {application.cnic}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <IdCard className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="text-muted-foreground">License:</span> {application.licenseNumber}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="text-muted-foreground">City:</span> {application.city?.name ?? "—"}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="text-muted-foreground">Center Phone:</span> {application.centerPhone ?? "—"}
+                        </div>
+                        <div className="sm:col-span-2 text-muted-foreground">{application.address}</div>
+                        {application.isJointVenture && (
+                            <div className="sm:col-span-2 flex items-center gap-2">
+                                <Badge variant="outline" className="text-[11px]">Joint Venture</Badge>
+                                {application.jointVentureLicenseNumber && (
+                                    <span className="text-xs text-muted-foreground font-mono">{application.jointVentureLicenseNumber}</span>
+                                )}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Staff */}
+                {application.staff.length > 0 && (
+                    <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Users className="w-5 h-5 text-primary" /> Staff ({application.staff.length})
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {application.staff.map((member) => (
+                                <div key={member.id} className="flex items-center justify-between text-sm p-2.5 rounded-lg bg-secondary/30">
+                                    <div className="min-w-0">
+                                        <p className="font-medium">{member.name}</p>
+                                        <p className="text-xs text-muted-foreground">CNIC {member.cnic}{member.qualification ? ` · ${member.qualification}` : ""}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {member.documentObjectKey && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7"
+                                                title="View supporting document"
+                                                onClick={async () => {
+                                                    const blob = await directorOperationsCenterApplicationService.getStaffDocumentBlob(member.id);
+                                                    window.open(URL.createObjectURL(blob), "_blank");
+                                                }}
+                                            >
+                                                <FileText className="w-3.5 h-3.5 text-primary" />
+                                            </Button>
+                                        )}
+                                        <Badge variant="outline" className="text-[11px]">{member.category}</Badge>
+                                    </div>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Committee */}
+                <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <UserCheck className="w-5 h-5 text-primary" /> Inspection
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm">
+                        {application.committee ? (
+                            <>
+                                <p>
+                                    <span className="text-muted-foreground">Committee:</span> {application.committee.name}
+                                    {application.committee.members.length > 0 && (
+                                        <span className="text-muted-foreground">
+                                            {" "}({application.committee.members.map((m) => [m.firstName, m.lastName].filter(Boolean).join(" ") || m.email).join(", ")})
+                                        </span>
+                                    )}
+                                </p>
+                                <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                                    <Clock className="w-3.5 h-3.5" /> Assigned {formatDateTime(application.inspectionAssignedAt)}
+                                </p>
+                                <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                                    <CalendarClock className="w-3.5 h-3.5" /> Scheduled inspection: {formatDate(application.scheduledInspectionDate)}
+                                </p>
+                                {application.inspectionCompletedAt && (
+                                    <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                                        <CheckCircle2 className="w-3.5 h-3.5" /> Inspection completed {formatDateTime(application.inspectionCompletedAt)}
+                                    </p>
+                                )}
+                            </>
+                        ) : (
+                            <p className="text-muted-foreground">No committee assigned yet.</p>
+                        )}
+
+                        {application.status === "INSPECTION_PENDING" && (
+                            <Button size="sm" className="gradient-primary text-white gap-2 mt-1" onClick={() => setAssignTarget(application)}>
+                                <UserCheck className="w-4 h-4" /> Assign Committee
+                            </Button>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Committee attendance — who's confirmed/declined the scheduled inspection */}
+                {application.committee && <CommitteeAttendanceCard attendance={attendance} />}
+
+                {/* Checklist results — everything the committee submitted */}
+                {checklistResults.length > 0 && (
+                    <div className="space-y-3">
+                        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide px-1">
+                            Inspection Checklist
+                        </h3>
+                        {checklistResults.map((result) => (
+                            <Card key={result.id} className="border-border/40">
+                                <CardHeader className="pb-2">
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="text-base">{result.checklistItem.label}</CardTitle>
+                                        {result.passed === null ? (
+                                            <Badge variant="outline" className="gap-1 text-[11px]">
+                                                <HelpCircle className="w-3 h-3" /> Not marked
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant={result.passed ? "success" : "destructive"} className="gap-1 text-[11px]">
+                                                {result.passed ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                                {result.passed ? "Passed" : "Failed"}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    {result.checklistItem.description && (
+                                        <p className="text-xs text-muted-foreground">{result.checklistItem.description}</p>
+                                    )}
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    {result.notes && (
+                                        <p className="text-sm bg-secondary/30 rounded-lg p-2.5">{result.notes}</p>
+                                    )}
+                                    {result.evidence.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2">
+                                            {result.evidence.map((evidence) => (
+                                                <EvidenceThumbnail
+                                                    key={evidence.id}
+                                                    evidenceId={evidence.id}
+                                                    fetchBlob={directorOperationsCenterApplicationService.getEvidenceBlob}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-muted-foreground">No evidence photos uploaded.</p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+
+                {/* Decision */}
+                {application.status === "UNDER_REVIEW" && (
+                    <div className="flex gap-2 justify-end pt-2">
+                        <Button variant="outline" className="border-destructive/40 text-destructive hover:bg-destructive/10 gap-2" onClick={() => setRejectTarget(application)}>
+                            <XCircle className="w-4 h-4" /> Reject
+                        </Button>
+                        <Button className="gradient-primary text-white gap-2" onClick={() => setApproveTarget(application)}>
+                            <CheckCircle2 className="w-4 h-4" /> Approve
+                        </Button>
+                    </div>
+                )}
+
+                {application.status === "REJECTED" && application.rejectionReason && (
+                    <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">
+                        <p className="text-sm font-medium text-destructive mb-1">Rejection reason</p>
+                        <p className="text-sm text-muted-foreground">{application.rejectionReason}</p>
+                    </div>
+                )}
+
+                {application.status === "APPROVED" && (
+                    <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                        <p className="text-sm text-emerald-700">
+                            Approved {formatDateTime(application.reviewedAt)} — the center and its admin login are now live.
+                        </p>
+                    </div>
+                )}
+
+                <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+                    <CardContent className="p-5">
+                        <CommentThread applicationId={applicationId} canPost={false} />
+                    </CardContent>
+                </Card>
+            </div>
+
+            <AssignCommitteeDialog application={assignTarget} onClose={() => setAssignTarget(null)} onAssigned={() => setAssignTarget(null)} />
+            <RejectApplicationDialog application={rejectTarget} onClose={() => setRejectTarget(null)} onRejected={() => setRejectTarget(null)} />
+            <ApproveApplicationDialog application={approveTarget} onClose={() => setApproveTarget(null)} onApproved={() => setApproveTarget(null)} />
+        </DashboardLayout>
+    );
+}

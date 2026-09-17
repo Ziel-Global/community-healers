@@ -3,9 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Filter, Award, User, Calendar, ExternalLink, CheckCircle2, X, Phone, Mail, MapPin, FileText, Download, UserCheck, Clock } from "lucide-react";
+import { Search, Filter, AlertTriangle, User, Calendar, ExternalLink, CheckCircle2, Phone, Mail, MapPin, FileText, Download, UserCheck, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
     Command,
@@ -22,9 +21,7 @@ import {
 import { getCandidateAvatarUrl } from "@/utils/avatar";
 import { getDocumentPreviewUrl } from "@/utils/sampleDocuments";
 import {
-    useBulkIssueCertificates,
     useEligibleCandidates,
-    useIssueCertificate,
     useMinistryCenters,
 } from "@/hooks/queries/useMinistryQueries";
 import { getApiErrorMessage } from "@/lib/errors";
@@ -64,7 +61,7 @@ function toDisplayCandidate(apiCandidate: EligibleCandidate): Candidate {
             })
             : "—",
         center: apiCandidate.city?.name || "N/A",
-        status: apiCandidate.certificateIssued ? "Certificate Issued" : "Passed",
+        status: "Missing Certificate",
         eligibilityBasis: apiCandidate.eligibilityBasis || 'EXAM',
         phone: apiCandidate.user.phoneNumber,
         email: apiCandidate.user.email,
@@ -86,8 +83,6 @@ function toDisplayCandidate(apiCandidate: EligibleCandidate): Candidate {
 }
 
 export function PassedCandidateTable() {
-    const [isBulkMode, setIsBulkMode] = useState(false);
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
     const [selectedCenter, setSelectedCenter] = useState<string>("");
     const [centerFilterOpen, setCenterFilterOpen] = useState(false);
@@ -99,9 +94,6 @@ export function PassedCandidateTable() {
         isLoading: isLoadingCandidates,
         error: candidatesError,
     } = useEligibleCandidates(selectedCenter);
-    const bulkIssueMutation = useBulkIssueCertificates();
-    const issueMutation = useIssueCertificate();
-    const issuingCertificate = bulkIssueMutation.isPending || issueMutation.isPending;
 
     const candidates = useMemo(() => apiCandidates.map(toDisplayCandidate), [apiCandidates]);
 
@@ -119,66 +111,6 @@ export function PassedCandidateTable() {
         }
     }, [candidatesError]);
 
-    const handleBulkModeToggle = () => {
-        if (!isBulkMode) {
-            // Enter bulk mode with all candidates selected
-            setSelectedIds(candidates.map(c => c.id));
-            setIsBulkMode(true);
-        } else {
-            // Exit bulk mode
-            setSelectedIds([]);
-            setIsBulkMode(false);
-        }
-    };
-
-    const handleCheckboxChange = (id: string, checked: boolean) => {
-        if (checked) {
-            setSelectedIds(prev => [...prev, id]);
-        } else {
-            setSelectedIds(prev => prev.filter(i => i !== id));
-        }
-    };
-
-    const handleSelectAll = (checked: boolean) => {
-        if (checked) {
-            setSelectedIds(filteredCandidates.map(c => c.id));
-        } else {
-            setSelectedIds([]);
-        }
-    };
-
-    const handleIssueCertificates = () => {
-        if (selectedIds.length === 0) {
-            toast.error("No candidates selected");
-            return;
-        }
-
-        bulkIssueMutation.mutate(selectedIds, {
-            onSuccess: () => {
-                toast.success(`Certificates issued for ${selectedIds.length} candidate(s)`);
-                setIsBulkMode(false);
-                setSelectedIds([]);
-            },
-            onError: (error) => {
-                console.error("Failed to issue certificates:", error);
-                toast.error(getApiErrorMessage(error, "Failed to issue certificates"));
-            },
-        });
-    };
-
-    const handleIssueSingleCertificate = (candidateId: string, candidateName: string) => {
-        issueMutation.mutate(candidateId, {
-            onSuccess: () => {
-                toast.success(`Certificate issued for ${candidateName}`);
-                setSelectedCandidate(null);
-            },
-            onError: (error) => {
-                console.error("Failed to issue certificate:", error);
-                toast.error(getApiErrorMessage(error, "Failed to issue certificate"));
-            },
-        });
-    };
-
     const filteredCandidates = candidates.filter(candidate => {
         if (!searchQuery) return true;
         const query = searchQuery.toLowerCase();
@@ -189,7 +121,6 @@ export function PassedCandidateTable() {
             candidate.email.toLowerCase().includes(query)
         );
     });
-    const allSelected = filteredCandidates.length > 0 && selectedIds.length === filteredCandidates.length;
 
     return (
         <div className="space-y-4 sm:space-y-6">
@@ -271,69 +202,33 @@ export function PassedCandidateTable() {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                    {!isBulkMode ? (
-                        <Button 
-                            onClick={handleBulkModeToggle}
-                            className="flex-1 sm:flex-none gradient-primary text-white alumni-sans-subtitle h-9 sm:h-11 px-3 sm:px-6 rounded-xl shadow-lg gap-2 text-xs sm:text-lg"
-                        >
-                            <Award className="w-4 h-4" />
-                            <span className="hidden sm:inline">Bulk Issue</span> Approval
-                        </Button>
-                    ) : (
-                        <div className="flex gap-2 flex-1 sm:flex-none">
-                            <Button 
-                                variant="outline"
-                                onClick={handleBulkModeToggle}
-                                className="h-9 sm:h-11 px-3 sm:px-4 border-border/60 gap-2 bg-white/50 text-xs sm:text-lg"
-                            >
-                                <X className="w-4 h-4" />
-                                Cancel
-                            </Button>
-                            <Button 
-                                onClick={handleIssueCertificates}
-                                className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white alumni-sans-subtitle h-9 sm:h-11 px-3 sm:px-6 rounded-xl shadow-lg gap-2 text-xs sm:text-lg"
-                                disabled={issuingCertificate}
-                            >
-                                <CheckCircle2 className="w-4 h-4" />
-                                {issuingCertificate ? "Issuing..." : `Issue (${selectedIds.length})`}
-                            </Button>
-                        </div>
-                    )}
                 </div>
             </div>
+
+            {candidates.length > 0 && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-800">
+                        These candidates passed their exam but have no certificate on file. Since certificates are issued
+                        automatically on a pass, this should never happen — investigate rather than treating it as a work queue.
+                    </p>
+                </div>
+            )}
 
             <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[600px]">
                         <thead>
                             <tr className="bg-secondary/40 border-b border-border/40">
-                                {isBulkMode && (
-                                    <th className="p-3 sm:p-4 w-10">
-                                        <Checkbox 
-                                            checked={allSelected}
-                                            onCheckedChange={handleSelectAll}
-                                            className="border-muted-foreground/50"
-                                        />
-                                    </th>
-                                )}
                                 <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Candidate</th>
                                 <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">Score</th>
                                 <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed hidden sm:table-cell">Center</th>
-                                <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed text-right">Action</th>
+                                <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed text-right">Details</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/30">
                             {filteredCandidates.map((candidate) => (
                                 <tr key={candidate.id} className="hover:bg-primary/5 transition-colors group">
-                                    {isBulkMode && (
-                                        <td className="p-3 sm:p-4">
-                                            <Checkbox 
-                                                checked={selectedIds.includes(candidate.id)}
-                                                onCheckedChange={(checked) => handleCheckboxChange(candidate.id, checked as boolean)}
-                                                className="border-muted-foreground/50"
-                                            />
-                                        </td>
-                                    )}
                                     <td className="p-3 sm:p-4">
                                         <div className="flex items-center gap-2 sm:gap-3">
                                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -363,28 +258,15 @@ export function PassedCandidateTable() {
                                         </div>
                                     </td>
                                     <td className="p-3 sm:p-4 text-right">
-                                        <div className="flex justify-end gap-1 sm:gap-2">
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
-                                                className="h-7 sm:h-9 px-2 sm:px-3 gap-1 sm:gap-2 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary text-xs"
-                                                onClick={() => setSelectedCandidate(candidate)}
-                                            >
-                                                <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                                <span className="hidden sm:inline">Review</span>
-                                            </Button>
-                                            {!isBulkMode && (
-                                                <Button 
-                                                    size="sm" 
-                                                    className="h-7 sm:h-9 px-2 sm:px-4 rounded-lg bg-black text-white hover:bg-black/80 font-bold gap-1 sm:gap-2 text-xs"
-                                                    onClick={() => handleIssueSingleCertificate(candidate.id, candidate.name)}
-                                                    disabled={issuingCertificate}
-                                                >
-                                                    <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                                    {issuingCertificate ? "Issuing..." : "Issue"}
-                                                </Button>
-                                            )}
-                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-7 sm:h-9 px-2 sm:px-3 gap-1 sm:gap-2 rounded-lg hover:bg-white border border-transparent hover:border-border/40 text-primary text-xs"
+                                            onClick={() => setSelectedCandidate(candidate)}
+                                        >
+                                            <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                            <span className="hidden sm:inline">Review</span>
+                                        </Button>
                                     </td>
                                 </tr>
                             ))}
@@ -433,7 +315,7 @@ export function PassedCandidateTable() {
                                     <h3 className="text-lg sm:text-xl font-bold text-foreground">{selectedCandidate.name}</h3>
                                     <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-1">{selectedCandidate.id}</p>
                                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
-                                        <Badge variant="success" className="text-[9px] sm:text-[10px] uppercase font-bold">
+                                        <Badge variant="destructive" className="text-[9px] sm:text-[10px] uppercase font-bold">
                                             {selectedCandidate.status}
                                         </Badge>
                                         <Badge variant="outline" className="text-[9px] sm:text-[10px]">
@@ -613,14 +495,6 @@ export function PassedCandidateTable() {
                             <div className="flex justify-end gap-3 pt-4 border-t">
                                 <Button variant="outline" onClick={() => setSelectedCandidate(null)}>
                                     Close
-                                </Button>
-                                <Button 
-                                    className="bg-black text-white hover:bg-black/80"
-                                    onClick={() => handleIssueSingleCertificate(selectedCandidate.id, selectedCandidate.name)}
-                                    disabled={issuingCertificate}
-                                >
-                                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                                    {issuingCertificate ? "Issuing..." : "Issue Certificate"}
                                 </Button>
                             </div>
                         </div>

@@ -10,6 +10,7 @@ export const candidateKeys = {
     paymentStatus: () => [...candidateKeys.all, "paymentStatus"] as const,
     examStatus: () => [...candidateKeys.all, "examStatus"] as const,
     examQuestions: () => [...candidateKeys.all, "examQuestions"] as const,
+    certificate: () => [...candidateKeys.all, "certificate"] as const,
 };
 
 export function useCandidateMe(options?: { enabled?: boolean }) {
@@ -72,6 +73,13 @@ export function useExamQuestions() {
         enabled: false,
         retry: (failureCount, error) => failureCount < 2 && !isExamOnOtherDeviceError(error),
         retryDelay: 1500,
+    });
+}
+
+export function useMyCertificate() {
+    return useQuery({
+        queryKey: candidateKeys.certificate(),
+        queryFn: candidateService.getMyCertificate,
     });
 }
 

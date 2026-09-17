@@ -35,3 +35,16 @@ export function getApiErrorMessage(error: unknown, fallback: string = DEFAULT_ER
 
     return fallback;
 }
+
+/**
+ * Some backend errors (the exam-start gates, liveness) carry a machine-readable
+ * `error` code alongside the human-readable `message` — e.g. `EXAM_NOT_RELEASED`.
+ * Branch on this, never on the message string, which can change wording freely.
+ */
+export function getApiErrorCode(error: unknown): string | undefined {
+    if (axios.isAxiosError(error)) {
+        const code = error.response?.data?.error;
+        if (typeof code === "string") return code;
+    }
+    return undefined;
+}

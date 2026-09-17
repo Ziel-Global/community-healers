@@ -1,16 +1,16 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { superAdminNavItems } from "../SuperAdminPortal";
-import { CenterApplicationsBoard } from "@/components/SuperAdminPortal/CenterApplications/CenterApplicationsBoard";
+import { CenterApplicationsReadOnlyTable } from "@/components/SuperAdminPortal/CenterApplicationsReadOnlyTable";
 
 export default function CenterApplicationsPage() {
     return (
         <DashboardLayout
             title="Center Applications"
-            subtitle="Review submissions, assign inspectors, and approve or reject centers"
+            subtitle="View-only — assignment and decisions are made by Director of Operations"
             portalType="admin"
             navItems={superAdminNavItems}
         >
-            <CenterApplicationsBoard />
+            <CenterApplicationsReadOnlyTable />
         </DashboardLayout>
     );
 }

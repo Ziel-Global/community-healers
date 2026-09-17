@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { superAdminNavItems } from "../SuperAdminPortal";
@@ -7,29 +6,29 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     ArrowLeft, Building2, MapPin, Phone, IdCard, Users, UserCheck,
-    CheckCircle2, XCircle, Clock, Loader2, HelpCircle,
+    CheckCircle2, XCircle, Clock, Loader2, HelpCircle, CalendarClock, FileText,
 } from "lucide-react";
-import { useCenterApplicationDetail } from "@/hooks/queries/useCenterApplicationQueries";
-import { EvidenceThumbnail } from "@/components/SuperAdminPortal/CenterApplications/EvidenceThumbnail";
-import { AssignInspectorDialog } from "@/components/SuperAdminPortal/CenterApplications/AssignInspectorDialog";
-import { RejectApplicationDialog } from "@/components/SuperAdminPortal/CenterApplications/RejectApplicationDialog";
-import { ApproveApplicationDialog } from "@/components/SuperAdminPortal/CenterApplications/ApproveApplicationDialog";
-import { APPLICATION_STATUS_META } from "@/components/SuperAdminPortal/CenterApplications/statusMeta";
-import type { CenterApplicationSummary } from "@/services/centerApplicationService";
+import { useCenterApplicationDetail } from "@/hooks/queries/useSuperAdminCenterApplicationQueries";
+import { superAdminCenterApplicationService } from "@/services/centerApplicationService";
+import { EvidenceThumbnail } from "@/components/EvidenceThumbnail";
+import { APPLICATION_STATUS_META } from "@/components/DirectorOperationsPortal/CenterApplications/statusMeta";
+import { CommitteeAttendanceCard } from "@/components/DirectorOperationsPortal/CenterApplications/CommitteeAttendanceCard";
+import { CommentThread } from "@/components/CommentThread";
 
 function formatDateTime(iso: string | null): string {
     if (!iso) return "—";
     return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
+function formatDate(iso: string | null): string {
+    if (!iso) return "Not scheduled";
+    return new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" });
+}
+
 export default function CenterApplicationDetailPage() {
     const { applicationId = "" } = useParams();
     const navigate = useNavigate();
     const { data, isLoading } = useCenterApplicationDetail(applicationId);
-
-    const [assignTarget, setAssignTarget] = useState<CenterApplicationSummary | null>(null);
-    const [rejectTarget, setRejectTarget] = useState<CenterApplicationSummary | null>(null);
-    const [approveTarget, setApproveTarget] = useState<CenterApplicationSummary | null>(null);
 
     if (isLoading) {
         return (
@@ -47,19 +46,19 @@ export default function CenterApplicationDetailPage() {
         );
     }
 
-    const { application, checklistResults } = data;
+    const { application, checklistResults, attendance } = data;
 
     return (
         <DashboardLayout
             title={application.centerName || "Center Application"}
-            subtitle={application.address || undefined}
+            subtitle="View only"
             portalType="admin"
             navItems={superAdminNavItems}
         >
             <div className="max-w-4xl mx-auto space-y-5 pb-12">
                 <div className="flex items-center justify-between">
                     <Button variant="ghost" size="sm" className="gap-2 -ml-2" onClick={() => navigate("/admin/applications")}>
-                        <ArrowLeft className="w-4 h-4" /> Back to board
+                        <ArrowLeft className="w-4 h-4" /> Back
                     </Button>
                     <Badge variant={APPLICATION_STATUS_META[application.status]?.badgeVariant ?? "outline"} className="gap-1.5 text-xs">
                         <span className={`w-1.5 h-1.5 rounded-full ${APPLICATION_STATUS_META[application.status]?.dot ?? "bg-slate-400"}`} />
@@ -67,7 +66,6 @@ export default function CenterApplicationDetailPage() {
                     </Badge>
                 </div>
 
-                {/* Application info */}
                 <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
                     <CardHeader className="pb-3">
                         <CardTitle className="text-lg flex items-center gap-2">
@@ -89,13 +87,12 @@ export default function CenterApplicationDetailPage() {
                         </div>
                         <div className="flex items-center gap-2">
                             <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
-                            <span className="text-muted-foreground">Phone:</span> {application.phone ?? "—"}
+                            <span className="text-muted-foreground">Center Phone:</span> {application.centerPhone ?? "—"}
                         </div>
                         <div className="sm:col-span-2 text-muted-foreground">{application.address}</div>
                     </CardContent>
                 </Card>
 
-                {/* Staff */}
                 {application.staff.length > 0 && (
                     <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
                         <CardHeader className="pb-3">
@@ -106,18 +103,33 @@ export default function CenterApplicationDetailPage() {
                         <CardContent className="space-y-2">
                             {application.staff.map((member) => (
                                 <div key={member.id} className="flex items-center justify-between text-sm p-2.5 rounded-lg bg-secondary/30">
-                                    <div>
+                                    <div className="min-w-0">
                                         <p className="font-medium">{member.name}</p>
-                                        <p className="text-xs text-muted-foreground">CNIC {member.cnic}</p>
+                                        <p className="text-xs text-muted-foreground">CNIC {member.cnic}{member.qualification ? ` · ${member.qualification}` : ""}</p>
                                     </div>
-                                    <Badge variant="outline" className="text-[11px]">{member.category}</Badge>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {member.documentObjectKey && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7"
+                                                title="View supporting document"
+                                                onClick={async () => {
+                                                    const blob = await superAdminCenterApplicationService.getStaffDocumentBlob(member.id);
+                                                    window.open(URL.createObjectURL(blob), "_blank");
+                                                }}
+                                            >
+                                                <FileText className="w-3.5 h-3.5 text-primary" />
+                                            </Button>
+                                        )}
+                                        <Badge variant="outline" className="text-[11px]">{member.category}</Badge>
+                                    </div>
                                 </div>
                             ))}
                         </CardContent>
                     </Card>
                 )}
 
-                {/* Inspector */}
                 <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
                     <CardHeader className="pb-3">
                         <CardTitle className="text-lg flex items-center gap-2">
@@ -125,14 +137,14 @@ export default function CenterApplicationDetailPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 text-sm">
-                        {application.inspector ? (
+                        {application.committee ? (
                             <>
-                                <p>
-                                    <span className="text-muted-foreground">Inspector:</span>{" "}
-                                    {[application.inspector.firstName, application.inspector.lastName].filter(Boolean).join(" ")} ({application.inspector.email})
-                                </p>
+                                <p><span className="text-muted-foreground">Committee:</span> {application.committee.name}</p>
                                 <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
                                     <Clock className="w-3.5 h-3.5" /> Assigned {formatDateTime(application.inspectionAssignedAt)}
+                                </p>
+                                <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                                    <CalendarClock className="w-3.5 h-3.5" /> Scheduled inspection: {formatDate(application.scheduledInspectionDate)}
                                 </p>
                                 {application.inspectionCompletedAt && (
                                     <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
@@ -141,18 +153,13 @@ export default function CenterApplicationDetailPage() {
                                 )}
                             </>
                         ) : (
-                            <p className="text-muted-foreground">No inspector assigned yet.</p>
-                        )}
-
-                        {application.status === "INSPECTION_PENDING" && (
-                            <Button size="sm" className="gradient-primary text-white gap-2 mt-1" onClick={() => setAssignTarget(application)}>
-                                <UserCheck className="w-4 h-4" /> Assign Inspector
-                            </Button>
+                            <p className="text-muted-foreground">No committee assigned yet.</p>
                         )}
                     </CardContent>
                 </Card>
 
-                {/* Checklist results — everything the inspector submitted */}
+                {application.committee && <CommitteeAttendanceCard attendance={attendance} />}
+
                 {checklistResults.length > 0 && (
                     <div className="space-y-3">
                         <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide px-1">
@@ -185,7 +192,11 @@ export default function CenterApplicationDetailPage() {
                                     {result.evidence.length > 0 ? (
                                         <div className="flex flex-wrap gap-2">
                                             {result.evidence.map((evidence) => (
-                                                <EvidenceThumbnail key={evidence.id} evidenceId={evidence.id} />
+                                                <EvidenceThumbnail
+                                                    key={evidence.id}
+                                                    evidenceId={evidence.id}
+                                                    fetchBlob={superAdminCenterApplicationService.getEvidenceBlob}
+                                                />
                                             ))}
                                         </div>
                                     ) : (
@@ -194,18 +205,6 @@ export default function CenterApplicationDetailPage() {
                                 </CardContent>
                             </Card>
                         ))}
-                    </div>
-                )}
-
-                {/* Decision */}
-                {application.status === "UNDER_REVIEW" && (
-                    <div className="flex gap-2 justify-end pt-2">
-                        <Button variant="outline" className="border-destructive/40 text-destructive hover:bg-destructive/10 gap-2" onClick={() => setRejectTarget(application)}>
-                            <XCircle className="w-4 h-4" /> Reject
-                        </Button>
-                        <Button className="gradient-primary text-white gap-2" onClick={() => setApproveTarget(application)}>
-                            <CheckCircle2 className="w-4 h-4" /> Approve
-                        </Button>
                     </div>
                 )}
 
@@ -223,11 +222,13 @@ export default function CenterApplicationDetailPage() {
                         </p>
                     </div>
                 )}
-            </div>
 
-            <AssignInspectorDialog application={assignTarget} onClose={() => setAssignTarget(null)} onAssigned={() => setAssignTarget(null)} />
-            <RejectApplicationDialog application={rejectTarget} onClose={() => setRejectTarget(null)} onRejected={() => setRejectTarget(null)} />
-            <ApproveApplicationDialog application={approveTarget} onClose={() => setApproveTarget(null)} onApproved={() => setApproveTarget(null)} />
+                <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+                    <CardContent className="p-5">
+                        <CommentThread applicationId={applicationId} canPost={false} />
+                    </CardContent>
+                </Card>
+            </div>
         </DashboardLayout>
     );
 }
