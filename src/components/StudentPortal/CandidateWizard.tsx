@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StepSuccessModal } from "./StepSuccessModal";
 
 interface WizardStep {
   id: number;
@@ -41,6 +42,11 @@ export function CandidateWizard({
     Math.min(Math.max(step, 0), Math.max(steps.length - 1, 0));
   const [currentStep, setCurrentStep] = useState(() => clampStep(initialStep));
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [successModalData, setSuccessModalData] = useState<{ open: boolean; titleEn: string; titleUr: string }>({
+    open: false,
+    titleEn: "",
+    titleUr: "",
+  });
 
   useEffect(() => {
     setCurrentStep(clampStep(initialStep));
@@ -52,16 +58,44 @@ export function CandidateWizard({
   const safeCurrentStep = clampStep(currentStep);
 
   const handleNext = () => {
-    if (safeCurrentStep < steps.length - 1) {
-      setCompletedSteps(prev => new Set(prev).add(safeCurrentStep));
-      const nextStep = safeCurrentStep + 1;
-      setCurrentStep(nextStep);
-      onStepChange?.(nextStep);
-    } else {
-      // Last step completed
-      setCompletedSteps(prev => new Set(prev).add(safeCurrentStep));
-      onComplete?.();
+    const currentStepObj = steps[safeCurrentStep];
+    
+    // Determine the right text based on the step id
+    let titleEn = "Step completed successfully.";
+    let titleUr = "مرحلہ کامیابی سے مکمل ہو گیا۔";
+    
+    if (currentStepObj.id === 1) { // Registration
+      titleEn = "Registration completed successfully.";
+      titleUr = "رجسٹریشن کامیابی سے مکمل ہو گئی۔";
+    } else if (currentStepObj.id === 2) { // Payment
+      titleEn = "Payment verified successfully.";
+      titleUr = "ادائیگی کی تصدیق کامیابی سے ہو گئی۔";
+    } else if (currentStepObj.id === 3) { // Scheduling
+      titleEn = "Exam scheduled successfully.";
+      titleUr = "امتحان کا شیڈول کامیابی سے طے ہو گیا۔";
     }
+
+    setSuccessModalData({
+      open: true,
+      titleEn,
+      titleUr,
+    });
+
+    // Auto-advance after 3 seconds
+    setTimeout(() => {
+      setSuccessModalData(prev => ({ ...prev, open: false }));
+      
+      if (safeCurrentStep < steps.length - 1) {
+        setCompletedSteps(prev => new Set(prev).add(safeCurrentStep));
+        const nextStep = safeCurrentStep + 1;
+        setCurrentStep(nextStep);
+        onStepChange?.(nextStep);
+      } else {
+        // Last step completed
+        setCompletedSteps(prev => new Set(prev).add(safeCurrentStep));
+        onComplete?.();
+      }
+    }, 3000);
   };
 
   const handleBack = () => {
@@ -169,6 +203,13 @@ export function CandidateWizard({
           onRequiresRepayment={onRequiresRepayment}
         />
       </div>
+
+      {/* Step Success Modal */}
+      <StepSuccessModal
+        open={successModalData.open}
+        titleEn={successModalData.titleEn}
+        titleUr={successModalData.titleUr}
+      />
     </div>
   );
 }
