@@ -1,10 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Building2, MapPin, ShieldCheck, Mail, Clock } from "lucide-react";
+import { Building2, MapPin, ShieldCheck, Mail, Clock, Phone } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface CenterInfoProps {
     name?: string;
     id?: string;
+    licenseNumber?: string | null;
+    phone?: string | null;
     location?: string;
     adminName?: string;
     email?: string;
@@ -16,6 +18,8 @@ interface CenterInfoProps {
 export function CenterInfoCard({
     name = "Lahore Training Center #3",
     id = "LHR-003",
+    licenseNumber,
+    phone,
     location = "Model Town, Lahore",
     adminName = "M. Siddique",
     email,
@@ -62,6 +66,7 @@ export function CenterInfoCard({
     }
 
     const contactEmail = email || `support@${id.toLowerCase()}.gov.pk`;
+    const displayId = licenseNumber || id;
     const timingsLabel =
         trainingStartTime && trainingEndTime
             ? `${trainingStartTime} – ${trainingEndTime}`
@@ -79,7 +84,7 @@ export function CenterInfoCard({
                             <h2 className="text-2xl font-bold text-foreground alumni-sans-title">{name}</h2>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[10px] tracking-wider uppercase">
-                                    ID: {id}
+                                    ID: {displayId}
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <MapPin className="w-3.5 h-3.5" />
@@ -119,6 +124,17 @@ export function CenterInfoCard({
                                 <p className="text-sm font-semibold text-foreground">{contactEmail}</p>
                             </div>
                         </div>
+                        {phone && (
+                            <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                    <Phone className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Center Phone</p>
+                                    <p className="text-sm font-semibold text-foreground">{phone}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </CardContent>

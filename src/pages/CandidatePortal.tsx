@@ -226,6 +226,7 @@ export default function CandidatePortal() {
           examDate={displayDate}
           centerName={examScheduleInfo?.centerName || t('candidatePortal.yourAssignedCenter')}
           centerId={examScheduleInfo?.centerName?.split(' ').map(w => w[0]).join('') || "CENTER"}
+          centerPhone={examScheduleInfo?.centerPhone}
           examStartTime={examScheduleInfo?.examStartTime}
           arriveByTime={examScheduleInfo?.arriveByTime}
           verificationMessage={examScheduleInfo?.verificationMessage}

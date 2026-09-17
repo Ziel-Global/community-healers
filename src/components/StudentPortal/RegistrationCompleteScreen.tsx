@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Calendar, MapPin, Clock, PartyPopper, FileText, Shield, AlertCircle, User, RefreshCw } from "lucide-react";
+import { CheckCircle2, Calendar, MapPin, Clock, PartyPopper, FileText, Shield, AlertCircle, User, RefreshCw, Phone } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { formatTimeLabel } from "@/utils/time";
@@ -10,6 +10,7 @@ interface RegistrationCompleteScreenProps {
   examDate: Date | string;
   centerName: string;
   centerId: string;
+  centerPhone?: string | null;
   examStartTime?: string;
   arriveByTime?: string;
   verificationMessage?: string;
@@ -21,6 +22,7 @@ export function RegistrationCompleteScreen({
   examDate,
   centerName,
   centerId,
+  centerPhone,
   examStartTime,
   arriveByTime,
   verificationMessage,
@@ -125,6 +127,12 @@ export function RegistrationCompleteScreen({
                 <div>
                   <p className="font-semibold text-foreground">{centerName}</p>
                   <p className="text-sm text-muted-foreground">{t('complete.assignedCenter')}</p>
+                  {centerPhone && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
+                      <Phone className="w-3.5 h-3.5" />
+                      {centerPhone}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

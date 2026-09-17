@@ -175,7 +175,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                         </div>
                     </div>
                     <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="city">{t('personalInfo.city')}</Label>
+                        <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="city">{t('personalInfo.city', { lng: 'en' })}</Label><Label htmlFor="city" dir="rtl">{t('personalInfo.city', { lng: 'ur' })}</Label></div>
                         <div className="relative">
                             <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                             <Select
@@ -206,7 +206,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="province">{t('personalInfo.province')}</Label>
+                            <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="province">{t('personalInfo.province', { lng: 'en' })}</Label><Label htmlFor="province" dir="rtl">{t('personalInfo.province', { lng: 'ur' })}</Label></div>
                             <div className="relative">
                                 <Landmark className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                 <Select
@@ -227,7 +227,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="district">{t('personalInfo.district')}</Label>
+                            <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="district">{t('personalInfo.district', { lng: 'en' })}</Label><Label htmlFor="district" dir="rtl">{t('personalInfo.district', { lng: 'ur' })}</Label></div>
                             <div className="relative">
                                 <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                 <Select
@@ -253,7 +253,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="tehsil">{t('personalInfo.tehsil')}</Label>
+                            <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="tehsil">{t('personalInfo.tehsil', { lng: 'en' })}</Label><Label htmlFor="tehsil" dir="rtl">{t('personalInfo.tehsil', { lng: 'ur' })}</Label></div>
                             <div className="relative">
                                 <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                 <Select
@@ -279,7 +279,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="address">{t('personalInfo.address')}</Label>
+                            <div className="flex items-center justify-between w-full" dir="ltr"><Label htmlFor="address">{t('personalInfo.address', { lng: 'en' })}</Label><Label htmlFor="address" dir="rtl">{t('personalInfo.address', { lng: 'ur' })}</Label></div>
                             <div className="relative">
                                 <Home className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                                 <Input

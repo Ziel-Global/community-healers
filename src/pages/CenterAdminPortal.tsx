@@ -85,6 +85,8 @@ export default function CenterAdminPortal() {
         <CenterInfoCard
           name={centerData?.name}
           id={centerData?.id?.split('-')[0].toUpperCase()} // Using short ID for display if needed, or full ID
+          licenseNumber={centerData?.licenseNumber}
+          phone={centerData?.phone}
           location={centerData?.city?.name ? `${centerData.city.name}, Pakistan` : undefined}
           adminName={centerData?.primaryAdmin ? `${centerData.primaryAdmin.firstName} ${centerData.primaryAdmin.lastName}` : undefined}
           email={centerData?.primaryAdmin?.email}

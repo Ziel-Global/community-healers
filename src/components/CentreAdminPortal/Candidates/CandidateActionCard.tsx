@@ -36,17 +36,12 @@ interface Candidate {
 
 const DOC_LABELS: Record<string, string> = {
     photo: "Candidate Photo",
-    passport: "Passport",
-    visa: "Visa",
     cnicFront: "CNIC Front",
     cnicBack: "CNIC Back",
-    degreeTranscript: "Degree/Transcript",
 };
 
 const EXPECTED_DOC_TYPES = [
     "photo",
-    "passport",
-    "visa",
     "cnicFront",
     "cnicBack",
 ] as const;
