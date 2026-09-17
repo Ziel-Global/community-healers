@@ -1,11 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { WizardStepProps } from "../CandidateWizard";
 import { ExamSlotPicker } from "../Scheduling/ExamSlotPicker";
-import { CenterSelector } from "../Scheduling/CenterSelector";
+import { CitySelector } from "../Scheduling/CitySelector";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Calendar, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useEligibleCenters, useScheduleExam } from "@/hooks/queries/useCandidateQueries";
+import { useScheduleExam } from "@/hooks/queries/useCandidateQueries";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { isRepaymentRequiredMessage } from "@/utils/time";
@@ -15,25 +15,16 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
   const { t } = useTranslation();
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedCenterId, setSelectedCenterId] = useState<string | undefined>(undefined);
+  const [selectedCityId, setSelectedCityId] = useState<string | undefined>(undefined);
   const [isScheduled, setIsScheduled] = useState(false);
   const scheduleExamMutation = useScheduleExam();
 
   const examDateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined;
-  // Shares its cache entry with the same call inside CenterSelector — this
-  // is only here to gate the "proceed" button, not a second request.
-  const centersQuery = useEligibleCenters(examDateStr);
-  const availableCenters = centersQuery.data?.centers ?? [];
-  // A center choice is required only once we know there's something to
-  // choose from. A slow/failed preview or a genuinely empty list never
-  // blocks scheduling — the backend still auto-assigns or reports the
-  // real error either way.
-  const requiresCenterSelection = centersQuery.isSuccess && availableCenters.length > 0;
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
-    // The previous selection may not exist (or may be full) for a new date.
-    setSelectedCenterId(undefined);
+    // The previous selection may not have capacity (or exist at all) for a new date.
+    setSelectedCityId(undefined);
   };
 
   const handleNext = () => {
@@ -41,11 +32,10 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
     // A rapid double-click must not issue a second request after the first
     // booking succeeds, because the API correctly treats that as a reschedule.
     // `mutation.isPending` (checked via disabled state below) is the dedupe guard now.
-    if (!selectedDate || scheduleExamMutation.isPending || isScheduled) return;
-    if (requiresCenterSelection && !selectedCenterId) return;
+    if (!selectedDate || !selectedCityId || scheduleExamMutation.isPending || isScheduled) return;
 
     const examDate = format(selectedDate, 'yyyy-MM-dd');
-    scheduleExamMutation.mutate({ examDate, centerId: selectedCenterId }, {
+    scheduleExamMutation.mutate({ examDate, cityId: selectedCityId }, {
       onSuccess: () => {
         setIsScheduled(true);
         toast({
@@ -78,7 +68,7 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
     });
   };
 
-  const canProceed = selectedDate !== undefined && (!requiresCenterSelection || !!selectedCenterId);
+  const canProceed = selectedDate !== undefined && selectedCityId !== undefined;
 
   return (
     <div className="space-y-8">
@@ -110,19 +100,19 @@ export function SchedulingStep({ onNext, onBack, isRepayment = false, onRequires
         />
 
         {selectedDate && examDateStr && !isScheduled && (
-          <CenterSelector
+          <CitySelector
             examDate={examDateStr}
-            selectedCenterId={selectedCenterId}
-            onSelectCenter={setSelectedCenterId}
+            selectedCityId={selectedCityId}
+            onSelectCity={setSelectedCityId}
           />
         )}
       </div>
 
-      {/* Date / Center Selection Status */}
+      {/* Date / City Selection Status */}
       {!canProceed && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
           <p className="text-sm text-amber-700 dark:text-amber-400">
-            {selectedDate ? t('scheduling.pleaseSelectCenter') : t('scheduling.warning')}
+            {selectedDate ? t('scheduling.pleaseSelectCity') : t('scheduling.warning')}
           </p>
         </div>
       )}

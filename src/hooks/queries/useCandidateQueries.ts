@@ -9,7 +9,7 @@ export const candidateKeys = {
     documentValidation: () => [...candidateKeys.all, "documentValidation"] as const,
     paymentStatus: () => [...candidateKeys.all, "paymentStatus"] as const,
     examStatus: () => [...candidateKeys.all, "examStatus"] as const,
-    eligibleCenters: (examDate: string) => [...candidateKeys.all, "eligibleCenters", examDate] as const,
+    eligibleCities: (examDate: string) => [...candidateKeys.all, "eligibleCities", examDate] as const,
     examQuestions: () => [...candidateKeys.all, "examQuestions"] as const,
     certificate: () => [...candidateKeys.all, "certificate"] as const,
 };
@@ -108,8 +108,8 @@ export function useUploadDocument() {
 export function useScheduleExam() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ examDate, centerId }: { examDate: string; centerId?: string }) =>
-            candidateService.scheduleExam(examDate, centerId),
+        mutationFn: ({ examDate, cityId }: { examDate: string; cityId: string }) =>
+            candidateService.scheduleExam(examDate, cityId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: authKeys.examSchedule() });
         },
@@ -117,14 +117,15 @@ export function useScheduleExam() {
 }
 
 /**
- * Centers available for a date, within the candidate's zone when their city
- * has coordinates set. Disabled until a date is picked — there is nothing
- * to preview before then.
+ * Cities available for a date, within the candidate's zone when their city
+ * has coordinates set (widened further if nothing in the normal zone has
+ * capacity). Disabled until a date is picked — there is nothing to preview
+ * before then.
  */
-export function useEligibleCenters(examDate: string | undefined) {
+export function useEligibleCities(examDate: string | undefined) {
     return useQuery({
-        queryKey: candidateKeys.eligibleCenters(examDate ?? ""),
-        queryFn: () => candidateService.getEligibleCenters(examDate as string),
+        queryKey: candidateKeys.eligibleCities(examDate ?? ""),
+        queryFn: () => candidateService.getEligibleCities(examDate as string),
         enabled: !!examDate,
     });
 }

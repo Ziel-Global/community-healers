@@ -11,7 +11,7 @@ import {
     SaveAnswerResponse,
     SubmitExamResponse,
     ConfirmPaymentResponse,
-    EligibleCentersResponse,
+    EligibleCitiesResponse,
 } from '../types/candidate';
 import { CandidateStatusResponse } from '../types/auth';
 
@@ -85,13 +85,13 @@ export const uploadDocument = async (type: string, file: File): Promise<UploadDo
 };
 
 /**
- * `centerId` is optional — omitting it keeps the legacy behaviour of
- * auto-assigning within the candidate's exact city. Pass the id of a
- * center picked from `getEligibleCenters` to book that one specifically.
+ * `cityId` is required — the candidate's own city, or one picked from
+ * `getEligibleCities`. The backend auto-assigns the best-available center
+ * within that city; there is no way to pick a center directly.
  */
-export const scheduleExam = async (examDate: string, centerId?: string): Promise<ScheduleExamResponse> => {
+export const scheduleExam = async (examDate: string, cityId: string): Promise<ScheduleExamResponse> => {
     try {
-        const response = await api.post('/candidates/me/schedule', { examDate, centerId });
+        const response = await api.post('/candidates/me/schedule', { examDate, cityId });
         return response.data;
     } catch (error: unknown) {
         console.error('Schedule exam error:', error);
@@ -100,17 +100,17 @@ export const scheduleExam = async (examDate: string, centerId?: string): Promise
 };
 
 /**
- * Centers available for a given date — within the candidate's zone (their
- * city's radius) when the city has coordinates set, otherwise the same
- * exact-city set `scheduleExam` itself would use. Read-only; does not book
- * anything.
+ * Cities available for a given date — within the candidate's zone (their
+ * city's radius) when the city has coordinates set, widened further if
+ * nothing in the normal zone has capacity, otherwise just their own exact
+ * city. Read-only; does not book anything.
  */
-export const getEligibleCenters = async (examDate: string): Promise<EligibleCentersResponse> => {
+export const getEligibleCities = async (examDate: string): Promise<EligibleCitiesResponse> => {
     try {
-        const response = await api.get('/candidates/me/centers', { params: { date: examDate } });
+        const response = await api.get('/candidates/me/cities', { params: { date: examDate } });
         return response.data;
     } catch (error: unknown) {
-        console.error('Get eligible centers error:', error);
+        console.error('Get eligible cities error:', error);
         throw error;
     }
 };
@@ -245,7 +245,7 @@ export const candidateService = {
     uploadDocument,
     getDocumentBlob,
     scheduleExam,
-    getEligibleCenters,
+    getEligibleCities,
     getExamStatus,
     getExamQuestions,
     autosaveAnswer,
