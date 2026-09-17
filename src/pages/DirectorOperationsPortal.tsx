@@ -39,15 +39,15 @@ export default function DirectorOperationsPortal() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
               {KANBAN_STATUSES.map((status) => {
                 const meta = APPLICATION_STATUS_META[status];
                 return (
-                    <Card key={status} className="relative overflow-hidden border-border/40 bg-card">
-                        <div className={cn("pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl opacity-50", meta.dot)} />
+                    <Card key={status} className="relative overflow-hidden border-y border-r border-l-[3px] border-l-primary border-y-border/40 border-r-border/40 bg-primary/[0.02]">
+                        <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl opacity-20 bg-primary" />
                         <CardContent className="relative p-5">
                             <div className="flex items-center gap-2 mb-3">
-                                <span className={cn("w-2 h-2 rounded-full", meta.dot)} />
+                                <span className="w-2 h-2 rounded-full bg-primary" />
                                 <p className="text-xs font-bold text-foreground/80 uppercase tracking-wider">{meta.label}</p>
                             </div>
                             <p className="text-3xl font-sans font-bold text-foreground tabular-nums">{countByStatus.get(status) ?? 0}</p>

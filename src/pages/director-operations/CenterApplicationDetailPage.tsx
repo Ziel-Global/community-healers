@@ -17,7 +17,6 @@ import { RejectApplicationDialog } from "@/components/DirectorOperationsPortal/C
 import { ApproveApplicationDialog } from "@/components/DirectorOperationsPortal/CenterApplications/ApproveApplicationDialog";
 import { APPLICATION_STATUS_META } from "@/components/DirectorOperationsPortal/CenterApplications/statusMeta";
 import { CommitteeAttendanceCard } from "@/components/DirectorOperationsPortal/CenterApplications/CommitteeAttendanceCard";
-import { CommentThread } from "@/components/CommentThread";
 import type { CenterApplicationSummary } from "@/services/centerApplicationService";
 
 function formatDateTime(iso: string | null): string {
@@ -270,11 +269,6 @@ export default function CenterApplicationDetailPage() {
                     </div>
                 )}
 
-                <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
-                    <CardContent className="p-5">
-                        <CommentThread applicationId={applicationId} canPost={false} />
-                    </CardContent>
-                </Card>
             </div>
 
             <AssignCommitteeDialog application={assignTarget} onClose={() => setAssignTarget(null)} onAssigned={() => setAssignTarget(null)} />

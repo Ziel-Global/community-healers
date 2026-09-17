@@ -228,7 +228,7 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                         <X className="w-4 h-4" />
                                     </Button>
                                 ) : doc.id === CAMERA_ONLY_DOC_ID ? (
-                                    <>
+                                    <div className="flex flex-col gap-2 min-w-[130px] shrink-0">
                                         <input
                                             type="file"
                                             ref={el => fileInputRefs.current[doc.id] = el}
@@ -239,25 +239,25 @@ export function DocumentUpload({ candidateData }: DocumentUploadProps) {
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="h-8 gap-2"
+                                            className="h-8 gap-2 w-full justify-center px-3"
                                             onClick={() => setShowCameraDialog(true)}
                                             disabled={doc.status === "uploading"}
                                         >
-                                            <Camera className="w-3.5 h-3.5" />
+                                            <Camera className="w-3.5 h-3.5 shrink-0" />
                                             {doc.status === "uploading" ? t('documents.uploading') : t('documents.takePhoto')}
                                         </Button>
                                         {/* Temporary fallback while camera-captured photos are failing face indexing — remove once that's fixed. */}
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="h-8 gap-2"
+                                            className="h-8 gap-2 w-full justify-center px-3"
                                             onClick={() => fileInputRefs.current[doc.id]?.click()}
                                             disabled={doc.status === "uploading"}
                                         >
-                                            <Upload className="w-3.5 h-3.5" />
+                                            <Upload className="w-3.5 h-3.5 shrink-0" />
                                             {doc.status === "uploading" ? t('documents.uploading') : t('documents.uploadButton')}
                                         </Button>
-                                    </>
+                                    </div>
                                 ) : (
                                     <>
                                         <input
