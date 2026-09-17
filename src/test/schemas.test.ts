@@ -89,7 +89,9 @@ describe("registrationSchemas — personalInfoSchema", () => {
         fatherName: "Father Name",
         cnic: "1234567890123",
         dob: "2000-01-01",
-        city: "city-id",
+        province: "province-id",
+        district: "district-id",
+        tehsil: "tehsil-id",
         address: "123 Street",
     };
 

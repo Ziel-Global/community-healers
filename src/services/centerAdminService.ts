@@ -53,15 +53,6 @@ export interface ExamSessionRecord {
     draftAnswers?: Record<string, number> | null;
 }
 
-export interface CloseVerificationResult {
-    updatedCount: number;
-    date: string;
-    centerIds: string[];
-    results: Array<Record<string, unknown>>;
-    candidateIds?: string[];
-    message?: string;
-}
-
 export interface CenterDetails {
     id: string;
     name: string;
@@ -247,18 +238,6 @@ export const getReports = async (): Promise<HistoricalReport[]> => {
     }
 };
 
-export const closeVerification = async (centerId: string): Promise<CloseVerificationResult> => {
-    try {
-        const response = await api.patch('/center-admin/mark-pending-absent', undefined, {
-            params: { centerId },
-        });
-        return response.data;
-    } catch (error: unknown) {
-        console.error('Error closing verification:', error);
-        throw error;
-    }
-};
-
 export const getDashboardStats = async (): Promise<CenterDashboardStats | null> => {
     try {
         const response = await api.get('/center-admin/dashboard-stats');
@@ -303,7 +282,6 @@ export const centerAdminService = {
     updateCandidateStatus,
     getCenterDetails,
     getReports,
-    closeVerification,
     getDashboardStats,
     updateTrainingTimings,
     verifyFace,

@@ -337,8 +337,6 @@
     "cnicPlaceholder": "42201-XXXXXXX-X",
     "dob": "Date of Birth",
     "phone": "Contact Number",
-    "city": "City / Area",
-    "selectCity": "Select your city",
     "residentialAddress": "Residential Address",
     "province": "Province",
     "selectProvince": "Select your province",
