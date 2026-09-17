@@ -220,7 +220,7 @@ export default function CandidateAuth() {
           </div>
 
           <h1 className="text-4xl alumni-sans-title mb-4 text-white">
-            Candidate Portal
+            {t("candidateAuth.candidatePortal")}
           </h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-md">
             {t("candidateAuth.brandDescription")}
@@ -250,7 +250,7 @@ export default function CandidateAuth() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
               <GraduationCap className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-sm font-display font-bold">Candidate Portal</span>
+            <span className="text-sm font-display font-bold">{t("candidateAuth.candidatePortal")}</span>
           </div>
           <div className="flex items-center gap-4">
             <Link
