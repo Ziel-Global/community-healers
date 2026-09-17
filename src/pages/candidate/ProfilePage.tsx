@@ -17,8 +17,6 @@ interface PersonalInfo {
     cnic: string;
     dob: string;
     phone: string;
-    /** Exam-centre city — unrelated to the residential fields below. */
-    city: string;
     province: string;
     district: string;
     tehsil: string;
@@ -30,7 +28,6 @@ const emptyPersonalInfo: PersonalInfo = {
     cnic: "",
     dob: "",
     phone: "",
-    city: "",
     province: "",
     district: "",
     tehsil: "",
@@ -60,7 +57,6 @@ export default function ProfilePage() {
             cnic: candidateData.cnic || "",
             dob,
             phone: candidateData.user?.phoneNumber || "",
-            city: candidateData.city?.id || "",
             province: candidateData.province?.id || "",
             district: candidateData.district?.id || "",
             tehsil: candidateData.tehsil?.id || "",
@@ -105,7 +101,6 @@ export default function ProfilePage() {
                     fatherName: t('personalInfo.fatherName'),
                     cnic: t('personalInfo.cnic'),
                     dob: t('personalInfo.dob'),
-                    city: t('personalInfo.city'),
                     province: t('personalInfo.province'),
                     district: t('personalInfo.district'),
                     tehsil: t('personalInfo.tehsil'),
@@ -133,7 +128,6 @@ export default function ProfilePage() {
                 cnic: personalInfo.cnic,
                 dob: personalInfo.dob,
                 address: personalInfo.address,
-                city: personalInfo.city,
                 province: personalInfo.province,
                 district: personalInfo.district,
                 tehsil: personalInfo.tehsil,

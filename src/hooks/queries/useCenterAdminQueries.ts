@@ -104,16 +104,6 @@ export function useOverrideLiveness() {
     });
 }
 
-export function useCloseVerification() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (centerId: string) => centerAdminService.closeVerification(centerId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: centerAdminKeys.todayCandidates() });
-        },
-    });
-}
-
 export function useUpdateTrainingTimings() {
     const queryClient = useQueryClient();
     return useMutation({

@@ -5,9 +5,7 @@ import { CenterInfoCard } from "@/components/CentreAdminPortal/Dashboard/CenterI
 import { CandidateTable } from "@/components/CentreAdminPortal/Candidates/CandidateTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Filter, Lock } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
@@ -15,9 +13,7 @@ import {
   Settings,
   Award,
 } from "lucide-react";
-import { useCenterDetails, useCloseVerification } from "@/hooks/queries/useCenterAdminQueries";
-import { getApiErrorMessage } from "@/lib/errors";
-import { toast } from "sonner";
+import { useCenterDetails } from "@/hooks/queries/useCenterAdminQueries";
 import { formatTimeLabel, toTimeInputValue } from "@/utils/time";
 
 export const centerNavItems = [
@@ -50,28 +46,8 @@ export const centerNavItems = [
 
 export default function CenterAdminPortal() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [isCloseVerificationOpen, setIsCloseVerificationOpen] = useState(false);
 
   const { data: centerData, isLoading } = useCenterDetails();
-  const closeVerification = useCloseVerification();
-  const isClosing = closeVerification.isPending;
-
-  const handleCloseVerification = () => {
-    if (!centerData?.id) {
-      toast.error("Center details are still loading. Please try again.");
-      return;
-    }
-
-    closeVerification.mutate(centerData.id, {
-      onSuccess: () => {
-        setIsCloseVerificationOpen(false);
-        toast.success("Verification closed successfully.");
-      },
-      onError: (error) => {
-        toast.error(getApiErrorMessage(error, "Failed to close verification. Please try again."));
-      },
-    });
-  };
 
   return (
     <DashboardLayout
@@ -105,23 +81,11 @@ export default function CenterAdminPortal() {
         <CenterStats />
 
         <div className="space-y-4 sm:space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <div>
-              <h3 className="text-lg sm:text-2xl font-bold text-foreground alumni-sans-title">Today's Candidates</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
-            </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="gap-2"
-              onClick={() => setIsCloseVerificationOpen(true)}
-              disabled={!centerData?.id || isLoading}
-            >
-              <Lock className="w-4 h-4" />
-              Close Verification
-            </Button>
+          <div>
+            <h3 className="text-lg sm:text-2xl font-bold text-foreground alumni-sans-title">Today's Candidates</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 bg-card/40 p-3 sm:p-4 rounded-2xl border border-border/40 backdrop-blur-sm">
             <div className="relative flex-1 group">
@@ -147,23 +111,6 @@ export default function CenterAdminPortal() {
           </div>
           <CandidateTable statusFilter={statusFilter} canVerify={true} />
         </div>
-
-        <Dialog open={isCloseVerificationOpen} onOpenChange={setIsCloseVerificationOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Close Verification?</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to close verification for {centerData?.name || "this center"}? This action cannot be undone and will mark only this center's pending candidates as absent after their verification time has closed.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCloseVerificationOpen(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={handleCloseVerification} disabled={isClosing}>
-                {isClosing ? "Closing..." : "Close Verification"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
       </div>
     </DashboardLayout>
