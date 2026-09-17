@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import i18n from "@/i18n";
 import { candidateService } from "@/services/candidateService";
 import { ProfileView } from "./ProfileView";
@@ -46,7 +47,14 @@ describe("ProfileView language changes", () => {
   });
 
   it("translates document labels without refetching authenticated data", async () => {
-    render(<ProfileView />);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ProfileView />
+      </QueryClientProvider>
+    );
 
     expect(await screen.findByText("Candidate Photo")).toBeInTheDocument();
     await waitFor(() => expect(candidateService.getMe).toHaveBeenCalledTimes(1));

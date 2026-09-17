@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,7 +31,7 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
     const { t } = useTranslation();
     const [dobError, setDobError] = useState<string | null>(null);
 
-    const validateAge = (dobString: string) => {
+    const validateAge = useCallback((dobString: string) => {
         if (!dobString) return null;
 
         const result = dobFieldSchema.safeParse(dobString);
@@ -39,14 +39,14 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
             return t('personalInfo.ageWarning');
         }
         return null;
-    };
+    }, [t]);
 
     // Validate DOB whenever it changes in props
     useEffect(() => {
         if (data.dob) {
             setDobError(validateAge(data.dob));
         }
-    }, [data.dob, t]);
+    }, [data.dob, validateAge]);
 
     // Residential address hierarchy. Districts are scoped to whichever
     // province is currently picked.

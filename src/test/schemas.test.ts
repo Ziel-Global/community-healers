@@ -160,8 +160,8 @@ describe("documentSchemas — documentMetadataSchema", () => {
     });
 
     it("accepts a PDF for a non-photo document type", () => {
-        const file = makeFile("passport.pdf", "application/pdf", 1024);
-        expect(documentMetadataSchema.safeParse({ type: "passport", file }).success).toBe(true);
+        const file = makeFile("cnicFront.pdf", "application/pdf", 1024);
+        expect(documentMetadataSchema.safeParse({ type: "cnicFront", file }).success).toBe(true);
     });
 
     it("rejects a PDF for the photo document type (photo must be an image)", () => {
