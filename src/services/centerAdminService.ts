@@ -70,6 +70,8 @@ export interface CenterDetails {
         name: string;
     };
     address?: string;
+    licenseNumber?: string | null;
+    phone?: string | null;
     capacity?: number;
     status?: string;
     trainingStartTime?: string;
