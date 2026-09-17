@@ -15,6 +15,7 @@ import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail, KeyRound, CheckCircl
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import i18n from "@/i18n";
+import { useTranslation } from "react-i18next";
 import {
   candidateLoginSchema,
   candidateSignupSchema,
@@ -22,6 +23,7 @@ import {
   forgotPasswordPhoneSchema,
   resetPasswordSchema,
 } from "@/schemas/authSchemas";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 // Disabled until a real OTP delivery channel (SMS/Jazz) is wired up behind
 // /auth/forgot-password/*. Previously this whole flow faked success with
@@ -29,6 +31,7 @@ import {
 const FORGOT_PASSWORD_ENABLED = false;
 
 export default function CandidateAuth() {
+  const { t } = useTranslation();
   const [isSignUp, setIsSignUp] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -53,14 +56,8 @@ export default function CandidateAuth() {
   const newPasswordTooShort = resetPasswordValidation.error?.issues.some((issue) => issue.path[0] === "newPassword") ?? false;
   const passwordsDontMatch = resetPasswordValidation.error?.issues.some((issue) => issue.path[0] === "confirmNewPassword") ?? false;
 
-  // Force English and LTR immediately when component loads
+  // Clear any existing session when auth page is accessed
   useEffect(() => {
-    // Set language to English synchronously
-    i18n.changeLanguage('en');
-    document.documentElement.dir = 'ltr';
-    document.documentElement.lang = 'en';
-
-    // Clear any existing session when auth page is accessed
     if (isAuthenticated) {
       logout().catch((error) => {
         console.error("Failed to clear session on auth page:", error);
@@ -219,21 +216,21 @@ export default function CandidateAuth() {
             <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-lg">
               <GraduationCap className="w-8 h-8 text-primary" />
             </div>
-            <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
+            <span className="text-3xl alumni-sans-title text-white">{t("candidateAuth.brandTitle")}</span>
           </div>
 
           <h1 className="text-4xl alumni-sans-title mb-4 text-white">
             Candidate Portal
           </h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-md">
-            Your gateway to professional soft skills certification. Complete your journey from registration to certification.
+            {t("candidateAuth.brandDescription")}
           </p>
 
           <div className="mt-12 space-y-4">
             {[
-              { num: "1", text: "Complete your registration" },
-              { num: "2", text: "Pay training fee" },
-              { num: "3", text: "Schedule your training date" },
+              { num: "1", text: t("candidateAuth.step1") },
+              { num: "2", text: t("candidateAuth.step2") },
+              { num: "3", text: t("candidateAuth.step3") },
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-md">
@@ -255,24 +252,27 @@ export default function CandidateAuth() {
             </div>
             <span className="text-sm font-display font-bold">Candidate Portal</span>
           </div>
-          <Link
-            to="/"
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Home</span>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("candidateAuth.backToHome")}</span>
+            </Link>
+            <LanguageSwitcher />
+          </div>
         </div>
 
         <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center py-6 sm:py-12">
 
           <h2 className="text-3xl sm:text-4xl alumni-sans-title text-foreground mb-2">
-            {isSignUp ? "Create Account" : "Welcome Back"}
+            {isSignUp ? t("candidateAuth.signupTitle") : t("candidateAuth.loginTitle")}
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
             {isSignUp
-              ? "Register to start your training journey"
-              : "Sign in to access your candidate portal"}
+              ? t("candidateAuth.signupDesc")
+              : t("candidateAuth.loginDesc")}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
@@ -280,13 +280,14 @@ export default function CandidateAuth() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5 sm:space-y-2">
-                    <Label htmlFor="firstName" className="text-sm">First Name</Label>
+                    <Label htmlFor="firstName" className="text-sm">{t("candidateAuth.firstName")}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       <Input
+                        dir="ltr"
                         id="firstName"
                         placeholder="Enter your first name"
-                        className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                        className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base text-left"
                         value={formData.firstName}
                         onChange={handleInputChange}
                         required
@@ -295,13 +296,14 @@ export default function CandidateAuth() {
                   </div>
 
                   <div className="space-y-1.5 sm:space-y-2">
-                    <Label htmlFor="lastName" className="text-sm">Last Name</Label>
+                    <Label htmlFor="lastName" className="text-sm">{t("candidateAuth.lastName")}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       <Input
+                        dir="ltr"
                         id="lastName"
                         placeholder="Enter your last name"
-                        className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                        className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base text-left"
                         value={formData.lastName}
                         onChange={handleInputChange}
                         required
@@ -311,14 +313,15 @@ export default function CandidateAuth() {
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="email" className="text-sm">Email Address</Label>
+                  <Label htmlFor="email" className="text-sm">{t("candidateAuth.email")}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     <Input
+                      dir="ltr"
                       id="email"
                       type="email"
                       placeholder="your.email@example.com"
-                      className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base text-left"
                       value={formData.email}
                       onChange={handleInputChange}
                       required
@@ -329,14 +332,15 @@ export default function CandidateAuth() {
             )}
 
             <div className="space-y-1.5 sm:space-y-2">
-              <Label htmlFor="phone" className="text-sm">Phone Number</Label>
+              <Label htmlFor="phone" className="text-sm">{t("candidateAuth.phone")}</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 <Input
+                  dir="ltr"
                   id="phoneNumber"
                   type="tel"
                   placeholder="03001234567"
-                  className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                  className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base text-left"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
                   required
@@ -347,13 +351,14 @@ export default function CandidateAuth() {
             {isSignUp && (
               <>
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="password" className="text-sm">Password</Label>
+                  <Label htmlFor="password" className="text-sm">{t("candidateAuth.password")}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
                     <PasswordInput
+                      dir="ltr"
                       id="password"
                       placeholder="Create a strong password"
-                      className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base ${formData.password && formData.password.length < 6 ? "border-destructive focus:border-destructive" : ""
+                      className={`pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base text-left ${formData.password && formData.password.length < 6 ? "border-destructive focus:border-destructive" : ""
                         }`}
                       value={formData.password}
                       onChange={handleInputChange}
@@ -362,19 +367,20 @@ export default function CandidateAuth() {
                   </div>
                   {formData.password && formData.password.length < 6 && (
                     <p className="text-xs text-destructive mt-1 animate-in fade-in slide-in-from-top-1">
-                      Password must be at least 6 characters
+                      {t("candidateAuth.passwordMinChars")}
                     </p>
                   )}
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-sm">{t("candidateAuth.confirmPassword")}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
                     <PasswordInput
+                      dir="ltr"
                       id="confirmPassword"
                       placeholder="Re-enter your password"
-                      className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                      className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base text-left"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       required
@@ -387,15 +393,16 @@ export default function CandidateAuth() {
             {!isSignUp && (
               <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm">Password</Label>
+                  <Label htmlFor="password" className="text-sm">{t("candidateAuth.password")}</Label>
                   {/* Forgot Password trigger — hidden alongside the modal below, see the comment there. */}
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground z-10" />
                   <PasswordInput
+                    dir="ltr"
                     id="password"
                     placeholder="Enter your password"
-                    className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base"
+                    className="pl-9 sm:pl-10 h-11 sm:h-12 border-2 focus:border-primary text-sm sm:text-base text-left"
                     value={formData.password}
                     onChange={handleInputChange}
                     required
@@ -408,22 +415,22 @@ export default function CandidateAuth() {
               {loading ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Please wait...
+                  {t("candidateAuth.loggingIn")}
                 </>
               ) : (
-                isSignUp ? "Create Account" : "Sign In"
+                isSignUp ? t("candidateAuth.signupButton") : t("candidateAuth.loginButton")
               )}
             </Button>
           </form>
 
           <p className="mt-4 sm:mt-6 text-center text-sm text-muted-foreground">
-            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+            {isSignUp ? t("candidateAuth.haveAccount") : t("candidateAuth.noAccount")}{" "}
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
               className="text-primary font-semibold hover:text-primary/80 transition-colors"
             >
-              {isSignUp ? "Sign In" : "Sign Up"}
+              {isSignUp ? t("candidateAuth.signInLink") : t("candidateAuth.signUpLink")}
             </button>
           </p>
         </div>
@@ -433,17 +440,18 @@ export default function CandidateAuth() {
       <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl alumni-sans-title">Verify Your Account</DialogTitle>
+            <DialogTitle className="text-2xl alumni-sans-title">{t("candidateAuth.otpTitle")}</DialogTitle>
             <DialogDescription>
-              Enter the 6-digit code sent to your phone number.
+              {t("candidateAuth.otpDesc")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleOtpSubmit} className="space-y-6 mt-4">
             <div className="space-y-4">
-              <Label className="text-sm">Verification Code</Label>
+              <Label className="text-sm">{t("candidateAuth.otpCode")}</Label>
               <div className="flex justify-center gap-2 sm:gap-3">
                 {otp.map((digit, index) => (
                   <Input
+                    dir="ltr"
                     key={index}
                     ref={(el) => (otpRefs.current[index] = el)}
                     type="text"
@@ -452,7 +460,7 @@ export default function CandidateAuth() {
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(index, e)}
                     onPaste={handleOtpPaste}
-                    className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold border-2 focus:border-primary"
+                    className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold border-2 focus:border-primary text-left"
                     maxLength={1}
                     required
                     autoFocus={index === 0}
@@ -480,10 +488,10 @@ export default function CandidateAuth() {
                 {loading ? (
                   <>
                     <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    Verifying...
+                    {t("candidateAuth.verifying")}
                   </>
                 ) : (
-                  "Verify"
+                  t("candidateAuth.verifyOtp")
                 )}
               </Button>
             </div>
@@ -797,3 +805,5 @@ export default function CandidateAuth() {
     </div>
   );
 }
+
+
