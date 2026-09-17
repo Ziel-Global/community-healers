@@ -75,6 +75,14 @@ export interface ChecklistResultDetail {
     evidence: ChecklistEvidenceItem[];
 }
 
+export interface AttendanceEntry {
+    memberUserId: string;
+    memberName: string;
+    attending: boolean | null;
+    reason: string | null;
+    updatedAt: string;
+}
+
 export interface CenterApplicationDetail {
     application: CenterApplicationSummary & {
         staff: CenterApplicationStaffMember[];
@@ -82,6 +90,7 @@ export interface CenterApplicationDetail {
         city: CenterApplicationCity | null;
     };
     checklistResults: ChecklistResultDetail[];
+    attendance: AttendanceEntry[];
 }
 
 /**

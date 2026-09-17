@@ -16,6 +16,7 @@ import { AssignCommitteeDialog } from "@/components/DirectorOperationsPortal/Cen
 import { RejectApplicationDialog } from "@/components/DirectorOperationsPortal/CenterApplications/RejectApplicationDialog";
 import { ApproveApplicationDialog } from "@/components/DirectorOperationsPortal/CenterApplications/ApproveApplicationDialog";
 import { APPLICATION_STATUS_META } from "@/components/DirectorOperationsPortal/CenterApplications/statusMeta";
+import { CommitteeAttendanceCard } from "@/components/DirectorOperationsPortal/CenterApplications/CommitteeAttendanceCard";
 import { CommentThread } from "@/components/CommentThread";
 import type { CenterApplicationSummary } from "@/services/centerApplicationService";
 
@@ -54,7 +55,7 @@ export default function CenterApplicationDetailPage() {
         );
     }
 
-    const { application, checklistResults } = data;
+    const { application, checklistResults, attendance } = data;
 
     return (
         <DashboardLayout
@@ -189,6 +190,9 @@ export default function CenterApplicationDetailPage() {
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Committee attendance — who's confirmed/declined the scheduled inspection */}
+                {application.committee && <CommitteeAttendanceCard attendance={attendance} />}
 
                 {/* Checklist results — everything the committee submitted */}
                 {checklistResults.length > 0 && (

@@ -12,6 +12,7 @@ import { useCenterApplicationDetail } from "@/hooks/queries/useSuperAdminCenterA
 import { superAdminCenterApplicationService } from "@/services/centerApplicationService";
 import { EvidenceThumbnail } from "@/components/EvidenceThumbnail";
 import { APPLICATION_STATUS_META } from "@/components/DirectorOperationsPortal/CenterApplications/statusMeta";
+import { CommitteeAttendanceCard } from "@/components/DirectorOperationsPortal/CenterApplications/CommitteeAttendanceCard";
 import { CommentThread } from "@/components/CommentThread";
 
 function formatDateTime(iso: string | null): string {
@@ -45,7 +46,7 @@ export default function CenterApplicationDetailPage() {
         );
     }
 
-    const { application, checklistResults } = data;
+    const { application, checklistResults, attendance } = data;
 
     return (
         <DashboardLayout
@@ -156,6 +157,8 @@ export default function CenterApplicationDetailPage() {
                         )}
                     </CardContent>
                 </Card>
+
+                {application.committee && <CommitteeAttendanceCard attendance={attendance} />}
 
                 {checklistResults.length > 0 && (
                     <div className="space-y-3">
