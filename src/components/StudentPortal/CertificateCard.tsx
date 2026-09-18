@@ -71,7 +71,7 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
                     </div>
                     <div className="p-4 rounded-xl bg-card border border-border/40">
                         <p className="text-xs text-muted-foreground mb-1">{t('certificate.examScore')}</p>
-                        <p className="font-bold text-green-600 dark:text-green-400 text-lg">{certificate.score}% - {t('certificate.passed')}</p>
+                        <p className="font-bold text-green-600 dark:text-green-400 text-lg">{t('certificate.passed')}</p>
                     </div>
                     <div className="p-4 rounded-xl bg-card border border-border/40">
                         <p className="text-xs text-muted-foreground mb-1">{t('certificate.issueDate')}</p>

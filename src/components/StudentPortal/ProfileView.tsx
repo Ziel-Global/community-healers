@@ -434,7 +434,7 @@ export function ProfileView({
               </div>
               <p className="text-xs text-muted-foreground">
                 {hasCertificate
-                  ? `${t("certificate.passed")} - ${t("certificate.examScore")}: ${candidateData?.certificate?.score}%`
+                  ? t("certificate.passed")
                   : (isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid)
                     ? (() => {
                       try {
