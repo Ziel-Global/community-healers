@@ -73,26 +73,6 @@ export function useVerifyFace() {
     });
 }
 
-export function useReleaseCandidateTest() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (candidateId: string) => centerAdminService.releaseCandidateTest(candidateId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: centerAdminKeys.todayCandidates() });
-        },
-    });
-}
-
-export function useRevokeCandidateTestRelease() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (candidateId: string) => centerAdminService.revokeCandidateTestRelease(candidateId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: centerAdminKeys.todayCandidates() });
-        },
-    });
-}
-
 export function useOverrideLiveness() {
     const queryClient = useQueryClient();
     return useMutation({

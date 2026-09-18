@@ -141,25 +141,6 @@ export const getCertificatePdfBlob = async (candidateId: string): Promise<Blob> 
     return response.data;
 };
 
-export interface ReleaseTestResult {
-    examSessionId: string;
-    candidateUserId: string;
-    examReleasedAt: string | null;
-    examReleasedByUserId?: string | null;
-}
-
-/** Unlocks the exam-start gate — only a verified candidate can be released. Idempotent. */
-export const releaseCandidateTest = async (candidateId: string): Promise<ReleaseTestResult> => {
-    const response = await api.post(`/center-admin/exam-session/${candidateId}/release-test`);
-    return response.data;
-};
-
-/** Withdraws a release for a candidate who left before starting — returns 400 once the exam has begun. */
-export const revokeCandidateTestRelease = async (candidateId: string): Promise<ReleaseTestResult> => {
-    const response = await api.post(`/center-admin/exam-session/${candidateId}/revoke-test-release`);
-    return response.data;
-};
-
 export const updateCandidateStatus = async (id: string, status: 'VERIFIED' | 'REJECTED'): Promise<ExamSessionRecord> => {
     try {
         const response = await api.patch(`/center-admin/exam-session/${id}/candidate-status`, {
@@ -288,6 +269,4 @@ export const centerAdminService = {
     overrideLiveness,
     getCertificates,
     getCertificatePdfBlob,
-    releaseCandidateTest,
-    revokeCandidateTestRelease,
 };

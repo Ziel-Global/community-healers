@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, XCircle, Clock, UserCheck, Eye, Phone, Mail, MapPin, Calendar, FileText, Download, ExternalLink, Loader2, ShieldAlert, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTodayCandidates, useOverrideLiveness, useReleaseCandidateTest, useRevokeCandidateTestRelease } from "@/hooks/queries/useCenterAdminQueries";
+import { useTodayCandidates, useOverrideLiveness } from "@/hooks/queries/useCenterAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { getCandidateAvatarUrl } from "@/utils/avatar";
@@ -70,19 +70,24 @@ const LivenessIndicator = ({ candidate }: { candidate: Candidate }) => {
     return null;
 };
 
-/** A verified candidate's test stays locked until the centre explicitly releases it — surface that state up front so it's not missed. */
+/**
+ * A verified candidate's test unlocks automatically once the Super
+ * Admin-configured wait after verification elapses (0 hours = immediately)
+ * — no manual per-candidate action needed. Surface that state so it's clear
+ * why the "Begin Examination" button isn't live yet.
+ */
 const ReleaseIndicator = ({ candidate }: { candidate: Candidate }) => {
     if (candidate.status !== "Verified") return null;
     if (candidate.examReleased) {
         return (
             <Badge variant="success" className="gap-1 text-[9px] sm:text-[10px]">
-                <CheckCircle2 className="w-3 h-3" /> Test Released
+                <CheckCircle2 className="w-3 h-3" /> Test Unlocked
             </Badge>
         );
     }
     return (
         <Badge variant="secondary" className="gap-1 text-[9px] sm:text-[10px] bg-amber-100 text-amber-700 border-amber-200">
-            <Clock className="w-3 h-3" /> Test Not Released
+            <Clock className="w-3 h-3" /> Test Unlocking Soon
         </Badge>
     );
 };
@@ -120,8 +125,6 @@ export function CandidateTable({
     const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
     const [overrideReason, setOverrideReason] = useState("");
     const overrideLivenessMutation = useOverrideLiveness();
-    const releaseTestMutation = useReleaseCandidateTest();
-    const revokeReleaseMutation = useRevokeCandidateTestRelease();
 
     // Default to today if not provided — local date components, not
     // toISOString(), which converts to UTC first and silently returns
@@ -262,46 +265,6 @@ export function CandidateTable({
                 },
             }
         );
-    };
-
-    const handleReleaseTest = () => {
-        if (!selectedCandidate) return;
-        releaseTestMutation.mutate(selectedCandidate.id, {
-            onSuccess: () => {
-                toast({
-                    title: "Test released",
-                    description: `${selectedCandidate.name}'s test is now released — it still opens 6 hours after check-in.`,
-                });
-                setSelectedCandidate((prev) => (prev ? { ...prev, examReleased: true } : prev));
-            },
-            onError: (error) => {
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: getApiErrorMessage(error, "Failed to release the test."),
-                });
-            },
-        });
-    };
-
-    const handleRevokeRelease = () => {
-        if (!selectedCandidate) return;
-        revokeReleaseMutation.mutate(selectedCandidate.id, {
-            onSuccess: () => {
-                toast({
-                    title: "Release withdrawn",
-                    description: `${selectedCandidate.name}'s test is no longer released.`,
-                });
-                setSelectedCandidate((prev) => (prev ? { ...prev, examReleased: false } : prev));
-            },
-            onError: (error) => {
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: getApiErrorMessage(error, "Failed to withdraw the release — the exam may already be in progress."),
-                });
-            },
-        });
     };
 
     // Filter candidates by status
@@ -588,28 +551,6 @@ export function CandidateTable({
                                     >
                                         Verify Candidate
                                     </Button>
-                                )}
-                                {canVerify && selectedCandidate.status === "Verified" && (
-                                    selectedCandidate.examReleased ? (
-                                        <Button
-                                            variant="outline"
-                                            className="border-destructive/40 text-destructive hover:bg-destructive/10"
-                                            onClick={handleRevokeRelease}
-                                            disabled={revokeReleaseMutation.isPending}
-                                        >
-                                            {revokeReleaseMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                                            Withdraw Release
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            onClick={handleReleaseTest}
-                                            className="gradient-primary text-white"
-                                            disabled={releaseTestMutation.isPending}
-                                        >
-                                            {releaseTestMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                                            Release Test
-                                        </Button>
-                                    )
                                 )}
                             </div>
                         </div>

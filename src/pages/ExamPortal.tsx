@@ -876,23 +876,19 @@ export default function ExamPortal() {
                             </ul>
                         </div>
 
-                        {/* Start Button — gated on both centre release and the post-verification wait */}
+                        {/* Start Button — gated on the post-verification unlock wait */}
                         <div className="pt-4">
                             {candidateStatus?.canStartExam === false ? (
                                 <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-center space-y-3">
                                     <Clock className="w-6 h-6 text-amber-600 mx-auto" />
-                                    {!candidateStatus.examReleased ? (
-                                        <p className="text-sm font-medium text-amber-800">
-                                            Waiting for centre staff to release your test. This happens once you're checked in.
-                                        </p>
-                                    ) : (
-                                        <p className="text-sm font-medium text-amber-800">
-                                            Your test unlocks {candidateStatus.examUnlockDelayHours ?? 6} hours after check-in
-                                            {candidateStatus.examUnlocksAt
-                                                ? ` — available at ${format(parseISO(candidateStatus.examUnlocksAt), "h:mm a 'on' MMM d")}.`
-                                                : "."}
-                                        </p>
-                                    )}
+                                    <p className="text-sm font-medium text-amber-800">
+                                        {candidateStatus.examUnlockDelayHours
+                                            ? `Your test unlocks ${candidateStatus.examUnlockDelayHours} hours after check-in`
+                                            : "Your test is unlocking"}
+                                        {candidateStatus.examUnlocksAt
+                                            ? ` — available at ${format(parseISO(candidateStatus.examUnlocksAt), "h:mm a 'on' MMM d")}.`
+                                            : "."}
+                                    </p>
                                     <Button
                                         variant="outline"
                                         size="sm"
