@@ -6,6 +6,8 @@ export interface ExamSettings {
     certificateValidityYears?: number;
     /** 0-11 month remainder on top of certificateValidityYears. */
     certificateValidityMonths?: number;
+    /** Hours after centre verification before a candidate's test unlocks. 0 = immediately. */
+    examUnlockDelayHours?: number;
 }
 
 export interface City {

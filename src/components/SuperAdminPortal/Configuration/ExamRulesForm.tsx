@@ -15,6 +15,7 @@ export function ExamRulesForm() {
     const [passingPercentage, setPassingPercentage] = useState(50);
     const [validityYears, setValidityYears] = useState(0);
     const [validityMonths, setValidityMonths] = useState(0);
+    const [unlockDelayHours, setUnlockDelayHours] = useState(0);
 
     const { data: settings, isLoading } = useExamSettings();
     const updateExamSettingsMutation = useUpdateExamSettings();
@@ -27,6 +28,7 @@ export function ExamRulesForm() {
                 passingPercentage: Number(passingPercentage),
                 certificateValidityYears: Number(validityYears),
                 certificateValidityMonths: Number(validityMonths),
+                examUnlockDelayHours: Number(unlockDelayHours),
             },
             {
                 onSuccess: () => {
@@ -46,6 +48,7 @@ export function ExamRulesForm() {
             if (settings.passingPercentage) setPassingPercentage(settings.passingPercentage);
             setValidityYears(settings.certificateValidityYears ?? 0);
             setValidityMonths(settings.certificateValidityMonths ?? 0);
+            setUnlockDelayHours(settings.examUnlockDelayHours ?? 0);
         }
     }, [settings]);
 
@@ -142,6 +145,22 @@ export function ExamRulesForm() {
                                 </div>
                                 <p className="text-[10px] text-muted-foreground italic">
                                     How long an issued certificate stays valid. 0 years and 0 months together mean it never expires. Applies only to certificates issued after this is saved.
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="unlockDelayHours" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Exam Unlock Delay (Hours)</Label>
+                                <Input
+                                    id="unlockDelayHours"
+                                    type="number"
+                                    min={0}
+                                    max={168}
+                                    value={unlockDelayHours}
+                                    onChange={(e) => setUnlockDelayHours(Number(e.target.value))}
+                                    className="h-11 bg-white/50 border-border/60"
+                                />
+                                <p className="text-[10px] text-muted-foreground italic">
+                                    How long after a centre verifies a candidate before their test unlocks. 0 means it unlocks immediately on verification.
                                 </p>
                             </div>
                         </div>
