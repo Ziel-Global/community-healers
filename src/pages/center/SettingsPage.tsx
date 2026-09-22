@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { TimePicker } from "@/components/ui/time-picker";
-import { Clock, Loader2, Save } from "lucide-react";
-import { useCenterDetails, useUpdateTrainingTimings } from "@/hooks/queries/useCenterAdminQueries";
+import { Clock, Loader2, Power, Save } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { useCenterDetails, useUpdateCenterStatus, useUpdateTrainingTimings } from "@/hooks/queries/useCenterAdminQueries";
+import type { CenterAvailabilityStatus } from "@/services/centerAdminService";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toTimeInputValue, utcHHMMToPkt, pktHHMMToUtc } from "@/utils/time";
 import { toast } from "sonner";
@@ -33,6 +35,8 @@ export default function SettingsPage() {
 
   const { data: centerData, isLoading, isError, error: loadQueryError } = useCenterDetails();
   const updateTimings = useUpdateTrainingTimings();
+  const updateStatus = useUpdateCenterStatus();
+  const [pendingOnline, setPendingOnline] = useState<boolean | null>(null);
 
   const centerId = centerData?.id ?? null;
   const centerName = centerData?.name || "";
@@ -62,6 +66,32 @@ export default function SettingsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError]);
+
+  const serverOnline = centerData?.status === "ACTIVE";
+  const isOnline = pendingOnline ?? serverOnline;
+
+  useEffect(() => {
+    setPendingOnline(null);
+  }, [centerData?.status]);
+
+  const handleStatusChange = (checked: boolean) => {
+    if (!centerId || updateStatus.isPending) return;
+    const status: CenterAvailabilityStatus = checked ? "ACTIVE" : "INACTIVE";
+    setPendingOnline(checked);
+    updateStatus.mutate(
+      { centerId, status },
+      {
+        onSuccess: () => {
+          setPendingOnline(null);
+          toast.success(checked ? "Center is online." : "Center is offline.");
+        },
+        onError: (error) => {
+          setPendingOnline(null);
+          toast.error(getApiErrorMessage(error, "Failed to update center availability."));
+        },
+      }
+    );
+  };
 
   const hasChanges =
     trainingStartTime !== savedStartTime || trainingEndTime !== savedEndTime;
@@ -102,11 +132,57 @@ export default function SettingsPage() {
   return (
     <DashboardLayout
       title="Center Settings"
-      subtitle="Configure training hours for your centre"
+      subtitle="Set whether your centre is open, and configure training hours"
       portalType="center"
       navItems={centerNavItems}
+      headerStatus={{ online: isOnline }}
     >
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-xl mx-auto space-y-6">
+        <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Power className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="alumni-sans-title">Center availability</CardTitle>
+                <CardDescription>
+                  {centerName
+                    ? `${centerName} is open to candidates when active, and offline when inactive.`
+                    : "The centre is open to candidates when active, and offline when inactive."}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-6 text-muted-foreground gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Loading availability…
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {isOnline ? "Online" : "Offline"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {isOnline
+                      ? "Candidates can use this centre."
+                      : "This centre is hidden from new activity."}
+                  </p>
+                </div>
+                <Switch
+                  checked={isOnline}
+                  onCheckedChange={handleStatusChange}
+                  disabled={!centerId || updateStatus.isPending}
+                  aria-label="Center availability"
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
           <CardHeader>
             <div className="flex items-center gap-3">

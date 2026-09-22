@@ -19,6 +19,8 @@ interface DashboardLayoutProps {
   subtitle?: string;
   portalType: "candidate" | "center" | "admin" | "ministry" | "committee" | "director-operations";
   navItems: NavItem[];
+  /** When set, the top-right pill reflects this instead of the static Online badge. */
+  headerStatus?: { online: boolean };
 }
 
 const portalColors = {
@@ -45,6 +47,7 @@ export function DashboardLayout({
   subtitle,
   portalType,
   navItems,
+  headerStatus,
 }: DashboardLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -209,10 +212,23 @@ export function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-success/10 border border-success/20">
-              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              <span className="text-[10px] sm:text-xs font-medium text-success hidden sm:block">
-                Online
+            <div className={cn(
+              "flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border",
+              headerStatus && !headerStatus.online
+                ? "bg-muted border-border"
+                : "bg-success/10 border-success/20"
+            )}>
+              <div className={cn(
+                "w-2 h-2 rounded-full",
+                headerStatus && !headerStatus.online
+                  ? "bg-muted-foreground"
+                  : "bg-success animate-pulse"
+              )} />
+              <span className={cn(
+                "text-[10px] sm:text-xs font-medium hidden sm:block",
+                headerStatus && !headerStatus.online ? "text-muted-foreground" : "text-success"
+              )}>
+                {headerStatus && !headerStatus.online ? "Offline" : "Online"}
               </span>
             </div>
           </div>

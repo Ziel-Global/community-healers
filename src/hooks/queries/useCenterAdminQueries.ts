@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { centerAdminService, TrainingTimingsPayload, CenterDetails } from "@/services/centerAdminService";
+import { centerAdminService, TrainingTimingsPayload, CenterDetails, CenterAvailabilityStatus } from "@/services/centerAdminService";
 
 export const centerAdminKeys = {
     all: ["centerAdmin"] as const,
@@ -93,6 +93,21 @@ export function useUpdateTrainingTimings() {
             queryClient.setQueryData(
                 centerAdminKeys.centerDetails(),
                 (prev: CenterDetails | null | undefined) => (prev ? { ...prev, ...data } : prev),
+            );
+        },
+    });
+}
+
+export function useUpdateCenterStatus() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ centerId, status }: { centerId: string; status: CenterAvailabilityStatus }) =>
+            centerAdminService.updateCenterStatus(centerId, status),
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(
+                centerAdminKeys.centerDetails(),
+                (prev: CenterDetails | null | undefined) =>
+                    prev ? { ...prev, status: data?.status ?? variables.status } : prev,
             );
         },
     });

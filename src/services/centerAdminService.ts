@@ -257,6 +257,29 @@ export const updateTrainingTimings = async (
     }
 };
 
+export type CenterAvailabilityStatus = "ACTIVE" | "INACTIVE";
+
+export interface CenterStatusResponse {
+    id?: string;
+    status?: CenterAvailabilityStatus | string;
+}
+
+export const updateCenterStatus = async (
+    centerId: string,
+    status: CenterAvailabilityStatus
+): Promise<CenterStatusResponse> => {
+    try {
+        const response = await api.patch(
+            `/center-admin/centers/${centerId}/status`,
+            { status }
+        );
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Error updating center status:', error);
+        throw error;
+    }
+};
+
 export const centerAdminService = {
     getTodayCandidates,
     getCandidateDocumentBlob,
@@ -265,6 +288,7 @@ export const centerAdminService = {
     getReports,
     getDashboardStats,
     updateTrainingTimings,
+    updateCenterStatus,
     verifyFace,
     overrideLiveness,
     getCertificates,
