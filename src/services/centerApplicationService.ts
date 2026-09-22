@@ -140,12 +140,11 @@ function createCenterApplicationReadApi(prefix: string) {
 export const superAdminCenterApplicationService = createCenterApplicationReadApi('/super-admin/center-applications');
 
 /**
- * Director of Operations — full read/write access to the pipeline. Lives under `/internal` on
- * the backend (not `/director-operations`) specifically so it can't collide with the frontend's
- * own `/director-operations/*` page routes once that prefix is added to the Vite dev proxy —
+ * Bureau — full read/write access to the pipeline. The API lives under `/internal/bureau`
+ * (not `/bureau`) so it can't collide with the frontend's `/bureau/*` page routes.
  * same reason Center Onboarding's public page is `/apply-center`, not `/center-onboarding`.
  */
-const DO_CENTER_APPLICATIONS_PREFIX = '/internal/director-operations/center-applications';
+const DO_CENTER_APPLICATIONS_PREFIX = '/internal/bureau/center-applications';
 
 /** Director of Operations assigns a committee — the final approve/reject call belongs to the committee itself now (view-only here). */
 export const directorOperationsCenterApplicationService = {

@@ -89,11 +89,11 @@ const portals = [
     ],
   },
   {
-    title: "Director of Operations",
+    title: "Bureau",
     description:
       "Oversee the center application pipeline, assign committees, and monitor every training center.",
     icon: Briefcase,
-    href: "/director-operations/auth",
+    href: "/bureau/auth",
     stats: [
       { label: "Applications In Flight", value: "48" },
       { label: "Committees", value: "6" },

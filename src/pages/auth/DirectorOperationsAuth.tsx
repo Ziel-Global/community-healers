@@ -42,7 +42,7 @@ export default function DirectorOperationsAuth() {
     setLoading(true);
     try {
       await loginDirectorOperations(result.data);
-      navigate("/director-operations");
+      navigate("/bureau");
       toast({ title: "Welcome back!", description: "Login successful." });
     } catch (error: any) {
       setLoading(false);
@@ -65,7 +65,7 @@ export default function DirectorOperationsAuth() {
             <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
           </div>
 
-          <h1 className="text-4xl alumni-sans-title mb-4 text-white">Director of Operations</h1>
+          <h1 className="text-4xl alumni-sans-title mb-4 text-white">Bureau</h1>
           <p className="text-lg text-white/90 leading-relaxed max-w-md">
             Receive new center applications, assign them to Approval Committees, and make the final decision.
           </p>
@@ -78,7 +78,7 @@ export default function DirectorOperationsAuth() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
               <Briefcase className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-sm font-display font-bold">Director of Operations</span>
+            <span className="text-sm font-display font-bold">Bureau</span>
           </div>
           <Link to="/" className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm">
             <ArrowLeft className="w-4 h-4" />
@@ -136,7 +136,7 @@ export default function DirectorOperationsAuth() {
 
           <div className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/20">
             <p className="text-xs text-muted-foreground text-center">
-              Director of Operations accounts are created by the Super Admin.
+              Bureau accounts are created by the Super Admin.
             </p>
           </div>
         </div>

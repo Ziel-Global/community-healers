@@ -32,3 +32,13 @@ export function useAddCommitteeMember() {
         },
     });
 }
+
+export function useAddCommitteeChairman() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (request: CreateCommitteeMemberRequest) => committeeService.addCommitteeChairman(request),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: committeeKeys.adminView() });
+        },
+    });
+}

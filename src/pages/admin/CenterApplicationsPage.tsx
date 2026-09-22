@@ -6,7 +6,7 @@ export default function CenterApplicationsPage() {
     return (
         <DashboardLayout
             title="Center Applications"
-            subtitle="View-only — assignment and decisions are made by Director of Operations"
+            subtitle="View-only — assignment and decisions are made by the Bureau"
             portalType="admin"
             navItems={superAdminNavItems}
         >

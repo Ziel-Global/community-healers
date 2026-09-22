@@ -68,7 +68,7 @@ const STATUS_COPY: Record<string, { title: string; body: string }> = {
   },
   UNDER_REVIEW: {
     title: "Under review",
-    body: "The inspection is complete and your application is now with the Director of Operations for a final decision.",
+    body: "The inspection is complete and your application is now with the Bureau for a final decision.",
   },
   APPROVED: {
     title: "Application approved",

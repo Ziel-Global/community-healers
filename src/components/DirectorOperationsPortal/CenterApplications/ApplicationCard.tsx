@@ -36,7 +36,7 @@ export function ApplicationCard({ application, cityName, committeeName }: Applic
         <Card
             ref={setNodeRef}
             style={style}
-            onClick={() => navigate(`/director-operations/applications/${application.id}`)}
+            onClick={() => navigate(`/bureau/applications/${application.id}`)}
             className="group relative overflow-hidden rounded-2xl border-border/40 bg-card shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_28px_rgba(0,0,0,0.08)] hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
         >
             <div className="absolute inset-x-0 top-0 h-0.5 gradient-primary opacity-0 group-hover:opacity-100 transition-opacity" />

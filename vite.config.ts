@@ -39,10 +39,10 @@ export default defineConfig(({ mode }) => {
           target: backendUrl,
           changeOrigin: true,
         },
-        // Committee-member, Director-of-Operations, and shared-comment API routes all live
+        // Committee, Bureau, and shared-comment API routes all live
         // under this one backend-only prefix — deliberately not "/committee" or
-        // "/director-operations" directly, since those are ALSO frontend page routes
-        // (/committee/history, /director-operations/applications, ...) and a prefix match
+        // "/bureau" directly, since those are ALSO frontend page routes
+        // (/committee/history, /bureau/applications, ...) and a prefix match
         // there would swallow the page loads themselves. Same reasoning as
         // "/apply-center" vs "/center-onboarding" below.
         "/internal": {

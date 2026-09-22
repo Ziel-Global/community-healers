@@ -136,7 +136,7 @@ export default function CommitteeMemberAuth() {
 
           <div className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/20">
             <p className="text-xs text-muted-foreground text-center">
-              Committee member accounts are created by the Director of Operations.
+              Committee member accounts are created by the Bureau.
             </p>
           </div>
         </div>

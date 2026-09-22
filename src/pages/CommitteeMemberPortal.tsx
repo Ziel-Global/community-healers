@@ -47,7 +47,7 @@ export default function CommitteeMemberPortal() {
                   <ClipboardCheck className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
                   <p className="text-muted-foreground">No active inspections right now</p>
                   <p className="text-xs text-muted-foreground/70 mt-1">
-                    New assignments from the Director of Operations will show up here
+                    New assignments from the Bureau will show up here
                   </p>
                 </div>
               ) : (

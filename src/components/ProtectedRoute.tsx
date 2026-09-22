@@ -16,7 +16,7 @@ const authPaths: Record<PortalType, string> = {
     exam: '/training/auth',
     committee: '/committee/auth',
     'committee-chairman': '/committee-chairman/auth',
-    'director-operations': '/director-operations/auth',
+    'director-operations': '/bureau/auth',
 };
 
 export function ProtectedRoute({ children, portalType }: ProtectedRouteProps) {

@@ -74,7 +74,7 @@ export function TableView({ applications, cityNameById, committeeNameById, onReq
                                         onClick={(e) => {
                                             const target = e.target as HTMLElement;
                                             if (target.closest("button")) return;
-                                            navigate(`/director-operations/applications/${application.id}`);
+                                            navigate(`/bureau/applications/${application.id}`);
                                         }}
                                     >
                                         <TableCell>
@@ -129,7 +129,7 @@ export function TableView({ applications, cityNameById, committeeNameById, onReq
                                                     size="icon"
                                                     className="h-8 w-8 text-muted-foreground hover:bg-primary/10 hover:text-primary"
                                                     title="Open"
-                                                    onClick={() => navigate(`/director-operations/applications/${application.id}`)}
+                                                    onClick={() => navigate(`/bureau/applications/${application.id}`)}
                                                 >
                                                     <ExternalLink className="w-3.5 h-3.5" />
                                                 </Button>

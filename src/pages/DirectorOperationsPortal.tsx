@@ -8,9 +8,9 @@ import { useCommitteeForDirectorOperations } from "@/hooks/queries/useCommitteeQ
 import { APPLICATION_STATUS_META, KANBAN_STATUSES } from "@/components/DirectorOperationsPortal/CenterApplications/statusMeta";
 
 export const directorOperationsNavItems = [
-  { label: "Dashboard", href: "/director-operations", icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: "Center Applications", href: "/director-operations/applications", icon: <ClipboardList className="w-4 h-4" /> },
-  { label: "Centers", href: "/director-operations/centers", icon: <Building2 className="w-4 h-4" /> },
+  { label: "Dashboard", href: "/bureau", icon: <LayoutDashboard className="w-4 h-4" /> },
+  { label: "Center Applications", href: "/bureau/applications", icon: <ClipboardList className="w-4 h-4" /> },
+  { label: "Centers", href: "/bureau/centers", icon: <Building2 className="w-4 h-4" /> },
 ];
 
 export default function DirectorOperationsPortal() {
@@ -28,7 +28,7 @@ export default function DirectorOperationsPortal() {
 
   return (
     <DashboardLayout
-      title="Director of Operations"
+      title="Bureau"
       subtitle="Center application pipeline at a glance"
       portalType="director-operations"
       navItems={directorOperationsNavItems}

@@ -14,6 +14,7 @@ export interface Committee {
     id: string;
     name: string;
     members: CommitteeMember[];
+    chairman?: CommitteeMember | null;
     createdAt: string;
 }
 
@@ -27,7 +28,7 @@ export interface CreateCommitteeMemberRequest {
 
 /** There is exactly one Approval Committee, system-wide — Director of Operations gets read-only visibility into it. */
 const getCommitteeForDirectorOperations = async (): Promise<Committee> => {
-    const response = await api.get('/internal/director-operations/committee');
+    const response = await api.get('/internal/bureau/committee');
     return response.data;
 };
 
@@ -42,8 +43,14 @@ const addCommitteeMember = async (request: CreateCommitteeMemberRequest): Promis
     return response.data;
 };
 
+const addCommitteeChairman = async (request: CreateCommitteeMemberRequest): Promise<CommitteeMember> => {
+    const response = await api.post('/super-admin/committee/chairman', request);
+    return response.data;
+};
+
 export const committeeService = {
     getCommitteeForDirectorOperations,
     getCommitteeForSuperAdmin,
     addCommitteeMember,
+    addCommitteeChairman,
 };

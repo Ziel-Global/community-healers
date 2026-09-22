@@ -76,7 +76,12 @@ export function CommitteeManager() {
                 </div>
             )}
 
-            <CreateCommitteeMemberDialog open={showCreateDialog} onClose={() => setShowCreateDialog(false)} onCreated={() => setShowCreateDialog(false)} />
+            <CreateCommitteeMemberDialog
+                open={showCreateDialog}
+                hasChairman={Boolean(committee?.chairman)}
+                onClose={() => setShowCreateDialog(false)}
+                onCreated={() => setShowCreateDialog(false)}
+            />
         </div>
     );
 }

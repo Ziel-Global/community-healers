@@ -40,7 +40,7 @@ const portalLabels = {
   ministry: "Ministry",
   committee: "Approval Committee",
   "committee-chairman": "Committee Chairman",
-  "director-operations": "Director of Operations",
+  "director-operations": "Bureau",
 };
 
 export function DashboardLayout({
@@ -72,7 +72,7 @@ export function DashboardLayout({
       case "committee-chairman":
         return "/committee-chairman/auth";
       case "director-operations":
-        return "/director-operations/auth";
+        return "/bureau/auth";
       default:
         return "/";
     }
@@ -93,7 +93,7 @@ export function DashboardLayout({
       case "committee-chairman":
         return "/committee-chairman";
       case "director-operations":
-        return "/director-operations";
+        return "/bureau";
       default:
         return "/";
     }

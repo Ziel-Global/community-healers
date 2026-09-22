@@ -86,7 +86,7 @@ export function AppRoutes() {
                 <Route path="/training/auth" element={<ExamAuth />} />
                 <Route path="/committee/auth" element={<CommitteeMemberAuth />} />
                 <Route path="/committee-chairman/auth" element={<CommitteeChairmanAuth />} />
-                <Route path="/director-operations/auth" element={<DirectorOperationsAuth />} />
+                <Route path="/bureau/auth" element={<DirectorOperationsAuth />} />
 
                 {/* Center Onboarding — public, no login (applicant has no account until approved).
                     Deliberately NOT "/center-onboarding": that path is also the API proxy
@@ -169,11 +169,11 @@ export function AppRoutes() {
 
                 <Route path="/committee-chairman" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanPortal /></ProtectedRoute>} />
 
-                {/* Director of Operations Portal Routes (protected) */}
-                <Route path="/director-operations" element={<ProtectedRoute portalType="director-operations"><DirectorOperationsPortal /></ProtectedRoute>} />
-                <Route path="/director-operations/applications" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationsPage /></ProtectedRoute>} />
-                <Route path="/director-operations/applications/:applicationId" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationDetailPage /></ProtectedRoute>} />
-                <Route path="/director-operations/centers" element={<ProtectedRoute portalType="director-operations"><DoCentersPage /></ProtectedRoute>} />
+                {/* Bureau portal routes (protected) */}
+                <Route path="/bureau" element={<ProtectedRoute portalType="director-operations"><DirectorOperationsPortal /></ProtectedRoute>} />
+                <Route path="/bureau/applications" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationsPage /></ProtectedRoute>} />
+                <Route path="/bureau/applications/:applicationId" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationDetailPage /></ProtectedRoute>} />
+                <Route path="/bureau/centers" element={<ProtectedRoute portalType="director-operations"><DoCentersPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="/landing-test" element={<LandingTest />} />
                 {/* <Route path="/training-test" element={<TrainingTest />} /> */}

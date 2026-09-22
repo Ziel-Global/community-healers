@@ -133,8 +133,8 @@ api.interceptors.response.use(
                         redirectPath = '/committee/auth';
                     } else if (role === 'committee_chairman' || role === 'committee-chairman') {
                         redirectPath = '/committee-chairman/auth';
-                    } else if (role === 'director_operations' || role === 'director-operations') {
-                        redirectPath = '/director-operations/auth';
+                    } else if (role === 'director_operations' || role === 'director-operations' || role === 'bureau') {
+                        redirectPath = '/bureau/auth';
                     }
                 } catch {
                     // malformed stored user — fall through to default redirect

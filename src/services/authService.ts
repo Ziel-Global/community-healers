@@ -79,11 +79,11 @@ const loginCommitteeChairman = async (credentials: CommitteeChairmanLoginCredent
 
 const loginDirectorOperations = async (credentials: DirectorOperationsLoginCredentials): Promise<AuthResponse> => {
     try {
-        const response = await api.post('/auth/login/director-operations', credentials);
+        const response = await api.post('/auth/login/bureau', credentials);
         return response.data;
     } catch (error: unknown) {
-        console.error('Director of Operations Login error:', error);
-        throw new Error(loginErrorMessage(error, 'Director of Operations Login failed. Please check your credentials.'));
+        console.error('Bureau Login error:', error);
+        throw new Error(loginErrorMessage(error, 'Bureau Login failed. Please check your credentials.'));
     }
 };
 

@@ -1,30 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserPlus, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getApiErrorMessage } from "@/lib/errors";
-import { useAddCommitteeMember } from "@/hooks/queries/useCommitteeQueries";
-import type { CommitteeMember } from "@/services/committeeService";
+import { useAddCommitteeChairman, useAddCommitteeMember } from "@/hooks/queries/useCommitteeQueries";
+import type { CommitteeMember, CreateCommitteeMemberRequest } from "@/services/committeeService";
 
 const emptyForm = { email: "", password: "", firstName: "", lastName: "", phoneNumber: "" };
+
+type CommitteeAccountRole = "member" | "chairman";
 
 interface CreateCommitteeMemberDialogProps {
     open: boolean;
     onClose: () => void;
     onCreated: (member: CommitteeMember) => void;
+    hasChairman?: boolean;
 }
 
-export function CreateCommitteeMemberDialog({ open, onClose, onCreated }: CreateCommitteeMemberDialogProps) {
+export function CreateCommitteeMemberDialog({ open, onClose, onCreated, hasChairman = false }: CreateCommitteeMemberDialogProps) {
     const { toast } = useToast();
     const addMemberMutation = useAddCommitteeMember();
+    const addChairmanMutation = useAddCommitteeChairman();
     const [form, setForm] = useState(emptyForm);
+    const [role, setRole] = useState<CommitteeAccountRole>("member");
+    const [chairmanCreatedThisVisit, setChairmanCreatedThisVisit] = useState(false);
+    const chairmanLocked = hasChairman || chairmanCreatedThisVisit;
+    const isPending = addMemberMutation.isPending || addChairmanMutation.isPending;
+
+    useEffect(() => {
+        if (chairmanLocked && role === "chairman") {
+            setRole("member");
+        }
+    }, [chairmanLocked, role]);
 
     const handleClose = () => {
         setForm(emptyForm);
+        setRole("member");
         onClose();
     };
 
@@ -33,25 +49,39 @@ export function CreateCommitteeMemberDialog({ open, onClose, onCreated }: Create
             toast({ variant: "destructive", title: "Incomplete form", description: "Email, password and first name are required." });
             return;
         }
-        addMemberMutation.mutate(
-            {
-                email: form.email,
-                password: form.password,
-                firstName: form.firstName,
-                lastName: form.lastName || undefined,
-                phoneNumber: form.phoneNumber || undefined,
+        if (role === "chairman" && chairmanLocked) return;
+
+        const request: CreateCommitteeMemberRequest = {
+            email: form.email,
+            password: form.password,
+            firstName: form.firstName,
+            lastName: form.lastName || undefined,
+            phoneNumber: form.phoneNumber || undefined,
+        };
+        const creatingChairman = role === "chairman";
+        const mutation = creatingChairman ? addChairmanMutation : addMemberMutation;
+
+        mutation.mutate(request, {
+            onSuccess: (member) => {
+                if (creatingChairman) setChairmanCreatedThisVisit(true);
+                toast({
+                    title: creatingChairman ? "Committee chairman added" : "Committee member added",
+                    description: creatingChairman
+                        ? `${member.firstName} can now sign in as committee chairman.`
+                        : `${member.firstName} can now review assigned applications.`,
+                });
+                setForm(emptyForm);
+                setRole("member");
+                onCreated(member);
             },
-            {
-                onSuccess: (member) => {
-                    toast({ title: "Committee member added", description: `${member.firstName} can now review assigned applications.` });
-                    setForm(emptyForm);
-                    onCreated(member);
-                },
-                onError: (error) => {
-                    toast({ variant: "destructive", title: "Failed to add committee member", description: getApiErrorMessage(error) });
-                },
-            }
-        );
+            onError: (error) => {
+                toast({
+                    variant: "destructive",
+                    title: creatingChairman ? "Failed to add committee chairman" : "Failed to add committee member",
+                    description: getApiErrorMessage(error),
+                });
+            },
+        });
     };
 
     return (
@@ -68,6 +98,21 @@ export function CreateCommitteeMemberDialog({ open, onClose, onCreated }: Create
                 </DialogHeader>
 
                 <div className="space-y-3 py-2">
+                    <div className="space-y-1.5">
+                        <Label htmlFor="new-member-role">Role</Label>
+                        <Select value={role} onValueChange={(value) => setRole(value as CommitteeAccountRole)}>
+                            <SelectTrigger id="new-member-role">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="member">Member</SelectItem>
+                                <SelectItem value="chairman" disabled={chairmanLocked}>Committee Chairman</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        {chairmanLocked && (
+                            <p className="text-xs text-muted-foreground">A chairman already exists.</p>
+                        )}
+                    </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1.5">
                             <Label htmlFor="new-member-first">First name *</Label>
@@ -93,10 +138,10 @@ export function CreateCommitteeMemberDialog({ open, onClose, onCreated }: Create
                 </div>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={handleClose} disabled={addMemberMutation.isPending}>Cancel</Button>
-                    <Button onClick={handleCreate} disabled={addMemberMutation.isPending} className="gradient-primary text-white gap-2">
-                        {addMemberMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                        Add Member
+                    <Button variant="outline" onClick={handleClose} disabled={isPending}>Cancel</Button>
+                    <Button onClick={handleCreate} disabled={isPending} className="gradient-primary text-white gap-2">
+                        {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {role === "chairman" ? "Add Chairman" : "Add Member"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

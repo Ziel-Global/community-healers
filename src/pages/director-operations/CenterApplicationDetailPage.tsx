@@ -62,7 +62,7 @@ export default function CenterApplicationDetailPage() {
         >
             <div className="max-w-4xl mx-auto space-y-5 pb-12">
                 <div className="flex items-center justify-between">
-                    <Button variant="ghost" size="sm" className="gap-2 -ml-2" onClick={() => navigate("/director-operations/applications")}>
+                    <Button variant="ghost" size="sm" className="gap-2 -ml-2" onClick={() => navigate("/bureau/applications")}>
                         <ArrowLeft className="w-4 h-4" /> Back to board
                     </Button>
                     <Badge variant={APPLICATION_STATUS_META[application.status]?.badgeVariant ?? "outline"} className="gap-1.5 text-xs">
