@@ -2,7 +2,7 @@ import axios from 'axios';
 import { api } from './api';
 import { getApiErrorMessage } from '../lib/errors';
 import i18n from '../i18n';
-import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, CommitteeMemberLoginCredentials, DirectorOperationsLoginCredentials, SignupCredentials, AuthResponse, SignupOtpRequestResponse, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
+import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, CommitteeMemberLoginCredentials, CommitteeChairmanLoginCredentials, DirectorOperationsLoginCredentials, SignupCredentials, AuthResponse, SignupOtpRequestResponse, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 
 /**
  * Role-mismatch logins (valid credentials, wrong portal) come back as 403,
@@ -64,6 +64,16 @@ const loginCommitteeMember = async (credentials: CommitteeMemberLoginCredentials
     } catch (error: unknown) {
         console.error('Committee Member Login error:', error);
         throw new Error(loginErrorMessage(error, 'Committee Member Login failed. Please check your credentials.'));
+    }
+};
+
+const loginCommitteeChairman = async (credentials: CommitteeChairmanLoginCredentials): Promise<AuthResponse> => {
+    try {
+        const response = await api.post('/auth/login/committee-chairman', credentials);
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Committee Chairman Login error:', error);
+        throw new Error(loginErrorMessage(error, 'Committee Chairman Login failed. Please check your credentials.'));
     }
 };
 
@@ -156,6 +166,7 @@ export const authService = {
     loginMinistry,
     loginSuperAdmin,
     loginCommitteeMember,
+    loginCommitteeChairman,
     loginDirectorOperations,
     signup,
     verifyCandidate,

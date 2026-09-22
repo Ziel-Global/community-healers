@@ -131,6 +131,8 @@ api.interceptors.response.use(
                         redirectPath = '/admin/auth';
                     } else if (role === 'committee_member' || role === 'committee-member') {
                         redirectPath = '/committee/auth';
+                    } else if (role === 'committee_chairman' || role === 'committee-chairman') {
+                        redirectPath = '/committee-chairman/auth';
                     } else if (role === 'director_operations' || role === 'director-operations') {
                         redirectPath = '/director-operations/auth';
                     }

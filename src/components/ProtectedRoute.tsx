@@ -15,6 +15,7 @@ const authPaths: Record<PortalType, string> = {
     ministry: '/ministry/auth',
     exam: '/training/auth',
     committee: '/committee/auth',
+    'committee-chairman': '/committee-chairman/auth',
     'director-operations': '/director-operations/auth',
 };
 

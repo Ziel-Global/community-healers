@@ -17,7 +17,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
   subtitle?: string;
-  portalType: "candidate" | "center" | "admin" | "ministry" | "committee" | "director-operations";
+  portalType: "candidate" | "center" | "admin" | "ministry" | "committee" | "committee-chairman" | "director-operations";
   navItems: NavItem[];
   /** When set, the top-right pill reflects this instead of the static Online badge. */
   headerStatus?: { online: boolean };
@@ -29,6 +29,7 @@ const portalColors = {
   admin: "from-violet-500 to-purple-500",
   ministry: "from-primary to-royal-700",
   committee: "from-amber-500 to-orange-500",
+  "committee-chairman": "from-amber-600 to-yellow-600",
   "director-operations": "from-blue-500 to-indigo-600",
 };
 
@@ -38,6 +39,7 @@ const portalLabels = {
   admin: "Admin",
   ministry: "Ministry",
   committee: "Approval Committee",
+  "committee-chairman": "Committee Chairman",
   "director-operations": "Director of Operations",
 };
 
@@ -67,6 +69,8 @@ export function DashboardLayout({
         return "/admin/auth";
       case "committee":
         return "/committee/auth";
+      case "committee-chairman":
+        return "/committee-chairman/auth";
       case "director-operations":
         return "/director-operations/auth";
       default:
@@ -86,6 +90,8 @@ export function DashboardLayout({
         return "/admin";
       case "committee":
         return "/committee";
+      case "committee-chairman":
+        return "/committee-chairman";
       case "director-operations":
         return "/director-operations";
       default:

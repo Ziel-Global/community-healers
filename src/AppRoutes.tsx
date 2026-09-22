@@ -52,10 +52,12 @@ const SuperAdminAuth = lazy(() => import("./pages/auth/SuperAdminAuth"));
 const MinistryAuth = lazy(() => import("./pages/auth/MinistryAuth"));
 const ExamAuth = lazy(() => import("./pages/auth/ExamAuth"));
 const CommitteeMemberAuth = lazy(() => import("./pages/auth/CommitteeMemberAuth"));
+const CommitteeChairmanAuth = lazy(() => import("./pages/auth/CommitteeChairmanAuth"));
 const DirectorOperationsAuth = lazy(() => import("./pages/auth/DirectorOperationsAuth"));
 const ExamPortal = lazy(() => import("./pages/ExamPortal"));
 
 const CommitteeMemberPortal = lazy(() => import("./pages/CommitteeMemberPortal"));
+const CommitteeChairmanPortal = lazy(() => import("./pages/CommitteeChairmanPortal"));
 const CommitteeApplicationDetailPage = lazy(() => import("./pages/committee/ApplicationDetailPage"));
 const CommitteeInspectionHistoryPage = lazy(() => import("./pages/committee/InspectionHistoryPage"));
 
@@ -83,6 +85,7 @@ export function AppRoutes() {
                 <Route path="/ministry/auth" element={<MinistryAuth />} />
                 <Route path="/training/auth" element={<ExamAuth />} />
                 <Route path="/committee/auth" element={<CommitteeMemberAuth />} />
+                <Route path="/committee-chairman/auth" element={<CommitteeChairmanAuth />} />
                 <Route path="/director-operations/auth" element={<DirectorOperationsAuth />} />
 
                 {/* Center Onboarding — public, no login (applicant has no account until approved).
@@ -163,6 +166,8 @@ export function AppRoutes() {
                 <Route path="/committee" element={<ProtectedRoute portalType="committee"><CommitteeMemberPortal /></ProtectedRoute>} />
                 <Route path="/committee/applications/:applicationId" element={<ProtectedRoute portalType="committee"><CommitteeApplicationDetailPage /></ProtectedRoute>} />
                 <Route path="/committee/history" element={<ProtectedRoute portalType="committee"><CommitteeInspectionHistoryPage /></ProtectedRoute>} />
+
+                <Route path="/committee-chairman" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanPortal /></ProtectedRoute>} />
 
                 {/* Director of Operations Portal Routes (protected) */}
                 <Route path="/director-operations" element={<ProtectedRoute portalType="director-operations"><DirectorOperationsPortal /></ProtectedRoute>} />

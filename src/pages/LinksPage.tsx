@@ -16,6 +16,7 @@ import {
   BookOpen,
   ClipboardCheck,
   Briefcase,
+  Gavel,
 } from "lucide-react";
 
 // Portals Interface is missing (Type Safety)
@@ -96,6 +97,17 @@ const portals = [
     stats: [
       { label: "Applications In Flight", value: "48" },
       { label: "Committees", value: "6" },
+    ],
+  },
+  {
+    title: "Committee Chairman",
+    description:
+      "Chair the approval committee, review inspection outcomes, and give the final decision on center applications.",
+    icon: Gavel,
+    href: "/committee-chairman/auth",
+    stats: [
+      { label: "Decisions Pending", value: "14" },
+      { label: "Committees Chaired", value: "6" },
     ],
   },
 ];

@@ -6,7 +6,7 @@ interface PortalCardProps {
   title: string;
   description: string;
   icon: LucideIcon;
-  href: string;
+  href?: string;
   accentColor?: string;
   stats?: { label: string; value: string }[];
 }
@@ -18,17 +18,15 @@ export function PortalCard({
   href,
   stats,
 }: PortalCardProps) {
-  return (
-    <Link
-      to={href}
-      className={cn(
-        "group relative flex flex-col p-4 sm:p-6 rounded-xl sm:rounded-2xl",
-        "bg-card border border-border/60",
-        "hover:border-primary/30 hover:shadow-royal",
-        "transition-all duration-500 ease-out",
-        "hover:-translate-y-1"
-      )}
-    >
+  const className = cn(
+    "group relative flex flex-col p-4 sm:p-6 rounded-xl sm:rounded-2xl",
+    "bg-card border border-border/60",
+    "hover:border-primary/30 hover:shadow-royal",
+    "transition-all duration-500 ease-out",
+    "hover:-translate-y-1"
+  );
+  const body = (
+    <>
       {/* Subtle gradient overlay on hover */}
       <div className="absolute inset-0 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-gold/5" />
@@ -79,6 +77,16 @@ export function PortalCard({
           />
         </svg>
       </div>
+    </>
+  );
+
+  if (!href) {
+    return <div className={className}>{body}</div>;
+  }
+
+  return (
+    <Link to={href} className={className}>
+      {body}
     </Link>
   );
 }

@@ -42,6 +42,11 @@ export interface CommitteeMemberLoginCredentials {
     password: string;
 }
 
+export interface CommitteeChairmanLoginCredentials {
+    email: string;
+    password: string;
+}
+
 export interface DirectorOperationsLoginCredentials {
     email: string;
     password: string;

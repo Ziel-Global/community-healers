@@ -9,9 +9,10 @@ export type UserRole =
     | 'CENTER_ADMIN'
     | 'MINISTRY'
     | 'COMMITTEE_MEMBER'
+    | 'COMMITTEE_CHAIRMAN'
     | 'DIRECTOR_OPERATIONS';
 
-export type PortalType = 'candidate' | 'center' | 'admin' | 'ministry' | 'exam' | 'committee' | 'director-operations';
+export type PortalType = 'candidate' | 'center' | 'admin' | 'ministry' | 'exam' | 'committee' | 'committee-chairman' | 'director-operations';
 
 /**
  * Which roles may access each portal. SUPER_ADMIN is included on most portals
@@ -34,6 +35,7 @@ export const PORTAL_ALLOWED_ROLES: Record<PortalType, UserRole[]> = {
     ministry: ['MINISTRY', 'SUPER_ADMIN'],
     admin: ['SUPER_ADMIN'],
     committee: ['COMMITTEE_MEMBER', 'SUPER_ADMIN'],
+    'committee-chairman': ['COMMITTEE_CHAIRMAN'],
     'director-operations': ['DIRECTOR_OPERATIONS'],
 };
 
@@ -44,5 +46,6 @@ export const ROLE_HOME_PATH: Record<UserRole, string> = {
     MINISTRY: '/ministry',
     SUPER_ADMIN: '/admin',
     COMMITTEE_MEMBER: '/committee',
+    COMMITTEE_CHAIRMAN: '/committee-chairman',
     DIRECTOR_OPERATIONS: '/director-operations',
 };
