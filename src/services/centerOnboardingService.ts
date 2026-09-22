@@ -22,6 +22,11 @@ export interface ChecklistItem {
     category: ChecklistCategory;
 }
 
+export interface StaffQualificationOption {
+    value: string;
+    label: string;
+}
+
 export interface VerifyLicenseResult {
     applicationId: string;
     phone: string;
@@ -111,6 +116,11 @@ export interface CenterInfoPayload {
 
 const getChecklist = async (): Promise<ChecklistItem[]> => {
     const response = await api.get('/center-onboarding/checklist');
+    return response.data;
+};
+
+const getStaffQualifications = async (): Promise<StaffQualificationOption[]> => {
+    const response = await api.get('/center-onboarding/staff-qualifications');
     return response.data;
 };
 
@@ -216,6 +226,7 @@ const submitCenterInfo = async (
 
 export const centerOnboardingService = {
     getChecklist,
+    getStaffQualifications,
     reverseGeocode,
     verifyLicense,
     resendOtp,

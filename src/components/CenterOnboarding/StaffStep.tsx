@@ -1,11 +1,12 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Users, Plus, Trash2, Loader2, ArrowRight, ArrowLeft, FileCheck, Paperclip, Save } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { StaffCategory } from "@/services/centerOnboardingService";
+import { getApiErrorMessage } from "@/lib/errors";
+import { centerOnboardingService, type StaffCategory, type StaffQualificationOption } from "@/services/centerOnboardingService";
 
 export interface StaffFormRow {
     /** Present once this row has been persisted — needed before a document can be attached. */
@@ -59,6 +60,33 @@ export function StaffStep({
     rosterSaved,
 }: StaffStepProps) {
     const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+    const [qualifications, setQualifications] = useState<StaffQualificationOption[]>([]);
+    const [qualificationsLoading, setQualificationsLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        centerOnboardingService
+            .getStaffQualifications()
+            .then((options) => {
+                if (!cancelled) setQualifications(Array.isArray(options) ? options : []);
+            })
+            .catch((error) => {
+                if (!cancelled) toast.error(getApiErrorMessage(error, "Failed to load qualifications"));
+            })
+            .finally(() => {
+                if (!cancelled) setQualificationsLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const optionsForRow = (qualification: string) => {
+        if (qualification && !qualifications.some((option) => option.value === qualification)) {
+            return [{ value: qualification, label: qualification }, ...qualifications];
+        }
+        return qualifications;
+    };
 
     const updateRow = (index: number, patch: Partial<StaffFormRow>) => {
         onRowsChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
@@ -133,11 +161,22 @@ export function StaffStep({
                                 </Button>
                             </div>
 
-                            <Input
-                                placeholder="Qualification (e.g. MBA, Certified Trainer)"
-                                value={row.qualification}
-                                onChange={(e) => updateRow(index, { qualification: e.target.value })}
-                            />
+                            <Select
+                                value={row.qualification || undefined}
+                                onValueChange={(value) => updateRow(index, { qualification: value })}
+                                disabled={qualificationsLoading}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select qualification" />
+                                </SelectTrigger>
+                                <SelectContent className="max-h-48 overflow-y-auto [&_[data-radix-select-viewport]]:max-h-44 [&_[data-radix-select-viewport]]:min-h-0 [&_[data-radix-select-viewport]]:overflow-y-scroll [&_[data-radix-select-viewport]]:[scrollbar-width:thin!important] [&_[data-radix-select-viewport]::-webkit-scrollbar]:!block [&_[data-radix-select-viewport]::-webkit-scrollbar]:w-2">
+                                    {optionsForRow(row.qualification).map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
 
                             {row.id && (
                                 <div className="flex items-center gap-2">
