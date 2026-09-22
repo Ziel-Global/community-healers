@@ -18,6 +18,12 @@ export interface StaffFormRow {
     documentObjectKey?: string | null;
 }
 
+const HIDDEN_QUALIFICATION_VALUES = new Set(["PRIMARY", "MIDDLE", "MATRIC"]);
+
+const isHiddenQualification = (option: StaffQualificationOption) =>
+    HIDDEN_QUALIFICATION_VALUES.has(option.value) ||
+    /\bgrade\s*(5|8|10)\b/i.test(option.label);
+
 const STAFF_CATEGORIES: { value: StaffCategory; label: string }[] = [
     { value: "PRINCIPAL", label: "Principal" },
     { value: "MODERATOR", label: "Moderator" },
@@ -68,7 +74,10 @@ export function StaffStep({
         centerOnboardingService
             .getStaffQualifications()
             .then((options) => {
-                if (!cancelled) setQualifications(Array.isArray(options) ? options : []);
+                if (!cancelled) {
+                    const list = Array.isArray(options) ? options : [];
+                    setQualifications(list.filter((option) => !isHiddenQualification(option)));
+                }
             })
             .catch((error) => {
                 if (!cancelled) toast.error(getApiErrorMessage(error, "Failed to load qualifications"));
@@ -82,7 +91,11 @@ export function StaffStep({
     }, []);
 
     const optionsForRow = (qualification: string) => {
-        if (qualification && !qualifications.some((option) => option.value === qualification)) {
+        if (
+            qualification &&
+            !HIDDEN_QUALIFICATION_VALUES.has(qualification) &&
+            !qualifications.some((option) => option.value === qualification)
+        ) {
             return [{ value: qualification, label: qualification }, ...qualifications];
         }
         return qualifications;
