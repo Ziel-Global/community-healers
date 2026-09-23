@@ -61,6 +61,15 @@ const CommitteeChairmanPortal = lazy(() => import("./pages/CommitteeChairmanPort
 const CommitteeChairmanMembersPage = lazy(() => import("./pages/committee-chairman/MembersPage"));
 const CommitteeChairmanApplicationsPage = lazy(() => import("./pages/committee-chairman/ApplicationsPage"));
 const CommitteeChairmanApplicationDetailPage = lazy(() => import("./pages/committee-chairman/ApplicationDetailPage"));
+const CommitteeChairmanInspectionReportsPage = lazy(
+  () => import("./pages/committee-chairman/inspection-reports/InspectionReportsPage"),
+);
+const CommitteeChairmanInspectionReportsCenterPage = lazy(
+  () => import("./pages/committee-chairman/inspection-reports/InspectionReportsCenterPage"),
+);
+const CommitteeChairmanInspectionReportsMemberPage = lazy(
+  () => import("./pages/committee-chairman/inspection-reports/InspectionReportsMemberPage"),
+);
 const CommitteeApplicationDetailPage = lazy(() => import("./pages/committee/ApplicationDetailPage"));
 const CommitteeInspectionHistoryPage = lazy(() => import("./pages/committee/InspectionHistoryPage"));
 
@@ -174,6 +183,9 @@ export function AppRoutes() {
                 <Route path="/committee-chairman/applications" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanApplicationsPage /></ProtectedRoute>} />
                 <Route path="/committee-chairman/applications/:applicationId" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanApplicationDetailPage /></ProtectedRoute>} />
                 <Route path="/committee-chairman/members" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanMembersPage /></ProtectedRoute>} />
+                <Route path="/committee-chairman/inspection-reports" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanInspectionReportsPage /></ProtectedRoute>} />
+                <Route path="/committee-chairman/inspection-reports/:applicationId" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanInspectionReportsCenterPage /></ProtectedRoute>} />
+                <Route path="/committee-chairman/inspection-reports/:applicationId/members/:memberUserId" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanInspectionReportsMemberPage /></ProtectedRoute>} />
 
                 {/* Bureau portal routes (protected) */}
                 <Route path="/bureau" element={<ProtectedRoute portalType="director-operations"><DirectorOperationsPortal /></ProtectedRoute>} />

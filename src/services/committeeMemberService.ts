@@ -1,4 +1,5 @@
 import { api } from './api';
+import type { ReportRecommendation } from './committeeChairmanService';
 
 export interface CommitteeApplication {
     id: string;
@@ -37,6 +38,12 @@ export interface AttendanceEntry {
     updatedAt: string;
 }
 
+export interface MemberInspectionReport {
+    submittedAt: string | null;
+    recommendation: ReportRecommendation | null;
+    notes: string | null;
+}
+
 export interface CommitteeApplicationDetail {
     application: {
         id: string;
@@ -48,6 +55,12 @@ export interface CommitteeApplicationDetail {
     checklist: CommitteeChecklistItem[];
     attendance: AttendanceEntry[];
     myAttendance: AttendanceEntry | null;
+    myReport?: MemberInspectionReport | null;
+}
+
+export interface SubmitReportPayload {
+    recommendation: ReportRecommendation;
+    notes?: string;
 }
 
 const getAssignedApplications = async (): Promise<CommitteeApplication[]> => {
@@ -57,6 +70,16 @@ const getAssignedApplications = async (): Promise<CommitteeApplication[]> => {
 
 const getApplicationDetail = async (applicationId: string): Promise<CommitteeApplicationDetail> => {
     const response = await api.get(`/internal/committee/applications/${applicationId}`);
+    return response.data;
+};
+
+const getMyReport = async (applicationId: string): Promise<MemberInspectionReport> => {
+    const response = await api.get(`/internal/committee/applications/${applicationId}/report`);
+    return response.data;
+};
+
+const submitReport = async (applicationId: string, payload: SubmitReportPayload): Promise<MemberInspectionReport> => {
+    const response = await api.post(`/internal/committee/applications/${applicationId}/report`, payload);
     return response.data;
 };
 
@@ -79,17 +102,6 @@ const setChecklistChecked = async (applicationId: string, checklistItemId: strin
     return response.data;
 };
 
-/** The committee's own final call — creates the real Center + admin login on approval. */
-const approveInspection = async (applicationId: string) => {
-    const response = await api.post(`/internal/committee/applications/${applicationId}/approve`);
-    return response.data;
-};
-
-const rejectInspection = async (applicationId: string, reason: string) => {
-    const response = await api.post(`/internal/committee/applications/${applicationId}/reject`, { reason });
-    return response.data;
-};
-
 const setAttendance = async (
     applicationId: string,
     attending: boolean,
@@ -105,9 +117,9 @@ const setAttendance = async (
 export const committeeMemberService = {
     getAssignedApplications,
     getApplicationDetail,
+    getMyReport,
+    submitReport,
     uploadEvidence,
     setChecklistChecked,
-    approveInspection,
-    rejectInspection,
     setAttendance,
 };

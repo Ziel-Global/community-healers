@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Award, ClipboardList, Gavel, Loader2, PlayCircle, TrendingUp, Users, XCircle, FileStack } from "lucide-react";
+import { Award, ClipboardList, ClipboardCheck, Gavel, Loader2, PlayCircle, TrendingUp, Users, XCircle, FileStack } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,6 +74,7 @@ function growthLabel(points: { value: number }[]) {
 export const committeeChairmanNavItems = [
   { label: "Dashboard", href: "/committee-chairman", icon: <Gavel className="w-4 h-4" /> },
   { label: "Applications", href: "/committee-chairman/applications", icon: <FileStack className="w-4 h-4" /> },
+  { label: "Inspection reports", href: "/committee-chairman/inspection-reports", icon: <ClipboardCheck className="w-4 h-4" /> },
   { label: "Members", href: "/committee-chairman/members", icon: <Users className="w-4 h-4" /> },
 ];
 

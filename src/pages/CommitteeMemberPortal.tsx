@@ -13,7 +13,7 @@ export const committeeNavItems = [
 
 export default function CommitteeMemberPortal() {
   const { data: applications = [], isLoading } = useAssignedApplications();
-  const activeApplications = applications.filter((a) => a.status === "INSPECTION_IN_PROGRESS" || a.status === "SCHEDULED");
+  const activeApplications = applications.filter((a) => a.status === "SCHEDULED");
 
   return (
     <DashboardLayout

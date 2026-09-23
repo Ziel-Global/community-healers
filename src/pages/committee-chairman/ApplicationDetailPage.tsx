@@ -22,16 +22,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -41,8 +31,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { APPLICATION_STATUS_META } from "@/components/DirectorOperationsPortal/CenterApplications/statusMeta";
 import { CommitteeAttendanceCard } from "@/components/DirectorOperationsPortal/CenterApplications/CommitteeAttendanceCard";
-import { ChecklistResultsSection } from "@/components/DirectorOperationsPortal/CenterApplications/ChecklistResultsSection";
 import { CommentThread } from "@/components/CommentThread";
+import { ForwardWithScheduleDialog } from "@/components/committee-chairman/ForwardWithScheduleDialog";
 import {
   useChairmanApplicationDetail,
   useForwardChairmanApplication,
@@ -73,7 +63,7 @@ export default function CommitteeChairmanApplicationDetailPage() {
   const forwardMutation = useForwardChairmanApplication(applicationId);
   const returnMutation = useReturnChairmanApplication(applicationId);
 
-  const [showForwardConfirm, setShowForwardConfirm] = useState(false);
+  const [showForwardDialog, setShowForwardDialog] = useState(false);
   const [showReturnDialog, setShowReturnDialog] = useState(false);
   const [returnReason, setReturnReason] = useState("");
 
@@ -98,15 +88,19 @@ export default function CommitteeChairmanApplicationDetailPage() {
     );
   }
 
-  const { application, checklistResults, attendance } = data;
+  const { application, attendance } = data;
   const canAct = application.status === "PENDING_CHAIRMAN_REVIEW";
+  const isScheduled = application.status === "SCHEDULED";
   const meta = APPLICATION_STATUS_META[application.status];
 
-  const handleForward = () => {
-    forwardMutation.mutate(undefined, {
+  const handleForward = (scheduledInspectionDate: string) => {
+    forwardMutation.mutate(scheduledInspectionDate, {
       onSuccess: () => {
-        toast({ title: "Forwarded to committee", description: "All committee members can now schedule and inspect this center." });
-        setShowForwardConfirm(false);
+        toast({
+          title: "Inspection scheduled",
+          description: "Committee members can now complete their individual inspection reports.",
+        });
+        setShowForwardDialog(false);
         navigate("/committee-chairman/applications");
       },
       onError: (err) => {
@@ -155,16 +149,35 @@ export default function CommitteeChairmanApplicationDetailPage() {
         {canAct && (
           <Card className="border-primary/30 bg-primary/5">
             <CardContent className="p-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-              <p className="text-sm text-foreground">Review the application, then forward it to all committee members or return it to the Bureau.</p>
+              <p className="text-sm text-foreground">
+                Review the application, pick an inspection date, and forward to all committee members — or return it to the Bureau.
+              </p>
               <div className="flex flex-wrap gap-2 shrink-0">
                 <Button variant="outline" className="gap-2" onClick={() => setShowReturnDialog(true)} disabled={returnMutation.isPending}>
                   <Undo2 className="w-4 h-4" /> Return to Bureau
                 </Button>
-                <Button className="gradient-primary text-white gap-2" onClick={() => setShowForwardConfirm(true)} disabled={forwardMutation.isPending}>
+                <Button className="gradient-primary text-white gap-2" onClick={() => setShowForwardDialog(true)} disabled={forwardMutation.isPending}>
                   {forwardMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  Forward to committee
+                  Schedule &amp; forward
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {isScheduled && (
+          <Card className="border-border/40">
+            <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">
+                Inspection is scheduled for {formatDate(application.scheduledInspectionDate)}. Review member reports and make the final decision.
+              </p>
+              <Button
+                variant="outline"
+                className="shrink-0"
+                onClick={() => navigate(`/committee-chairman/inspection-reports/${application.id}`)}
+              >
+                View inspection reports
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -299,13 +312,6 @@ export default function CommitteeChairmanApplicationDetailPage() {
 
         {application.committee && attendance.length > 0 && <CommitteeAttendanceCard attendance={attendance} />}
 
-        {checklistResults.length > 0 && (
-          <ChecklistResultsSection
-            checklistResults={checklistResults}
-            getEvidenceBlob={directorOperationsCenterApplicationService.getEvidenceBlob}
-          />
-        )}
-
         {application.status === "REJECTED" && application.rejectionReason && (
           <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">
             <p className="text-sm font-medium text-destructive mb-1">Rejection reason</p>
@@ -323,22 +329,12 @@ export default function CommitteeChairmanApplicationDetailPage() {
         )}
       </div>
 
-      <AlertDialog open={showForwardConfirm} onOpenChange={setShowForwardConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Forward to all committee members?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Every committee member will be able to schedule and carry out the on-site inspection. You cannot undo this from the chairman portal.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={forwardMutation.isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleForward} disabled={forwardMutation.isPending} className="gradient-primary">
-              {forwardMutation.isPending ? "Forwarding…" : "Forward"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ForwardWithScheduleDialog
+        open={showForwardDialog}
+        onOpenChange={setShowForwardDialog}
+        onConfirm={handleForward}
+        loading={forwardMutation.isPending}
+      />
 
       <Dialog open={showReturnDialog} onOpenChange={(open) => { if (!open) setReturnReason(""); setShowReturnDialog(open); }}>
         <DialogContent>

@@ -7,22 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle2, XCircle, Camera, Loader2, ImageIcon, CalendarClock, UserCheck, UserX, Users, ClipboardList, Building2, GraduationCap } from "lucide-react";
+import { CheckCircle2, Camera, Loader2, ImageIcon, CalendarClock, UserCheck, UserX, Users, ClipboardList, Building2, GraduationCap, Send } from "lucide-react";
 import { toast } from "sonner";
 import {
   useCommitteeApplicationDetail,
   useUploadEvidence,
   useSetChecklistChecked,
-  useApproveInspection,
-  useRejectInspection,
   useSetAttendance,
+  useMyInspectionReport,
+  useSubmitInspectionReport,
 } from "@/hooks/queries/useCommitteeMemberQueries";
 import { getApiErrorMessage } from "@/lib/errors";
 import { CommentThread } from "@/components/CommentThread";
-import { ScheduleInspectionDialog } from "@/components/ScheduleInspectionDialog";
 import { CameraCaptureDialog } from "@/components/CameraCaptureDialog";
+import { Label } from "@/components/ui/label";
 import type { CommitteeChecklistItem, ChecklistCategory } from "@/services/committeeMemberService";
+import type { ReportRecommendation } from "@/services/committeeChairmanService";
 
 /** One clear photo proves an item was inspected — no need for a second angle. */
 const MIN_EVIDENCE = 1;
@@ -47,18 +47,17 @@ export default function CommitteeApplicationDetailPage() {
   const { applicationId = "" } = useParams();
   const navigate = useNavigate();
   const { data, isLoading } = useCommitteeApplicationDetail(applicationId);
+  const { data: myReport } = useMyInspectionReport(applicationId);
   const uploadMutation = useUploadEvidence(applicationId);
   const checkedMutation = useSetChecklistChecked(applicationId);
-  const approveMutation = useApproveInspection(applicationId);
-  const rejectMutation = useRejectInspection(applicationId);
+  const submitReportMutation = useSubmitInspectionReport(applicationId);
   const attendanceMutation = useSetAttendance(applicationId);
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
-  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [cameraTargetItemId, setCameraTargetItemId] = useState<string | null>(null);
   const [showDeclineReason, setShowDeclineReason] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
-  const [showRejectDialog, setShowRejectDialog] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
+  const [recommendation, setRecommendation] = useState<ReportRecommendation>("APPROVE");
+  const [reportNotes, setReportNotes] = useState("");
 
   if (isLoading) {
     return (
@@ -70,12 +69,15 @@ export default function CommitteeApplicationDetailPage() {
 
   if (!data) return null;
 
-  const { application, checklist, attendance, myAttendance } = data;
-  // The checklist only unlocks once the committee has picked an inspection date.
-  const needsScheduling = application.status === "INSPECTION_IN_PROGRESS";
-  const isEditable = application.status === "SCHEDULED";
-  const isReadOnly = !isEditable;
+  const { application, checklist, attendance, myAttendance, myReport: myReportOnDetail } = data;
   const allDocumented = checklist.every(isItemComplete);
+  const submittedAt = myReport?.submittedAt ?? myReportOnDetail?.submittedAt ?? null;
+  const isReportSubmitted = !!submittedAt;
+  const isScheduled = application.status === "SCHEDULED";
+  const isEditable = isScheduled && !isReportSubmitted;
+  const isReadOnly = !isEditable;
+  const isAttending = myAttendance?.attending === true;
+  const canSubmitReport = isEditable && isAttending && allDocumented && !submitReportMutation.isPending;
   const groupedChecklist = CATEGORY_ORDER.map((category) => ({
     category,
     items: checklist.filter((item) => item.category === category),
@@ -136,26 +138,17 @@ export default function CommitteeApplicationDetailPage() {
     );
   };
 
-  const handleApprove = () => {
-    approveMutation.mutate(undefined, {
-      onSuccess: () => {
-        toast.success("Application approved — the center and its admin login are now live");
-        navigate("/committee");
+  const handleSubmitReport = () => {
+    submitReportMutation.mutate(
+      { recommendation, notes: reportNotes.trim() || undefined },
+      {
+        onSuccess: () => {
+          toast.success("Report submitted to the chairman");
+          navigate("/committee");
+        },
+        onError: (error) => toast.error(getApiErrorMessage(error, "Failed to submit report")),
       },
-      onError: (error) => toast.error(getApiErrorMessage(error, "Failed to approve application")),
-    });
-  };
-
-  const handleReject = () => {
-    if (!rejectReason.trim()) return;
-    rejectMutation.mutate(rejectReason.trim(), {
-      onSuccess: () => {
-        toast.success("Application rejected");
-        setShowRejectDialog(false);
-        navigate("/committee");
-      },
-      onError: (error) => toast.error(getApiErrorMessage(error, "Failed to reject application")),
-    });
+    );
   };
 
   return (
@@ -166,44 +159,43 @@ export default function CommitteeApplicationDetailPage() {
       navItems={committeeNavItems}
     >
       <div className="max-w-3xl mx-auto space-y-4">
-        {needsScheduling ? (
-          <Card className="border-primary/30 bg-primary/5">
-            <CardContent className="p-6 text-center space-y-3">
-              <CalendarClock className="w-10 h-10 text-primary mx-auto" />
-              <h2 className="text-lg font-semibold text-foreground">Schedule the inspection first</h2>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Pick a date and leave a note for the rest of your committee before the checklist unlocks —
-                e.g. "We will visit this center for inspection on this date."
-              </p>
-              <Button className="gradient-primary text-white gap-2 mt-2" onClick={() => setShowScheduleDialog(true)}>
-                <CalendarClock className="w-4 h-4" /> Schedule Inspection
-              </Button>
+        {!isScheduled ? (
+          <Card className="border-border/40">
+            <CardContent className="p-6 text-center text-sm text-muted-foreground">
+              This application is <strong>{application.status}</strong>. Your inspection checklist opens once the chairman
+              schedules and forwards it.
             </CardContent>
           </Card>
         ) : (
           <>
-            {isReadOnly && (
+            {isReportSubmitted && (
+              <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-sm text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                Report submitted to the chairman
+                {submittedAt && ` on ${formatDate(submittedAt)}`}.
+                {myReport?.recommendation && (
+                  <Badge variant="outline" className="ml-1">
+                    Recommended {myReport.recommendation}
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {isReadOnly && !isReportSubmitted && (
               <div className="p-4 rounded-xl bg-secondary/40 border border-border/40 text-sm text-muted-foreground">
                 This application's status is <strong>{application.status}</strong> — checklist is read-only.
               </div>
             )}
 
             <Card className="border-border/40">
-              <CardContent className="p-5 flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2.5">
-                  <CalendarClock className="w-4 h-4 text-primary shrink-0" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Scheduled Inspection Date</p>
-                    <p className="text-sm font-semibold text-foreground">
-                      {formatDate(application.scheduledInspectionDate) ?? "Not scheduled yet"}
-                    </p>
-                  </div>
+              <CardContent className="p-5 flex items-center gap-2.5">
+                <CalendarClock className="w-4 h-4 text-primary shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Scheduled Inspection Date</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {formatDate(application.scheduledInspectionDate) ?? "Not scheduled yet"}
+                  </p>
                 </div>
-                {isEditable && (
-                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowScheduleDialog(true)}>
-                    <CalendarClock className="w-3.5 h-3.5" /> Reschedule / Comment
-                  </Button>
-                )}
               </CardContent>
             </Card>
 
@@ -359,7 +351,7 @@ export default function CommitteeApplicationDetailPage() {
                       >
                         <Checkbox
                           checked={item.checked}
-                          disabled={isReadOnly || checkedMutation.isPending}
+                          disabled={isReadOnly}
                           onCheckedChange={(checked) => handleToggleChecked(item.checklistItemId, checked === true)}
                           className="mt-0.5"
                         />
@@ -377,29 +369,65 @@ export default function CommitteeApplicationDetailPage() {
             })}
 
             {isEditable && (
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  className="border-destructive/40 text-destructive hover:bg-destructive/10 gap-2"
-                  disabled={!allDocumented || rejectMutation.isPending}
-                  onClick={() => setShowRejectDialog(true)}
-                >
-                  <XCircle className="w-4 h-4" /> Reject
-                </Button>
-                <Button
-                  className="gradient-primary text-white gap-2"
-                  disabled={!allDocumented || approveMutation.isPending}
-                  onClick={handleApprove}
-                >
-                  {approveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  Approve
-                </Button>
-              </div>
-            )}
-            {isEditable && !allDocumented && (
-              <p className="text-xs text-muted-foreground text-right -mt-2">
-                Every checklist item must be checked or photographed before you can decide.
-              </p>
+              <Card className="border-primary/30 bg-primary/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Submit your report</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Your recommendation (advisory)</Label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={recommendation === "APPROVE" ? "default" : "outline"}
+                        className={recommendation === "APPROVE" ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+                        onClick={() => setRecommendation("APPROVE")}
+                      >
+                        Recommend approve
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={recommendation === "REJECT" ? "destructive" : "outline"}
+                        onClick={() => setRecommendation("REJECT")}
+                      >
+                        Recommend reject
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="report-notes">Notes (optional)</Label>
+                    <Textarea
+                      id="report-notes"
+                      value={reportNotes}
+                      onChange={(e) => setReportNotes(e.target.value.slice(0, 4000))}
+                      rows={3}
+                      placeholder="Summary for the chairman…"
+                    />
+                  </div>
+                  {!isAttending && (
+                    <p className="text-xs text-muted-foreground">Mark yourself as attending before you can submit.</p>
+                  )}
+                  {isAttending && !allDocumented && (
+                    <p className="text-xs text-muted-foreground">
+                      Complete every checklist item before submitting.
+                    </p>
+                  )}
+                  <Button
+                    className="w-full gradient-primary text-white gap-2"
+                    disabled={!canSubmitReport}
+                    onClick={handleSubmitReport}
+                  >
+                    {submitReportMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                    Submit report
+                  </Button>
+                </CardContent>
+              </Card>
             )}
           </>
         )}
@@ -411,13 +439,6 @@ export default function CommitteeApplicationDetailPage() {
           </CardContent>
         </Card>
       </div>
-
-      <ScheduleInspectionDialog
-        applicationId={applicationId}
-        open={showScheduleDialog}
-        onClose={() => setShowScheduleDialog(false)}
-        currentScheduledDate={application.scheduledInspectionDate}
-      />
 
       <CameraCaptureDialog
         open={!!cameraTargetItemId}
@@ -431,37 +452,6 @@ export default function CommitteeApplicationDetailPage() {
         allowFileFallbackHint={false}
       />
 
-      <Dialog open={showRejectDialog} onOpenChange={(open) => { setShowRejectDialog(open); if (!open) setRejectReason(""); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <XCircle className="w-5 h-5 text-destructive" /> Reject Application
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              This is the committee's final decision — the applicant will be notified of the rejection and the reason below.
-            </p>
-            <Textarea
-              placeholder="Reason for rejection (required)"
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              rows={4}
-            />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
-            <Button
-              variant="destructive"
-              disabled={!rejectReason.trim() || rejectMutation.isPending}
-              onClick={handleReject}
-            >
-              {rejectMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Confirm Rejection
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </DashboardLayout>
   );
 }
