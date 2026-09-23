@@ -7,6 +7,7 @@ export interface CommitteeMember {
     email: string;
     phoneNumber: string | null;
     status: 'ACTIVE' | 'INACTIVE';
+    role?: 'COMMITTEE_CHAIRMAN' | 'COMMITTEE_MEMBER';
     createdAt: string;
 }
 

@@ -30,7 +30,10 @@ export function AssignCommitteeDialog({ application, onClose, onAssigned }: Assi
         const noteText = comment.trim();
         assignMutation.mutate(committee.id, {
             onSuccess: () => {
-                toast({ title: "Committee assigned", description: `${application.centerName || "Application"} moved to Assigned — every member will see it.` });
+                toast({
+                    title: "Sent to chairman review",
+                    description: `${application.centerName || "Application"} is with the committee chairman. Members will see it after the chairman forwards it.`,
+                });
                 if (noteText) {
                     addComment.mutate(
                         { text: noteText },
@@ -59,9 +62,8 @@ export function AssignCommitteeDialog({ application, onClose, onAssigned }: Assi
                         Assign to {committee?.name ?? "the Approval Committee"}?
                     </DialogTitle>
                     <DialogDescription>
-                        {application?.centerName || "This application"} will be visible to every member of the committee
-                        {committee ? ` (${committee.members.length} member${committee.members.length === 1 ? "" : "s"})` : ""}, who can then
-                        schedule and carry out the inspection.
+                        {application?.centerName || "This application"} will go to the committee chairman for review
+                        {committee ? ` (${committee.name})` : ""}. After the chairman forwards it, every member can schedule and carry out the inspection.
                     </DialogDescription>
                 </DialogHeader>
 

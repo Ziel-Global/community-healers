@@ -44,12 +44,21 @@ export function KanbanBoard({ applications, cityNameById, committeeNameById, onR
         const toStatus = over.id as CenterApplicationStatus;
         if (fromStatus === toStatus) return;
 
-        if (toStatus === "INSPECTION_IN_PROGRESS") {
+        if (toStatus === "PENDING_CHAIRMAN_REVIEW") {
             if (fromStatus !== "INSPECTION_PENDING") {
-                toast({ variant: "destructive", title: "Can't move there", description: "Only new applications can be assigned a committee." });
+                toast({ variant: "destructive", title: "Can't move there", description: "Only new applications can be sent to chairman review." });
                 return;
             }
             onRequestAssign(application);
+            return;
+        }
+
+        if (toStatus === "INSPECTION_IN_PROGRESS") {
+            toast({
+                variant: "destructive",
+                title: "Can't move there",
+                description: "Applications reach Assigned after the committee chairman forwards them to the inspection team.",
+            });
             return;
         }
 

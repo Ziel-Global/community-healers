@@ -196,6 +196,13 @@ export default function CenterApplicationDetailPage() {
                     getEvidenceBlob={directorOperationsCenterApplicationService.getEvidenceBlob}
                 />
 
+                {application.chairmanReturnReason && (
+                    <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                        <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">Returned from chairman review</p>
+                        <p className="text-sm text-muted-foreground">{application.chairmanReturnReason}</p>
+                    </div>
+                )}
+
                 {/* Decision — made by the committee directly now; this is view-only. */}
                 {application.status === "REJECTED" && application.rejectionReason && (
                     <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">

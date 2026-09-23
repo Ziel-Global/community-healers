@@ -6,17 +6,36 @@ export type CenterApplicationStatus =
     | 'PENDING_VERIFICATION'
     | 'DETAILS_PENDING'
     | 'INSPECTION_PENDING'
+    | 'PENDING_CHAIRMAN_REVIEW'
     | 'INSPECTION_IN_PROGRESS'
     | 'SCHEDULED'
     | 'UNDER_REVIEW'
     | 'APPROVED'
     | 'REJECTED';
 
+export interface BureauLicenseData {
+    phone?: string;
+    valid?: boolean;
+    ownerName?: string;
+    centerName?: string;
+    licenseIssuedDate?: string;
+}
+
+export interface ChairmanReviewedByUser {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    email: string;
+}
+
 export interface CommitteeMemberSummary {
     id: string;
     firstName: string | null;
     lastName: string | null;
     email: string;
+    phoneNumber?: string | null;
+    role?: 'COMMITTEE_CHAIRMAN' | 'COMMITTEE_MEMBER';
+    status?: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface CommitteeSummary {
@@ -52,6 +71,22 @@ export interface CenterApplicationSummary {
     jointVentureLicenseNumber: string | null;
     createdAt: string;
     updatedAt: string;
+    chairmanReviewedAt?: string | null;
+    chairmanReviewedByUserId?: string | null;
+    chairmanReturnReason?: string | null;
+    resultingCenterId?: string | null;
+    bureauVerified?: boolean;
+    detailsStep?: number;
+    buildingArea?: string | null;
+    buildingCapacity?: number | null;
+    buildingOwnership?: string | null;
+    receptionAvailable?: boolean | null;
+    requiredSystemsAvailable?: boolean | null;
+    camerasAvailable?: boolean | null;
+    camerasInfo?: string | null;
+    bureauData?: BureauLicenseData | null;
+    inspectorId?: string | null;
+    reviewedByUserId?: string | null;
 }
 
 export interface CenterApplicationStaffMember {
@@ -94,12 +129,15 @@ export interface AttendanceEntry {
     updatedAt: string;
 }
 
+export interface CenterApplicationDetailApplication extends CenterApplicationSummary {
+    staff: CenterApplicationStaffMember[];
+    committee: CommitteeSummary | null;
+    city: CenterApplicationCity | null;
+    chairmanReviewedBy?: ChairmanReviewedByUser | null;
+}
+
 export interface CenterApplicationDetail {
-    application: CenterApplicationSummary & {
-        staff: CenterApplicationStaffMember[];
-        committee: CommitteeSummary | null;
-        city: CenterApplicationCity | null;
-    };
+    application: CenterApplicationDetailApplication;
     checklistResults: ChecklistResultDetail[];
     attendance: AttendanceEntry[];
 }

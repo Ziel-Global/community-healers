@@ -58,6 +58,9 @@ const ExamPortal = lazy(() => import("./pages/ExamPortal"));
 
 const CommitteeMemberPortal = lazy(() => import("./pages/CommitteeMemberPortal"));
 const CommitteeChairmanPortal = lazy(() => import("./pages/CommitteeChairmanPortal"));
+const CommitteeChairmanMembersPage = lazy(() => import("./pages/committee-chairman/MembersPage"));
+const CommitteeChairmanApplicationsPage = lazy(() => import("./pages/committee-chairman/ApplicationsPage"));
+const CommitteeChairmanApplicationDetailPage = lazy(() => import("./pages/committee-chairman/ApplicationDetailPage"));
 const CommitteeApplicationDetailPage = lazy(() => import("./pages/committee/ApplicationDetailPage"));
 const CommitteeInspectionHistoryPage = lazy(() => import("./pages/committee/InspectionHistoryPage"));
 
@@ -168,6 +171,9 @@ export function AppRoutes() {
                 <Route path="/committee/history" element={<ProtectedRoute portalType="committee"><CommitteeInspectionHistoryPage /></ProtectedRoute>} />
 
                 <Route path="/committee-chairman" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanPortal /></ProtectedRoute>} />
+                <Route path="/committee-chairman/applications" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanApplicationsPage /></ProtectedRoute>} />
+                <Route path="/committee-chairman/applications/:applicationId" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanApplicationDetailPage /></ProtectedRoute>} />
+                <Route path="/committee-chairman/members" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanMembersPage /></ProtectedRoute>} />
 
                 {/* Bureau portal routes (protected) */}
                 <Route path="/bureau" element={<ProtectedRoute portalType="director-operations"><DirectorOperationsPortal /></ProtectedRoute>} />

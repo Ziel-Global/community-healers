@@ -32,6 +32,13 @@ export const APPLICATION_STATUS_META: Record<
         glow: "shadow-[0_0_0_4px_rgba(148,163,184,0.18)]",
         chipClassName: "bg-slate-500/10 text-slate-600 dark:text-slate-300 border-slate-500/20",
     },
+    PENDING_CHAIRMAN_REVIEW: {
+        label: "Chairman review",
+        badgeVariant: "outline",
+        dot: "bg-amber-500",
+        glow: "shadow-[0_0_0_4px_rgba(245,158,11,0.16)]",
+        chipClassName: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25",
+    },
     INSPECTION_IN_PROGRESS: {
         label: "Assigned",
         badgeVariant: "default",
@@ -72,6 +79,7 @@ export const APPLICATION_STATUS_META: Record<
 /** The 5 stages Super Admin actually acts on — pre-submission stages (PENDING_VERIFICATION/DETAILS_PENDING) live with the applicant, not on this board. */
 export const KANBAN_STATUSES: CenterApplicationStatus[] = [
     "INSPECTION_PENDING",
+    "PENDING_CHAIRMAN_REVIEW",
     "INSPECTION_IN_PROGRESS",
     "SCHEDULED",
     "UNDER_REVIEW",

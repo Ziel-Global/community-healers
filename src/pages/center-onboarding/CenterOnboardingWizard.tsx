@@ -58,6 +58,10 @@ const STATUS_COPY: Record<string, { title: string; body: string }> = {
     title: "Application submitted",
     body: "Your center details and staff roster have been received. An Approval Committee will be assigned to visit your premises soon.",
   },
+  PENDING_CHAIRMAN_REVIEW: {
+    title: "Application submitted",
+    body: "Your center details and staff roster have been received. An Approval Committee will be assigned to visit your premises soon.",
+  },
   INSPECTION_IN_PROGRESS: {
     title: "Committee assigned",
     body: "An Approval Committee has been assigned to your application. They'll schedule a date to visit your premises soon.",
