@@ -2,31 +2,31 @@
   "rewrites": [
     {
       "source": "/auth/:path*",
-      "destination": "https://ministry-backend-2jdm.onrender.com/auth/:path*"
+      "destination": "https://ministry-backend-1.onrender.com/auth/:path*"
     },
     {
       "source": "/candidates/:path*",
-      "destination": "https://ministry-backend-2jdm.onrender.com/candidates/:path*"
+      "destination": "https://ministry-backend-1.onrender.com/candidates/:path*"
     },
     {
       "source": "/center-admin/:path*",
-      "destination": "https://ministry-backend-2jdm.onrender.com/center-admin/:path*"
+      "destination": "https://ministry-backend-1.onrender.com/center-admin/:path*"
     },
     {
       "source": "/ministry/:path*",
-      "destination": "https://ministry-backend-2jdm.onrender.com/ministry/:path*"
+      "destination": "https://ministry-backend-1.onrender.com/ministry/:path*"
     },
     {
       "source": "/super-admin/:path*",
-      "destination": "https://ministry-backend-2jdm.onrender.com/super-admin/:path*"
+      "destination": "https://ministry-backend-1.onrender.com/super-admin/:path*"
     },
     {
       "source": "/center-onboarding/:path*",
-      "destination": "https://ministry-backend-2jdm.onrender.com/center-onboarding/:path*"
+      "destination": "https://ministry-backend-1.onrender.com/center-onboarding/:path*"
     },
     {
       "source": "/internal/:path*",
-      "destination": "https://ministry-backend-2jdm.onrender.com/internal/:path*"
+      "destination": "https://ministry-backend-1.onrender.com/internal/:path*"
     },
     {
       "source": "/(.*)",
