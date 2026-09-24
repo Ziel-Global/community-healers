@@ -25,6 +25,7 @@ const MonitoringPage = lazy(() => import("./pages/center/MonitoringPage"));
 const ResultsPage = lazy(() => import("./pages/center/ResultsPage"));
 const ReportsPage = lazy(() => import("./pages/center/ReportsPage"));
 const SettingsPage = lazy(() => import("./pages/center/SettingsPage"));
+const InstructorsPage = lazy(() => import("./pages/center/InstructorsPage"));
 
 const SuperAdminPortal = lazy(() => import("./pages/SuperAdminPortal"));
 const ConfigPage = lazy(() => import("./pages/admin/ConfigPage"));
@@ -53,11 +54,13 @@ const MinistryAuth = lazy(() => import("./pages/auth/MinistryAuth"));
 const ExamAuth = lazy(() => import("./pages/auth/ExamAuth"));
 const CommitteeMemberAuth = lazy(() => import("./pages/auth/CommitteeMemberAuth"));
 const CommitteeChairmanAuth = lazy(() => import("./pages/auth/CommitteeChairmanAuth"));
+const TrainingInstructorAuth = lazy(() => import("./pages/auth/TrainingInstructorAuth"));
 const DirectorOperationsAuth = lazy(() => import("./pages/auth/DirectorOperationsAuth"));
 const ExamPortal = lazy(() => import("./pages/ExamPortal"));
 
 const CommitteeMemberPortal = lazy(() => import("./pages/CommitteeMemberPortal"));
 const CommitteeChairmanPortal = lazy(() => import("./pages/CommitteeChairmanPortal"));
+const TrainingInstructorPortal = lazy(() => import("./pages/TrainingInstructorPortal"));
 const CommitteeChairmanMembersPage = lazy(() => import("./pages/committee-chairman/MembersPage"));
 const CommitteeChairmanApplicationsPage = lazy(() => import("./pages/committee-chairman/ApplicationsPage"));
 const CommitteeChairmanApplicationDetailPage = lazy(() => import("./pages/committee-chairman/ApplicationDetailPage"));
@@ -99,6 +102,7 @@ export function AppRoutes() {
                 <Route path="/training/auth" element={<ExamAuth />} />
                 <Route path="/committee/auth" element={<CommitteeMemberAuth />} />
                 <Route path="/committee-chairman/auth" element={<CommitteeChairmanAuth />} />
+                <Route path="/training-instructor/auth" element={<TrainingInstructorAuth />} />
                 <Route path="/bureau/auth" element={<DirectorOperationsAuth />} />
 
                 {/* Center Onboarding — public, no login (applicant has no account until approved).
@@ -147,6 +151,7 @@ export function AppRoutes() {
                 <Route path="/center/certificates" element={<ProtectedRoute portalType="center"><CenterCertificatesPage /></ProtectedRoute>} />
                 <Route path="/center/reports" element={<ProtectedRoute portalType="center"><ReportsPage /></ProtectedRoute>} />
                 <Route path="/center/settings" element={<ProtectedRoute portalType="center"><SettingsPage /></ProtectedRoute>} />
+                <Route path="/center/instructors" element={<ProtectedRoute portalType="center"><InstructorsPage /></ProtectedRoute>} />
 
 
 
@@ -188,6 +193,8 @@ export function AppRoutes() {
                 <Route path="/committee-chairman/inspection-reports" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanInspectionReportsPage /></ProtectedRoute>} />
                 <Route path="/committee-chairman/inspection-reports/:applicationId" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanInspectionReportsCenterPage /></ProtectedRoute>} />
                 <Route path="/committee-chairman/inspection-reports/:applicationId/members/:memberUserId" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanInspectionReportsMemberPage /></ProtectedRoute>} />
+
+                <Route path="/training-instructor" element={<ProtectedRoute portalType="training-instructor"><TrainingInstructorPortal /></ProtectedRoute>} />
 
                 {/* Bureau portal routes (protected) */}
                 <Route path="/bureau" element={<ProtectedRoute portalType="director-operations"><DirectorOperationsPortal /></ProtectedRoute>} />

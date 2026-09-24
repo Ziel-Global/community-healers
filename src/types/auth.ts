@@ -52,6 +52,11 @@ export interface DirectorOperationsLoginCredentials {
     password: string;
 }
 
+export interface TrainingInstructorLoginCredentials {
+    email: string;
+    password: string;
+}
+
 export interface SignupCredentials {
     firstName: string;
     lastName: string;
