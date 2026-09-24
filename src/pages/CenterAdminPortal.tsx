@@ -12,6 +12,7 @@ import {
   FileText,
   Settings,
   Award,
+  GraduationCap,
 } from "lucide-react";
 import { useCenterDetails } from "@/hooks/queries/useCenterAdminQueries";
 import { formatTimeLabel, toTimeInputValue } from "@/utils/time";
@@ -26,6 +27,11 @@ export const centerNavItems = [
     label: "Candidates",
     href: "/center/candidates",
     icon: <Users className="w-4 h-4" />,
+  },
+  {
+    label: "Instructors",
+    href: "/center/instructors",
+    icon: <GraduationCap className="w-4 h-4" />,
   },
   {
     label: "Certificates",

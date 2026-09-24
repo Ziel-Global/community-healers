@@ -2,7 +2,7 @@ import axios from 'axios';
 import { api } from './api';
 import { getApiErrorMessage } from '../lib/errors';
 import i18n from '../i18n';
-import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, CommitteeMemberLoginCredentials, CommitteeChairmanLoginCredentials, DirectorOperationsLoginCredentials, SignupCredentials, AuthResponse, SignupOtpRequestResponse, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
+import { CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, CommitteeMemberLoginCredentials, CommitteeChairmanLoginCredentials, DirectorOperationsLoginCredentials, TrainingInstructorLoginCredentials, SignupCredentials, AuthResponse, SignupOtpRequestResponse, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 
 /**
  * Role-mismatch logins (valid credentials, wrong portal) come back as 403,
@@ -87,6 +87,16 @@ const loginDirectorOperations = async (credentials: DirectorOperationsLoginCrede
     }
 };
 
+const loginTrainingInstructor = async (credentials: TrainingInstructorLoginCredentials): Promise<AuthResponse> => {
+    try {
+        const response = await api.post('/auth/login/training-instructor', credentials);
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Training Instructor Login error:', error);
+        throw new Error(loginErrorMessage(error, 'Training Instructor Login failed. Please check your credentials.'));
+    }
+};
+
 const signup = async (credentials: SignupCredentials): Promise<SignupOtpRequestResponse> => {
     try {
         // Built explicitly (not `credentials` spread as-is) because callers
@@ -168,6 +178,7 @@ export const authService = {
     loginCommitteeMember,
     loginCommitteeChairman,
     loginDirectorOperations,
+    loginTrainingInstructor,
     signup,
     verifyCandidate,
     logout,

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, CommitteeMemberLoginCredentials, CommitteeChairmanLoginCredentials, DirectorOperationsLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
+import { User, CandidateLoginCredentials, CenterAdminLoginCredentials, MinistryLoginCredentials, SuperAdminLoginCredentials, CommitteeMemberLoginCredentials, CommitteeChairmanLoginCredentials, DirectorOperationsLoginCredentials, TrainingInstructorLoginCredentials, SignupCredentials, AuthState, CandidateVerificationCredentials, ExamScheduledResponse } from '../types/auth';
 import { authService } from '../services/authService';
 import i18n from '../i18n';
 import { authKeys, useExamSchedule } from '../hooks/queries/useAuthQueries';
@@ -13,6 +13,7 @@ interface AuthContextType extends AuthState {
     loginCommitteeMember: (credentials: CommitteeMemberLoginCredentials) => Promise<void>;
     loginCommitteeChairman: (credentials: CommitteeChairmanLoginCredentials) => Promise<void>;
     loginDirectorOperations: (credentials: DirectorOperationsLoginCredentials) => Promise<void>;
+    loginTrainingInstructor: (credentials: TrainingInstructorLoginCredentials) => Promise<void>;
     signup: (credentials: SignupCredentials) => Promise<void>;
     verifyCandidate: (credentials: CandidateVerificationCredentials) => Promise<void>;
     logout: () => Promise<void>;
@@ -205,6 +206,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
+    const loginTrainingInstructor = async (credentials: TrainingInstructorLoginCredentials) => {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const response = await authService.loginTrainingInstructor(credentials);
+            hydrateSession(response.user);
+        } catch (error: unknown) {
+            console.error("Login error details:", error);
+            setState((prev) => ({
+                ...prev,
+                isLoading: false,
+                error: error instanceof Error ? error.message : 'Login failed',
+            }));
+            throw error;
+        }
+    };
+
     const signup = async (credentials: SignupCredentials) => {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
@@ -273,6 +290,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         loginCommitteeMember,
         loginCommitteeChairman,
         loginDirectorOperations,
+        loginTrainingInstructor,
         signup,
         verifyCandidate,
         logout,

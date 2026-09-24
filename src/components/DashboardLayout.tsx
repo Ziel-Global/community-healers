@@ -17,7 +17,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
   subtitle?: string;
-  portalType: "candidate" | "center" | "admin" | "ministry" | "committee" | "committee-chairman" | "director-operations";
+  portalType: "candidate" | "center" | "admin" | "ministry" | "committee" | "committee-chairman" | "director-operations" | "training-instructor";
   navItems: NavItem[];
   /** When set, the top-right pill reflects this instead of the static Online badge. */
   headerStatus?: { online: boolean };
@@ -31,6 +31,7 @@ const portalColors = {
   committee: "from-amber-500 to-orange-500",
   "committee-chairman": "from-amber-600 to-yellow-600",
   "director-operations": "from-blue-500 to-indigo-600",
+  "training-instructor": "from-emerald-600 to-lime-600",
 };
 
 const portalLabels = {
@@ -41,6 +42,7 @@ const portalLabels = {
   committee: "Approval Committee",
   "committee-chairman": "Committee Chairman",
   "director-operations": "Bureau",
+  "training-instructor": "Training Instructor",
 };
 
 export function DashboardLayout({
