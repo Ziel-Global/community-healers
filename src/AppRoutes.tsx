@@ -71,6 +71,7 @@ const CommitteeChairmanInspectionReportsMemberPage = lazy(
   () => import("./pages/committee-chairman/inspection-reports/InspectionReportsMemberPage"),
 );
 const CommitteeApplicationDetailPage = lazy(() => import("./pages/committee/ApplicationDetailPage"));
+const CommitteeInspectionWorkPage = lazy(() => import("./pages/committee/InspectionWorkPage"));
 const CommitteeInspectionHistoryPage = lazy(() => import("./pages/committee/InspectionHistoryPage"));
 
 const DirectorOperationsPortal = lazy(() => import("./pages/DirectorOperationsPortal"));
@@ -177,6 +178,7 @@ export function AppRoutes() {
                 {/* Approval Committee Portal Routes (protected) */}
                 <Route path="/committee" element={<ProtectedRoute portalType="committee"><CommitteeMemberPortal /></ProtectedRoute>} />
                 <Route path="/committee/applications/:applicationId" element={<ProtectedRoute portalType="committee"><CommitteeApplicationDetailPage /></ProtectedRoute>} />
+                <Route path="/committee/applications/:applicationId/inspection" element={<ProtectedRoute portalType="committee"><CommitteeInspectionWorkPage /></ProtectedRoute>} />
                 <Route path="/committee/history" element={<ProtectedRoute portalType="committee"><CommitteeInspectionHistoryPage /></ProtectedRoute>} />
 
                 <Route path="/committee-chairman" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanPortal /></ProtectedRoute>} />
