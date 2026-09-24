@@ -142,7 +142,9 @@ export default function CenterOnboardingWizard() {
       .finally(() => setChecklistLoading(false));
   }, []);
 
-  const allAcknowledged = checklist.every((item) => acknowledged[item.id]);
+  const checklistItems = Array.isArray(checklist) ? checklist : [];
+  const allAcknowledged =
+    checklistItems.length > 0 && checklistItems.every((item) => acknowledged[item.id]);
 
   // Once the committee has scheduled a date, show the applicant the date + comment thread.
   useEffect(() => {
@@ -476,7 +478,7 @@ export default function CenterOnboardingWizard() {
               ) : (
                 <div className="space-y-6">
                   {CHECKLIST_CATEGORY_ORDER.map((category) => {
-                    const items = checklist.filter((item) => item.category === category);
+                    const items = checklistItems.filter((item) => item.category === category);
                     if (items.length === 0) return null;
                     const meta = CHECKLIST_CATEGORY_META[category];
                     const Icon = meta.icon;

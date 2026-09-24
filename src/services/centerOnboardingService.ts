@@ -114,14 +114,22 @@ export interface CenterInfoPayload {
     jointVentureLicenseNumber?: string;
 }
 
+function asChecklistItems(data: unknown): ChecklistItem[] {
+    return Array.isArray(data) ? data : [];
+}
+
+function asStaffQualificationOptions(data: unknown): StaffQualificationOption[] {
+    return Array.isArray(data) ? data : [];
+}
+
 const getChecklist = async (): Promise<ChecklistItem[]> => {
     const response = await api.get('/center-onboarding/checklist');
-    return response.data;
+    return asChecklistItems(response.data);
 };
 
 const getStaffQualifications = async (): Promise<StaffQualificationOption[]> => {
     const response = await api.get('/center-onboarding/staff-qualifications');
-    return response.data;
+    return asStaffQualificationOptions(response.data);
 };
 
 const reverseGeocode = async (

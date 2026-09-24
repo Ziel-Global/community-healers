@@ -21,6 +21,14 @@
       "destination": "https://ministry-backend-2jdm.onrender.com/super-admin/:path*"
     },
     {
+      "source": "/center-onboarding/:path*",
+      "destination": "https://ministry-backend-2jdm.onrender.com/center-onboarding/:path*"
+    },
+    {
+      "source": "/internal/:path*",
+      "destination": "https://ministry-backend-2jdm.onrender.com/internal/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
