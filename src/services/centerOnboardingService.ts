@@ -27,6 +27,23 @@ export interface StaffQualificationOption {
     label: string;
 }
 
+/** Canonical list from the API — used when the deployed backend lacks the route. */
+export const DEFAULT_STAFF_QUALIFICATIONS: StaffQualificationOption[] = [
+    { value: 'NONE', label: 'No formal education' },
+    { value: 'PRIMARY', label: 'Primary (Grade 5)' },
+    { value: 'MIDDLE', label: 'Middle (Grade 8)' },
+    { value: 'MATRIC', label: 'Matriculation (Grade 10)' },
+    { value: 'INTERMEDIATE', label: 'Intermediate / FA / FSc (Grade 12)' },
+    { value: 'DIPLOMA', label: 'Diploma / DAE' },
+    { value: 'BACHELORS', label: "Bachelor's degree" },
+    { value: 'MASTERS', label: "Master's degree" },
+    { value: 'MPHIL', label: 'MPhil' },
+    { value: 'PHD', label: 'PhD' },
+    { value: 'MBBS', label: 'MBBS' },
+    { value: 'NURSING', label: 'Nursing qualification' },
+    { value: 'OTHER', label: 'Other' },
+];
+
 export interface VerifyLicenseResult {
     applicationId: string;
     phone: string;
@@ -128,8 +145,14 @@ const getChecklist = async (): Promise<ChecklistItem[]> => {
 };
 
 const getStaffQualifications = async (): Promise<StaffQualificationOption[]> => {
-    const response = await api.get('/center-onboarding/staff-qualifications');
-    return asStaffQualificationOptions(response.data);
+    try {
+        const response = await api.get('/center-onboarding/staff-qualifications');
+        const options = asStaffQualificationOptions(response.data);
+        return options.length > 0 ? options : DEFAULT_STAFF_QUALIFICATIONS;
+    } catch {
+        // Prod backend (e.g. 2jdm) may not expose this route yet — keep the step usable.
+        return DEFAULT_STAFF_QUALIFICATIONS;
+    }
 };
 
 const reverseGeocode = async (
