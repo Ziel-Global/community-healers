@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   FileCheck,
   Loader2,
+  ThumbsDown,
   ThumbsUp,
   UserCheck,
   UserX,
@@ -172,8 +173,8 @@ export default function InspectionReportsCenterPage() {
 
           <Card className="border-border/40 rounded-xl h-full">
             <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-1.5 h-full">
-              <FileCheck className="w-5 h-5 text-muted-foreground" />
-              <p className="text-2xl font-semibold tabular-nums text-muted-foreground">
+              <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <p className="text-2xl font-semibold tabular-nums text-blue-600 dark:text-blue-400">
                 {reports.summary.submitted}
               </p>
               <p className="text-xs text-muted-foreground">Submitted</p>
@@ -181,23 +182,23 @@ export default function InspectionReportsCenterPage() {
           </Card>
 
           <Card className="border-border/40 rounded-xl h-full">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
-              <ThumbsUp className="w-5 h-5 text-muted-foreground" />
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-1.5 h-full">
               <div className="flex items-stretch w-full">
-                <div className="flex-1 flex flex-col items-center gap-0.5 px-1">
-                  <p className="text-xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                <div className="flex-1 flex flex-col items-center gap-1.5 px-1">
+                  <ThumbsUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <p className="text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
                     {reports.summary.recommendApprove}
                   </p>
-                  <p className="text-[10px] text-muted-foreground leading-tight">Rec. approve</p>
                 </div>
                 <div className="w-px bg-border self-stretch my-0.5" />
-                <div className="flex-1 flex flex-col items-center gap-0.5 px-1">
-                  <p className="text-xl font-semibold tabular-nums text-destructive">
+                <div className="flex-1 flex flex-col items-center gap-1.5 px-1">
+                  <ThumbsDown className="w-5 h-5 text-destructive" />
+                  <p className="text-2xl font-semibold tabular-nums text-destructive">
                     {reports.summary.recommendReject}
                   </p>
-                  <p className="text-[10px] text-muted-foreground leading-tight">Rec. reject</p>
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground">Recommendation</p>
             </CardContent>
           </Card>
         </div>
