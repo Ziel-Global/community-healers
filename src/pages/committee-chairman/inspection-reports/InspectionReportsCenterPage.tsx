@@ -2,8 +2,14 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  Check,
   CheckCircle2,
+  FileCheck,
   Loader2,
+  ThumbsUp,
+  UserCheck,
+  UserX,
+  X,
   XCircle,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -30,6 +36,29 @@ import { useToast } from "@/hooks/use-toast";
 import { committeeChairmanNavItems } from "../../CommitteeChairmanPortal";
 
 const MIN_REJECT_REASON = 5;
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
+function avatarClasses(attending: boolean | null): string {
+  if (attending === true) {
+    return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
+  }
+  if (attending === false) {
+    return "bg-destructive/15 text-destructive";
+  }
+  return "bg-secondary text-muted-foreground";
+}
+
+function memberCardBorder(attending: boolean | null): string {
+  if (attending === true) return "border-emerald-500/40";
+  if (attending === false) return "border-destructive/40";
+  return "border-border/40";
+}
 
 export default function InspectionReportsCenterPage() {
   const { applicationId = "" } = useParams();
@@ -99,6 +128,10 @@ export default function InspectionReportsCenterPage() {
     );
   }
 
+  const respondedCount = reports.members.filter(
+    (m) => m.attending === true || m.attending === false,
+  ).length;
+
   return (
     <DashboardLayout
       title={application.centerName || "Inspection reports"}
@@ -116,21 +149,67 @@ export default function InspectionReportsCenterPage() {
           <ArrowLeft className="w-4 h-4" /> All scheduled centers
         </Button>
 
-        <Card className="border-border/40">
-          <CardContent className="p-4 text-sm text-muted-foreground flex flex-wrap gap-4">
-            <span>Attending: {reports.summary.attending}</span>
-            <span>Submitted: {reports.summary.submitted}</span>
-            <span>Recommend approve: {reports.summary.recommendApprove}</span>
-            <span>Recommend reject: {reports.summary.recommendReject}</span>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Card className="border-border/40 rounded-xl h-full">
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-1.5 h-full">
+              <UserCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <p className="text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                {reports.summary.attending}
+              </p>
+              <p className="text-xs text-muted-foreground">Attending</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/40 rounded-xl h-full">
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-1.5 h-full">
+              <UserX className="w-5 h-5 text-destructive" />
+              <p className="text-2xl font-semibold tabular-nums text-destructive">
+                {reports.summary.notAttending}
+              </p>
+              <p className="text-xs text-muted-foreground">Not attending</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/40 rounded-xl h-full">
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-1.5 h-full">
+              <FileCheck className="w-5 h-5 text-muted-foreground" />
+              <p className="text-2xl font-semibold tabular-nums text-muted-foreground">
+                {reports.summary.submitted}
+              </p>
+              <p className="text-xs text-muted-foreground">Submitted</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/40 rounded-xl h-full">
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
+              <ThumbsUp className="w-5 h-5 text-muted-foreground" />
+              <div className="flex items-stretch w-full">
+                <div className="flex-1 flex flex-col items-center gap-0.5 px-1">
+                  <p className="text-xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                    {reports.summary.recommendApprove}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">Rec. approve</p>
+                </div>
+                <div className="w-px bg-border self-stretch my-0.5" />
+                <div className="flex-1 flex flex-col items-center gap-0.5 px-1">
+                  <p className="text-xl font-semibold tabular-nums text-destructive">
+                    {reports.summary.recommendReject}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">Rec. reject</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="space-y-3">
           <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground px-1">Committee members</h2>
           {reports.members.map((member) => (
             <Card
               key={member.memberUserId}
-              className={`border-border/40 ${member.submitted ? "cursor-pointer hover:border-primary/30" : ""}`}
+              className={`${memberCardBorder(member.attending)} ${
+                member.submitted ? "cursor-pointer hover:border-primary/30" : ""
+              }`}
               onClick={() => {
                 if (member.submitted) {
                   navigate(
@@ -139,23 +218,42 @@ export default function InspectionReportsCenterPage() {
                 }
               }}
             >
-              <CardContent className="p-4 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-medium text-foreground">{member.memberName}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {member.attending === false
-                      ? `Not attending${member.absenceReason ? `: ${member.absenceReason}` : ""}`
-                      : member.attending
-                        ? "Attending"
-                        : "Attendance not set"}
-                  </p>
+              <CardContent className="p-4 flex items-center gap-3">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${avatarClasses(
+                    member.attending,
+                  )}`}
+                >
+                  {initials(member.memberName)}
+                </div>
+
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="font-medium text-foreground truncate">{member.memberName}</p>
+                  {member.attending === true && (
+                    <p className="text-xs flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                      <Check className="w-3.5 h-3.5 shrink-0" />
+                      Attending
+                    </p>
+                  )}
+                  {member.attending === false && (
+                    <p className="text-xs flex items-start gap-1.5 text-destructive">
+                      <X className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span className="min-w-0 break-words">
+                        {member.absenceReason?.trim() || "Not attending"}
+                      </span>
+                    </p>
+                  )}
+                  {member.attending == null && (
+                    <p className="text-xs text-muted-foreground">Attendance not set</p>
+                  )}
                   {member.submitted && member.recommendation && (
-                    <p className="text-xs mt-1">
-                      Recommends <strong>{member.recommendation}</strong>
+                    <p className="text-xs text-muted-foreground">
+                      Recommends <strong className="text-foreground">{member.recommendation}</strong>
                     </p>
                   )}
                 </div>
-                <Badge variant={member.submitted ? "default" : "outline"}>
+
+                <Badge variant={member.submitted ? "default" : "outline"} className="shrink-0">
                   {member.submitted ? "Submitted" : "Pending"}
                 </Badge>
               </CardContent>
@@ -166,6 +264,9 @@ export default function InspectionReportsCenterPage() {
         <Card className="border-border/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Final decision</CardTitle>
+            <p className="text-sm text-muted-foreground font-normal">
+              {respondedCount} of {reports.members.length} members have responded
+            </p>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row gap-2">
             <Button

@@ -44,6 +44,12 @@ export interface MemberInspectionReport {
     notes: string | null;
 }
 
+export interface InspectionGate {
+    scheduledInspectionDate: string | null;
+    isOpen: boolean;
+    message: string | null;
+}
+
 export interface CommitteeApplicationDetail {
     application: {
         id: string;
@@ -56,6 +62,8 @@ export interface CommitteeApplicationDetail {
     attendance: AttendanceEntry[];
     myAttendance: AttendanceEntry | null;
     myReport?: MemberInspectionReport | null;
+    /** Present on backends that enforce the Pakistan-date checklist gate. */
+    inspection?: InspectionGate | null;
 }
 
 export interface SubmitReportPayload {

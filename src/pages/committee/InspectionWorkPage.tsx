@@ -72,7 +72,12 @@ export default function CommitteeInspectionWorkPage() {
     const submittedAt = myReport?.submittedAt ?? data.myReport?.submittedAt ?? null;
     const isReportSubmitted = !!submittedAt;
     const isAttending = data.myAttendance?.attending === true;
+    const isInspectionOpen = data.inspection?.isOpen ?? true;
     if (!isAttending && !isReportSubmitted) {
+      navigate(detailPath, { replace: true });
+      return;
+    }
+    if (!isInspectionOpen && !isReportSubmitted) {
       navigate(detailPath, { replace: true });
     }
   }, [isLoading, data, myReport, navigate, detailPath]);
@@ -89,12 +94,14 @@ export default function CommitteeInspectionWorkPage() {
 
   if (!data) return null;
 
-  const { application, checklist, myAttendance, myReport: myReportOnDetail } = data;
+  const { application, checklist: rawChecklist, myAttendance, myReport: myReportOnDetail, inspection } = data;
+  const checklist = Array.isArray(rawChecklist) ? rawChecklist : [];
   const allDocumented = checklist.every(isItemComplete);
   const submittedAt = myReport?.submittedAt ?? myReportOnDetail?.submittedAt ?? null;
   const isReportSubmitted = !!submittedAt;
   const isScheduled = application.status === "SCHEDULED";
-  const isEditable = isScheduled && !isReportSubmitted;
+  const isInspectionOpen = inspection?.isOpen ?? true;
+  const isEditable = isScheduled && !isReportSubmitted && isInspectionOpen;
   const isReadOnly = !isEditable;
   const isAttending = myAttendance?.attending === true;
   const canSubmitReport = isEditable && isAttending && allDocumented && !submitReportMutation.isPending;
@@ -103,11 +110,19 @@ export default function CommitteeInspectionWorkPage() {
     items: checklist.filter((item) => item.category === category),
   })).filter((group) => group.items.length > 0);
 
-  if (!isAttending && !isReportSubmitted) {
+  if ((!isAttending && !isReportSubmitted) || (!isInspectionOpen && !isReportSubmitted)) {
     return (
       <DashboardLayout title="Loading..." portalType="committee" navItems={committeeNavItems}>
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="max-w-3xl mx-auto space-y-4 py-6">
+          {!isInspectionOpen && inspection?.message ? (
+            <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/25 text-sm text-amber-900 dark:text-amber-200">
+              {inspection.message}
+            </div>
+          ) : (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          )}
         </div>
       </DashboardLayout>
     );

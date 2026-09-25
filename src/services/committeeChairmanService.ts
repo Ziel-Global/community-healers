@@ -27,6 +27,7 @@ export interface InspectionReportMemberRow {
 
 export interface InspectionReportsSummary {
     attending: number;
+    notAttending: number;
     submitted: number;
     recommendApprove: number;
     recommendReject: number;
@@ -94,6 +95,9 @@ function normalizeInspectionReportsDashboard(raw: Record<string, unknown>): Insp
         members,
         summary: {
             attending: summary.attending ?? 0,
+            notAttending:
+                summary.notAttending
+                ?? members.filter((m) => m.attending === false).length,
             submitted: summary.submitted ?? 0,
             recommendApprove: summary.recommendApprove ?? 0,
             recommendReject: summary.recommendReject ?? 0,

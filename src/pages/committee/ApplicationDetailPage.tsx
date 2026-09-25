@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { CalendarClock, UserCheck, UserX, Users, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
+import { CalendarClock, UserCheck, UserX, Users, Loader2, ArrowRight, CheckCircle2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import {
   useCommitteeApplicationDetail,
@@ -28,6 +28,7 @@ export default function CommitteeApplicationDetailPage() {
   const attendanceMutation = useSetAttendance(applicationId);
   const [showDeclineReason, setShowDeclineReason] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
+  const [editingAttendance, setEditingAttendance] = useState(false);
 
   const inspectionPath = `/committee/applications/${applicationId}/inspection`;
 
@@ -43,12 +44,19 @@ export default function CommitteeApplicationDetailPage() {
 
   if (!data) return null;
 
-  const { application, attendance, myAttendance, myReport: myReportOnDetail } = data;
+  const { application, attendance, myAttendance, myReport: myReportOnDetail, inspection } = data;
   const submittedAt = myReport?.submittedAt ?? myReportOnDetail?.submittedAt ?? null;
   const isReportSubmitted = !!submittedAt;
   const isScheduled = application.status === "SCHEDULED";
   const isEditable = isScheduled && !isReportSubmitted;
   const isAttending = myAttendance?.attending === true;
+  const hasResponded = myAttendance?.attending === true || myAttendance?.attending === false;
+  const showRsvpControls = isEditable && (!hasResponded || editingAttendance);
+  /** Missing `inspection` (older backends) → treat as open so local still works. */
+  const isInspectionOpen = inspection?.isOpen ?? true;
+  const scheduledDate =
+    inspection?.scheduledInspectionDate ?? application.scheduledInspectionDate;
+  const canContinueToInspection = isReportSubmitted || (isAttending && isInspectionOpen);
 
   const handleAttend = () => {
     attendanceMutation.mutate(
@@ -58,7 +66,10 @@ export default function CommitteeApplicationDetailPage() {
           toast.success("Marked as attending");
           setShowDeclineReason(false);
           setDeclineReason("");
-          navigate(inspectionPath);
+          setEditingAttendance(false);
+          if (isInspectionOpen) {
+            navigate(inspectionPath);
+          }
         },
         onError: (error) => toast.error(getApiErrorMessage(error, "Failed to update attendance")),
       },
@@ -73,6 +84,8 @@ export default function CommitteeApplicationDetailPage() {
         onSuccess: () => {
           toast.success("Marked as not attending");
           setShowDeclineReason(false);
+          setDeclineReason("");
+          setEditingAttendance(false);
         },
         onError: (error) => toast.error(getApiErrorMessage(error, "Failed to update attendance")),
       },
@@ -110,11 +123,17 @@ export default function CommitteeApplicationDetailPage() {
                 <div>
                   <p className="text-xs text-muted-foreground">Scheduled Inspection Date</p>
                   <p className="text-sm font-semibold text-foreground">
-                    {formatDate(application.scheduledInspectionDate) ?? "Not scheduled yet"}
+                    {formatDate(scheduledDate) ?? "Not scheduled yet"}
                   </p>
                 </div>
               </CardContent>
             </Card>
+
+            {!isInspectionOpen && inspection?.message && (
+              <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/25 text-sm text-amber-900 dark:text-amber-200">
+                {inspection.message}
+              </div>
+            )}
 
             <Card className="border-border/40">
               <CardHeader className="pb-3">
@@ -123,7 +142,34 @@ export default function CommitteeApplicationDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {isEditable && (
+                {isEditable && hasResponded && !editingAttendance && (
+                  <div className="space-y-3 pb-4 border-b border-border/30">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground">
+                          You marked: {isAttending ? "Attending" : "Can't attend"}
+                        </p>
+                        {myAttendance?.attending === false && myAttendance.reason && (
+                          <p className="text-xs text-muted-foreground mt-0.5">Reason: {myAttendance.reason}</p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 shrink-0"
+                        onClick={() => {
+                          setEditingAttendance(true);
+                          setShowDeclineReason(false);
+                          setDeclineReason(myAttendance?.reason ?? "");
+                        }}
+                      >
+                        <Pencil className="w-3.5 h-3.5" /> Edit
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {showRsvpControls && (
                   <div className="space-y-3 pb-4 border-b border-border/30">
                     <p className="text-xs text-muted-foreground">Will you personally attend this inspection?</p>
                     <div className="flex gap-2">
@@ -154,9 +200,6 @@ export default function CommitteeApplicationDetailPage() {
                         <UserX className="w-3.5 h-3.5" /> Can't Attend
                       </Button>
                     </div>
-                    {myAttendance?.attending === false && !showDeclineReason && (
-                      <p className="text-xs text-muted-foreground">Reason: {myAttendance.reason}</p>
-                    )}
                     {showDeclineReason && (
                       <div className="space-y-2">
                         <Textarea
@@ -175,7 +218,14 @@ export default function CommitteeApplicationDetailPage() {
                             {attendanceMutation.isPending && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
                             Confirm
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => setShowDeclineReason(false)}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setShowDeclineReason(false);
+                              setDeclineReason("");
+                            }}
+                          >
                             Cancel
                           </Button>
                         </div>
@@ -212,11 +262,16 @@ export default function CommitteeApplicationDetailPage() {
                   </div>
                 )}
 
-                {(isAttending || isReportSubmitted) && (
+                {canContinueToInspection && (
                   <Button className="w-full gap-2" onClick={() => navigate(inspectionPath)}>
                     Continue to inspection
                     <ArrowRight className="w-4 h-4" />
                   </Button>
+                )}
+                {isAttending && !isInspectionOpen && !isReportSubmitted && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Checklist unlocks on the scheduled inspection day.
+                  </p>
                 )}
               </CardContent>
             </Card>
