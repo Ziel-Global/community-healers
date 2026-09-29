@@ -19,9 +19,12 @@ function isResultComplete(result: ChecklistResultDetail): boolean {
 export function ChecklistResultsSection({
     checklistResults,
     getEvidenceBlob,
+    showEvidence = true,
 }: {
     checklistResults: ChecklistResultDetail[];
-    getEvidenceBlob: (evidenceId: string) => Promise<Blob>;
+    getEvidenceBlob?: (evidenceId: string) => Promise<Blob>;
+    /** When false, photo items render as status rows only (no thumbnails). Use on Bureau apply-center view. */
+    showEvidence?: boolean;
 }) {
     if (checklistResults.length === 0) return null;
 
@@ -50,43 +53,75 @@ export function ChecklistResultsSection({
                             </span>
                         </div>
 
-                        {results.map((result) =>
-                            result.checklistItem.requiresPhoto ? (
-                                <Card key={result.id} className="border-border/40">
-                                    <CardHeader className="pb-2">
-                                        <div className="flex items-center justify-between">
-                                            <CardTitle className="text-base">{result.checklistItem.label}</CardTitle>
+                        {results.map((result) => {
+                            if (result.checklistItem.requiresPhoto && showEvidence && getEvidenceBlob) {
+                                return (
+                                    <Card key={result.id} className="border-border/40">
+                                        <CardHeader className="pb-2">
+                                            <div className="flex items-center justify-between">
+                                                <CardTitle className="text-base">{result.checklistItem.label}</CardTitle>
+                                                {result.evidence.length > 0 ? (
+                                                    <Badge variant="success" className="gap-1 text-[11px]">
+                                                        <CheckCircle2 className="w-3 h-3" /> Documented
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge variant="outline" className="gap-1 text-[11px]">
+                                                        <HelpCircle className="w-3 h-3" /> No photo yet
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            {result.checklistItem.description && (
+                                                <p className="text-xs text-muted-foreground">{result.checklistItem.description}</p>
+                                            )}
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
                                             {result.evidence.length > 0 ? (
-                                                <Badge variant="success" className="gap-1 text-[11px]">
-                                                    <CheckCircle2 className="w-3 h-3" /> Documented
-                                                </Badge>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {result.evidence.map((evidence) => (
+                                                        <EvidenceThumbnail
+                                                            key={evidence.id}
+                                                            evidenceId={evidence.id}
+                                                            fetchBlob={getEvidenceBlob}
+                                                        />
+                                                    ))}
+                                                </div>
                                             ) : (
-                                                <Badge variant="outline" className="gap-1 text-[11px]">
-                                                    <HelpCircle className="w-3 h-3" /> No photo yet
-                                                </Badge>
+                                                <p className="text-xs text-muted-foreground">No evidence photos uploaded.</p>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                );
+                            }
+
+                            if (result.checklistItem.requiresPhoto) {
+                                const documented = result.evidence.length > 0;
+                                return (
+                                    <div
+                                        key={result.id}
+                                        className="flex items-start justify-between gap-3 p-3.5 rounded-xl border border-border/40 bg-card"
+                                    >
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium text-foreground">{result.checklistItem.label}</p>
+                                            {result.checklistItem.description && (
+                                                <p className="text-xs text-muted-foreground mt-0.5">{result.checklistItem.description}</p>
                                             )}
                                         </div>
-                                        {result.checklistItem.description && (
-                                            <p className="text-xs text-muted-foreground">{result.checklistItem.description}</p>
-                                        )}
-                                    </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        {result.evidence.length > 0 ? (
-                                            <div className="flex flex-wrap gap-2">
-                                                {result.evidence.map((evidence) => (
-                                                    <EvidenceThumbnail
-                                                        key={evidence.id}
-                                                        evidenceId={evidence.id}
-                                                        fetchBlob={getEvidenceBlob}
-                                                    />
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <p className="text-xs text-muted-foreground">No evidence photos uploaded.</p>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            ) : (
+                                        <Badge
+                                            variant="outline"
+                                            className={
+                                                documented
+                                                    ? "gap-1.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shrink-0"
+                                                    : "gap-1.5 shrink-0"
+                                            }
+                                        >
+                                            {documented ? <CheckCircle2 className="w-3 h-3" /> : <HelpCircle className="w-3 h-3" />}
+                                            {documented ? "Documented" : "Not documented"}
+                                        </Badge>
+                                    </div>
+                                );
+                            }
+
+                            return (
                                 <div
                                     key={result.id}
                                     className="flex items-start justify-between gap-3 p-3.5 rounded-xl border border-border/40 bg-card"
@@ -109,8 +144,8 @@ export function ChecklistResultsSection({
                                         {result.passed === true ? "Checked" : "Not checked"}
                                     </Badge>
                                 </div>
-                            ),
-                        )}
+                            );
+                        })}
                     </div>
                 );
             })}

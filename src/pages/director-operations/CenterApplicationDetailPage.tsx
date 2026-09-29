@@ -26,6 +26,12 @@ function formatDate(iso: string | null): string {
     return new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" });
 }
 
+function formatYesNo(value: boolean | null | undefined): string | null {
+    if (value === true) return "Yes";
+    if (value === false) return "No";
+    return null;
+}
+
 export default function CenterApplicationDetailPage() {
     const { applicationId = "" } = useParams();
     const navigate = useNavigate();
@@ -50,6 +56,27 @@ export default function CenterApplicationDetailPage() {
     }
 
     const { application, attendance } = data;
+
+    const buildingRows: { label: string; value: string }[] = [];
+    if (application.buildingArea != null && application.buildingArea !== "") {
+        buildingRows.push({ label: "Building area", value: String(application.buildingArea) });
+    }
+    if (application.buildingCapacity != null) {
+        buildingRows.push({ label: "Building capacity", value: String(application.buildingCapacity) });
+    }
+    if (application.buildingOwnership) {
+        buildingRows.push({ label: "Ownership", value: application.buildingOwnership });
+    }
+    const reception = formatYesNo(application.receptionAvailable);
+    if (reception) buildingRows.push({ label: "Reception available", value: reception });
+    const systems = formatYesNo(application.requiredSystemsAvailable);
+    if (systems) buildingRows.push({ label: "Required systems available", value: systems });
+    const cameras = formatYesNo(application.camerasAvailable);
+    if (cameras) buildingRows.push({ label: "Cameras available", value: cameras });
+    if (application.camerasInfo) {
+        buildingRows.push({ label: "Cameras info", value: application.camerasInfo });
+    }
+    const hasBuildingDetails = buildingRows.length > 0;
 
     return (
         <DashboardLayout
@@ -105,44 +132,6 @@ export default function CenterApplicationDetailPage() {
                     </CardContent>
                 </Card>
 
-                {/* Staff */}
-                {application.staff.length > 0 && (
-                    <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Users className="w-5 h-5 text-primary" /> Staff ({application.staff.length})
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            {application.staff.map((member) => (
-                                <div key={member.id} className="flex items-center justify-between text-sm p-2.5 rounded-lg bg-secondary/30">
-                                    <div className="min-w-0">
-                                        <p className="font-medium">{member.name}</p>
-                                        <p className="text-xs text-muted-foreground">CNIC {member.cnic}{member.qualification ? ` · ${member.qualification}` : ""}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2 shrink-0">
-                                        {member.documentObjectKey && (
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-7 w-7"
-                                                title="View supporting document"
-                                                onClick={async () => {
-                                                    const blob = await directorOperationsCenterApplicationService.getStaffDocumentBlob(member.id);
-                                                    window.open(URL.createObjectURL(blob), "_blank");
-                                                }}
-                                            >
-                                                <FileText className="w-3.5 h-3.5 text-primary" />
-                                            </Button>
-                                        )}
-                                        <Badge variant="outline" className="text-[11px]">{member.category}</Badge>
-                                    </div>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                )}
-
                 {/* Committee */}
                 <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
                     <CardHeader className="pb-3">
@@ -187,6 +176,63 @@ export default function CenterApplicationDetailPage() {
 
                 {/* Committee attendance — who's confirmed/declined the scheduled inspection */}
                 {application.committee && <CommitteeAttendanceCard attendance={attendance} />}
+
+                {/* Apply-center building details */}
+                {hasBuildingDetails && (
+                    <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Building2 className="w-5 h-5 text-primary" /> Building details
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                            {buildingRows.map((row) => (
+                                <div key={row.label} className={row.label === "Cameras info" ? "sm:col-span-2" : undefined}>
+                                    <span className="text-muted-foreground">{row.label}:</span>{" "}
+                                    <span className="text-foreground">{row.value}</span>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Apply-center staff & trainers */}
+                {application.staff.length > 0 && (
+                    <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Users className="w-5 h-5 text-primary" /> Staff &amp; trainers ({application.staff.length})
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {application.staff.map((member) => (
+                                <div key={member.id} className="flex items-center justify-between text-sm p-2.5 rounded-lg bg-secondary/30">
+                                    <div className="min-w-0">
+                                        <p className="font-medium">{member.name}</p>
+                                        <p className="text-xs text-muted-foreground">CNIC {member.cnic}{member.qualification ? ` · ${member.qualification}` : ""}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {member.documentObjectKey && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7"
+                                                title="View supporting document"
+                                                onClick={async () => {
+                                                    const blob = await directorOperationsCenterApplicationService.getStaffDocumentBlob(member.id);
+                                                    window.open(URL.createObjectURL(blob), "_blank");
+                                                }}
+                                            >
+                                                <FileText className="w-3.5 h-3.5 text-primary" />
+                                            </Button>
+                                        )}
+                                        <Badge variant="outline" className="text-[11px]">{member.category}</Badge>
+                                    </div>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
 
             </div>
 
