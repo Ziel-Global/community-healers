@@ -53,82 +53,79 @@ export function RegistrationCompleteScreen({
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-2">
       <div className="max-w-2xl w-full space-y-4 sm:space-y-6">
-        {/* Success Banner */}
-        <Card className="border-green-500/30 shadow-xl bg-gradient-to-br from-green-500/5 to-emerald-500/5">
+        <Card className="border-[#d8e4bc] shadow-[0_16px_40px_#163a2b0c] bg-gradient-to-br from-[#edf5df] to-white rounded-2xl overflow-hidden">
           <CardHeader className="text-center pb-3 sm:pb-4">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-              <PartyPopper className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 dark:text-green-400" />
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#e7f2db] border border-[#c7ddb5] flex items-center justify-center mx-auto mb-4">
+              <PartyPopper className="w-10 h-10 sm:w-12 sm:h-12 text-[#426f36]" />
             </div>
-            <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/40 text-sm px-4 py-1.5 mx-auto mb-3">
+            <Badge className="bg-[#e7f2db] text-[#426f36] border-[#c7ddb5] text-sm px-4 py-1.5 mx-auto mb-3 hover:bg-[#e7f2db]">
               <CheckCircle2 className="w-4 h-4 mr-1.5" />
               {t('complete.registrationComplete')}
             </Badge>
-            <CardTitle className="text-2xl sm:text-3xl font-bold alumni-sans-title text-foreground">
+            <CardTitle className="text-2xl sm:text-3xl font-display font-semibold text-[#183d34] tracking-tight">
               {t('complete.congratulations')}
             </CardTitle>
-            <p className="text-sm sm:text-base text-muted-foreground mt-2">
+            <p className="text-sm sm:text-base text-[#64736d] mt-2">
               {t('complete.successMessage')}
             </p>
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
             {wasAutoRescheduled && (
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-                <RefreshCw className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-amber-800 dark:text-amber-300">
+              <div className="p-3 rounded-xl ss-status-warn flex items-start gap-3">
+                <RefreshCw className="w-5 h-5 text-[#5c4e2a] mt-0.5 flex-shrink-0" />
+                <p className="text-sm">
                   {t('complete.autoRescheduledNotice')}
                 </p>
               </div>
             )}
 
-            {/* Exam Schedule Card */}
-            <div className="p-4 sm:p-6 rounded-xl bg-card border border-border/60 shadow-sm">
+            <div className="p-4 sm:p-6 rounded-2xl bg-white border border-[#e7eee9] shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-[13px] bg-[#e9f1e3] flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-[#3c6445]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-foreground">{t('complete.examSchedule')}</h3>
-                  <p className="text-xs text-muted-foreground">{t('complete.scheduledDetails')}</p>
+                  <h3 className="font-display font-semibold text-lg text-[#183d34]">{t('complete.examSchedule')}</h3>
+                  <p className="text-xs text-[#64736d]">{t('complete.scheduledDetails')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
+                <div className="p-3 sm:p-4 rounded-xl bg-[#f5f8f2] border border-[#e7eee9] text-center">
                   <Calendar className="w-5 h-5 text-primary mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground mb-1">{t('complete.date')}</p>
-                  <p className="font-bold text-foreground text-sm sm:text-base">
+                  <p className="text-xs text-[#658075] mb-1">{t('complete.date')}</p>
+                  <p className="font-semibold text-[#183d34] text-sm sm:text-base">
                     {format(dateObj, 'MMMM d, yyyy')}
                   </p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
+                <div className="p-3 sm:p-4 rounded-xl bg-[#f5f8f2] border border-[#e7eee9] text-center">
                   <Clock className="w-5 h-5 text-primary mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground mb-1">{t('complete.time')}</p>
-                  <p className="font-bold text-foreground text-sm sm:text-base">{startLabel}</p>
+                  <p className="text-xs text-[#658075] mb-1">{t('complete.time')}</p>
+                  <p className="font-semibold text-[#183d34] text-sm sm:text-base">{startLabel}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
+                <div className="p-3 sm:p-4 rounded-xl bg-[#f5f8f2] border border-[#e7eee9] text-center">
                   <MapPin className="w-5 h-5 text-primary mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground mb-1">{t('complete.center')}</p>
-                  <p className="font-bold text-foreground text-sm sm:text-base">{centerId}</p>
+                  <p className="text-xs text-[#658075] mb-1">{t('complete.center')}</p>
+                  <p className="font-semibold text-[#183d34] text-sm sm:text-base">{centerId}</p>
                 </div>
               </div>
 
               {arriveLabel && (
-                <div className="mt-3 p-3 rounded-lg bg-secondary/40 border border-border/40 text-center sm:text-left">
-                  <p className="text-xs text-muted-foreground mb-0.5">{t('complete.arriveBy')}</p>
-                  <p className="font-semibold text-foreground">{arriveLabel}</p>
+                <div className="mt-3 p-3 rounded-xl bg-[#f5f8f2] border border-[#e7eee9] text-center sm:text-left">
+                  <p className="text-xs text-[#658075] mb-0.5">{t('complete.arriveBy')}</p>
+                  <p className="font-semibold text-[#183d34]">{arriveLabel}</p>
                 </div>
               )}
             </div>
 
-            {/* Center Details */}
-            <div className="p-4 rounded-xl bg-secondary/30 border border-border/40">
+            <div className="p-4 rounded-2xl bg-[#f5f8f2] border border-[#e7eee9]">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-primary mt-0.5" />
                 <div>
-                  <p className="font-semibold text-foreground">{centerName}</p>
-                  <p className="text-sm text-muted-foreground">{t('complete.assignedCenter')}</p>
+                  <p className="font-semibold text-[#183d34]">{centerName}</p>
+                  <p className="text-sm text-[#64736d]">{t('complete.assignedCenter')}</p>
                   {centerPhone && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
+                    <p className="text-sm text-[#64736d] flex items-center gap-1.5 mt-1">
                       <Phone className="w-3.5 h-3.5" />
                       {centerPhone}
                     </p>
@@ -137,18 +134,17 @@ export function RegistrationCompleteScreen({
               </div>
             </div>
 
-            {/* What's Next Section */}
-            <div className="p-4 sm:p-5 rounded-xl bg-blue-500/10 border border-blue-500/30">
+            <div className="p-4 sm:p-5 rounded-2xl ss-status-info">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <p className="font-semibold text-foreground text-base">{t('complete.whatsNext')}</p>
+                <AlertCircle className="w-5 h-5 text-[#378456] mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-[#64736d] space-y-2">
+                  <p className="font-semibold text-[#183d34] text-base">{t('complete.whatsNext')}</p>
                   {verificationMessage && (
-                    <p className="text-foreground/90">{verificationMessage}</p>
+                    <p className="text-[#183d34]/90">{verificationMessage}</p>
                   )}
                   <ul className="space-y-1.5">
                     <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-[#426f36] mt-0.5 flex-shrink-0" />
                       <span>{t('complete.visitCenter')}</span>
                     </li>
                     <li className="flex items-start gap-2">
@@ -168,26 +164,20 @@ export function RegistrationCompleteScreen({
               </div>
             </div>
 
-            {/* Status Summary */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-center">
-                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 mx-auto mb-1" />
-                <p className="text-xs font-medium text-foreground">{t('complete.registrationLabel')}</p>
-                <p className="text-[10px] text-green-600 dark:text-green-400">{t('complete.complete')}</p>
-              </div>
-              <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-center">
-                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 mx-auto mb-1" />
-                <p className="text-xs font-medium text-foreground">{t('complete.paymentLabel')}</p>
-                <p className="text-[10px] text-green-600 dark:text-green-400">{t('complete.received')}</p>
-              </div>
-              <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-center">
-                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 mx-auto mb-1" />
-                <p className="text-xs font-medium text-foreground">{t('complete.examLabel')}</p>
-                <p className="text-[10px] text-green-600 dark:text-green-400">{t('complete.scheduledLabel')}</p>
-              </div>
+              {[
+                { label: t('complete.registrationLabel'), status: t('complete.complete') },
+                { label: t('complete.paymentLabel'), status: t('complete.received') },
+                { label: t('complete.examLabel'), status: t('complete.scheduledLabel') },
+              ].map((item) => (
+                <div key={item.label} className="p-3 rounded-xl bg-[#e7f2db] border border-[#c7ddb5] text-center">
+                  <CheckCircle2 className="w-5 h-5 text-[#426f36] mx-auto mb-1" />
+                  <p className="text-xs font-medium text-[#183d34]">{item.label}</p>
+                  <p className="text-[10px] text-[#426f36]">{item.status}</p>
+                </div>
+              ))}
             </div>
 
-            {/* Go to Profile Button */}
             <Button
               onClick={onGoToProfile}
               variant="outline"

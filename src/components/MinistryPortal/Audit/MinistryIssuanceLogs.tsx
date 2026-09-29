@@ -34,7 +34,7 @@ export function MinistryIssuanceLogs() {
                     <FileSignature className="w-4 h-4 text-primary" />
                     Issuance & Authority Trail
                 </h4>
-                <Badge variant="outline" className="bg-white/50 border-primary/20 text-primary uppercase text-[9px] font-bold">Authority Action Log</Badge>
+                <Badge variant="outline" className="border-primary/20 text-primary uppercase text-[9px] font-bold">Authority Action Log</Badge>
             </div>
             {isLoading ? (
                 <div className="p-12 text-center">
@@ -97,7 +97,7 @@ export function MinistryIssuanceLogs() {
                                                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Issued Certificates:</p>
                                                 <div className="space-y-2">
                                                     {log.candidates.map((candidate) => (
-                                                        <div key={candidate.candidateId} className="flex items-center justify-between text-xs bg-white/50 rounded p-2">
+                                                        <div key={candidate.candidateId} className="flex items-center justify-between text-xs rounded p-2">
                                                             <div className="flex-1">
                                                                 <p className="font-medium text-foreground">{candidate.candidateName}</p>
                                                                 <p className="text-muted-foreground text-[10px] mt-0.5">

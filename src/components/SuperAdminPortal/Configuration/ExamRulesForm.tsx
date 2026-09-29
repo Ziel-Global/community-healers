@@ -3,11 +3,38 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Settings2, Save, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useExamSettings, useUpdateExamSettings } from "@/hooks/queries/useSuperAdminQueries";
 import { getApiErrorMessage } from "@/lib/errors";
+import { cn } from "@/lib/utils";
+
+function Field({
+    id,
+    label,
+    hint,
+    children,
+    className,
+}: {
+    id?: string;
+    label: string;
+    hint: string;
+    children: React.ReactNode;
+    className?: string;
+}) {
+    return (
+        <div className={cn("space-y-2.5", className)}>
+            <Label
+                htmlFor={id}
+                className="text-sm font-semibold uppercase tracking-[0.08em] text-[#355c45]"
+            >
+                {label}
+            </Label>
+            {children}
+            <p className="text-xs text-[#64736d] leading-relaxed">{hint}</p>
+        </div>
+    );
+}
 
 export function ExamRulesForm() {
     const [duration, setDuration] = useState(0);
@@ -53,134 +80,154 @@ export function ExamRulesForm() {
     }, [settings]);
 
     return (
-        <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm">
-            <CardHeader className="border-b border-border/40 bg-primary/5">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <CardTitle className="text-2xl font-bold alumni-sans-title flex items-center gap-2">
-                            <Settings2 className="w-5 h-5 text-primary" />
-                            Global Training Configuration
-                        </CardTitle>
-                        <CardDescription>Define system-wide rules for CBT Tests</CardDescription>
-                    </div>
-                    <Badge variant="outline" className="bg-white/50">Version 2.4.0</Badge>
+        <Card className="border-[#e7eee9] shadow-[0_10px_30px_#163a2b08] bg-white rounded-2xl overflow-hidden">
+            <CardHeader className="border-b border-[#e7eee9] bg-[#f5f8f2]">
+                <div>
+                    <CardTitle className="text-2xl font-display font-semibold tracking-tight flex items-center gap-2 text-[#183d34]">
+                        <Settings2 className="w-5 h-5 text-primary" />
+                        Global Training Configuration
+                    </CardTitle>
+                    <CardDescription className="text-[#64736d]">
+                        Define system-wide rules for CBT Tests
+                    </CardDescription>
                 </div>
             </CardHeader>
             <CardContent className="p-6 space-y-8">
                 {isLoading ? (
                     <div className="flex flex-col items-center gap-3 py-12">
                         <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                        <p className="text-sm text-muted-foreground animate-pulse">Loading current configuration...</p>
+                        <p className="text-sm text-muted-foreground animate-pulse">
+                            Loading current configuration...
+                        </p>
                     </div>
                 ) : (
-                    <div className="grid md:grid-cols-2 gap-8">
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="duration" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Test Duration (Minutes)</Label>
-                                <Input
-                                    id="duration"
-                                    type="number"
-                                    value={duration}
-                                    onChange={(e) => setDuration(Number(e.target.value))}
-                                    className="h-11 bg-white/50 border-border/60"
-                                />
-                                <p className="text-[10px] text-muted-foreground italic">Default duration for all standard certification trainings.</p>
-                            </div>
+                    <div className="grid md:grid-cols-2 gap-x-8 gap-y-7 items-start">
+                        <Field
+                            id="duration"
+                            label="Test Duration (Minutes)"
+                            hint="Default duration for all standard certification trainings."
+                        >
+                            <Input
+                                id="duration"
+                                type="number"
+                                value={duration}
+                                onChange={(e) => setDuration(Number(e.target.value))}
+                                className="h-11"
+                            />
+                        </Field>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="questions" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Number of Questions</Label>
-                                <Input
-                                    id="questions"
-                                    type="number"
-                                    value={questions}
-                                    onChange={(e) => setQuestions(Number(e.target.value))}
-                                    className="h-11 bg-white/50 border-border/60"
-                                />
-                                <p className="text-[10px] text-muted-foreground italic">Randomly pulled from the active question bank.</p>
-                            </div>
+                        <Field
+                            id="questions"
+                            label="Number of Questions"
+                            hint="Randomly pulled from the active question bank."
+                        >
+                            <Input
+                                id="questions"
+                                type="number"
+                                value={questions}
+                                onChange={(e) => setQuestions(Number(e.target.value))}
+                                className="h-11"
+                            />
+                        </Field>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="passingPercentage" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Passing Marks (%)</Label>
-                                <Input
-                                    id="passingPercentage"
-                                    type="number"
-                                    min={1}
-                                    max={100}
-                                    value={passingPercentage}
-                                    onChange={(e) => setPassingPercentage(Number(e.target.value))}
-                                    className="h-11 bg-white/50 border-border/60"
-                                />
-                                <p className="text-[10px] text-muted-foreground italic">Minimum percentage score a candidate must obtain to pass and become eligible for certification.</p>
-                            </div>
-                        </div>
+                        <Field
+                            id="passingPercentage"
+                            label="Passing Marks (%)"
+                            hint="Minimum percentage score a candidate must obtain to pass and become eligible for certification."
+                        >
+                            <Input
+                                id="passingPercentage"
+                                type="number"
+                                min={1}
+                                max={100}
+                                value={passingPercentage}
+                                onChange={(e) => setPassingPercentage(Number(e.target.value))}
+                                className="h-11"
+                            />
+                        </Field>
 
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <Label className="text-lg alumni-sans-subtitle uppercase tracking-wider">Certificate Validity</Label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="validityYears" className="text-xs text-muted-foreground">Years</Label>
-                                        <Input
-                                            id="validityYears"
-                                            type="number"
-                                            min={0}
-                                            max={50}
-                                            value={validityYears}
-                                            onChange={(e) => setValidityYears(Number(e.target.value))}
-                                            className="h-11 bg-white/50 border-border/60"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label htmlFor="validityMonths" className="text-xs text-muted-foreground">Months</Label>
-                                        <Input
-                                            id="validityMonths"
-                                            type="number"
-                                            min={0}
-                                            max={11}
-                                            value={validityMonths}
-                                            onChange={(e) => setValidityMonths(Number(e.target.value))}
-                                            className="h-11 bg-white/50 border-border/60"
-                                        />
-                                    </div>
+                        <Field
+                            id="unlockDelayHours"
+                            label="Exam Unlock Delay (Hours)"
+                            hint="How long after a centre verifies a candidate before their test unlocks. 0 means it unlocks immediately on verification."
+                        >
+                            <Input
+                                id="unlockDelayHours"
+                                type="number"
+                                min={0}
+                                max={168}
+                                value={unlockDelayHours}
+                                onChange={(e) => setUnlockDelayHours(Number(e.target.value))}
+                                className="h-11"
+                            />
+                        </Field>
+
+                        <Field
+                            label="Certificate Validity"
+                            hint="How long an issued certificate stays valid. 0 years and 0 months together mean it never expires. Applies only to certificates issued after this is saved."
+                            className="md:col-span-2"
+                        >
+                            <div className="grid grid-cols-2 gap-4 max-w-md">
+                                <div className="space-y-1.5">
+                                    <Label
+                                        htmlFor="validityYears"
+                                        className="text-xs font-medium text-[#658075]"
+                                    >
+                                        Years
+                                    </Label>
+                                    <Input
+                                        id="validityYears"
+                                        type="number"
+                                        min={0}
+                                        max={50}
+                                        value={validityYears}
+                                        onChange={(e) => setValidityYears(Number(e.target.value))}
+                                        className="h-11"
+                                    />
                                 </div>
-                                <p className="text-[10px] text-muted-foreground italic">
-                                    How long an issued certificate stays valid. 0 years and 0 months together mean it never expires. Applies only to certificates issued after this is saved.
-                                </p>
+                                <div className="space-y-1.5">
+                                    <Label
+                                        htmlFor="validityMonths"
+                                        className="text-xs font-medium text-[#658075]"
+                                    >
+                                        Months
+                                    </Label>
+                                    <Input
+                                        id="validityMonths"
+                                        type="number"
+                                        min={0}
+                                        max={11}
+                                        value={validityMonths}
+                                        onChange={(e) => setValidityMonths(Number(e.target.value))}
+                                        className="h-11"
+                                    />
+                                </div>
                             </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="unlockDelayHours" className="text-lg alumni-sans-subtitle uppercase tracking-wider">Exam Unlock Delay (Hours)</Label>
-                                <Input
-                                    id="unlockDelayHours"
-                                    type="number"
-                                    min={0}
-                                    max={168}
-                                    value={unlockDelayHours}
-                                    onChange={(e) => setUnlockDelayHours(Number(e.target.value))}
-                                    className="h-11 bg-white/50 border-border/60"
-                                />
-                                <p className="text-[10px] text-muted-foreground italic">
-                                    How long after a centre verifies a candidate before their test unlocks. 0 means it unlocks immediately on verification.
-                                </p>
-                            </div>
-                        </div>
+                        </Field>
                     </div>
                 )}
 
-                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex gap-4">
-                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                    <p className="text-xs text-amber-800 leading-relaxed">
-                        <span className="font-bold">Important:</span> Changes to these parameters will only affect <span className="underline italic">future</span> exam attempts. Currently active sessions will remain on the previous configuration version.
+                <div className="p-4 rounded-xl bg-[#f8f4e8] border border-[#e8dfc4] flex gap-4">
+                    <AlertTriangle className="w-5 h-5 text-[#6a5a3a] shrink-0" />
+                    <p className="text-xs text-[#5c4e2a] leading-relaxed">
+                        <span className="font-bold">Important:</span> Changes to these parameters
+                        will only affect <span className="underline italic">future</span> exam
+                        attempts. Currently active sessions will remain on the previous
+                        configuration version.
                     </p>
                 </div>
 
-                <div className="flex justify-between items-center pt-4 border-t border-border/40">
+                <div className="flex justify-between items-center pt-4 border-t border-[#e7eee9]">
                     <Button
                         onClick={handleSave}
                         disabled={updateExamSettingsMutation.isPending || isLoading}
-                        className="gradient-primary text-white font-bold h-11 px-8 shadow-lg group"
+                        className="ss-cta h-11 px-8"
                     >
-                        {updateExamSettingsMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />}
+                        {updateExamSettingsMutation.isPending ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                            <Save className="w-4 h-4 mr-2" />
+                        )}
                         Save & Apply Configuration
                     </Button>
                 </div>

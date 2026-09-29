@@ -147,7 +147,7 @@ export function EducationDeclaration({ candidateData, onToggle }: EducationDecla
                         <div
                             className={cn(
                                 "p-6 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center space-y-4 transition-colors",
-                                isUploaded ? "bg-success/5 border-success/30" : "bg-secondary/10 border-border/60 hover:border-primary/40"
+                                isUploaded ? "bg-success/5 border-success/30" : "bg-secondary/10  hover:border-primary/40"
                             )}
                         >
                             {uploadDocumentMutation.isPending ? (

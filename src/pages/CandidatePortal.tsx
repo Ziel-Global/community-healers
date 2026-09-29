@@ -15,6 +15,7 @@ import { useCandidateMe } from "@/hooks/queries/useCandidateQueries";
 import { CertificateCard } from "@/components/StudentPortal/CertificateCard";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { DegreeStatusScreen } from "@/components/StudentPortal/DegreeStatusScreen";
+import { SoftSkillsBrand } from "@/components/SoftSkillsBrand";
 
 export default function CandidatePortal() {
   const { t, i18n } = useTranslation();
@@ -184,17 +185,17 @@ export default function CandidatePortal() {
     if (candidateStatus === "SUBMITTED") {
       return (
         <div className="max-w-3xl mx-auto">
-          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-6 text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-8 h-8 text-emerald-600" />
+          <div className="ss-status-success p-8 text-center">
+            <div className="w-16 h-16 bg-[#e7f2db] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#c7ddb5]">
+              <Shield className="w-8 h-8 text-primary" />
             </div>
-            <h2 className="text-2xl font-semibold text-emerald-900 dark:text-emerald-100 mb-2">
+            <h2 className="text-2xl font-display font-semibold text-[#183d34] mb-2">
               {t('candidatePortal.examSubmittedTitle')}
             </h2>
-            <p className="text-emerald-700 dark:text-emerald-300 mb-6">
+            <p className="text-[#64736d] mb-6">
               {t('candidatePortal.examSubmittedDesc')}
             </p>
-            <Button onClick={() => setActiveTab("profile")} variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-100">
+            <Button onClick={() => setActiveTab("profile")} variant="outline">
               {t('candidatePortal.viewProfile')}
             </Button>
           </div>
@@ -243,13 +244,13 @@ export default function CandidatePortal() {
     if (examScheduled && candidateStatus !== "ABSENT" && candidateStatus !== "REJECTED") {
       return (
         <div className="max-w-3xl mx-auto">
-          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
-            <h2 className="text-2xl font-semibold text-blue-900 dark:text-blue-100 mb-2">
+          <div className="ss-status-info p-8 text-center">
+            <h2 className="text-2xl font-display font-semibold text-[#183d34] mb-2">
               {examScheduleInfo?.wasAutoRescheduled
                 ? t('candidatePortal.autoRescheduledTitle')
                 : t('candidatePortal.examAlreadyScheduled')}
             </h2>
-            <p className="text-blue-700 dark:text-blue-300 mb-4">
+            <p className="text-[#64736d] mb-4">
               {examScheduleInfo?.wasAutoRescheduled
                 ? t('candidatePortal.autoRescheduledDesc')
                 : t('candidatePortal.examAlreadyScheduledDesc')}
@@ -288,12 +289,11 @@ export default function CandidatePortal() {
   };
 
   return (
-    <div className="min-h-screen bg-background candidate-portal" data-portal="candidate">
+    <div className="min-h-screen bg-[#f5f8f2] candidate-portal" data-portal="candidate">
       {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-50 border-b border-border/60 bg-card/95 backdrop-blur-md shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+      <div className="sticky top-0 z-50 ss-header">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5">
           <div className="flex items-center justify-between gap-2">
-            {/* Logo/Branding */}
             <button
               type="button"
               onClick={() => {
@@ -305,29 +305,20 @@ export default function CandidatePortal() {
                   return next;
                 });
               }}
-              className="flex items-center gap-2 sm:gap-3 text-start hover:opacity-90 transition-opacity"
+              className="text-start hover:opacity-90 transition-opacity"
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md flex-shrink-0">
-                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
-              </div>
-              <div className="portal-brand hidden sm:flex flex-col justify-center min-w-0">
-                <h1 className="portal-brand-title alumni-sans-title text-xl text-foreground leading-tight">
-                  {t('nav.title')}
-                </h1>
-                <p className="portal-brand-subtitle alumni-sans-subtitle text-sm text-muted-foreground leading-snug">
-                  {t('nav.subtitle')}
-                </p>
-              </div>
+              <SoftSkillsBrand compact className="sm:gap-3" />
             </button>
 
-            {/* Navigation Tabs & Actions */}
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="flex items-center gap-1 sm:gap-2 p-1 rounded-xl bg-secondary/40 border border-border/40">
+              <div className="flex items-center gap-1 p-1 rounded-[11px] bg-[#f4f7f3] border border-[#e2e9e1]">
                 <Button
                   variant={activeTab === "profile" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setActiveTab("profile")}
-                  className={`px-2 sm:px-3 ${activeTab === "profile" ? "shadow-md" : ""}`}
+                  className={`px-2 sm:px-3 rounded-[7px] ${
+                    activeTab === "profile" ? "" : "text-[#658075] hover:text-foreground"
+                  }`}
                 >
                   <User className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">{t('nav.profile')}</span>
@@ -336,23 +327,23 @@ export default function CandidatePortal() {
                   variant={activeTab === "application" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setActiveTab("application")}
-                  className={`px-2 sm:px-3 ${activeTab === "application" ? "shadow-md" : ""}`}
+                  className={`px-2 sm:px-3 rounded-[7px] ${
+                    activeTab === "application" ? "" : "text-[#658075] hover:text-foreground"
+                  }`}
                 >
                   <FileText className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">{t('nav.application')}</span>
                 </Button>
               </div>
 
-              {/* Language Switcher */}
               <LanguageSwitcher />
 
-              {/* Logout Button */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="gap-1 sm:gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive px-2 sm:px-3"
+                className="gap-1 sm:gap-2 border-[#e2e9e1] text-[#64736d] hover:bg-[#f4f7f3] hover:text-[#183d34] px-2 sm:px-3"
               >
                 {isLoggingOut ? (
                   <Loader2 className="w-4 h-4 animate-spin rtl:-scale-x-100" />
@@ -368,8 +359,7 @@ export default function CandidatePortal() {
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="py-4 sm:py-8 px-3 sm:px-6">
+      <div className="py-5 sm:py-10 px-3 sm:px-6">
         {renderContent()}
       </div>
     </div>

@@ -85,7 +85,7 @@ export function AdminAccountList() {
                                             <Shield className="w-5 h-5 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="alumni-sans-title text-lg font-semibold text-foreground flex items-center gap-1.5">
+                                            <p className="font-display font-semibold tracking-tight text-lg font-semibold text-foreground flex items-center gap-1.5">
                                                 {admin.name}
                                             </p>
                                             <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -97,7 +97,7 @@ export function AdminAccountList() {
                                 <td className="p-4">
                                     <div className="flex flex-wrap gap-1.5">
                                         {admin.centers.map(center => (
-                                            <Badge key={center.id} variant="outline" className="bg-white/50 text-[10px] font-mono border-border/60">
+                                            <Badge key={center.id} variant="outline" className="text-[10px] font-mono">
                                                 {center.code}
                                             </Badge>
                                         ))}

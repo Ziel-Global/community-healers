@@ -234,8 +234,8 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
 
     return (
         <>
-            <Card className="border-border/40 shadow-royal overflow-hidden bg-card/80 backdrop-blur-md">
-                <CardHeader className="bg-primary/5 border-b border-border/40 p-6">
+            <Card className="border-[#e7eee9] shadow-primary overflow-hidden bg-card/80 backdrop-blur-md">
+                <CardHeader className="bg-primary/5 border-b border-[#e7eee9] p-6">
                     <div className="flex justify-between items-start">
                         <div className="flex gap-4">
                             <div className="relative">
@@ -253,7 +253,7 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                         });
                                     }}
                                 />
-                                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-emerald-500 border-4 border-white flex items-center justify-center shadow-lg">
+                                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-[#568a38] border-4 border-white flex items-center justify-center shadow-lg">
                                     <ShieldCheck className="w-4 h-4 text-white" />
                                 </div>
                             </div>
@@ -294,16 +294,16 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                 className={cn(
                                     "flex items-center justify-between p-4 rounded-xl border transition-all",
                                     checklist.faceMatch
-                                        ? "bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/20"
-                                        : "bg-secondary text-muted-foreground border-border/40"
+                                        ? "bg-[#e7f2db] border-[#c7ddb5] ring-1 ring-[#c7ddb5]"
+                                        : "bg-secondary text-muted-foreground border-[#e7eee9]"
                                 )}
                             >
                                 <div className="min-w-0">
-                                    <span className={cn("text-sm font-medium transition-colors block", checklist.faceMatch ? "text-emerald-700" : "text-muted-foreground")}>
+                                    <span className={cn("text-sm font-medium transition-colors block", checklist.faceMatch ? "text-[#426f36]" : "text-muted-foreground")}>
                                         Face matches Registration Photo
                                     </span>
                                     {faceCheckResult && (
-                                        <span className={cn("text-[11px] block", faceCheckResult.matched ? "text-emerald-600" : "text-destructive")}>
+                                        <span className={cn("text-[11px] block", faceCheckResult.matched ? "text-[#426f36]" : "text-destructive")}>
                                             {faceCheckResult.conflict
                                                 ? `Registered to ${faceCheckResult.conflict.candidateName}${faceCheckResult.conflict.cnic ? ` (CNIC: ${faceCheckResult.conflict.cnic})` : ""} — ${faceCheckResult.confidence.toFixed(1)}% confidence`
                                                 : `${faceCheckResult.matched ? "Matched" : "No match"} — ${faceCheckResult.confidence.toFixed(1)}% confidence`}
@@ -343,8 +343,8 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                         className={cn(
                                             "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
                                             checklist.faceMatch
-                                                ? "bg-emerald-500 border-emerald-500 scale-110"
-                                                : "border-border/60 hover:border-primary/40"
+                                                ? "bg-[#568a38] border-[#568a38] scale-110"
+                                                : " hover:border-primary/40"
                                         )}
                                     >
                                         {checklist.faceMatch && <CheckCircle2 className="w-4 h-4 text-white" />}
@@ -362,18 +362,18 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                     className={cn(
                                         "flex items-center justify-between p-4 rounded-xl border transition-all text-left group",
                                         checklist[item.id as keyof typeof checklist]
-                                            ? "bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/20"
-                                            : "bg-secondary text-muted-foreground border-border/40 hover:border-primary/40"
+                                            ? "bg-[#e7f2db] border-[#c7ddb5] ring-1 ring-[#c7ddb5]"
+                                            : "bg-secondary text-muted-foreground border-[#e7eee9] hover:border-primary/40"
                                     )}
                                 >
-                                    <span className={cn("text-sm font-medium transition-colors", checklist[item.id as keyof typeof checklist] ? "text-emerald-700" : "text-muted-foreground")}>
+                                    <span className={cn("text-sm font-medium transition-colors", checklist[item.id as keyof typeof checklist] ? "text-[#426f36]" : "text-muted-foreground")}>
                                         {item.label}
                                     </span>
                                     <div className={cn(
                                         "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
                                         checklist[item.id as keyof typeof checklist]
-                                            ? "bg-emerald-500 border-emerald-500 scale-110"
-                                            : "border-border/60 group-hover:border-primary/40"
+                                            ? "bg-[#568a38] border-[#568a38] scale-110"
+                                            : " group-hover:border-primary/40"
                                     )}>
                                         {checklist[item.id as keyof typeof checklist] && <CheckCircle2 className="w-4 h-4 text-white" />}
                                     </div>
@@ -399,21 +399,21 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                     className={cn(
                                         "flex items-center justify-between p-4 rounded-xl border transition-all text-left group",
                                         doc.uploaded
-                                            ? "bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/15 cursor-pointer"
-                                            : "bg-secondary/60 border-border/40 opacity-80 cursor-not-allowed"
+                                            ? "bg-[#e7f2db] border-[#c7ddb5] hover:bg-[#568a38]/15 cursor-pointer"
+                                            : "bg-secondary/60 border-[#e7eee9] opacity-80 cursor-not-allowed"
                                     )}
                                 >
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className={cn(
                                             "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
-                                            doc.uploaded ? "bg-emerald-500/15 text-emerald-700" : "bg-muted text-muted-foreground"
+                                            doc.uploaded ? "bg-[#568a38]/15 text-[#426f36]" : "bg-muted text-muted-foreground"
                                         )}>
                                             <FileText className="w-4 h-4" />
                                         </div>
                                         <div className="min-w-0">
                                             <p className={cn(
                                                 "text-sm font-medium truncate",
-                                                doc.uploaded ? "text-emerald-800" : "text-muted-foreground"
+                                                doc.uploaded ? "text-[#355c45]" : "text-muted-foreground"
                                             )}>
                                                 {doc.label}
                                             </p>
@@ -425,13 +425,13 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                                     <div className="flex items-center gap-2 flex-shrink-0">
                                         {doc.uploaded ? (
                                             <>
-                                                <Eye className="w-4 h-4 text-emerald-600 opacity-70 group-hover:opacity-100" />
-                                                <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                <Eye className="w-4 h-4 text-[#426f36] opacity-70 group-hover:opacity-100" />
+                                                <div className="w-6 h-6 rounded-full bg-[#568a38] flex items-center justify-center">
                                                     <CheckCircle2 className="w-4 h-4 text-white" />
                                                 </div>
                                             </>
                                         ) : (
-                                            <div className="w-6 h-6 rounded-full border-2 border-border/60 flex items-center justify-center">
+                                            <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center">
                                                 <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
                                             </div>
                                         )}
@@ -441,7 +441,7 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                         </div>
                     </div>
 
-                    <div className="flex gap-3 pt-4 border-t border-border/40">
+                    <div className="flex gap-3 pt-4 border-t border-[#e7eee9]">
                         <Button
                             variant="outline"
                             className={cn(
@@ -461,7 +461,7 @@ export function CandidateActionCard({ candidate }: { candidate?: Candidate }) {
                         <Button
                             className={cn(
                                 "flex-1 h-12 font-bold transition-all shadow-lg group",
-                                (isVerified && !loading) ? "gradient-primary text-white" : "bg-primary/20 text-muted-foreground cursor-not-allowed border-none shadow-none"
+                                (isVerified && !loading) ? "bg-primary text-white" : "bg-primary/20 text-muted-foreground cursor-not-allowed border-none shadow-none"
                             )}
                             disabled={!isVerified || loading}
                             onClick={handleVerifyAndUnlock}

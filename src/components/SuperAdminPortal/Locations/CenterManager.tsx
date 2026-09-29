@@ -139,7 +139,7 @@ export function CenterManager() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                     placeholder="Search centers by name or code..."
-                    className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
+                    className="pl-12 h-11 bg-card/60 focus:border-primary/40 rounded-xl"
                 />
             </div>
 
@@ -159,13 +159,13 @@ export function CenterManager() {
                                 <Badge
                                     key={city.id}
                                     variant="outline"
-                                    className="gap-1.5 h-8 pl-3 pr-1.5 bg-card/60 border-border/60 text-sm font-normal"
+                                    className="gap-1.5 h-8 pl-3 pr-1.5 bg-card/60 text-sm font-normal"
                                 >
                                     <MapPin className="w-3 h-3 text-primary" />
                                     {city.name}
                                     {hasCoordinates && (
                                         <Radius
-                                            className="w-3 h-3 text-emerald-500"
+                                            className="w-3 h-3 text-[#426f36]"
                                             aria-label={`Zone radius set (${city.radiusKm ?? "default"} km)`}
                                         />
                                     )}
@@ -209,7 +209,7 @@ export function CenterManager() {
                                             <Building2 className="w-6 h-6 text-primary" />
                                         </div>
                                         <div>
-                                            <h4 className="alumni-sans-title text-lg text-foreground leading-tight">{center.name}</h4>
+                                            <h4 className="font-display font-semibold tracking-tight text-lg text-foreground leading-tight">{center.name}</h4>
                                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                                 <MapPin className="w-3 h-3" /> {center.location} • ID: {center.id}
                                             </p>
@@ -230,7 +230,7 @@ export function CenterManager() {
                                     <div className="space-y-1">
                                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Avg Attendance</p>
                                         <div className="flex items-center gap-2">
-                                            <Activity className="w-3.5 h-3.5 text-emerald-500" />
+                                            <Activity className="w-3.5 h-3.5 text-[#426f36]" />
                                             <span className="font-bold text-sm">{center.attendance}</span>
                                         </div>
                                     </div>
@@ -315,8 +315,8 @@ export function CenterManager() {
                             </div>
                         </div>
 
-                        <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
-                            <p className="text-xs text-blue-700">
+                        <div className="p-3 rounded-lg bg-blue-500/5 border border-[#dce7d6]">
+                            <p className="text-xs text-[#355c45]">
                                 Centers within this radius of {editingCity?.name ?? "this city"} — in any city that
                                 also has coordinates set — become available to candidates registered here, in
                                 addition to centers in their own city.
@@ -336,7 +336,7 @@ export function CenterManager() {
                         <Button
                             onClick={handleLocationSubmit}
                             disabled={isSubmittingLocation}
-                            className="gradient-primary text-white gap-2 flex-1"
+                            className="bg-primary text-white gap-2 flex-1"
                         >
                             {isSubmittingLocation ? (
                                 <>

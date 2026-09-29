@@ -89,14 +89,14 @@ export function PersonalInfoForm({ data, onUpdate, errors = {} }: PersonalInfoFo
     }, [data.district]);
 
     return (
-        <Card className="border-border/40 shadow-sm">
+        <Card className="border-[#e7eee9] shadow-[0_8px_24px_#163a2b08] rounded-2xl overflow-hidden">
             <CardHeader>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <User className="w-5 h-5 text-primary" />
+                    <div className="w-10 h-10 rounded-[13px] bg-[#e9f1e3] flex items-center justify-center">
+                        <User className="w-5 h-5 text-[#3c6445]" />
                     </div>
                     <div>
-                        <CardTitle className="alumni-sans-title">{t('personalInfo.title')}</CardTitle>
+                        <CardTitle className="font-display font-semibold text-[#183d34] tracking-tight">{t('personalInfo.title')}</CardTitle>
                         <CardDescription>{t('personalInfo.description')}</CardDescription>
                     </div>
                 </div>

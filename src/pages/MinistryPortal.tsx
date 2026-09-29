@@ -106,7 +106,7 @@ export default function MinistryPortal() {
                     onClick={() => setTimeFilter("days")}
                     className={cn(
                       "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold",
-                      timeFilter === "days" ? "bg-white shadow-sm" : "hover:bg-white/50"
+                      timeFilter === "days" ? "bg-white shadow-sm" : "hover:"
                     )}
                   >
                     Days
@@ -117,7 +117,7 @@ export default function MinistryPortal() {
                     onClick={() => setTimeFilter("months")}
                     className={cn(
                       "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold",
-                      timeFilter === "months" ? "bg-white shadow-sm" : "hover:bg-white/50"
+                      timeFilter === "months" ? "bg-white shadow-sm" : "hover:"
                     )}
                   >
                     Months
@@ -128,7 +128,7 @@ export default function MinistryPortal() {
                     onClick={() => setTimeFilter("years")}
                     className={cn(
                       "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold",
-                      timeFilter === "years" ? "bg-white shadow-sm" : "hover:bg-white/50"
+                      timeFilter === "years" ? "bg-white shadow-sm" : "hover:"
                     )}
                   >
                     Years

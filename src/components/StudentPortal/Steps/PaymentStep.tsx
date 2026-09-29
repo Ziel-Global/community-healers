@@ -237,16 +237,16 @@ export function PaymentStep({ onNext, onBack, isFirstStep, isRepayment = false }
         </div>
       )}
 
-      <div className="bg-card border border-border/60 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Wallet className="w-5 h-5 text-primary" />
+      <div className="ss-card p-5 sm:p-6">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-11 h-11 rounded-[13px] bg-[#e9f1e3] flex items-center justify-center">
+            <Wallet className="w-5 h-5 text-[#3c6445]" />
           </div>
           <div>
-            <h2 className="font-display font-bold text-xl text-foreground">
+            <h2 className="font-display font-semibold text-xl sm:text-2xl text-[#183d34] tracking-tight">
               {isRepayment ? t("payment.repaymentTitle") : t("payment.title")}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[#64736d]">
               {isRepayment ? t("payment.repaymentDescription") : t("payment.description")}
             </p>
           </div>
@@ -254,15 +254,15 @@ export function PaymentStep({ onNext, onBack, isFirstStep, isRepayment = false }
       </div>
 
       {isRepayment && (
-        <div className="max-w-md mx-auto bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-          <p className="text-sm text-amber-800 dark:text-amber-300">
+        <div className="max-w-md mx-auto ss-status-warn p-4">
+          <p className="text-sm">
             {t("payment.repaymentNotice")}
           </p>
         </div>
       )}
 
       {isQrExpired && !isPaid && (
-        <div className="max-w-md mx-auto bg-destructive/10 border border-destructive/30 rounded-xl p-4 flex items-start gap-3">
+        <div className="max-w-md mx-auto bg-destructive/10 border border-destructive/30 rounded-2xl p-4 flex items-start gap-3">
           <RefreshCw className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
           <div className="space-y-1">
             <p className="text-sm font-medium text-destructive">{t("payment.qrExpiredTitle")}</p>
@@ -292,30 +292,30 @@ export function PaymentStep({ onNext, onBack, isFirstStep, isRepayment = false }
       </div>
 
       {isPaid && (
-        <div className="max-w-md mx-auto bg-green-500/10 border border-green-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="max-w-md mx-auto ss-status-success p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <CheckCircle2 className="w-5 h-5 text-[#426f36]" />
             <div>
-              <p className="font-semibold text-foreground">{t("payment.successful")}</p>
-              <p className="text-sm text-muted-foreground">{t("payment.successDesc")}</p>
+              <p className="font-semibold text-[#183d34]">{t("payment.successful")}</p>
+              <p className="text-sm text-[#64736d]">{t("payment.successDesc")}</p>
             </div>
           </div>
         </div>
       )}
 
       {!isPaid && !isRepayment && (
-        <div className="max-w-md mx-auto bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-          <p className="text-sm text-amber-700 dark:text-amber-400">{t("payment.warning")}</p>
+        <div className="max-w-md mx-auto ss-status-warn p-4">
+          <p className="text-sm">{t("payment.warning")}</p>
         </div>
       )}
 
       {isLocalDev && isQRGenerated && !isPaid && (
-        <div className="max-w-md mx-auto bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
-          <p className="text-sm text-blue-800 dark:text-blue-300">{t("payment.localDevHint")}</p>
+        <div className="max-w-md mx-auto ss-status-info p-4">
+          <p className="text-sm">{t("payment.localDevHint")}</p>
         </div>
       )}
 
-      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-border/60">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t">
         {!isFirstStep && !isRepayment ? (
           <Button onClick={onBack} variant="outline" size="lg" className="group w-full sm:w-auto">
             <ChevronLeft className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 rtl:-scale-x-100 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />

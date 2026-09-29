@@ -18,7 +18,7 @@ export function ExamMonitoringGrid() {
                     key={item.id}
                     className={cn(
                         "p-5 rounded-2xl border transition-all relative overflow-hidden group",
-                        item.status === "In Progress" ? "bg-primary/5 border-primary/30 shadow-md ring-1 ring-primary/20" : "bg-card border-border/40"
+                        item.status === "In Progress" ? "bg-primary/5 border-primary/30 shadow-md ring-1 ring-primary/20" : "bg-card border-[#e7eee9]"
                     )}
                 >
                     <div className="flex justify-between items-start mb-4">

@@ -49,7 +49,7 @@ const StatCard = ({ title, value, icon: Icon, desc }: any) => (
                 <div className="space-y-1">
                     <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{title}</p>
                     <h3 className="text-2xl font-bold text-foreground font-sans tabular-nums">{value}</h3>
-                    <p className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
+                    <p className="text-[10px] text-[#426f36] font-medium flex items-center gap-1">
                         <Activity className="w-3 h-3" /> {desc}
                     </p>
                 </div>
@@ -106,7 +106,7 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
                     <div className="flex-1">
-                        <h2 className="text-2xl alumni-sans-title text-foreground">{center.name}</h2>
+                        <h2 className="text-2xl font-display font-semibold tracking-tight text-foreground">{center.name}</h2>
                     </div>
                 </div>
                 <div className="flex items-center justify-center py-12">
@@ -132,7 +132,7 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
                     <div className="flex-1">
-                        <h2 className="text-2xl alumni-sans-title text-foreground">{center.name}</h2>
+                        <h2 className="text-2xl font-display font-semibold tracking-tight text-foreground">{center.name}</h2>
                     </div>
                 </div>
                 <div className="text-center py-12">
@@ -156,7 +156,7 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                 </Button>
                 <div className="flex-1">
                     <div className="flex items-center gap-3">
-                        <h2 className="text-2xl alumni-sans-title text-foreground">{centerDetails.name}</h2>
+                        <h2 className="text-2xl font-display font-semibold tracking-tight text-foreground">{centerDetails.name}</h2>
                         <Badge variant={centerDetails.status === "ACTIVE" ? "success" : "secondary"}>
                             {centerDetails.status}
                         </Badge>
@@ -282,7 +282,7 @@ export function CenterDetail({ center, onBack }: CenterDetailProps) {
                                 <Button
                                     variant="outline"
                                     className={cn(
-                                        "h-10 px-4 rounded-xl border-border/60 gap-2 hover:bg-white transition-all bg-white/50 text-sm justify-start text-left font-normal w-full sm:w-[240px]",
+                                        "h-10 px-4 rounded-xl  gap-2 hover:bg-white transition-all  text-sm justify-start text-left font-normal w-full sm:w-[240px]",
                                         !selectedDate && "text-muted-foreground"
                                     )}
                                 >

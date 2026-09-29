@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Lateef:wght@200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&family=Manrope:wght@400..800&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Lateef:wght@200;300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,110 +6,116 @@
 
 @layer base {
   :root {
-    /* Forest Green & White Premium Theme */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 15%;
+    /* SoftSkills forest palette (landing-aligned) */
+    --background: 90 27% 96%;
+    --foreground: 162 44% 17%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 15%;
+    --card-foreground: 162 44% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 15%;
+    --popover-foreground: 162 44% 17%;
 
-    /* Forest Green Primary */
-    --primary: 152 45% 28%;
+    /* Primary CTA #164c3e */
+    --primary: 162 55% 19%;
     --primary-foreground: 0 0% 100%;
 
-    /* Light Gray Secondary */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 15%;
+    /* Soft mint secondary #f4f7f3 */
+    --secondary: 100 20% 96%;
+    --secondary-foreground: 162 44% 17%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 100 18% 97%;
+    --muted-foreground: 150 6% 42%;
 
-    /* Forest Green Accent */
-    --accent: 152 45% 28%;
+    /* Mid green accent #328260 */
+    --accent: 155 45% 35%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 45% 35%;
+    --success: 155 45% 35%;
     --success-foreground: 0 0% 100%;
 
     --warning: 45 93% 47%;
-    --warning-foreground: 0 0% 15%;
+    --warning-foreground: 162 44% 17%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 96%;
-    --ring: 152 45% 28%;
+    /* Softer surfaces; field borders come from SoftSkills Input chrome */
+    --border: 137 18% 88%;
+    --input: 140 18% 81%;
+    --ring: 162 55% 19%;
 
-    --radius: 0.75rem;
+    --radius: 0.5625rem;
 
-    /* Charcoal Colors for text/accents */
-    --charcoal-900: 0 0% 12%;
-    --charcoal-800: 0 0% 18%;
-    --charcoal-700: 0 0% 27%;
-    --charcoal-600: 0 0% 40%;
-    --charcoal-500: 0 0% 55%;
-    --charcoal-400: 0 0% 70%;
-    --charcoal-300: 0 0% 82%;
-    --charcoal-200: 0 0% 90%;
-    --charcoal-100: 0 0% 96%;
+    /* Charcoal / ink scale (green-tinted) */
+    --charcoal-900: 162 44% 12%;
+    --charcoal-800: 162 35% 18%;
+    --charcoal-700: 162 25% 27%;
+    --charcoal-600: 150 8% 40%;
+    --charcoal-500: 150 6% 42%;
+    --charcoal-400: 140 8% 70%;
+    --charcoal-300: 137 12% 82%;
+    --charcoal-200: 137 18% 92%;
+    --charcoal-100: 90 27% 96%;
 
-    /* Forest Green Color Scale */
-    --forest: 152 45% 28%;
-    --forest-light: 152 40% 40%;
-    --forest-dark: 152 50% 20%;
-    --forest-50: 152 40% 97%;
-    --forest-100: 152 40% 92%;
-    --forest-200: 152 40% 80%;
+    /* Forest scale */
+    --forest: 162 55% 19%;
+    --forest-light: 155 45% 35%;
+    --forest-dark: 162 60% 14%;
+    --forest-50: 90 27% 96%;
+    --forest-100: 100 25% 92%;
+    --forest-200: 140 20% 80%;
+
+    /* Lime accents #d7f88c / #dcf5aa */
+    --lime: 80 88% 76%;
+    --lime-soft: 80 78% 81%;
+    --lime-muted: 80 45% 90%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(152 45% 28%) 0%, hsl(152 40% 40%) 100%);
-    --gradient-forest: linear-gradient(135deg, hsl(152 45% 28%) 0%, hsl(152 50% 35%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(152 20% 98%) 50%, hsl(152 30% 96%) 100%);
-    --gradient-dark: linear-gradient(135deg, hsl(152 50% 20%) 0%, hsl(152 45% 28%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(162 55% 19%) 0%, hsl(155 45% 28%) 100%);
+    --gradient-forest: linear-gradient(135deg, hsl(162 55% 19%) 0%, hsl(155 45% 35%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(90 27% 96%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(100 25% 97%) 50%, hsl(90 27% 96%) 100%);
+    --gradient-dark: linear-gradient(135deg, hsl(162 60% 14%) 0%, hsl(162 55% 19%) 100%);
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    --shadow-lg: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-    --shadow-primary: 0 10px 40px -10px hsl(152 45% 28% / 0.3);
-    --shadow-primary-strong: 0 15px 50px -10px hsl(152 45% 28% / 0.4);
+    --shadow-sm: 0 1px 2px 0 rgb(22 60 50 / 0.04);
+    --shadow-md: 0 4px 12px -2px rgb(22 60 50 / 0.07), 0 2px 4px -2px rgb(22 60 50 / 0.04);
+    --shadow-lg: 0 12px 28px -6px rgb(22 60 50 / 0.1), 0 6px 12px -6px rgb(22 60 50 / 0.05);
+    --shadow-primary: 0 8px 24px -8px hsl(162 55% 19% / 0.22);
+    --shadow-primary-strong: 0 12px 32px -8px hsl(162 55% 19% / 0.3);
     --shadow-dark: 0 10px 40px -10px hsl(0 0% 0% / 0.2);
 
-    --sidebar-background: 152 45% 28%;
+    --sidebar-background: 162 55% 19%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 152 45% 28%;
-    --sidebar-accent: 152 40% 35%;
+    --sidebar-primary-foreground: 162 55% 19%;
+    --sidebar-accent: 155 40% 28%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 152 40% 35%;
-    --sidebar-ring: 0 0% 100%;
+    --sidebar-border: 155 40% 28%;
+    --sidebar-ring: 80 88% 76%;
   }
 
   .dark {
-    --background: 0 0% 8%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 152 45% 40%;
+    --background: 162 30% 8%;
+    --foreground: 90 20% 96%;
+    --card: 162 25% 12%;
+    --card-foreground: 90 20% 96%;
+    --popover: 162 25% 12%;
+    --popover-foreground: 90 20% 96%;
+    --primary: 155 40% 40%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 152 45% 45%;
+    --secondary: 162 20% 15%;
+    --secondary-foreground: 90 20% 96%;
+    --muted: 162 18% 18%;
+    --muted-foreground: 140 10% 60%;
+    --accent: 155 40% 42%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
-    --input: 0 0% 18%;
-    --ring: 152 45% 45%;
+    --border: 162 15% 20%;
+    --input: 162 18% 18%;
+    --ring: 155 40% 42%;
   }
 }
 
@@ -120,12 +126,12 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased m-0 p-0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'DM Sans', 'Inter', sans-serif;
   }
 
   /* Apply Noto Sans Arabic when language is Urdu */
   html[lang="ur"] body {
-    font-family: 'Noto Sans Arabic', 'Inter', sans-serif;
+    font-family: 'Noto Sans Arabic', 'DM Sans', sans-serif;
     /* Adjust line height for better Urdu readability */
     line-height: 1.7 !important;
     font-size: 1.05em;
@@ -158,7 +164,7 @@
   h1,
   h2,
   h3 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Manrope', 'DM Sans', sans-serif;
   }
 }
 
@@ -237,7 +243,131 @@
   }
 
   .font-display {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Manrope', 'DM Sans', sans-serif;
+  }
+
+  .bg-lime {
+    background-color: hsl(var(--lime));
+  }
+
+  .text-lime {
+    color: hsl(var(--lime));
+  }
+
+  .bg-lime-soft {
+    background-color: hsl(var(--lime-soft));
+  }
+
+  .bg-lime-muted {
+    background-color: hsl(var(--lime-muted));
+  }
+
+  /* SoftSkills candidate / auth surface */
+  .candidate-portal,
+  [data-portal="candidate"],
+  .candidate-auth,
+  .center-portal,
+  [data-portal="center"] {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  .candidate-portal h1,
+  .candidate-portal h2,
+  .candidate-portal h3,
+  [data-portal="candidate"] h1,
+  [data-portal="candidate"] h2,
+  [data-portal="candidate"] h3,
+  .candidate-auth h1,
+  .candidate-auth h2,
+  .candidate-auth h3,
+  .center-portal h1,
+  .center-portal h2,
+  .center-portal h3,
+  [data-portal="center"] h1,
+  [data-portal="center"] h2,
+  [data-portal="center"] h3,
+  .candidate-portal .font-display,
+  [data-portal="candidate"] .font-display,
+  .candidate-auth .font-display,
+  .center-portal .font-display,
+  [data-portal="center"] .font-display {
+    font-family: 'Manrope', 'DM Sans', sans-serif;
+    letter-spacing: -0.03em;
+  }
+
+  .ss-header {
+    background: #fffefef2;
+    border-bottom: 1px solid #e7eee9;
+    backdrop-filter: blur(18px);
+  }
+
+  .ss-brand-mark {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    background: #174c3e;
+    width: 42px;
+    height: 45px;
+    padding: 11px;
+    border-radius: 10px;
+    transform: rotate(-4deg);
+    flex-shrink: 0;
+  }
+
+  .ss-brand-mark span {
+    width: 5px;
+    background: #dcf5aa;
+    border-radius: 2px;
+  }
+
+  .ss-brand-mark span:nth-child(1) { height: 11px; }
+  .ss-brand-mark span:nth-child(2) { height: 18px; }
+  .ss-brand-mark span:nth-child(3) { height: 25px; }
+
+  .ss-brand-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #183d34;
+    line-height: 1.1;
+  }
+
+  .ss-brand-subtitle {
+    font-family: 'Manrope', sans-serif;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #658075;
+    margin-top: 4px;
+  }
+
+  .ss-status-success {
+    @apply rounded-2xl border border-[#d8e4bc] bg-[#edf5df] text-[#254931];
+  }
+
+  .ss-status-info {
+    @apply rounded-2xl border border-[#dce7d6] bg-[#f3f8ed] text-[#173e30];
+  }
+
+  .ss-status-warn {
+    @apply rounded-2xl border border-[#e8dfc4] bg-[#f8f4e8] text-[#5c4e2a];
+  }
+
+  .ss-card {
+    @apply rounded-2xl border border-border bg-card shadow-sm;
+  }
+
+  .ss-cta {
+    @apply bg-primary text-primary-foreground rounded-[9px] font-semibold transition-all duration-200;
+  }
+
+  .ss-cta:hover {
+    background: #226b52;
+    transform: translateY(-2px);
   }
 
   /* Alumni Sans font for Super Admin Portal */
@@ -276,11 +406,13 @@
   html[lang="ur"] .training-portal *,
   html[lang="ur"] .candidate-portal,
   html[lang="ur"] .candidate-portal *,
+  html[lang="ur"] .candidate-auth,
+  html[lang="ur"] .candidate-auth *,
   html[lang="ur"] [data-portal="training"],
   html[lang="ur"] [data-portal="training"] *,
   html[lang="ur"] [data-portal="candidate"],
   html[lang="ur"] [data-portal="candidate"] * {
-    font-family: 'Noto Sans Arabic', 'Lateef', 'Inter', sans-serif !important;
+    font-family: 'Noto Sans Arabic', 'Lateef', 'DM Sans', sans-serif !important;
   }
 
   /* Latin IDs / codes keep monospace */
@@ -294,9 +426,10 @@
   /* Email, phone, dates — Latin sans for clarity */
   html[lang="ur"] .candidate-portal [dir="ltr"]:not(.font-mono),
   html[lang="ur"] .training-portal [dir="ltr"]:not(.font-mono),
+  html[lang="ur"] .candidate-auth [dir="ltr"]:not(.font-mono),
   html[lang="ur"] [data-portal="candidate"] [dir="ltr"]:not(.font-mono),
   html[lang="ur"] [data-portal="training"] [dir="ltr"]:not(.font-mono) {
-    font-family: 'Inter', system-ui, sans-serif !important;
+    font-family: 'DM Sans', system-ui, sans-serif !important;
   }
 
   /* Slight base bump for Urdu in portals (Arabic needs optical size) */

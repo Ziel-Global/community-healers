@@ -101,7 +101,7 @@ export function ChecklistResultsSection({
                                         variant="outline"
                                         className={
                                             result.passed === true
-                                                ? "gap-1.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shrink-0"
+                                                ? "gap-1.5 border-[#c7ddb5] bg-[#e7f2db] text-[#426f36] dark:text-emerald-400 shrink-0"
                                                 : "gap-1.5 shrink-0"
                                         }
                                     >

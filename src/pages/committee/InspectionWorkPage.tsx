@@ -190,7 +190,7 @@ export default function CommitteeInspectionWorkPage() {
         ) : (
           <>
             {isReportSubmitted && (
-              <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-sm text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+              <div className="p-4 rounded-xl bg-[#f3f8ed] border border-[#c7ddb5] text-sm text-[#355c45] dark:text-emerald-300 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 Report submitted to the chairman
                 {submittedAt && ` on ${formatDate(submittedAt)}`}.
@@ -329,7 +329,7 @@ export default function CommitteeInspectionWorkPage() {
                     <p className="text-xs text-muted-foreground">Complete every checklist item before submitting.</p>
                   )}
                   <Button
-                    className="w-full gradient-primary text-white gap-2"
+                    className="w-full bg-primary text-white gap-2"
                     disabled={!canSubmitReport}
                     onClick={handleSubmitReport}
                   >

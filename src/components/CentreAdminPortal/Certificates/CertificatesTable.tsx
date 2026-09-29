@@ -56,7 +56,7 @@ export function CertificatesTable() {
                     placeholder="Search by candidate, CNIC, or certificate #..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
+                    className="pl-12 h-11 bg-card/60 focus:border-primary/40 rounded-xl"
                 />
             </div>
 
@@ -71,11 +71,11 @@ export function CertificatesTable() {
                     </div>
                 </div>
             ) : (
-                <div className="rounded-2xl border border-border/40 bg-card overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                <div className="rounded-2xl border border-[#e7eee9] bg-card overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
-                                <TableRow className="border-b border-border/40 bg-gradient-to-r from-secondary/40 to-secondary/10 hover:bg-gradient-to-r hover:from-secondary/40 hover:to-secondary/10">
+                                <TableRow className="border-b border-[#e7eee9] bg-gradient-to-r from-secondary/40 to-secondary/10 hover:bg-gradient-to-r hover:from-secondary/40 hover:to-secondary/10">
                                     <TableHead className={headCell}>Candidate</TableHead>
                                     <TableHead className={cn(headCell, "hidden md:table-cell")}>CNIC</TableHead>
                                     <TableHead className={cn(headCell, "hidden lg:table-cell")}>Certificate #</TableHead>

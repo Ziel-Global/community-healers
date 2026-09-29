@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Building2, MapPin, ShieldCheck, Mail, Clock, Phone } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface CenterInfoProps {
     name?: string;
@@ -13,6 +13,38 @@ interface CenterInfoProps {
     trainingStartTime?: string;
     trainingEndTime?: string;
     isLoading?: boolean;
+}
+
+function MetaTile({
+    icon: Icon,
+    label,
+    value,
+    tone = "mint",
+}: {
+    icon: React.ElementType;
+    label: string;
+    value: string;
+    tone?: "mint" | "lime" | "warm";
+}) {
+    const tones = {
+        mint: "bg-[#edf3ea] text-[#355c45]",
+        lime: "bg-[#eef6df] text-[#426f36]",
+        warm: "bg-[#f3efe6] text-[#6a5a3a]",
+    };
+
+    return (
+        <div className="flex items-start gap-3 rounded-2xl border border-[#e7eee9] bg-white/70 px-4 py-3.5 min-w-0">
+            <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", tones[tone])}>
+                <Icon className="w-4 h-4" strokeWidth={1.75} />
+            </div>
+            <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7a8b7e] mb-1">
+                    {label}
+                </p>
+                <p className="text-sm font-semibold text-[#183d34] truncate leading-snug">{value}</p>
+            </div>
+        </div>
+    );
 }
 
 export function CenterInfoCard({
@@ -29,39 +61,25 @@ export function CenterInfoCard({
 }: CenterInfoProps) {
     if (isLoading) {
         return (
-            <Card className="border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden border-l-4 border-l-primary/40">
-                <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-4">
-                            <Skeleton className="w-14 h-14 rounded-2xl" />
-                            <div className="space-y-2">
-                                <Skeleton className="h-8 w-64" />
-                                <div className="flex items-center gap-2">
-                                    <Skeleton className="h-4 w-20 rounded-full" />
-                                    <Skeleton className="h-4 w-40" />
-                                </div>
+            <div className="rounded-[22px] border border-[#e7eee9] bg-white overflow-hidden shadow-[0_18px_50px_#163a2b0a]">
+                <div className="p-6 sm:p-7">
+                    <div className="flex flex-col xl:flex-row xl:items-center gap-6 xl:gap-10">
+                        <div className="flex items-center gap-4 flex-1">
+                            <Skeleton className="w-16 h-16 rounded-2xl" />
+                            <div className="space-y-3 flex-1">
+                                <Skeleton className="h-7 w-64 max-w-full" />
+                                <Skeleton className="h-4 w-48" />
                             </div>
                         </div>
-
-                        <div className="flex flex-wrap gap-4">
-                            <div className="p-3 rounded-xl bg-secondary/30 border border-border/20 flex items-center gap-3 w-40">
-                                <Skeleton className="w-8 h-8 rounded-lg" />
-                                <div className="space-y-1">
-                                    <Skeleton className="h-2 w-16" />
-                                    <Skeleton className="h-4 w-24" />
-                                </div>
-                            </div>
-                            <div className="p-3 rounded-xl bg-secondary/30 border border-border/20 flex items-center gap-3 w-40">
-                                <Skeleton className="w-8 h-8 rounded-lg" />
-                                <div className="space-y-1">
-                                    <Skeleton className="h-2 w-16" />
-                                    <Skeleton className="h-4 w-24" />
-                                </div>
-                            </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+                            <Skeleton className="h-[72px] rounded-2xl" />
+                            <Skeleton className="h-[72px] rounded-2xl" />
+                            <Skeleton className="h-[72px] rounded-2xl" />
+                            <Skeleton className="h-[72px] rounded-2xl" />
                         </div>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         );
     }
 
@@ -73,71 +91,50 @@ export function CenterInfoCard({
             : null;
 
     return (
-        <Card className="border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden border-l-4 border-l-primary">
-            <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-royal">
-                            <Building2 className="w-7 h-7 text-primary-foreground" />
+        <div className="relative rounded-[22px] border border-[#e7eee9] overflow-hidden shadow-[0_18px_50px_#163a2b0a] bg-[linear-gradient(135deg,#ffffff_0%,#f7faf4_55%,#eef5e8_100%)]">
+            <div className="absolute inset-y-0 left-0 w-1 bg-[linear-gradient(180deg,#164c3e_0%,#71a64b_100%)]" />
+            <div className="absolute -top-24 -right-16 w-64 h-64 rounded-full bg-[#d7f88c]/20 blur-3xl pointer-events-none" />
+
+            <div className="relative p-6 sm:p-7 pl-7 sm:pl-8">
+                <div className="flex flex-col xl:flex-row xl:items-center gap-7 xl:gap-10">
+                    <div className="flex items-start sm:items-center gap-4 sm:gap-5 flex-1 min-w-0">
+                        <div className="relative shrink-0">
+                            <div className="w-16 h-16 rounded-[18px] bg-[#164c3e] flex items-center justify-center shadow-[0_12px_28px_#164c3e33]">
+                                <Building2 className="w-7 h-7 text-white" strokeWidth={1.6} />
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#d7f88c] border-[3px] border-white" />
                         </div>
-                        <div>
-                            <h2 className="text-2xl font-bold text-foreground alumni-sans-title">{name}</h2>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[10px] tracking-wider uppercase">
-                                    ID: {displayId}
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6d8474] mb-1.5">
+                                Your training centre
+                            </p>
+                            <h2 className="text-2xl sm:text-[1.7rem] font-display font-semibold text-[#183d34] tracking-tight leading-tight truncate">
+                                {name}
+                            </h2>
+                            <div className="flex flex-wrap items-center gap-2.5 mt-3">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-[#164c3e] text-[#d7f88c] text-[10px] font-bold tracking-[0.08em] uppercase">
+                                    ID · {displayId}
                                 </span>
-                                <span className="flex items-center gap-1">
-                                    <MapPin className="w-3.5 h-3.5" />
+                                <span className="inline-flex items-center gap-1.5 text-sm text-[#5a7064]">
+                                    <MapPin className="w-3.5 h-3.5 text-[#378456]" />
                                     {location}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full xl:max-w-xl">
                         {timingsLabel && (
-                            <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                                    <Clock className="w-4 h-4 text-amber-600" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Training Hours</p>
-                                    <p className="text-sm font-semibold text-foreground">{timingsLabel}</p>
-                                </div>
-                            </div>
+                            <MetaTile icon={Clock} label="Training Hours" value={timingsLabel} tone="warm" />
                         )}
-                        <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Verified Admin</p>
-                                <p className="text-sm font-semibold text-foreground">{adminName}</p>
-                            </div>
-                        </div>
-                        <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <Mail className="w-4 h-4 text-primary" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Center Contact</p>
-                                <p className="text-sm font-semibold text-foreground">{contactEmail}</p>
-                            </div>
-                        </div>
+                        <MetaTile icon={ShieldCheck} label="Verified Admin" value={adminName} tone="lime" />
+                        <MetaTile icon={Mail} label="Center Contact" value={contactEmail} tone="mint" />
                         {phone && (
-                            <div className="p-3 rounded-xl bg-secondary/50 border border-border/40 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                    <Phone className="w-4 h-4 text-blue-600" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Center Phone</p>
-                                    <p className="text-sm font-semibold text-foreground">{phone}</p>
-                                </div>
-                            </div>
+                            <MetaTile icon={Phone} label="Center Phone" value={phone} tone="mint" />
                         )}
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

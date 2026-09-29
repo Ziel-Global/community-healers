@@ -14,9 +14,9 @@ export function HistoricalReports() {
     };
 
     return (
-        <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
-            <div className="p-4 border-b border-border/40 bg-secondary/20 flex justify-between items-center">
-                <h4 className="text-lg alumni-sans-title text-foreground uppercase tracking-widest flex items-center gap-2">
+        <Card className="border-[#e7eee9] overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
+            <div className="p-4 border-b border-[#e7eee9] bg-secondary/20 flex justify-between items-center">
+                <h4 className="text-lg font-display font-semibold tracking-tight text-foreground uppercase tracking-widest flex items-center gap-2">
                     <FileText className="w-4 h-4 text-primary" /> Past Reports
                 </h4>
                 {/* <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
@@ -26,7 +26,7 @@ export function HistoricalReports() {
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="bg-secondary/40 border-b border-border/40">
+                        <tr className="bg-secondary/40 border-b border-[#e7eee9]">
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Training Date</th>
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Candidates</th>
                             <th className="p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Pass Rate</th>
@@ -52,7 +52,7 @@ export function HistoricalReports() {
                             reports.map((r, index) => (
                                 <tr key={index} className="hover:bg-primary/5 transition-colors">
                                     <td className="p-4">
-                                        <div className="flex items-center gap-2 text-lg alumni-sans-subtitle text-foreground">
+                                        <div className="flex items-center gap-2 text-lg font-medium text-foreground">
                                             <CalendarIcon className="w-3.5 h-3.5 text-primary" />
                                             {formatDate(r.examDate)}
                                         </div>
@@ -61,7 +61,7 @@ export function HistoricalReports() {
                                         <p className="text-sm font-medium text-foreground">{r.candidates}</p>
                                     </td>
                                     <td className="p-4 text-right">
-                                        <p className="text-sm font-bold text-emerald-600">{r.passRate}%</p>
+                                        <p className="text-sm font-bold text-[#426f36]">{r.passRate}%</p>
                                     </td>
                                 </tr>
                             ))

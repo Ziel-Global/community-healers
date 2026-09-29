@@ -156,7 +156,7 @@ export default function CommitteeChairmanApplicationDetailPage() {
                 <Button variant="outline" className="gap-2" onClick={() => setShowReturnDialog(true)} disabled={returnMutation.isPending}>
                   <Undo2 className="w-4 h-4" /> Return to Bureau
                 </Button>
-                <Button className="gradient-primary text-white gap-2" onClick={() => setShowForwardDialog(true)} disabled={forwardMutation.isPending}>
+                <Button className="bg-primary text-white gap-2" onClick={() => setShowForwardDialog(true)} disabled={forwardMutation.isPending}>
                   {forwardMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   Schedule &amp; forward
                 </Button>
@@ -320,8 +320,8 @@ export default function CommitteeChairmanApplicationDetailPage() {
         )}
 
         {application.status === "APPROVED" && (
-          <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-            <p className="text-sm text-emerald-700 flex items-center gap-2">
+          <div className="p-4 rounded-xl bg-[#f3f8ed] border border-[#c7ddb5]">
+            <p className="text-sm text-[#426f36] flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
               Approved {formatDateTime(application.reviewedAt)} — center is live.
             </p>

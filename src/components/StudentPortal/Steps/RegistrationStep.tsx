@@ -204,16 +204,16 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
   return (
     <div className="space-y-8">
       {/* Step Header */}
-      <div className="bg-card border border-border/60 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <FileCheck className="w-5 h-5 text-primary" />
+      <div className="ss-card p-5 sm:p-6">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-11 h-11 rounded-[13px] bg-[#e9f1e3] flex items-center justify-center">
+            <FileCheck className="w-5 h-5 text-[#3c6445]" />
           </div>
           <div>
-            <h2 className="font-bold text-3xl text-foreground alumni-sans-title">
+            <h2 className="font-display font-semibold text-xl sm:text-2xl text-[#183d34] tracking-tight">
               {t('registration.title')}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[#64736d]">
               {t('registration.description')}
             </p>
           </div>
@@ -254,7 +254,7 @@ export function RegistrationStep({ onNext, isFirstStep }: WizardStepProps) {
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between pt-6 border-t border-border/60">
+      <div className="flex items-center justify-between pt-6 border-t">
         <div className="text-sm text-muted-foreground">
           {hasSixteenYears ? t('registration.stepInfoDegree') : t('registration.stepInfo')}
         </div>

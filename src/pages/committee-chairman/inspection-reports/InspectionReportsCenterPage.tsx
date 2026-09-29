@@ -1,22 +1,23 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Check,
   CheckCircle2,
+  ChevronRight,
   FileCheck,
   Loader2,
   ThumbsDown,
   ThumbsUp,
   UserCheck,
+  Users,
   UserX,
   X,
   XCircle,
+  type LucideIcon,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import {
   useChairmanApplicationDetail,
   useChairmanApprove,
@@ -38,6 +41,9 @@ import { committeeChairmanNavItems } from "../../CommitteeChairmanPortal";
 
 const MIN_REJECT_REASON = 5;
 
+const headCell =
+  "h-11 px-4 text-[10px] font-bold uppercase tracking-[0.1em] text-[#6d8474] bg-[#f4f7f3]";
+
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
@@ -46,19 +52,42 @@ function initials(name: string): string {
 }
 
 function avatarClasses(attending: boolean | null): string {
-  if (attending === true) {
-    return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
-  }
-  if (attending === false) {
-    return "bg-destructive/15 text-destructive";
-  }
-  return "bg-secondary text-muted-foreground";
+  if (attending === true) return "bg-[#eef6df] text-[#426f36]";
+  if (attending === false) return "bg-red-50 text-red-700";
+  return "bg-[#e8f0ea] text-[#6d8474]";
 }
 
-function memberCardBorder(attending: boolean | null): string {
-  if (attending === true) return "border-emerald-500/40";
-  if (attending === false) return "border-destructive/40";
-  return "border-border/40";
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  accent,
+  iconWell,
+  iconColor,
+  valueClass,
+}: {
+  label: string;
+  value: number;
+  icon: LucideIcon;
+  accent: string;
+  iconWell: string;
+  iconColor: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-[18px] border border-[#e7eee9] bg-white shadow-[0_10px_30px_#163a2b08]">
+      <div className={cn("absolute inset-x-0 top-0 h-[3px]", accent)} />
+      <div className="p-4 flex flex-col h-full min-h-[120px]">
+        <div className={cn("w-9 h-9 rounded-[11px] flex items-center justify-center", iconWell)}>
+          <Icon className={cn("w-4 h-4", iconColor)} strokeWidth={1.75} />
+        </div>
+        <p className={cn("mt-3 text-2xl font-display font-semibold tabular-nums tracking-tight text-[#183d34]", valueClass)}>
+          {value}
+        </p>
+        <p className="mt-auto pt-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#6d8474]">{label}</p>
+      </div>
+    </div>
+  );
 }
 
 export default function InspectionReportsCenterPage() {
@@ -70,6 +99,7 @@ export default function InspectionReportsCenterPage() {
   const approveMutation = useChairmanApprove(applicationId);
   const rejectMutation = useChairmanReject(applicationId);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
   const isLoading = appLoading || reportsLoading;
@@ -80,6 +110,7 @@ export default function InspectionReportsCenterPage() {
     approveMutation.mutate(undefined, {
       onSuccess: () => {
         toast({ title: "Center approved", description: "The center and admin login are now live." });
+        setShowApproveDialog(false);
         navigate("/committee-chairman/inspection-reports");
       },
       onError: (err) => {
@@ -113,7 +144,9 @@ export default function InspectionReportsCenterPage() {
   if (isLoading) {
     return (
       <DashboardLayout title="Loading..." portalType="committee-chairman" navItems={committeeChairmanNavItems}>
-        <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+        <div className="flex justify-center py-16">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
       </DashboardLayout>
     );
   }
@@ -121,8 +154,8 @@ export default function InspectionReportsCenterPage() {
   if (!application || !reports) {
     return (
       <DashboardLayout title="Inspection reports" portalType="committee-chairman" navItems={committeeChairmanNavItems}>
-        <p className="text-sm text-muted-foreground">Could not load this center.</p>
-        <Button variant="ghost" className="mt-4" onClick={() => navigate("/committee-chairman/inspection-reports")}>
+        <p className="text-sm text-[#6d8474]">Could not load this center.</p>
+        <Button variant="ghost" className="mt-4 text-[#6d8474]" onClick={() => navigate("/committee-chairman/inspection-reports")}>
           Back
         </Button>
       </DashboardLayout>
@@ -140,179 +173,291 @@ export default function InspectionReportsCenterPage() {
       portalType="committee-chairman"
       navItems={committeeChairmanNavItems}
     >
-      <div className="max-w-3xl mx-auto space-y-5 pb-12">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-2 -ml-2"
-          onClick={() => navigate("/committee-chairman/inspection-reports")}
+      <div className="max-w-4xl mx-auto space-y-5 pb-12">
+        <Link
+          to="/committee-chairman/inspection-reports"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[#6d8474] hover:text-[#164c3e] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> All scheduled centers
-        </Button>
+        </Link>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="border-border/40 rounded-xl h-full">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-1.5 h-full">
-              <UserCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              <p className="text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
-                {reports.summary.attending}
-              </p>
-              <p className="text-xs text-muted-foreground">Attending</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/40 rounded-xl h-full">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-1.5 h-full">
-              <UserX className="w-5 h-5 text-destructive" />
-              <p className="text-2xl font-semibold tabular-nums text-destructive">
-                {reports.summary.notAttending}
-              </p>
-              <p className="text-xs text-muted-foreground">Not attending</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/40 rounded-xl h-full">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-1.5 h-full">
-              <FileCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <p className="text-2xl font-semibold tabular-nums text-blue-600 dark:text-blue-400">
-                {reports.summary.submitted}
-              </p>
-              <p className="text-xs text-muted-foreground">Submitted</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/40 rounded-xl h-full">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-1.5 h-full">
-              <div className="flex items-stretch w-full">
-                <div className="flex-1 flex flex-col items-center gap-1.5 px-1">
-                  <ThumbsUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  <p className="text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard
+            label="Attending"
+            value={reports.summary.attending}
+            icon={UserCheck}
+            accent="bg-[#71a64b]"
+            iconWell="bg-[#eef6df]"
+            iconColor="text-[#426f36]"
+            valueClass="text-[#426f36]"
+          />
+          <StatCard
+            label="Not attending"
+            value={reports.summary.notAttending}
+            icon={UserX}
+            accent="bg-red-500"
+            iconWell="bg-red-50"
+            iconColor="text-red-600"
+            valueClass="text-red-600"
+          />
+          <StatCard
+            label="Submitted"
+            value={reports.summary.submitted}
+            icon={FileCheck}
+            accent="bg-[#164c3e]"
+            iconWell="bg-[#e8f0ea]"
+            iconColor="text-[#164c3e]"
+          />
+          <div className="relative overflow-hidden rounded-[18px] border border-[#e7eee9] bg-white shadow-[0_10px_30px_#163a2b08]">
+            <div className="absolute inset-x-0 top-0 h-[3px] bg-[#a08a55]" />
+            <div className="p-4 flex flex-col h-full min-h-[120px]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#6d8474]">Recommendation</p>
+              <div className="mt-3 flex items-stretch gap-0 flex-1">
+                <div className="flex-1 flex flex-col items-center justify-center gap-1">
+                  <ThumbsUp className="w-4 h-4 text-[#426f36]" />
+                  <p className="text-2xl font-display font-semibold tabular-nums text-[#426f36]">
                     {reports.summary.recommendApprove}
                   </p>
                 </div>
-                <div className="w-px bg-border self-stretch my-0.5" />
-                <div className="flex-1 flex flex-col items-center gap-1.5 px-1">
-                  <ThumbsDown className="w-5 h-5 text-destructive" />
-                  <p className="text-2xl font-semibold tabular-nums text-destructive">
+                <div className="w-px bg-[#e7eee9] self-stretch my-1" />
+                <div className="flex-1 flex flex-col items-center justify-center gap-1">
+                  <ThumbsDown className="w-4 h-4 text-red-600" />
+                  <p className="text-2xl font-display font-semibold tabular-nums text-red-600">
                     {reports.summary.recommendReject}
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">Recommendation</p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-3">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground px-1">Committee members</h2>
-          {reports.members.map((member) => (
-            <Card
-              key={member.memberUserId}
-              className={`${memberCardBorder(member.attending)} ${
-                member.submitted ? "cursor-pointer hover:border-primary/30" : ""
-              }`}
-              onClick={() => {
-                if (member.submitted) {
-                  navigate(
-                    `/committee-chairman/inspection-reports/${applicationId}/members/${member.memberUserId}`,
-                  );
-                }
-              }}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${avatarClasses(
-                    member.attending,
-                  )}`}
-                >
-                  {initials(member.memberName)}
-                </div>
-
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="font-medium text-foreground truncate">{member.memberName}</p>
-                  {member.attending === true && (
-                    <p className="text-xs flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
-                      <Check className="w-3.5 h-3.5 shrink-0" />
-                      Attending
-                    </p>
-                  )}
-                  {member.attending === false && (
-                    <p className="text-xs flex items-start gap-1.5 text-destructive">
-                      <X className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                      <span className="min-w-0 break-words">
-                        {member.absenceReason?.trim() || "Not attending"}
-                      </span>
-                    </p>
-                  )}
-                  {member.attending == null && (
-                    <p className="text-xs text-muted-foreground">Attendance not set</p>
-                  )}
-                  {member.submitted && member.recommendation && (
-                    <p className="text-xs text-muted-foreground">
-                      Recommends <strong className="text-foreground">{member.recommendation}</strong>
-                    </p>
-                  )}
-                </div>
-
-                <Badge variant={member.submitted ? "default" : "outline"} className="shrink-0">
-                  {member.submitted ? "Submitted" : "Pending"}
-                </Badge>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <Card className="border-border/40">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Final decision</CardTitle>
-            <p className="text-sm text-muted-foreground font-normal">
-              {respondedCount} of {reports.members.length} members have responded
+        <section className="rounded-[20px] border border-[#d5e0d4] bg-white overflow-hidden shadow-[0_12px_40px_rgba(22,76,62,0.06)]">
+          <div className="px-5 sm:px-6 pt-5 pb-4 border-b border-[#e7eee9]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#6d8474] flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5" /> Committee
             </p>
-          </CardHeader>
-          <CardContent className="flex flex-col sm:flex-row gap-2">
+            <h2 className="text-lg font-semibold text-[#183d34] tracking-tight mt-0.5">Members</h2>
+          </div>
+
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-[#e7eee9] hover:bg-[#f4f7f3]">
+                  <TableHead className={headCell}>Member</TableHead>
+                  <TableHead className={headCell}>Attendance</TableHead>
+                  <TableHead className={cn(headCell, "hidden sm:table-cell")}>Recommendation</TableHead>
+                  <TableHead className={headCell}>Report</TableHead>
+                  <TableHead className={cn(headCell, "w-12 text-right")}>
+                    <span className="sr-only">Open</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {reports.members.map((member) => (
+                  <TableRow
+                    key={member.memberUserId}
+                    className={cn(
+                      "border-b border-[#e7eee9] last:border-0 transition-colors",
+                      member.submitted
+                        ? "cursor-pointer hover:bg-[#f8faf7]"
+                        : "hover:bg-[#f8faf7]/60"
+                    )}
+                    onClick={() => {
+                      if (member.submitted) {
+                        navigate(
+                          `/committee-chairman/inspection-reports/${applicationId}/members/${member.memberUserId}`,
+                        );
+                      }
+                    }}
+                  >
+                    <TableCell className="px-4 py-3.5">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={cn(
+                            "w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0",
+                            avatarClasses(member.attending)
+                          )}
+                        >
+                          {initials(member.memberName)}
+                        </div>
+                        <p className="text-sm font-semibold text-[#183d34] truncate">{member.memberName}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      {member.attending === true && (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#426f36]">
+                          <Check className="w-3.5 h-3.5" /> Attending
+                        </span>
+                      )}
+                      {member.attending === false && (
+                        <div className="min-w-0 max-w-[200px]">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-700">
+                            <X className="w-3.5 h-3.5 shrink-0" /> Not attending
+                          </span>
+                          {member.absenceReason?.trim() && (
+                            <p className="text-[11px] text-[#6d8474] mt-0.5 truncate">{member.absenceReason}</p>
+                          )}
+                        </div>
+                      )}
+                      {member.attending == null && (
+                        <span className="text-xs text-[#93a087]">Not set</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 hidden sm:table-cell">
+                      {member.submitted && member.recommendation ? (
+                        <span
+                          className={cn(
+                            "text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-md border",
+                            member.recommendation === "APPROVE"
+                              ? "border-[#c9dbc0] bg-[#eef6df] text-[#426f36]"
+                              : "border-red-200 bg-red-50 text-red-700"
+                          )}
+                        >
+                          {member.recommendation}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-[#93a087]">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      <span
+                        className={cn(
+                          "text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-md border",
+                          member.submitted
+                            ? "border-[#c9dbc0] bg-[#eef6df] text-[#426f36]"
+                            : "border-[#e7eee9] bg-[#f4f7f3] text-[#6d8474]"
+                        )}
+                      >
+                        {member.submitted ? "Submitted" : "Pending"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 text-right">
+                      {member.submitted ? (
+                        <ChevronRight className="w-4 h-4 text-[#c9d6c8] inline-block" />
+                      ) : (
+                        <span className="inline-block w-4" />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+
+        <section className="rounded-[20px] border border-[#d5e0d4] bg-white shadow-[0_12px_40px_rgba(22,76,62,0.06)] overflow-hidden">
+          <div className="px-5 sm:px-6 pt-5 pb-3 border-b border-[#e7eee9]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#6d8474]">Outcome</p>
+            <h2 className="text-lg font-semibold text-[#183d34] tracking-tight mt-0.5">Final decision</h2>
+            <p className="text-sm text-[#6d8474] mt-1">
+              {respondedCount} of {reports.members.length} members have responded
+              {!readyToDecide && " — waiting until the committee is ready to decide"}
+            </p>
+          </div>
+          <div className="p-5 sm:p-6 flex flex-col sm:flex-row gap-2.5">
             <Button
               variant="outline"
-              className="border-destructive/40 text-destructive gap-2 flex-1"
+              className="h-11 gap-2 flex-1 rounded-[10px] border-red-200 text-red-700 hover:bg-red-50"
               disabled={!readyToDecide || rejectMutation.isPending || approveMutation.isPending}
               onClick={() => setShowRejectDialog(true)}
             >
               <XCircle className="w-4 h-4" /> Reject center
             </Button>
             <Button
-              className="gradient-primary text-white gap-2 flex-1"
+              className="h-11 gap-2 flex-1 rounded-[10px] bg-[#164c3e] hover:bg-[#12382d] text-white shadow-[0_8px_20px_rgba(22,76,62,0.22)]"
               disabled={!readyToDecide || approveMutation.isPending || rejectMutation.isPending}
+              onClick={() => setShowApproveDialog(true)}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Approve center
+            </Button>
+          </div>
+        </section>
+      </div>
+
+      <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <DialogContent className="rounded-2xl border-[#d5e0d4] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[#183d34]">Approve this center?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-[#6d8474] leading-relaxed">
+            You are about to approve{" "}
+            <span className="font-semibold text-[#183d34]">
+              {application.centerName || "this center"}
+            </span>
+            . The center and admin login will go live. This can’t be undone from here.
+          </p>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              className="border-[#c9d6c8] rounded-[10px]"
+              onClick={() => setShowApproveDialog(false)}
+              disabled={approveMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="rounded-[10px] bg-[#164c3e] hover:bg-[#12382d] text-white gap-2"
               onClick={handleApprove}
+              disabled={approveMutation.isPending}
             >
               {approveMutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <CheckCircle2 className="w-4 h-4" />
               )}
-              Approve center
+              Confirm approve
             </Button>
-          </CardContent>
-        </Card>
-      </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent>
+        <DialogContent className="rounded-2xl border-[#d5e0d4] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Reject this center</DialogTitle>
+            <DialogTitle className="text-[#183d34]">Reject this center?</DialogTitle>
           </DialogHeader>
+          <p className="text-sm text-[#6d8474] leading-relaxed">
+            Rejecting{" "}
+            <span className="font-semibold text-[#183d34]">
+              {application.centerName || "this center"}
+            </span>{" "}
+            will close the application. Please provide a clear reason for the record.
+          </p>
           <div className="space-y-2">
-            <Label htmlFor="reject-reason">Reason (required)</Label>
+            <Label htmlFor="reject-reason" className="text-[#183d34]">
+              Reason (required)
+            </Label>
             <Textarea
               id="reject-reason"
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={4}
               disabled={rejectMutation.isPending}
+              placeholder="Explain why this center is being rejected…"
             />
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleReject} disabled={rejectMutation.isPending}>
-              {rejectMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm reject"}
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              className="border-[#c9d6c8] rounded-[10px]"
+              onClick={() => setShowRejectDialog(false)}
+              disabled={rejectMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              className="rounded-[10px] gap-2"
+              onClick={handleReject}
+              disabled={rejectMutation.isPending}
+            >
+              {rejectMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <XCircle className="w-4 h-4" />
+              )}
+              Confirm reject
             </Button>
           </DialogFooter>
         </DialogContent>

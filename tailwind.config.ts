@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Playfair Display', 'serif'],
+        sans: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Manrope', 'DM Sans', 'sans-serif'],
+        manrope: ['Manrope', 'sans-serif'],
         urdu: ['Noto Sans Arabic', 'Lateef', 'Noto Nastaliq Urdu', 'sans-serif'],
       },
       colors: {
@@ -88,6 +89,11 @@ export default {
           50: "hsl(var(--forest-50))",
           100: "hsl(var(--forest-100))",
           200: "hsl(var(--forest-200))",
+        },
+        lime: {
+          DEFAULT: "hsl(var(--lime))",
+          soft: "hsl(var(--lime-soft))",
+          muted: "hsl(var(--lime-muted))",
         },
       },
       borderRadius: {

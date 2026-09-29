@@ -10,7 +10,7 @@ interface ViewToggleProps {
 
 export function ViewToggle({ view, onChange }: ViewToggleProps) {
     return (
-        <div className="inline-flex rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm p-1 shadow-sm shrink-0">
+        <div className="inline-flex rounded-xl border bg-card/80 backdrop-blur-sm p-1 shadow-sm shrink-0">
             <button
                 type="button"
                 onClick={() => onChange("kanban")}
@@ -18,7 +18,7 @@ export function ViewToggle({ view, onChange }: ViewToggleProps) {
                 className={cn(
                     "flex items-center gap-2 h-9 rounded-lg px-3 text-sm font-medium transition-all",
                     view === "kanban"
-                        ? "gradient-primary text-white shadow-primary"
+                        ? "bg-primary text-white shadow-primary"
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 )}
             >
@@ -32,7 +32,7 @@ export function ViewToggle({ view, onChange }: ViewToggleProps) {
                 className={cn(
                     "flex items-center gap-2 h-9 rounded-lg px-3 text-sm font-medium transition-all",
                     view === "table"
-                        ? "gradient-primary text-white shadow-primary"
+                        ? "bg-primary text-white shadow-primary"
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 )}
             >

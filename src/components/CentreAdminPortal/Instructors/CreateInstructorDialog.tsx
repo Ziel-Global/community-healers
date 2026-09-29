@@ -93,7 +93,7 @@ export function CreateInstructorDialog({ centerId, open, onClose, onCreated }: C
 
                 <DialogFooter>
                     <Button variant="outline" onClick={handleClose} disabled={createInstructorMutation.isPending}>Cancel</Button>
-                    <Button onClick={handleCreate} disabled={createInstructorMutation.isPending} className="gradient-primary text-white gap-2">
+                    <Button onClick={handleCreate} disabled={createInstructorMutation.isPending} className="bg-primary text-white gap-2">
                         {createInstructorMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                         Add Instructor
                     </Button>

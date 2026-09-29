@@ -100,7 +100,7 @@ export function TableView({ applications, cityNameById, committeeNameById, onReq
                                         <TableCell className="hidden lg:table-cell">
                                             {committeeName ? (
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="w-5 h-5 rounded-full gradient-primary text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                                                    <span className="w-5 h-5 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center shrink-0">
                                                         {initials(committeeName.split(" ")[0], committeeName.split(" ")[1] ?? null, committeeName)}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground truncate max-w-[120px]">{committeeName}</span>
@@ -147,7 +147,7 @@ export function TableView({ applications, cityNameById, committeeNameById, onReq
                 <div className="flex items-center gap-2">
                     <span className="text-xs font-medium">Rows per page:</span>
                     <Select value={String(rowsPerPage)} onValueChange={(v) => { setRowsPerPage(Number(v)); setPage(1); }}>
-                        <SelectTrigger className="h-8 w-[70px] rounded-lg border-border/60 bg-card text-xs">
+                        <SelectTrigger className="h-8 w-[70px] rounded-lg bg-card text-xs">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>

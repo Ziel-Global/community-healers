@@ -18,7 +18,7 @@ export default function CandidatesPage() {
         >
             <div className="space-y-6 max-w-[1600px] mx-auto">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
-                    <h3 className="text-lg sm:text-2xl font-bold text-foreground alumni-sans-title">Candidate Queue</h3>
+                    <h3 className="text-lg sm:text-2xl font-display font-semibold tracking-tight text-[#183d34]">Candidate Queue</h3>
                     <p className="text-xs sm:text-sm text-muted-foreground">
                         {format(selectedDate, "MMMM dd, yyyy")}
                     </p>

@@ -138,14 +138,14 @@ export default function SettingsPage() {
       headerStatus={{ online: isOnline }}
     >
       <div className="max-w-xl mx-auto space-y-6">
-        <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+        <Card className="border-[#e7eee9] bg-card/60 backdrop-blur-sm">
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Power className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="alumni-sans-title">Center availability</CardTitle>
+                <CardTitle className="font-display font-semibold tracking-tight">Center availability</CardTitle>
                 <CardDescription>
                   {centerName
                     ? `${centerName} is open to candidates when active, and offline when inactive.`
@@ -161,7 +161,7 @@ export default function SettingsPage() {
                 Loading availability…
               </div>
             ) : (
-              <div className="flex items-center justify-between gap-4 rounded-xl border border-border/60 px-4 py-3">
+              <div className="flex items-center justify-between gap-4 rounded-xl border px-4 py-3">
                 <div>
                   <p className="text-sm font-medium text-foreground">
                     {isOnline ? "Online" : "Offline"}
@@ -183,14 +183,14 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+        <Card className="border-[#e7eee9] bg-card/60 backdrop-blur-sm">
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Clock className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="alumni-sans-title">Training Timings</CardTitle>
+                <CardTitle className="font-display font-semibold tracking-tight">Training Timings</CardTitle>
                 <CardDescription>
                   {centerName
                     ? `Set daily training start and end for ${centerName}. Default is ${DEFAULT_START}–${DEFAULT_END}.`
@@ -237,7 +237,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-3 text-sm text-muted-foreground">
+                <div className="rounded-xl bg-[#f3f8ed] border border-[#dce7d6] p-3 text-sm text-muted-foreground">
                   Candidates are told to arrive at least <strong className="text-foreground">1 hour before</strong> the
                   training start time for verification.
                 </div>

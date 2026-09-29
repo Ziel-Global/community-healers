@@ -21,7 +21,7 @@ export default function VerificationPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                         placeholder="Search by Reg ID for direct verification..."
-                        className="pl-12 h-12 bg-white/50 border-border/60 focus:border-primary/40 focus:ring-primary/20 rounded-xl"
+                        className="pl-12 h-12 focus:border-primary/40 focus:ring-primary/20 rounded-xl"
                     />
                 </div>
                 <CandidateActionCard candidate={candidate} />

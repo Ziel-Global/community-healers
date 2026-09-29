@@ -32,7 +32,7 @@ export function CommitteeAttendanceCard({ attendance }: { attendance: Attendance
                                 className="flex items-start justify-between gap-3 p-3 rounded-xl bg-secondary/30 border border-border/30"
                             >
                                 <div className="flex items-start gap-3 min-w-0">
-                                    <div className="w-8 h-8 rounded-full gradient-primary text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center shrink-0">
                                         {initials(entry.memberName)}
                                     </div>
                                     <div className="min-w-0">
@@ -55,7 +55,7 @@ export function CommitteeAttendanceCard({ attendance }: { attendance: Attendance
                                     variant="outline"
                                     className={
                                         entry.attending
-                                            ? "gap-1.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shrink-0"
+                                            ? "gap-1.5 border-[#c7ddb5] bg-[#e7f2db] text-[#426f36] dark:text-emerald-400 shrink-0"
                                             : "gap-1.5 border-destructive/30 bg-destructive/10 text-destructive shrink-0"
                                     }
                                 >

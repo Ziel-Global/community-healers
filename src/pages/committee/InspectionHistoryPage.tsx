@@ -19,21 +19,25 @@ export default function InspectionHistoryPage() {
             portalType="committee"
             navItems={committeeNavItems}
         >
-            <div className="max-w-[1600px] mx-auto space-y-3 pb-12">
+            <div className="max-w-[1600px] mx-auto space-y-4 pb-12">
                 {isLoading ? (
-                    <div className="flex items-center justify-center py-12">
+                    <div className="flex items-center justify-center py-16">
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />
                     </div>
                 ) : completed.length === 0 ? (
-                    <div className="text-center py-16 bg-secondary/10 rounded-2xl border border-dashed border-border/50">
-                        <History className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-                        <p className="text-muted-foreground">No completed inspections yet</p>
-                        <p className="text-xs text-muted-foreground/70 mt-1">
+                    <div className="text-center py-16 rounded-[20px] border border-dashed border-[#c9d6c8] bg-white">
+                        <History className="w-12 h-12 text-[#c9d6c8] mx-auto mb-3" />
+                        <p className="text-[#183d34] font-medium">No completed inspections yet</p>
+                        <p className="text-xs text-[#6d8474] mt-1">
                             Once you submit an inspection, it will show up here
                         </p>
                     </div>
                 ) : (
-                    completed.map((app) => <InspectionCard key={app.id} application={app} />)
+                    <div className="space-y-2.5">
+                        {completed.map((app) => (
+                            <InspectionCard key={app.id} application={app} />
+                        ))}
+                    </div>
                 )}
             </div>
         </DashboardLayout>

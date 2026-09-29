@@ -14,8 +14,8 @@ import type { AdminComplaint, ComplaintStatus } from "@/services/complaintServic
 
 const STATUS_META: Record<ComplaintStatus, { label: string; className: string; icon: typeof Clock }> = {
     OPEN: { label: "Open", className: "bg-amber-500/10 text-amber-600 border-amber-500/20", icon: Clock },
-    IN_PROGRESS: { label: "In Progress", className: "bg-blue-500/10 text-blue-600 border-blue-500/20", icon: AlertCircle },
-    RESOLVED: { label: "Resolved", className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", icon: CheckCircle2 },
+    IN_PROGRESS: { label: "In Progress", className: "bg-[#f3f8ed] text-[#378456] border-[#dce7d6]", icon: AlertCircle },
+    RESOLVED: { label: "Resolved", className: "bg-[#e7f2db] text-[#426f36] border-[#c7ddb5]", icon: CheckCircle2 },
 };
 
 export function ComplaintsAdminTable() {
@@ -63,7 +63,7 @@ export function ComplaintsAdminTable() {
                         placeholder="Search by subject or description..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
+                        className="pl-12 h-11 bg-card/60 focus:border-primary/40 rounded-xl"
                     />
                 </div>
                 <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as ComplaintStatus | "all")}>
@@ -162,7 +162,7 @@ export function ComplaintsAdminTable() {
                             <div className="flex justify-end gap-2 pt-2">
                                 <Button variant="outline" onClick={() => setSelected(null)}>Cancel</Button>
                                 <Button
-                                    className="gradient-primary text-white"
+                                    className="bg-primary text-white"
                                     onClick={handleSave}
                                     disabled={updateStatus.isPending}
                                 >

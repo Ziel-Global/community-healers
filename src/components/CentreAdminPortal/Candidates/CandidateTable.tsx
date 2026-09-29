@@ -289,11 +289,11 @@ export function CandidateTable({
     }
     return (
         <>
-            <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
+            <Card className="border-[#e7eee9] overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[700px]">
                         <thead>
-                            <tr className="bg-secondary/40 border-b border-border/40">
+                            <tr className="bg-secondary/40 border-b border-[#e7eee9]">
                                 <th className="p-3 sm:p-4 text-[9px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest">Candidate</th>
                                 <th className="p-3 sm:p-4 text-[9px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest hidden md:table-cell">CNIC</th>
                                 <th className="p-3 sm:p-4 text-[9px] sm:text-xs font-bold text-muted-foreground uppercase tracking-widest">Time</th>
@@ -310,7 +310,7 @@ export function CandidateTable({
                                             <img
                                                 src={c.photo}
                                                 alt={c.name}
-                                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-secondary object-cover border border-border/40 flex-shrink-0"
+                                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-secondary object-cover border border-[#e7eee9] flex-shrink-0"
                                                 onError={(e) => {
                                                     const img = e.currentTarget;
                                                     if (img.dataset.fallbackApplied === "true") return;
@@ -322,7 +322,7 @@ export function CandidateTable({
                                                 }}
                                             />
                                             <div className="min-w-0">
-                                                <p className="alumni-sans-subtitle text-foreground text-base sm:text-lg truncate">{c.name}</p>
+                                                <p className="font-medium text-foreground text-base sm:text-lg truncate">{c.name}</p>
                                                 <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono truncate">{c.id}</p>
                                             </div>
                                         </div>
@@ -370,7 +370,7 @@ export function CandidateTable({
             <Dialog open={!!selectedCandidate} onOpenChange={() => setSelectedCandidate(null)}>
                 <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="text-xl sm:text-2xl font-bold alumni-sans-title">Candidate Details</DialogTitle>
+                        <DialogTitle className="text-xl sm:text-2xl font-display font-semibold tracking-tight">Candidate Details</DialogTitle>
                     </DialogHeader>
 
                     {selectedCandidate && (
@@ -380,7 +380,7 @@ export function CandidateTable({
                                 <img
                                     src={selectedCandidate.photo}
                                     alt={selectedCandidate.name}
-                                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-secondary object-cover border-2 border-border/40"
+                                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-secondary object-cover border-2 border-[#e7eee9]"
                                     onError={(e) => {
                                         const img = e.currentTarget;
                                         if (img.dataset.fallbackApplied === "true") return;
@@ -392,7 +392,7 @@ export function CandidateTable({
                                     }}
                                 />
                                 <div className="flex-1">
-                                    <h3 className="text-lg sm:text-xl font-bold text-foreground alumni-sans-title">{selectedCandidate.name}</h3>
+                                    <h3 className="text-lg sm:text-xl font-display font-semibold tracking-tight text-[#183d34]">{selectedCandidate.name}</h3>
                                     <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-1">{selectedCandidate.id}</p>
                                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
                                         <StatusBadge status={selectedCandidate.status} />
@@ -484,7 +484,7 @@ export function CandidateTable({
                                         {selectedCandidate.documents.map((doc) => (
                                             <div
                                                 key={doc.id}
-                                                className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-secondary/20 hover:bg-secondary/40 transition-colors"
+                                                className="flex items-center justify-between p-3 rounded-lg border border-[#e7eee9] bg-secondary/20 hover:bg-secondary/40 transition-colors"
                                             >
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -547,7 +547,7 @@ export function CandidateTable({
                                 {canVerify && selectedCandidate.status === "Pending" && (
                                     <Button
                                         onClick={handleVerify}
-                                        className="gradient-primary text-white"
+                                        className="bg-primary text-white"
                                     >
                                         Verify Candidate
                                     </Button>

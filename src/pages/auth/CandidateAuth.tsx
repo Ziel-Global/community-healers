@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { GraduationCap, ArrowLeft, Phone, Lock, User, Mail, KeyRound, CheckCircle2, ShieldCheck, TriangleAlert } from "lucide-react";
+import { GraduationCap, Phone, Lock, User, Mail, KeyRound, CheckCircle2, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import i18n from "@/i18n";
@@ -24,6 +24,8 @@ import {
   resetPasswordSchema,
 } from "@/schemas/authSchemas";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SoftSkillsBrand } from "@/components/SoftSkillsBrand";
+import { AuthBackButton } from "@/components/AuthBackButton";
 
 // Disabled until a real OTP delivery channel (SMS/Jazz) is wired up behind
 // /auth/forgot-password/*. Previously this whole flow faked success with
@@ -274,13 +276,7 @@ export default function CandidateAuth() {
             <span className="text-sm font-display font-bold">{t("candidateAuth.candidatePortal")}</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link
-              to="/"
-              className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">{t("candidateAuth.backToHome")}</span>
-            </Link>
+            <AuthBackButton className="text-muted-foreground" />
             <LanguageSwitcher />
           </div>
         </div>

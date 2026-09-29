@@ -165,13 +165,13 @@ export default function CommitteeChairmanPortal() {
             <CardHeader className="pb-2 sm:pb-6">
               <div className="flex flex-col gap-4">
                 <div>
-                  <CardTitle className="text-xl sm:text-2xl alumni-sans-title">Confirmed centers</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl font-display font-semibold tracking-tight">Confirmed centers</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">Centers approved over time</CardDescription>
                 </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <TrendingUp className="w-4 h-4 text-emerald-600" />
-                    <span className="text-emerald-600 font-semibold text-xs sm:text-sm">{growthLabel(trend)}</span>
+                    <TrendingUp className="w-4 h-4 text-[#426f36]" />
+                    <span className="text-[#426f36] font-semibold text-xs sm:text-sm">{growthLabel(trend)}</span>
                   </div>
                   <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-lg">
                     {(["days", "months", "years"] as const).map((period) => (
@@ -182,7 +182,7 @@ export default function CommitteeChairmanPortal() {
                         onClick={() => setTimeFilter(period)}
                         className={cn(
                           "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold capitalize",
-                          timeFilter === period ? "bg-white shadow-sm" : "hover:bg-white/50",
+                          timeFilter === period ? "bg-white shadow-sm" : "hover:",
                         )}
                       >
                         {period}

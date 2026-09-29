@@ -174,7 +174,7 @@ export function TimePicker({ id, value, onChange, disabled, className }: TimePic
           variant="outline"
           disabled={disabled}
           className={cn(
-            "h-11 w-full justify-between rounded-xl border-border/60 bg-background/80 px-3.5 font-semibold",
+            "h-11 w-full justify-between rounded-xl  bg-background/80 px-3.5 font-semibold",
             "hover:bg-background hover:border-primary/40 hover:shadow-sm",
             "focus-visible:ring-primary/30 data-[state=open]:border-primary/50 data-[state=open]:ring-2 data-[state=open]:ring-primary/20",
             "disabled:opacity-50",

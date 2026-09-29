@@ -21,11 +21,11 @@ export function SystemAuditLogs() {
     return (
         <Card className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm shadow-sm">
             <div className="bg-secondary/40 p-4 border-b border-border/40 flex items-center justify-between">
-                <h4 className="text-lg font-bold text-foreground uppercase tracking-widest flex items-center gap-2 alumni-sans-title">
+                <h4 className="text-lg font-bold text-foreground uppercase tracking-widest flex items-center gap-2 font-display font-semibold tracking-tight">
                     <History className="w-4 h-4 text-primary" />
                     Global Activity Audit
                 </h4>
-                <Badge variant="outline" className="bg-white/50 border-primary/20 text-primary uppercase text-[9px] font-bold">Real-time Feed</Badge>
+                <Badge variant="outline" className="border-primary/20 text-primary uppercase text-[9px] font-bold">Real-time Feed</Badge>
             </div>
             <div className="divide-y divide-border/30 max-h-[600px] overflow-y-auto">
                 {isLoading ? (
@@ -53,7 +53,7 @@ export function SystemAuditLogs() {
 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <span className="alumni-sans-subtitle text-foreground text-lg leading-none">{log.message}</span>
+                                        <span className="font-medium text-foreground text-lg leading-none">{log.message}</span>
                                         <Badge variant={log.statusCode < 300 ? "success" : "secondary"} className="text-[8px] uppercase font-bold tracking-tight h-3.5 px-1 py-0 min-h-0">
                                             {log.statusCode < 300 ? "Success" : "Error"}
                                         </Badge>

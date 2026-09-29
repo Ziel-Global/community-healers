@@ -65,14 +65,14 @@ export function CitySelector({ examDate, selectedCityId, onSelectCity }: CitySel
             : t('scheduling.selectCityDesc');
 
     return (
-        <Card className="border-border/40 shadow-sm overflow-hidden">
-            <CardHeader className="bg-primary/5 border-b border-border/40 p-4 sm:p-6">
+        <Card className="border-[#e7eee9] shadow-[0_8px_24px_#163a2b08] overflow-hidden rounded-2xl">
+            <CardHeader className="bg-[#f5f8f2] border-b border-[#e7eee9] p-4 sm:p-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/50 backdrop-blur-md flex items-center justify-center border border-primary/20 shadow-sm shrink-0">
-                        <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-[13px] bg-white flex items-center justify-center border border-[#e0e9dc] shrink-0">
+                        <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#3c6445]" />
                     </div>
                     <div className="min-w-0">
-                        <CardTitle className="text-lg sm:text-2xl font-bold alumni-sans-title">
+                        <CardTitle className="text-lg sm:text-xl font-display font-semibold text-[#183d34] tracking-tight">
                             {t('scheduling.selectCity')}
                         </CardTitle>
                         <CardDescription className="text-xs sm:text-sm">{description}</CardDescription>
@@ -111,7 +111,7 @@ export function CitySelector({ examDate, selectedCityId, onSelectCity }: CitySel
                                         "text-xs font-medium px-2 py-1 rounded-full shrink-0 whitespace-nowrap",
                                         isFull
                                             ? "bg-destructive/10 text-destructive"
-                                            : "bg-green-500/10 text-green-700 dark:text-green-400",
+                                            : "bg-[#e7f2db] text-[#426f36]",
                                     )}
                                 >
                                     {isFull

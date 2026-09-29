@@ -65,22 +65,22 @@ export function LivenessGateDialog({ open, onOpenChange, onResult }: LivenessGat
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg rounded-[20px] border-[#d5e0d4] shadow-[0_16px_48px_rgba(22,76,62,0.12)]">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <ShieldCheck className="w-5 h-5 text-primary" /> Face Verification Required
+                    <DialogTitle className="flex items-center gap-2 font-display text-[#183d34]">
+                        <ShieldCheck className="w-5 h-5 text-[#164c3e]" /> Face Verification Required
                     </DialogTitle>
                 </DialogHeader>
-                <p className="text-sm text-muted-foreground -mt-2">
+                <p className="text-sm text-[#6d8474] -mt-2 leading-relaxed">
                     Please look at your camera and follow the on-screen instructions to confirm your identity before starting the exam.
                 </p>
-                <div className="h-[520px]">
+                <div className="h-[520px] rounded-[14px] overflow-hidden border border-[#e7eee9] bg-[#f8faf7]">
                     {loading && (
                         <div className="h-full flex items-center justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                            <Loader2 className="w-6 h-6 animate-spin text-[#164c3e]" />
                         </div>
                     )}
-                    {error && <p className="text-sm text-destructive text-center py-12">{error}</p>}
+                    {error && <p className="text-sm text-red-600 text-center py-12">{error}</p>}
                     {sessionId && !error && (
                         <FaceLivenessDetector
                             sessionId={sessionId}

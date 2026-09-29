@@ -76,12 +76,12 @@ export default function CommitteeChairmanMembersPage() {
                 <Card key={member.id} className="border-border/40 overflow-hidden bg-card/60 backdrop-blur-sm">
                   <CardContent className="p-5 flex items-center justify-between gap-3">
                     <div className="flex gap-3.5 min-w-0">
-                      <div className="w-11 h-11 rounded-xl gradient-primary text-white flex items-center justify-center shrink-0 text-sm font-bold shadow-primary">
+                      <div className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center shrink-0 text-sm font-bold shadow-primary">
                         {initials(member.firstName, member.lastName, member.email)}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 min-w-0">
-                          <h4 className="alumni-sans-title text-lg text-foreground leading-tight truncate">{name}</h4>
+                          <h4 className="font-display font-semibold tracking-tight text-lg text-foreground leading-tight truncate">{name}</h4>
                           {member.isChairman && (
                             <Badge variant="default" className="shrink-0">Chairman</Badge>
                           )}

@@ -55,7 +55,7 @@ function SignatureBlock({
                 <Input
                     value={name}
                     onChange={(e) => onNameChange(e.target.value)}
-                    className="h-10 bg-white/50 border-border/60"
+                    className="h-10"
                     placeholder="e.g. Ms. Marija Raus"
                 />
             </div>
@@ -65,14 +65,14 @@ function SignatureBlock({
                 <Input
                     value={title}
                     onChange={(e) => onTitleChange(e.target.value)}
-                    className="h-10 bg-white/50 border-border/60"
+                    className="h-10"
                     placeholder="e.g. Head of Region Silk Routes, ICMPD"
                 />
             </div>
 
             <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">Signature Image</Label>
-                <div className="h-24 rounded-xl border border-dashed border-border/60 bg-white/50 flex items-center justify-center overflow-hidden">
+                <div className="h-24 rounded-xl border border-dashed flex items-center justify-center overflow-hidden">
                     {pendingPreviewUrl ? (
                         <img src={pendingPreviewUrl} alt="New signature preview" className="max-h-16 max-w-[85%] object-contain" />
                     ) : currentSignatureLoading ? (
@@ -100,7 +100,7 @@ function SignatureBlock({
                     </Button>
                     <Button
                         size="sm"
-                        className="gradient-primary text-white gap-1.5"
+                        className="bg-primary text-white gap-1.5"
                         disabled={!hasPendingFile || uploading}
                         onClick={onUpload}
                     >
@@ -266,7 +266,7 @@ export function CertificateTemplateForm() {
             <CardHeader className="border-b border-border/40 bg-primary/5">
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle className="text-2xl font-bold alumni-sans-title flex items-center gap-2">
+                        <CardTitle className="text-2xl font-display font-semibold tracking-tight flex items-center gap-2">
                             <Award className="w-5 h-5 text-primary" />
                             Certificate Template
                         </CardTitle>
@@ -314,14 +314,14 @@ export function CertificateTemplateForm() {
                         </div>
 
                         <div className="space-y-2 max-w-sm">
-                            <Label htmlFor="trainingDuration" className="text-lg alumni-sans-subtitle uppercase tracking-wider">
+                            <Label htmlFor="trainingDuration" className="text-lg font-medium uppercase tracking-wider">
                                 Training Duration
                             </Label>
                             <Input
                                 id="trainingDuration"
                                 value={trainingDuration}
                                 onChange={(e) => setTrainingDuration(e.target.value)}
-                                className="h-11 bg-white/50 border-border/60"
+                                className="h-11"
                                 placeholder="e.g. 4 Hours"
                             />
                             <p className="text-[10px] text-muted-foreground italic">Shown on newly issued certificates.</p>
@@ -340,7 +340,7 @@ export function CertificateTemplateForm() {
                 )}
 
                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex gap-4">
-                    <Badge variant="outline" className="bg-white/50 shrink-0">Note</Badge>
+                    <Badge variant="outline" className="shrink-0">Note</Badge>
                     <p className="text-xs text-amber-800 leading-relaxed">
                         Changing a signature, name/title, or training duration only affects <span className="underline italic">newly issued</span> certificates —
                         certificates already issued keep whatever was current at the time they were issued.

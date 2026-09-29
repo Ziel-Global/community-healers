@@ -62,19 +62,19 @@ export function FeePaymentCard({
   return (
     <Card
       className={cn(
-        "border-border/40 overflow-hidden text-card-foreground",
-        isPaid ? "ring-2 ring-success/30" : "shadow-md",
+        "border-[#e7eee9] overflow-hidden text-card-foreground rounded-2xl shadow-[0_8px_24px_#163a2b08]",
+        isPaid && "ring-1 ring-[#c7ddb5]",
       )}
     >
-      <div className={cn("h-2", isPaid ? "bg-success" : "gradient-primary")} />
+      <div className={cn("h-1.5", isPaid ? "bg-[#71a64b]" : "bg-primary")} />
       <CardHeader>
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-1">
-            <CardTitle className="text-2xl font-bold alumni-sans-title">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
+            <CardTitle className="text-xl sm:text-2xl font-display font-semibold text-[#183d34] tracking-tight">{title}</CardTitle>
+            <CardDescription className="text-[#64736d]">{description}</CardDescription>
           </div>
           {isPaid && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 border border-success/20 text-success text-xs font-bold uppercase tracking-wider shrink-0">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e7f2db] border border-[#c7ddb5] text-[#426f36] text-xs font-bold uppercase tracking-wider shrink-0">
               <CheckCircle2 className="w-3.5 h-3.5" />
               {t("payment.paid")}
             </div>
@@ -97,7 +97,7 @@ export function FeePaymentCard({
               <Button
                 onClick={onGenerateQR}
                 disabled={isLoadingQR}
-                className="w-full h-12 gradient-white font-semibold text-white shadow-royal hover:opacity-90"
+                className="w-full h-12 ss-cta"
               >
                 {isLoadingQR ? (
                   <>
@@ -167,13 +167,13 @@ export function FeePaymentCard({
                 )}
 
                 {isLocalDev && onSimulateLocalPayment && (
-                  <div className="space-y-2 pt-2 border-t border-dashed border-border/60">
+                  <div className="space-y-2 pt-2 border-t border-dashed">
                     <p className="text-xs text-muted-foreground">{t("payment.simulateLocalHint")}</p>
                     <Button
                       onClick={onSimulateLocalPayment}
                       disabled={isLoadingSimulate}
                       variant="outline"
-                      className="w-full h-11 border-blue-500/40 text-blue-700 dark:text-blue-300 hover:bg-blue-500/10"
+                      className="w-full h-11 border-[#bdcfc2] text-[#355c45] hover:bg-[#f3f8ed]"
                     >
                       {isLoadingSimulate ? (
                         <>

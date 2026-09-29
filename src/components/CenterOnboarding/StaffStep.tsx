@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SoftSelect } from "@/components/ui/soft-select";
 import { getApiErrorMessage } from "@/lib/errors";
 import { centerOnboardingService, type StaffCategory, type StaffQualificationOption } from "@/services/centerOnboardingService";
 
@@ -114,82 +114,75 @@ export function StaffStep({
     };
 
     return (
-        <Card className="border-border/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-            <CardContent className="p-6 sm:p-8 space-y-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <Users className="w-5 h-5 text-primary" />
+        <Card className="border border-[#d5e0d4] rounded-2xl bg-white shadow-[0_12px_40px_rgba(22,76,62,0.06)] overflow-hidden">
+            <CardContent className="p-0">
+                <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-[#e7eee9]">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3.5">
+                            <div className="w-12 h-12 rounded-xl bg-[#174c3e] flex items-center justify-center shrink-0 shadow-[0_8px_20px_rgba(23,76,62,0.22)]">
+                                <Users className="w-5 h-5 text-[#d7f88c]" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-semibold text-[#183d34] tracking-tight">Staff Information</h2>
+                                <p className="text-sm text-[#6d8474] mt-0.5">Add every staff member with their role and CNIC.</p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-lg font-semibold text-foreground">Staff Information</h2>
-                            <p className="text-sm text-muted-foreground">Add every staff member with their role and CNIC.</p>
-                        </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={addRow}
+                            className="gap-1.5 shrink-0 border-[#c9d6c8] text-[#183d34] hover:bg-[#f4f7f3]"
+                        >
+                            <Plus className="w-3.5 h-3.5" /> Add
+                        </Button>
                     </div>
-                    <Button type="button" variant="outline" size="sm" onClick={addRow} className="gap-1.5 shrink-0">
-                        <Plus className="w-3.5 h-3.5" /> Add
-                    </Button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="px-6 sm:px-8 py-6 sm:py-7 space-y-3">
                     {rows.map((row, index) => (
-                        <div key={index} className="p-4 rounded-xl border border-border/40 bg-secondary/10 space-y-3">
-                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_140px_auto] gap-2">
+                        <div key={index} className="p-4 rounded-xl border border-[#c9d6c8] bg-[#f8faf7] space-y-3 shadow-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_140px_auto] gap-2.5">
                                 <Input
+                                    className="h-11"
                                     placeholder="Name"
                                     value={row.name}
                                     onChange={(e) => updateRow(index, { name: e.target.value })}
                                 />
                                 <Input
+                                    className="h-11"
                                     placeholder="CNIC (13 digits)"
                                     inputMode="numeric"
                                     maxLength={13}
                                     value={row.cnic}
                                     onChange={(e) => updateRow(index, { cnic: e.target.value.replace(/\D/g, "") })}
                                 />
-                                <Select
+                                <SoftSelect
+                                    size="lg"
                                     value={row.category}
                                     onValueChange={(v) => updateRow(index, { category: v as StaffCategory })}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {STAFF_CATEGORIES.map((cat) => (
-                                            <SelectItem key={cat.value} value={cat.value}>
-                                                {cat.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                    options={STAFF_CATEGORIES}
+                                />
                                 <Button
                                     type="button"
                                     variant="ghost"
                                     size="icon"
                                     disabled={rows.length === 1}
                                     onClick={() => removeRow(index)}
-                                    className="shrink-0"
+                                    className="shrink-0 h-11 w-11"
                                 >
                                     <Trash2 className="w-4 h-4 text-destructive" />
                                 </Button>
                             </div>
 
-                            <Select
+                            <SoftSelect
+                                size="lg"
                                 value={row.qualification || undefined}
                                 onValueChange={(value) => updateRow(index, { qualification: value })}
                                 disabled={qualificationsLoading}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select qualification" />
-                                </SelectTrigger>
-                                <SelectContent className="max-h-48 overflow-y-auto [&_[data-radix-select-viewport]]:max-h-44 [&_[data-radix-select-viewport]]:min-h-0 [&_[data-radix-select-viewport]]:overflow-y-scroll [&_[data-radix-select-viewport]]:[scrollbar-width:thin!important] [&_[data-radix-select-viewport]::-webkit-scrollbar]:!block [&_[data-radix-select-viewport]::-webkit-scrollbar]:w-2">
-                                    {optionsForRow(row.qualification).map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                placeholder="Select qualification"
+                                options={optionsForRow(row.qualification)}
+                            />
 
                             {row.id && (
                                 <div className="flex items-center gap-2">
@@ -230,26 +223,40 @@ export function StaffStep({
                     ))}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                    <Button type="button" variant="outline" onClick={onBack} className="gap-2 sm:w-auto">
-                        <ArrowLeft className="w-4 h-4" /> Back
-                    </Button>
-                    {!rosterSaved ? (
-                        <Button onClick={onSaveRoster} disabled={saving} className="flex-1 gradient-primary text-white gap-2 h-11">
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                            Save Staff Roster
+                <div className="px-6 sm:px-8 pb-6 sm:pb-8 space-y-3">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onBack}
+                            className="gap-2 sm:w-auto border-[#c9d6c8] text-[#183d34] hover:bg-[#f4f7f3]"
+                        >
+                            <ArrowLeft className="w-4 h-4" /> Back
                         </Button>
-                    ) : (
-                        <Button onClick={onContinue} className="flex-1 gradient-primary text-white gap-2 h-11">
-                            Continue <ArrowRight className="w-4 h-4" />
-                        </Button>
+                        {!rosterSaved ? (
+                            <Button
+                                onClick={onSaveRoster}
+                                disabled={saving}
+                                className="flex-1 bg-[#164c3e] hover:bg-[#12382d] text-white gap-2 h-11 rounded-[10px] shadow-[0_8px_20px_rgba(22,76,62,0.22)]"
+                            >
+                                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                Save Staff Roster
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={onContinue}
+                                className="flex-1 bg-[#164c3e] hover:bg-[#12382d] text-white gap-2 h-11 rounded-[10px] shadow-[0_8px_20px_rgba(22,76,62,0.22)]"
+                            >
+                                Continue <ArrowRight className="w-4 h-4" />
+                            </Button>
+                        )}
+                    </div>
+                    {!rosterSaved && (
+                        <p className="text-xs text-[#6d8474] text-center">
+                            Save the roster to unlock document attachments, then continue.
+                        </p>
                     )}
                 </div>
-                {!rosterSaved && (
-                    <p className="text-xs text-muted-foreground text-center -mt-2">
-                        Save the roster to unlock document attachments, then continue.
-                    </p>
-                )}
             </CardContent>
         </Card>
     );

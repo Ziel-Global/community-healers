@@ -139,7 +139,7 @@ export function CreateCommitteeMemberDialog({ open, onClose, onCreated, hasChair
 
                 <DialogFooter>
                     <Button variant="outline" onClick={handleClose} disabled={isPending}>Cancel</Button>
-                    <Button onClick={handleCreate} disabled={isPending} className="gradient-primary text-white gap-2">
+                    <Button onClick={handleCreate} disabled={isPending} className="bg-primary text-white gap-2">
                         {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                         {role === "chairman" ? "Add Chairman" : "Add Member"}
                     </Button>

@@ -43,52 +43,52 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
     };
 
     return (
-        <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-green-500/5 to-emerald-500/5">
-            <CardHeader className="border-b border-border/40 bg-gradient-to-r from-primary/5 to-primary/10">
-                <div className="flex items-center justify-between">
+        <Card className="border-[#d8e4bc] shadow-[0_16px_40px_#163a2b0c] bg-gradient-to-br from-[#edf5df] to-white rounded-2xl overflow-hidden">
+            <CardHeader className="border-b border-[#e7eee9] bg-[#f5f8f2]">
+                <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Award className="w-6 h-6 text-primary" />
+                        <div className="w-12 h-12 rounded-[13px] bg-[#e9f1e3] flex items-center justify-center border border-[#dce7d6]">
+                            <Award className="w-6 h-6 text-[#3c6445]" />
                         </div>
                         <div>
-                            <CardTitle className="text-xl">{t('certificate.ready')}</CardTitle>
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <CardTitle className="text-xl font-display font-semibold text-[#183d34] tracking-tight">{t('certificate.ready')}</CardTitle>
+                            <p className="text-sm text-[#64736d] mt-1">
                                 {t('certificate.congratsExam')}
                             </p>
                         </div>
                     </div>
-                    <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/40 text-sm px-3 py-1">
+                    <Badge className="bg-[#e7f2db] text-[#426f36] border-[#c7ddb5] text-sm px-3 py-1 hover:bg-[#e7f2db]">
                         <CheckCircle2 className="w-4 h-4 mr-1" />
                         {t('certificate.certified')}
                     </Badge>
                 </div>
             </CardHeader>
             <CardContent className="p-6">
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                    <div className="p-4 rounded-xl bg-card border border-border/40">
-                        <p className="text-xs text-muted-foreground mb-1">{t('certificate.certificateNumber')}</p>
-                        <p className="font-bold text-foreground font-mono text-lg">{certificate.certificate_number}</p>
+                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                    <div className="p-4 rounded-xl bg-white border border-[#e7eee9]">
+                        <p className="text-xs text-[#658075] mb-1">{t('certificate.certificateNumber')}</p>
+                        <p className="font-bold text-[#183d34] font-mono text-lg">{certificate.certificate_number}</p>
                     </div>
-                    <div className="p-4 rounded-xl bg-card border border-border/40">
-                        <p className="text-xs text-muted-foreground mb-1">{t('certificate.examScore')}</p>
-                        <p className="font-bold text-green-600 dark:text-green-400 text-lg">{t('certificate.passed')}</p>
+                    <div className="p-4 rounded-xl bg-white border border-[#e7eee9]">
+                        <p className="text-xs text-[#658075] mb-1">{t('certificate.examScore')}</p>
+                        <p className="font-bold text-[#426f36] text-lg">{t('certificate.passed')}</p>
                     </div>
-                    <div className="p-4 rounded-xl bg-card border border-border/40">
-                        <p className="text-xs text-muted-foreground mb-1">{t('certificate.issueDate')}</p>
-                        <p className="font-bold text-foreground">
+                    <div className="p-4 rounded-xl bg-white border border-[#e7eee9]">
+                        <p className="text-xs text-[#658075] mb-1">{t('certificate.issueDate')}</p>
+                        <p className="font-semibold text-[#183d34]">
                             {format(new Date(certificate.issuedDate), 'MMMM d, yyyy')}
                         </p>
                     </div>
-                    <div className="p-4 rounded-xl bg-card border border-border/40">
-                        <p className="text-xs text-muted-foreground mb-1">{t('certificate.validUntil')}</p>
-                        <p className="font-bold text-foreground">
+                    <div className="p-4 rounded-xl bg-white border border-[#e7eee9]">
+                        <p className="text-xs text-[#658075] mb-1">{t('certificate.validUntil')}</p>
+                        <p className="font-semibold text-[#183d34]">
                             {certificate.expiryDate ? format(new Date(certificate.expiryDate), 'MMMM d, yyyy') : t('certificate.indefinite')}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                    <Button size="lg" className="flex-1 gap-2 shadow-lg" disabled={downloading} onClick={handleDownload}>
+                    <Button size="lg" className="flex-1 gap-2" disabled={downloading} onClick={handleDownload}>
                         {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                         {t('certificate.downloadPDF')}
                     </Button>
@@ -98,9 +98,9 @@ export function CertificateCard({ certificate }: CertificateCardProps) {
                     </Button>
                 </div>
 
-                <div className="mt-4 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <p className="text-xs text-muted-foreground">
-                        <strong className="text-foreground">{t('common.note')}</strong> {t('certificate.note')}
+                <div className="mt-4 p-4 rounded-xl ss-status-info">
+                    <p className="text-xs text-[#64736d]">
+                        <strong className="text-[#183d34]">{t('common.note')}</strong> {t('certificate.note')}
                     </p>
                 </div>
             </CardContent>

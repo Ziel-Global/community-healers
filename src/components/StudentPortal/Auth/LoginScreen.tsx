@@ -89,12 +89,12 @@ export function LoginScreen() {
                                     onChange={setOtp}
                                 >
                                     <InputOTPGroup className="gap-2">
-                                        <InputOTPSlot index={0} className="h-12 w-12 text-lg border-border/60" />
-                                        <InputOTPSlot index={1} className="h-12 w-12 text-lg border-border/60" />
-                                        <InputOTPSlot index={2} className="h-12 w-12 text-lg border-border/60" />
-                                        <InputOTPSlot index={3} className="h-12 w-12 text-lg border-border/60" />
-                                        <InputOTPSlot index={4} className="h-12 w-12 text-lg border-border/60" />
-                                        <InputOTPSlot index={5} className="h-12 w-12 text-lg border-border/60" />
+                                        <InputOTPSlot index={0} className="h-12 w-12 text-lg" />
+                                        <InputOTPSlot index={1} className="h-12 w-12 text-lg" />
+                                        <InputOTPSlot index={2} className="h-12 w-12 text-lg" />
+                                        <InputOTPSlot index={3} className="h-12 w-12 text-lg" />
+                                        <InputOTPSlot index={4} className="h-12 w-12 text-lg" />
+                                        <InputOTPSlot index={5} className="h-12 w-12 text-lg" />
                                     </InputOTPGroup>
                                 </InputOTP>
                             </div>

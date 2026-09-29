@@ -49,7 +49,7 @@ export function ExamDetailsCard({ status, date, time, center }: ExamDetailsProps
                     </div>
                 </div>
 
-                <div className="p-4 rounded-xl border border-border/60 bg-secondary/10 space-y-3">
+                <div className="p-4 rounded-xl border bg-secondary/10 space-y-3">
                     <div className="flex items-start gap-3">
                         <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                         <div>

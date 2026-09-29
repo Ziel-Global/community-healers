@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { Landmark, ArrowLeft, Mail, Lock, KeyRound, Building, GraduationCap } from "lucide-react";
+import { Landmark, Mail, Lock, KeyRound, Building, GraduationCap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { emailLoginSchema } from "@/schemas/authSchemas";
+import { AuthBackButton } from "@/components/AuthBackButton";
 
 export default function MinistryAuth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -112,13 +113,7 @@ export default function MinistryAuth() {
             </div>
             <span className="text-sm font-display font-bold">Ministry Portal</span>
           </div>
-          <Link
-            to="/"
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Home</span>
-          </Link>
+          <AuthBackButton className="text-muted-foreground" />
         </div>
 
         <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center py-6 sm:py-12">

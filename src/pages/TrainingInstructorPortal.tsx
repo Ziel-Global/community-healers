@@ -1,3 +1,4 @@
+import { SoftSkillsBrand } from "@/components/SoftSkillsBrand";
 import { useAuth } from "@/context/AuthContext";
 import { getApiErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
@@ -14,7 +15,6 @@ import {
   Lock,
   LogOut,
   Play,
-  Shield,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -176,48 +176,38 @@ export default function TrainingInstructorPortal() {
     : "Instructor";
 
   return (
-    <div className="h-screen bg-[#f7f8f9] text-foreground overflow-hidden flex flex-col">
+    <div className="h-screen bg-[#f5f8f2] text-foreground overflow-hidden flex flex-col">
       {/* Top chrome */}
-      <header className="h-14 shrink-0 border-b border-border/70 bg-white/90 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 z-30">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-700 to-emerald-600 flex items-center justify-center shadow-sm shrink-0">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
-          <div className="min-w-0">
-            <p className="alumni-sans-title text-[15px] leading-tight truncate">Soft skill training</p>
-            <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-medium">
-              Training course
-            </p>
-          </div>
-        </div>
+      <header className="h-14 shrink-0 border-b border-[#e7eee9] bg-white/90 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 z-30">
+        <SoftSkillsBrand compact alwaysShowText subtitle="Training Instructor" />
 
         <div className="hidden md:flex items-center gap-4">
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+            <p className="text-[10px] uppercase tracking-wider text-[#6d8474] font-semibold">
               Overall progress
             </p>
-            <p className="text-sm font-semibold tabular-nums">
+            <p className="text-sm font-semibold tabular-nums text-[#183d34]">
               {progress?.lastCompletedSequenceOrder ?? 0}/{progress?.totalVideos ?? 0}
-              <span className="text-muted-foreground font-normal ml-1.5">{coursePercent}%</span>
+              <span className="text-[#6d8474] font-normal ml-1.5">{coursePercent}%</span>
             </p>
           </div>
-          <div className="w-28 h-1.5 rounded-full bg-secondary overflow-hidden">
+          <div className="w-28 h-1.5 rounded-full bg-[#e7eee9] overflow-hidden">
             <div
-              className="h-full rounded-full bg-emerald-700 transition-all duration-500 ease-out"
+              className="h-full rounded-full bg-[#164c3e] transition-all duration-500 ease-out"
               style={{ width: `${coursePercent}%` }}
             />
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <p className="hidden sm:block text-xs text-muted-foreground truncate max-w-[140px]">
+          <p className="hidden sm:block text-xs text-[#6d8474] truncate max-w-[140px]">
             {displayName}
           </p>
           <button
             type="button"
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
+            className="inline-flex items-center gap-2 rounded-[9px] px-3 py-2 text-xs font-medium text-[#6d8474] hover:text-destructive hover:bg-destructive/5 border border-transparent hover:border-[#e7eee9] transition-colors"
           >
             {isLoggingOut ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -250,12 +240,12 @@ export default function TrainingInstructorPortal() {
         {/* Left: course content */}
         <aside
           className={cn(
-            "w-[min(100%,22rem)] shrink-0 bg-white border-r border-border/80 flex flex-col z-50",
+            "w-[min(100%,22rem)] shrink-0 bg-white border-r border-[#e7eee9] flex flex-col z-50",
             "fixed inset-y-0 left-0 pt-14 lg:pt-0 lg:static lg:translate-x-0 transition-transform duration-300",
             mobileSyllabusOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           )}
         >
-          <div className="px-5 py-4 border-b border-border/60">
+          <div className="px-5 py-4 border-b">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground mb-1">
               Course content
             </p>
@@ -265,11 +255,11 @@ export default function TrainingInstructorPortal() {
             <div className="mt-3 flex items-center gap-3">
               <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-emerald-700 transition-all duration-500"
+                  className="h-full rounded-full bg-[#164c3e] transition-all duration-500"
                   style={{ width: `${coursePercent}%` }}
                 />
               </div>
-              <span className="text-xs font-semibold tabular-nums text-emerald-800">
+              <span className="text-xs font-semibold tabular-nums text-[#164c3e]">
                 {coursePercent}%
               </span>
             </div>
@@ -300,7 +290,7 @@ export default function TrainingInstructorPortal() {
                           "w-full text-left px-4 py-3.5 border-l-[3px] transition-all duration-200",
                           "flex gap-3 items-start",
                           isActive
-                            ? "bg-emerald-50/80 border-l-emerald-700"
+                            ? "bg-[#e8f0ea]/80 border-l-[#164c3e]"
                             : "border-l-transparent hover:bg-secondary/70",
                           lesson.status === "locked" && "opacity-55 cursor-not-allowed hover:bg-transparent"
                         )}
@@ -308,8 +298,8 @@ export default function TrainingInstructorPortal() {
                         <span
                           className={cn(
                             "mt-0.5 w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold",
-                            lesson.status === "completed" && "bg-emerald-700 text-white",
-                            lesson.status === "current" && "bg-white border-2 border-emerald-700 text-emerald-800",
+                            lesson.status === "completed" && "bg-[#164c3e] text-white",
+                            lesson.status === "current" && "bg-white border-2 border-[#164c3e] text-[#164c3e]",
                             lesson.status === "locked" && "bg-secondary text-muted-foreground border border-border"
                           )}
                         >
@@ -318,7 +308,7 @@ export default function TrainingInstructorPortal() {
                           ) : lesson.status === "locked" ? (
                             <Lock className="w-3 h-3" />
                           ) : isPlaying ? (
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 animate-pulse" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#164c3e] animate-pulse" />
                           ) : (
                             lesson.sequenceOrder
                           )}
@@ -335,7 +325,7 @@ export default function TrainingInstructorPortal() {
                               {lesson.title}
                             </span>
                             {lesson.status === "current" && (
-                              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 mt-0.5">
+                              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[#164c3e] mt-0.5">
                                 Now
                               </span>
                             )}
@@ -347,9 +337,9 @@ export default function TrainingInstructorPortal() {
                                 className={cn(
                                   "block h-full rounded-full transition-all duration-300",
                                   lesson.status === "completed"
-                                    ? "bg-emerald-700"
+                                    ? "bg-[#164c3e]"
                                     : lesson.status === "current"
-                                      ? "bg-emerald-600"
+                                      ? "bg-[#328260]"
                                       : "bg-transparent"
                                 )}
                                 style={{ width: `${lesson.progressPercent}%` }}
@@ -379,8 +369,8 @@ export default function TrainingInstructorPortal() {
           ) : progress?.nextVideo === null && progress.totalVideos > 0 ? (
             <div className="flex-1 flex items-center justify-center p-6">
               <div className="max-w-md text-center space-y-4">
-                <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <Check className="w-8 h-8 text-emerald-700" strokeWidth={2.5} />
+                <div className="mx-auto w-16 h-16 rounded-full bg-[#eef6df] flex items-center justify-center">
+                  <Check className="w-8 h-8 text-[#164c3e]" strokeWidth={2.5} />
                 </div>
                 <h3 className="font-display text-3xl font-semibold">Course complete</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -412,7 +402,7 @@ export default function TrainingInstructorPortal() {
                           onClick={() => selectedLesson?.video && handlePlay(selectedLesson.video.id)}
                           className={cn(
                             "group relative w-20 h-20 rounded-full flex items-center justify-center transition-transform duration-300",
-                            "bg-white text-emerald-800 shadow-xl",
+                            "bg-white text-[#164c3e] shadow-xl",
                             "hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
                           )}
                         >
@@ -438,11 +428,11 @@ export default function TrainingInstructorPortal() {
                 </div>
               </div>
 
-              <div className="flex-1 bg-[#f7f8f9]">
+              <div className="flex-1 bg-[#f5f8f2]">
                 <div className="max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-8">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-800/80 mb-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#164c3e]/80 mb-2">
                         {selectedLesson?.status === "completed"
                           ? "Completed lesson"
                           : selectedLesson?.status === "current"
@@ -462,7 +452,7 @@ export default function TrainingInstructorPortal() {
                         type="button"
                         disabled={playVideo.isPending}
                         onClick={() => handlePlay(selectedLesson.video!.id)}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-emerald-900/15 transition-colors disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#164c3e] hover:bg-[#12382d] text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-[#164c3e]/15 transition-colors disabled:opacity-60"
                       >
                         {playVideo.isPending ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -475,7 +465,7 @@ export default function TrainingInstructorPortal() {
                   </div>
 
                   {selectedLesson && (
-                    <div className="mt-6 rounded-xl border border-border/70 bg-white p-4 sm:p-5">
+                    <div className="mt-6 rounded-xl border border-[#e7eee9] bg-white p-4 sm:p-5">
                       <div className="flex items-center justify-between gap-3 mb-2">
                         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           Lesson progress
@@ -486,7 +476,7 @@ export default function TrainingInstructorPortal() {
                       </div>
                       <div className="h-2 rounded-full bg-secondary overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-emerald-700 transition-all duration-300"
+                          className="h-full rounded-full bg-[#164c3e] transition-all duration-300"
                           style={{ width: `${selectedLesson.progressPercent}%` }}
                         />
                       </div>

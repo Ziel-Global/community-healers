@@ -242,7 +242,7 @@ export function QuestionEditor() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                         placeholder="Search questions by text or keyword..."
-                        className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
+                        className="pl-12 h-11 bg-card/60 focus:border-primary/40 rounded-xl"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -250,7 +250,7 @@ export function QuestionEditor() {
                 <div className="flex gap-2 w-full md:w-auto">
                     <Button
                         onClick={() => setIsDialogOpen(true)}
-                        className="gradient-primary text-white font-bold h-11 px-6 rounded-xl shadow-lg gap-2"
+                        className="bg-primary text-white font-bold h-11 px-6 rounded-xl shadow-lg gap-2"
                     >
                         <Plus className="w-4 h-4" />
                         Add Question
@@ -286,9 +286,9 @@ export function QuestionEditor() {
                                                 <HelpCircle className="w-5 h-5 text-primary" />
                                             </div>
                                             <div className="space-y-2">
-                                                <p className="alumni-sans-title text-xl font-semibold text-foreground leading-snug">{q.questionText}</p>
+                                                <p className="font-display font-semibold tracking-tight text-xl font-semibold text-foreground leading-snug">{q.questionText}</p>
                                                 <div className="flex flex-wrap gap-2">
-                                                    <Badge variant="outline" className="bg-white/50 text-[10px] uppercase font-bold tracking-tighter">
+                                                    <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-tighter">
                                                         <Tag className="w-3 h-3 mr-1" /> {q.category}
                                                     </Badge>
                                                 </div>
@@ -327,7 +327,7 @@ export function QuestionEditor() {
             }}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl alumni-sans-title flex items-center gap-2">
+                        <DialogTitle className="text-2xl font-display font-semibold tracking-tight flex items-center gap-2">
                             {editingQuestionId ? <Edit3 className="w-6 h-6 text-primary" /> : <HelpCircle className="w-6 h-6 text-primary" />}
                             {editingQuestionId ? 'Edit Question' : 'Add New Question'}
                         </DialogTitle>
@@ -529,7 +529,7 @@ export function QuestionEditor() {
                         <Button
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="gradient-primary text-white gap-2"
+                            className="bg-primary text-white gap-2"
                         >
                             {isSubmitting ? (
                                 <>

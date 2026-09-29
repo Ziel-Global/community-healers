@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, ArrowLeft, Mail, Lock } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { emailLoginSchema } from "@/schemas/authSchemas";
+import { SoftSkillsAuthLayout } from "@/components/SoftSkillsAuthLayout";
 
 export default function TrainingInstructorAuth() {
   const navigate = useNavigate();
@@ -55,86 +56,73 @@ export default function TrainingInstructorAuth() {
   };
 
   return (
-    <div className="fixed inset-0 bg-white flex overflow-hidden">
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{ backgroundColor: '#13452c' }}>
-        <div className="relative z-10 flex flex-col justify-center px-12">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-lg">
-              <GraduationCap className="w-8 h-8 text-primary" />
-            </div>
-            <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
+    <SoftSkillsAuthLayout
+      portalLabel="Training Instructor"
+      headline="Deliver the SoftSkills course"
+      description="Play training videos for candidates at your center, one lesson at a time, in order."
+      highlights={[
+        "Unlock lessons in sequence",
+        "Track course completion",
+        "Guide candidates through SoftSkills",
+      ]}
+    >
+      <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-[#7e9571] mb-3">
+        Training Instructor
+      </p>
+      <h2 className="text-3xl font-display font-semibold text-[#183d34] tracking-tight mb-2">
+        Sign In
+      </h2>
+      <p className="text-[#64736d] mb-8 text-sm leading-relaxed">
+        Access the training instructor portal
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-[#405438]">Email Address</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a9487]" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="instructor@ziel.com"
+              className="pl-10 h-12"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
-
-          <h1 className="text-4xl alumni-sans-title mb-4 text-white">Training Instructor</h1>
-          <p className="text-lg text-white/90 leading-relaxed max-w-md">
-            Play the training course for candidates at your center, one video at a time.
-          </p>
         </div>
-      </div>
 
-      <div className="flex-1 flex flex-col px-6 lg:px-16 bg-white">
-        <div className="sticky top-0 z-10 bg-white pt-4 pb-2 flex items-center justify-between lg:justify-end">
-          <div className="lg:hidden flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-              <GraduationCap className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="text-sm font-display font-bold">Instructor</span>
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-[#405438]">Password</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a9487] z-10" />
+            <PasswordInput
+              id="password"
+              placeholder="Enter your password"
+              className="pl-10 h-12"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
-          <Link to="/" className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Home</span>
-          </Link>
         </div>
 
-        <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center py-6 sm:py-12">
-          <h2 className="text-3xl alumni-sans-title text-foreground mb-2">Sign In</h2>
-          <p className="text-muted-foreground mb-8">Access the training instructor portal</p>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="instructor@ziel.com"
-                  className="pl-10 h-12 border-2 focus:border-primary"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
-                <PasswordInput
-                  id="password"
-                  placeholder="Enter your password"
-                  className="pl-10 h-12 border-2 focus:border-primary"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <Button type="submit" variant="forest" className="w-full h-12 text-lg alumni-sans-subtitle" disabled={loading}>
-              {loading ? (
-                <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Please wait...
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </Button>
-          </form>
-        </div>
-      </div>
-    </div>
+        <Button
+          type="submit"
+          className="w-full h-12 rounded-[10px] bg-[#164c3e] hover:bg-[#12382d] text-white shadow-[0_8px_20px_rgba(22,76,62,0.22)]"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Please wait...
+            </>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
+      </form>
+    </SoftSkillsAuthLayout>
   );
 }

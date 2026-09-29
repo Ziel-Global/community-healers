@@ -47,7 +47,7 @@ export default function InstructorsPage() {
         ) : instructors && instructors.length > 0 ? (
           <div className="grid gap-3">
             {instructors.map((instructor) => (
-              <Card key={instructor.id} className="border-border/40 bg-card/60 backdrop-blur-sm">
+              <Card key={instructor.id} className="border-[#e7eee9] bg-card/60 backdrop-blur-sm">
                 <CardContent className="p-5 flex items-center gap-4">
                   <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <UserRound className="w-5 h-5 text-primary" />
@@ -72,7 +72,7 @@ export default function InstructorsPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border-2 border-dashed border-border/60 bg-secondary/20 flex flex-col items-center justify-center text-center py-12 gap-3">
+          <div className="rounded-2xl border-2 border-dashed bg-secondary/20 flex flex-col items-center justify-center text-center py-12 gap-3">
             <UserRound className="w-10 h-10 text-primary/40" />
             <div>
               <p className="font-bold text-foreground">No instructors yet</p>

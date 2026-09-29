@@ -74,7 +74,7 @@ export function CenterApplicationsBoard() {
                         placeholder="Search by center, city, CNIC or license..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
+                        className="pl-12 h-11 bg-card/60 focus:border-primary/40 rounded-xl"
                     />
                 </div>
                 <ViewToggle view={view} onChange={setView} />

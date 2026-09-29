@@ -85,7 +85,7 @@ const StatCard = ({ title, value, icon: Icon, desc }: any) => (
         <div className="space-y-1">
           <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{title}</p>
           <h3 className="text-2xl font-bold text-foreground font-sans tabular-nums">{value}</h3>
-          <p className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
+          <p className="text-[10px] text-[#426f36] font-medium flex items-center gap-1">
             <Activity className="w-3 h-3" /> {desc}
           </p>
         </div>
@@ -151,13 +151,13 @@ export default function SuperAdminPortal() {
           <CardHeader className="pb-2 sm:pb-6">
             <div className="flex flex-col gap-4">
               <div>
-                <CardTitle className="text-xl sm:text-2xl alumni-sans-title">Training Participation Trend</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-display font-semibold tracking-tight">Training Participation Trend</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">Number of candidates appearing in training over time</CardDescription>
               </div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <TrendingUp className="w-4 h-4 text-emerald-600" />
-                  <span className="text-emerald-600 font-semibold text-xs sm:text-sm">{getGrowthText()}</span>
+                  <TrendingUp className="w-4 h-4 text-[#426f36]" />
+                  <span className="text-[#426f36] font-semibold text-xs sm:text-sm">{getGrowthText()}</span>
                 </div>
                 <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-lg">
                   <Button
@@ -166,7 +166,7 @@ export default function SuperAdminPortal() {
                     onClick={() => setTimeFilter("days")}
                     className={cn(
                       "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold",
-                      timeFilter === "days" ? "bg-white shadow-sm" : "hover:bg-white/50"
+                      timeFilter === "days" ? "bg-white shadow-sm" : "hover:"
                     )}
                   >
                     Days
@@ -177,7 +177,7 @@ export default function SuperAdminPortal() {
                     onClick={() => setTimeFilter("months")}
                     className={cn(
                       "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold",
-                      timeFilter === "months" ? "bg-white shadow-sm" : "hover:bg-white/50"
+                      timeFilter === "months" ? "bg-white shadow-sm" : "hover:"
                     )}
                   >
                     Months
@@ -188,7 +188,7 @@ export default function SuperAdminPortal() {
                     onClick={() => setTimeFilter("years")}
                     className={cn(
                       "h-7 sm:h-8 px-2 sm:px-3 rounded-md text-[10px] sm:text-xs font-semibold",
-                      timeFilter === "years" ? "bg-white shadow-sm" : "hover:bg-white/50"
+                      timeFilter === "years" ? "bg-white shadow-sm" : "hover:"
                     )}
                   >
                     Years

@@ -88,21 +88,21 @@ export default function CenterAdminPortal() {
 
         <div className="space-y-4 sm:space-y-6">
           <div>
-            <h3 className="text-lg sm:text-2xl font-bold text-foreground alumni-sans-title">Today's Candidates</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">
+            <h3 className="text-lg sm:text-2xl font-display font-semibold tracking-tight text-[#183d34]">Today&apos;s Candidates</h3>
+            <p className="text-xs sm:text-sm text-[#64736d]">
               {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 bg-card/40 p-3 sm:p-4 rounded-2xl border border-border/40 backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 bg-white p-3 sm:p-4 rounded-2xl border border-[#e7eee9] shadow-[0_8px_24px_#163a2b08]">
             <div className="relative flex-1 group">
-              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a9487] group-focus-within:text-primary transition-colors" />
               <Input
                 placeholder="Search by name, CNIC, or Reg ID..."
-                className="pl-10 sm:pl-12 h-10 sm:h-12 bg-white/50 border-border/60 focus:border-primary/40 focus:ring-primary/20 rounded-xl text-sm sm:text-base w-full"
+                className="pl-10 sm:pl-12 h-10 sm:h-12 bg-[#fafcf8] border-[#dce5d9] focus:border-primary rounded-[9px] text-sm sm:text-base w-full"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-10 sm:h-12 px-3 sm:px-4 rounded-xl border-border/60 bg-white/50 hover:bg-white transition-all w-full sm:w-[180px] text-xs sm:text-sm">
+              <SelectTrigger className="h-10 sm:h-12 px-3 sm:px-4 rounded-[9px] border-[#dce5d9] bg-[#fafcf8] hover:bg-white transition-all w-full sm:w-[180px] text-xs sm:text-sm">
                 <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary mr-2" />
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>

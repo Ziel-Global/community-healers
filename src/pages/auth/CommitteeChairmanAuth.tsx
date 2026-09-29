@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { Gavel, ArrowLeft, Mail, Lock } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { emailLoginSchema } from "@/schemas/authSchemas";
+import { SoftSkillsAuthLayout } from "@/components/SoftSkillsAuthLayout";
 
 export default function CommitteeChairmanAuth() {
   const navigate = useNavigate();
@@ -55,86 +56,69 @@ export default function CommitteeChairmanAuth() {
   };
 
   return (
-    <div className="fixed inset-0 bg-white flex overflow-hidden">
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{ backgroundColor: '#13452c' }}>
-        <div className="relative z-10 flex flex-col justify-center px-12">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-lg">
-              <Gavel className="w-8 h-8 text-primary" />
-            </div>
-            <span className="text-3xl alumni-sans-title text-white">Soft skill training</span>
+    <SoftSkillsAuthLayout
+      portalLabel="Committee Chairman"
+      headline="Lead the final decision"
+      description="Chair the approval committee, review inspection outcomes, and decide on centre applications."
+      highlights={[
+        "Oversee committee work",
+        "Review inspection reports",
+        "Issue final decisions",
+      ]}
+    >
+      <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-[#7e9571] mb-3">
+        Committee Chairman
+      </p>
+      <h2 className="text-3xl font-display font-semibold text-[#183d34] tracking-tight mb-2">
+        Sign In
+      </h2>
+      <p className="text-[#64736d] mb-8 text-sm leading-relaxed">
+        Access the committee chairman dashboard
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-[#405438]">Email Address</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a9487]" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="chairman@ziel.com"
+              className="pl-10 h-12 rounded-[9px] border-[#dce5d9] bg-[#fafcf8] focus:border-primary"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
-
-          <h1 className="text-4xl alumni-sans-title mb-4 text-white">Committee Chairman</h1>
-          <p className="text-lg text-white/90 leading-relaxed max-w-md">
-            Chair the approval committee, review inspection outcomes, and give the final decision on center applications.
-          </p>
         </div>
-      </div>
 
-      <div className="flex-1 flex flex-col px-6 lg:px-16 bg-white">
-        <div className="sticky top-0 z-10 bg-white pt-4 pb-2 flex items-center justify-between lg:justify-end">
-          <div className="lg:hidden flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-              <Gavel className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="text-sm font-display font-bold">Chairman</span>
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-[#405438]">Password</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a9487] z-10" />
+            <PasswordInput
+              id="password"
+              placeholder="Enter your password"
+              className="pl-10 h-12 rounded-[9px] border-[#dce5d9] bg-[#fafcf8] focus:border-primary"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
-          <Link to="/" className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Home</span>
-          </Link>
         </div>
 
-        <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center py-6 sm:py-12">
-          <h2 className="text-3xl alumni-sans-title text-foreground mb-2">Sign In</h2>
-          <p className="text-muted-foreground mb-8">Access the committee chairman dashboard</p>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="chairman@ziel.com"
-                  className="pl-10 h-12 border-2 focus:border-primary"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
-                <PasswordInput
-                  id="password"
-                  placeholder="Enter your password"
-                  className="pl-10 h-12 border-2 focus:border-primary"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <Button type="submit" variant="forest" className="w-full h-12 text-lg alumni-sans-subtitle" disabled={loading}>
-              {loading ? (
-                <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Please wait...
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </Button>
-          </form>
-        </div>
-      </div>
-    </div>
+        <Button type="submit" className="w-full h-12 text-base ss-cta" disabled={loading}>
+          {loading ? (
+            <>
+              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Please wait...
+            </>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
+      </form>
+    </SoftSkillsAuthLayout>
   );
 }

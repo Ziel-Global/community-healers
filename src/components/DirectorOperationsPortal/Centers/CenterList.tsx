@@ -51,7 +51,7 @@ export function CenterList() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                     placeholder="Search centers by name or code..."
-                    className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
+                    className="pl-12 h-11 bg-card/60 focus:border-primary/40 rounded-xl"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -93,7 +93,7 @@ export function CenterList() {
                                             <Building2 className="w-6 h-6 text-primary" />
                                         </div>
                                         <div>
-                                            <h4 className="alumni-sans-title text-lg text-foreground leading-tight">{center.name}</h4>
+                                            <h4 className="font-display font-semibold tracking-tight text-lg text-foreground leading-tight">{center.name}</h4>
                                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                                 <MapPin className="w-3 h-3" /> {center.location} • ID: {center.id}
                                             </p>
@@ -114,7 +114,7 @@ export function CenterList() {
                                     <div className="space-y-1">
                                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Avg Attendance</p>
                                         <div className="flex items-center gap-2">
-                                            <Activity className="w-3.5 h-3.5 text-emerald-500" />
+                                            <Activity className="w-3.5 h-3.5 text-[#426f36]" />
                                             <span className="font-bold text-sm">{center.attendance}</span>
                                         </div>
                                     </div>

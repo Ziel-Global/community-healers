@@ -138,7 +138,7 @@ export function PassedCandidateTable() {
                     <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                         placeholder="Search by name, CNIC or Registry ID..."
-                        className="pl-10 sm:pl-12 h-10 sm:h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl text-sm"
+                        className="pl-10 sm:pl-12 h-10 sm:h-11 bg-card/60 focus:border-primary/40 rounded-xl text-sm"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -146,7 +146,7 @@ export function PassedCandidateTable() {
                 <div className="flex flex-wrap gap-2 w-full">
                     <Popover open={centerFilterOpen} onOpenChange={setCenterFilterOpen}>
                         <PopoverTrigger asChild>
-                            <Button variant="outline" className="flex-1 sm:flex-none h-9 sm:h-11 px-3 sm:px-4 border-border/60 gap-2 bg-white/50 text-xs sm:text-lg alumni-sans-subtitle">
+                            <Button variant="outline" className="flex-1 sm:flex-none h-9 sm:h-11 px-3 sm:px-4 gap-2 text-xs sm:text-lg alumni-sans-subtitle">
                                 <Filter className="w-4 h-4 text-primary" />
                                 <span className="hidden sm:inline">Center</span> Filter
                                 {selectedCenter && (

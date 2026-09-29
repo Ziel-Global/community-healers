@@ -198,7 +198,7 @@ export default function LinksPage() {
               // This shoud be a seperate component. for example StatCard.tsx
               <div
                 key={index}
-                className="text-center p-3 sm:p-5 rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-royal transition-all duration-300"
+                className="text-center p-3 sm:p-5 rounded-xl bg-card border shadow-sm hover:shadow-royal transition-all duration-300"
               >
                 <p className="text-lg sm:text-2xl md:text-3xl font-bold text-gradient">
                   {stat.value}
@@ -227,7 +227,7 @@ export default function LinksPage() {
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className="p-4 sm:p-6 rounded-xl bg-card border border-border/60 hover:border-primary/30 hover:shadow-royal transition-all duration-300 group"
+                  className="p-4 sm:p-6 rounded-xl bg-card border hover:border-primary/30 hover:shadow-royal transition-all duration-300 group"
                 >
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-primary/20 transition-colors">
                     <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />

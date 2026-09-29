@@ -63,15 +63,15 @@ export function DegreeStatusScreen({ status, reviewNote, onSwitchedToExam }: Deg
   if (status === "UPLOADED") {
     return (
       <div className="max-w-2xl mx-auto">
-        <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
+        <Card className="ss-status-warn border shadow-sm rounded-2xl overflow-hidden">
           <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Clock className="w-8 h-8 text-amber-600" />
+            <div className="w-16 h-16 bg-[#f3ebe0] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#e8dfc4]">
+              <Clock className="w-8 h-8 text-[#5c4e2a]" />
             </div>
-            <h2 className="text-2xl font-semibold text-amber-900 dark:text-amber-100 mb-2">
+            <h2 className="text-2xl font-display font-semibold text-[#183d34] mb-2">
               {t("education.underReviewTitle")}
             </h2>
-            <p className="text-amber-700 dark:text-amber-300">{t("education.underReviewDesc")}</p>
+            <p className="text-[#5c4e2a]/90">{t("education.underReviewDesc")}</p>
           </CardContent>
         </Card>
       </div>
@@ -81,31 +81,30 @@ export function DegreeStatusScreen({ status, reviewNote, onSwitchedToExam }: Deg
   if (status === "APPROVED") {
     return (
       <div className="max-w-2xl mx-auto">
-        <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30">
+        <Card className="ss-status-success border shadow-sm rounded-2xl overflow-hidden">
           <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ShieldCheck className="w-8 h-8 text-emerald-600" />
+            <div className="w-16 h-16 bg-[#e7f2db] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#c7ddb5]">
+              <ShieldCheck className="w-8 h-8 text-[#426f36]" />
             </div>
-            <h2 className="text-2xl font-semibold text-emerald-900 dark:text-emerald-100 mb-2">
+            <h2 className="text-2xl font-display font-semibold text-[#183d34] mb-2">
               {t("education.approvedPendingTitle")}
             </h2>
-            <p className="text-emerald-700 dark:text-emerald-300">{t("education.approvedPendingDesc")}</p>
+            <p className="text-[#426f36]/90">{t("education.approvedPendingDesc")}</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // REJECTED
   return (
     <div className="max-w-2xl mx-auto">
-      <Card className="border-destructive/30 bg-destructive/5">
+      <Card className="border-destructive/30 bg-destructive/5 rounded-2xl overflow-hidden">
         <CardContent className="p-8 text-center space-y-6">
           <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
             <XCircle className="w-8 h-8 text-destructive" />
           </div>
           <div>
-            <h2 className="text-2xl font-semibold text-destructive mb-2">{t("education.rejectedTitle")}</h2>
+            <h2 className="text-2xl font-display font-semibold text-destructive mb-2">{t("education.rejectedTitle")}</h2>
             <p className="text-muted-foreground">{t("education.rejectedDesc")}</p>
             {reviewNote && (
               <p className="text-sm text-muted-foreground mt-3">
@@ -129,7 +128,6 @@ export function DegreeStatusScreen({ status, reviewNote, onSwitchedToExam }: Deg
               onChange={(e) => handleReupload(e.target.files?.[0] || null)}
             />
             <Button
-              className="gradient-primary text-white"
               disabled={uploadDocumentMutation.isPending}
               onClick={() => fileInputRef.current?.click()}
             >

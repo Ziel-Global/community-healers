@@ -145,11 +145,11 @@ export function ProfileView({
   return (
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       {/* Profile Header */}
-      <Card className="border-border/40 shadow-sm">
+      <Card className="border-[#e7eee9] shadow-[0_8px_24px_#163a2b08] rounded-2xl overflow-hidden">
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/20 flex-shrink-0">
-              <User className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#e9f1e3] flex items-center justify-center border border-[#dce7d6] flex-shrink-0">
+              <User className="w-10 h-10 sm:w-12 sm:h-12 text-[#3c6445]" />
             </div>
             <div className="flex-1 text-center sm:text-start w-full">
               <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-2 mb-2">
@@ -196,14 +196,14 @@ export function ProfileView({
       {/* Scheduled Exam Card from API - Show if exam is scheduled AND no certificate issued */}
       {
         examScheduleInfo?.examScheduled && !hasCertificate && (
-          <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
+          <Card className="border-[#dce7d6] shadow-[0_8px_24px_#163a2b08] bg-gradient-to-br from-[#f5f8f2] to-white rounded-2xl">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Calendar className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 rounded-[13px] bg-[#e9f1e3] flex items-center justify-center flex-shrink-0 border border-[#dce7d6]">
+                  <Calendar className="w-6 h-6 text-[#3c6445]" />
                 </div>
                 <div className="portal-section-heading min-w-0">
-                  <CardTitle className="text-xl alumni-sans-title leading-tight">{t("profile.examScheduled")}</CardTitle>
+                  <CardTitle className="text-xl font-display font-semibold tracking-tight leading-tight">{t("profile.examScheduled")}</CardTitle>
                   <p className="text-sm text-muted-foreground mt-0.5 leading-snug">
                     {t("profile.examScheduledDesc")}
                   </p>
@@ -287,7 +287,7 @@ export function ProfileView({
                   <p className="font-bold text-foreground leading-snug">{examScheduleInfo.cityName || t("common.na")}</p>
                 </div>
               </div>
-              <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <div className="mt-4 p-3 rounded-lg bg-[#f3f8ed] border border-[#dce7d6]">
                 <p className="text-xs text-muted-foreground">
                   <strong className="text-foreground">{t("common.note")}</strong>{" "}
                   {examScheduleInfo.verificationMessage || t("profile.examNote")}
@@ -301,14 +301,14 @@ export function ProfileView({
       {/* Scheduled Exam Card - Only show if registration complete and exam scheduled (local state) AND no certificate */}
       {
         isRegistrationComplete && scheduledExamDate && !examCompleted && !examScheduleInfo?.examScheduled && !hasCertificate && (
-          <Card className="border-primary/30 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10">
+          <Card className="border-[#dce7d6] shadow-[0_8px_24px_#163a2b08] bg-gradient-to-br from-[#f5f8f2] to-white rounded-2xl">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Calendar className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 rounded-[13px] bg-[#e9f1e3] flex items-center justify-center flex-shrink-0 border border-[#dce7d6]">
+                  <Calendar className="w-6 h-6 text-[#3c6445]" />
                 </div>
                 <div className="portal-section-heading min-w-0">
-                  <CardTitle className="text-xl alumni-sans-title leading-tight">{t("profile.examScheduled")}</CardTitle>
+                  <CardTitle className="text-xl font-display font-semibold tracking-tight leading-tight">{t("profile.examScheduled")}</CardTitle>
                   <p className="text-sm text-muted-foreground mt-0.5 leading-snug">
                     {t("profile.examScheduledDesc")}
                   </p>
@@ -330,7 +330,7 @@ export function ProfileView({
                   <p className="font-bold text-foreground leading-snug">LHR-003</p>
                 </div>
               </div>
-              <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <div className="mt-4 p-3 rounded-lg bg-[#f3f8ed] border border-[#dce7d6]">
                 <p className="text-xs text-muted-foreground">
                   <strong className="text-foreground">{t("common.note")}</strong> {t("profile.localExamNote")}
                 </p>
@@ -343,7 +343,7 @@ export function ProfileView({
       {/* Personal Information */}
       <Card className="border-border/40 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 alumni-sans-title">
+          <CardTitle className="flex items-center gap-2 font-display font-semibold tracking-tight">
             <User className="w-5 h-5 text-primary" />
             {t("profile.personalInfo")}
           </CardTitle>
@@ -382,7 +382,7 @@ export function ProfileView({
               <p className="text-xs text-muted-foreground mb-1">{t("profile.paymentStatus", "Fee Payment")}</p>
               <div className="flex items-center mt-0.5">
                 {candidateData?.payment?.isPaid ? (
-                  <Badge variant="outline" className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
+                  <Badge variant="outline" className="bg-[#e7f2db] text-[#426f36] border-[#c7ddb5]">
                     <CheckCircle2 className="w-3 h-3 mr-1" />
                     {t("profile.paid", "Paid")}
                   </Badge>
@@ -401,19 +401,19 @@ export function ProfileView({
       {/* Application Status */}
       <Card className="border-border/40 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 alumni-sans-title">
+          <CardTitle className="flex items-center gap-2 font-display font-semibold tracking-tight">
             <Award className="w-5 h-5 text-primary" />
             {t("profile.applicationStatus")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
-            <div className={`p-4 rounded-xl ${isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
+            <div className={`p-4 rounded-xl ${isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid ? 'bg-[#e7f2db] border border-[#c7ddb5]' : 'bg-[#f3f8ed] border border-[#dce7d6]'}`}>
               <div className="flex items-center gap-2 mb-2">
                 {isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid ? (
-                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <CheckCircle2 className="w-5 h-5 text-[#426f36]" />
                 ) : (
-                  <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <Clock className="w-5 h-5 text-[#378456]" />
                 )}
                 <p className="font-semibold text-foreground">{t("profile.registration")}</p>
               </div>
@@ -421,12 +421,12 @@ export function ProfileView({
                 {isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid ? t("profile.completedVerified") : t("profile.inProgress")}
               </p>
             </div>
-            <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-green-500/10 border-green-500/30' : (isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid) ? 'bg-blue-500/10 border-blue-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+            <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-[#e7f2db] border border-[#c7ddb5]' : (isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid) ? 'bg-[#f3f8ed] border border-[#dce7d6]' : 'bg-[#f8f4e8] border border-[#e8dfc4]'}`}>
               <div className="flex items-center gap-2 mb-2">
                 {hasCertificate ? (
-                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <CheckCircle2 className="w-5 h-5 text-[#426f36]" />
                 ) : (isRegistrationComplete || examScheduleInfo?.examScheduled || candidateData?.payment?.isPaid) ? (
-                  <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <Calendar className="w-5 h-5 text-[#378456]" />
                 ) : (
                   <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 )}
@@ -448,9 +448,9 @@ export function ProfileView({
                 }
               </p>
             </div>
-            <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-green-500/10 border-green-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+            <div className={`p-4 rounded-xl ${hasCertificate ? 'bg-[#e7f2db] border border-[#c7ddb5]' : 'bg-[#f8f4e8] border border-[#e8dfc4]'}`}>
               <div className="flex items-center gap-2 mb-2">
-                <Award className={`w-5 h-5 ${hasCertificate ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`} />
+                <Award className={`w-5 h-5 ${hasCertificate ? 'text-[#426f36]' : 'text-amber-600 dark:text-amber-400'}`} />
                 <p className="font-semibold text-foreground">{t("profile.certificate")}</p>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -472,7 +472,7 @@ export function ProfileView({
       <Card className="border-border/40 shadow-sm">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 alumni-sans-title">
+            <CardTitle className="flex items-center gap-2 font-display font-semibold tracking-tight">
               <FileText className="w-5 h-5 text-primary" />
               {t("profile.uploadedDocuments")}
             </CardTitle>
@@ -505,11 +505,11 @@ export function ProfileView({
                       handleViewDocument(doc);
                     }
                   }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-green-500/5 border border-green-500/20 cursor-pointer hover:bg-green-500/10 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg bg-[#f3f8ed] border border-[#dce7d6] cursor-pointer hover:bg-[#e7f2db] transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                      <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <div className="w-10 h-10 rounded-lg bg-[#e7f2db] flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-5 h-5 text-[#426f36]" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -534,7 +534,7 @@ export function ProfileView({
                       <Eye className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">{t("profile.view")}</span>
                     </Button>
-                    <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30">
+                    <Badge className="bg-[#e7f2db] text-[#426f36] border-[#c7ddb5]">
                       <CheckCircle2 className="w-3 h-3 mr-1" />
                       {t("profile.uploaded")}
                     </Badge>

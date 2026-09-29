@@ -132,7 +132,7 @@ export function AcademyManager() {
                         {sortedVideos.length} videos, played in order by Center Admins
                     </p>
                 </div>
-                <Button className="gradient-primary text-black font-bold h-11 px-6 rounded-xl shadow-lg gap-2" onClick={() => setIsCreateOpen(true)}>
+                <Button className="bg-primary text-black font-bold h-11 px-6 rounded-xl shadow-lg gap-2" onClick={() => setIsCreateOpen(true)}>
                     <Plus className="w-4 h-4" />
                     Add Video
                 </Button>

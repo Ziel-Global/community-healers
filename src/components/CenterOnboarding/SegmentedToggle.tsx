@@ -9,11 +9,25 @@ interface SegmentedToggleProps<T extends string | boolean> {
     options: SegmentedOption<T>[];
     value: T | null;
     onChange: (value: T) => void;
+    className?: string;
+    fullWidth?: boolean;
 }
 
-export function SegmentedToggle<T extends string | boolean>({ options, value, onChange }: SegmentedToggleProps<T>) {
+export function SegmentedToggle<T extends string | boolean>({
+    options,
+    value,
+    onChange,
+    className,
+    fullWidth = false,
+}: SegmentedToggleProps<T>) {
     return (
-        <div className="inline-flex rounded-xl border border-border/60 bg-secondary/30 p-1 gap-1">
+        <div
+            className={cn(
+                "inline-flex rounded-[10px] border border-[#c9d6c8] bg-[#f4f7f3] p-1 gap-1",
+                fullWidth && "flex w-full",
+                className
+            )}
+        >
             {options.map((option) => {
                 const isActive = value === option.value;
                 return (
@@ -22,10 +36,11 @@ export function SegmentedToggle<T extends string | boolean>({ options, value, on
                         type="button"
                         onClick={() => onChange(option.value)}
                         className={cn(
-                            "h-9 px-4 rounded-lg text-sm font-medium transition-all",
+                            "h-9 px-4 rounded-lg text-sm font-medium transition-all duration-200",
+                            fullWidth && "flex-1",
                             isActive
-                                ? "gradient-primary text-white shadow-primary"
-                                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                                ? "bg-[#164c3e] text-white shadow-[0_4px_12px_rgba(22,76,62,0.22)]"
+                                : "text-[#6d8474] hover:text-[#183d34] hover:bg-white/70"
                         )}
                     >
                         {option.label}
@@ -49,10 +64,10 @@ export function YesNoRow({
     onChange: (value: boolean) => void;
 }) {
     return (
-        <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-border/40 bg-card">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-4 rounded-xl border border-[#c9d6c8] bg-white shadow-sm">
             <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{label}</p>
-                {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+                <p className="text-sm font-semibold text-[#183d34]">{label}</p>
+                {description && <p className="text-xs text-[#6d8474] mt-0.5 leading-relaxed">{description}</p>}
             </div>
             <SegmentedToggle
                 options={[
@@ -61,6 +76,7 @@ export function YesNoRow({
                 ]}
                 value={value}
                 onChange={onChange}
+                className="shrink-0"
             />
         </div>
     );

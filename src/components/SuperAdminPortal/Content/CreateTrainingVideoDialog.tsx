@@ -93,7 +93,7 @@ export function CreateTrainingVideoDialog({ open, onClose, onCreated }: CreateTr
 
                 <DialogFooter>
                     <Button variant="outline" onClick={handleClose} disabled={createVideoMutation.isPending}>Cancel</Button>
-                    <Button onClick={handleCreate} disabled={createVideoMutation.isPending} className="gradient-primary text-white gap-2">
+                    <Button onClick={handleCreate} disabled={createVideoMutation.isPending} className="bg-primary text-white gap-2">
                         {createVideoMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                         Register Video
                     </Button>

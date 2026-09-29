@@ -39,7 +39,7 @@ export function ApplicationCard({ application, cityName, committeeName }: Applic
             onClick={() => navigate(`/bureau/applications/${application.id}`)}
             className="group relative overflow-hidden rounded-2xl border-border/40 bg-card shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_28px_rgba(0,0,0,0.08)] hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
         >
-            <div className="absolute inset-x-0 top-0 h-0.5 gradient-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardContent className="p-3.5 space-y-2.5">
                 <div className="flex items-start justify-between gap-2">
                     <div className="flex gap-2.5 min-w-0">
@@ -85,7 +85,7 @@ export function ApplicationCard({ application, cityName, committeeName }: Applic
                         <div className="flex items-center gap-1.5 min-w-0">
                             <span
                                 className={cn(
-                                    "shrink-0 w-5 h-5 rounded-full gradient-primary text-white text-[9px] font-bold",
+                                    "shrink-0 w-5 h-5 rounded-full bg-primary text-white text-[9px] font-bold",
                                     "flex items-center justify-center"
                                 )}
                             >

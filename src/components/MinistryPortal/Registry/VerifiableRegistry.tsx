@@ -58,7 +58,7 @@ export function VerifiableRegistry() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                         placeholder="Search by Certificate # or CNIC..."
-                        className="pl-12 h-11 bg-white/80 border-border/60 focus:border-primary/40 rounded-xl shadow-inner"
+                        className="pl-12 h-11 bg-white/80 focus:border-primary/40 rounded-xl shadow-inner"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -106,7 +106,7 @@ export function VerifiableRegistry() {
                                         className={`text-[8px] uppercase font-bold tracking-tight h-3.5 px-1 ${
                                             cert.status === 'ACTIVE' 
                                                 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' 
-                                                : 'bg-white/50'
+                                                : ''
                                         }`}
                                     >
                                         {cert.status}

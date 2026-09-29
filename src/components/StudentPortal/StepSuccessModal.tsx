@@ -32,7 +32,7 @@ export function StepSuccessModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         hideClose 
-        className="sm:max-w-2xl text-center p-16 border-x-2 border-b-2 border-t-4 border-primary/30 border-t-primary overflow-hidden shadow-[0_25px_50px_-12px_hsl(var(--primary)/0.2),inset_0_0_20px_hsl(var(--primary)/0.15)] bg-gradient-to-b from-background to-primary/5"
+        className="sm:max-w-2xl text-center p-16 border border-[#e7eee9] border-t-4 border-t-primary overflow-hidden shadow-[0_25px_50px_-12px_#163a2b20] bg-gradient-to-b from-white to-[#f5f8f2] rounded-2xl"
       >
         {/* Subtle Decorative Confetti / Dots in corners */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20 dark:opacity-10">
@@ -52,18 +52,18 @@ export function StepSuccessModal({
           {/* Animated Checkmark with Double Glow (Larger) */}
           <div className="relative mt-4">
             <div 
-              className="w-32 h-32 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center ring-[10px] ring-green-500/10 ring-offset-[16px] ring-offset-green-500/5 dark:ring-offset-background"
+              className="w-32 h-32 bg-[#e7f2db] rounded-full flex items-center justify-center ring-[10px] ring-[#d4e9bb50] ring-offset-[16px] ring-offset-[#edf5df]"
               style={{
                 animation: showProgress ? "checkmarkHeartbeat 1.5s ease-in-out infinite" : "none"
               }}
             >
-              <CheckCircle2 className="w-16 h-16 text-green-600 dark:text-green-400" />
+              <CheckCircle2 className="w-16 h-16 text-[#426f36]" />
             </div>
           </div>
           
           <div className="space-y-6 w-full">
             {/* English Text (Larger) */}
-            <div dir="ltr" className="text-4xl font-bold alumni-sans-title text-foreground">
+            <div dir="ltr" className="text-3xl sm:text-4xl font-display font-semibold text-[#183d34] tracking-tight">
               {titleEn}
             </div>
             

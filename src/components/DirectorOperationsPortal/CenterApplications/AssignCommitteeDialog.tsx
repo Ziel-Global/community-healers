@@ -85,7 +85,7 @@ export function AssignCommitteeDialog({ application, onClose, onAssigned }: Assi
                     <Button
                         onClick={handleAssign}
                         disabled={!committee || isLoadingCommittee || assignMutation.isPending}
-                        className="gradient-primary text-white gap-2"
+                        className="bg-primary text-white gap-2"
                     >
                         {assignMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                         Confirm Assignment

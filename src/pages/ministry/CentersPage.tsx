@@ -44,7 +44,7 @@ export default function CenterOversightPage() {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
                             placeholder="Search centers by name or code..."
-                            className="pl-12 h-11 bg-card/60 border-border/60 focus:border-primary/40 rounded-xl"
+                            className="pl-12 h-11 bg-card/60 focus:border-primary/40 rounded-xl"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />

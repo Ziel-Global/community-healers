@@ -7,6 +7,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SoftSkillsBrand } from "@/components/SoftSkillsBrand";
 import { getApiErrorMessage } from "@/lib/errors";
 import {
   centerOnboardingService,
@@ -446,29 +447,27 @@ export default function CenterOnboardingWizard() {
   const currentDetailsStepNumber = DETAILS_STEP_ORDER.indexOf(step) + 1;
 
   return (
-    <div className="min-h-screen bg-background flex items-start justify-center py-10 px-4">
-      <div className="w-full max-w-2xl space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-royal-600 flex items-center justify-center shadow-md">
-            <Building2 className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <div>
-            <p className="alumni-sans-title text-foreground text-lg">Center Onboarding</p>
-            <p className="text-xs text-muted-foreground">Apply to become a registered training center</p>
-          </div>
+    <div className="min-h-screen bg-[#f5f8f2] relative flex items-start justify-center py-10 px-4">
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(215,248,140,0.18)_0%,transparent_50%)]"
+        aria-hidden
+      />
+      <div className="relative w-full max-w-2xl space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <SoftSkillsBrand subtitle="Center Onboarding" alwaysShowText />
         </div>
 
         {showStepIndicator && (
-          <div className="px-2">
+          <div className="rounded-2xl border border-[#d5e0d4] bg-white/80 backdrop-blur-sm px-4 sm:px-6 py-5 shadow-[0_8px_24px_rgba(22,76,62,0.04)]">
             <StepIndicator steps={DETAILS_STEPS} currentStep={currentDetailsStepNumber} />
           </div>
         )}
 
         {step === "prerequisites" && (
-          <Card className="border-border/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+          <Card className="border border-[#d5e0d4] rounded-2xl bg-white shadow-[0_12px_40px_rgba(22,76,62,0.06)]">
             <CardContent className="p-6 sm:p-8 space-y-4">
-              <h2 className="text-lg font-semibold">Before you apply</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-lg font-semibold text-[#183d34]">Before you apply</h2>
+              <p className="text-sm text-[#6d8474]">
                 Confirm you meet each requirement below before starting your application.
               </p>
               {checklistLoading ? (
@@ -487,9 +486,9 @@ export default function CenterOnboardingWizard() {
                     return (
                       <div key={category} className="space-y-2.5">
                         <div className="flex items-center gap-2 px-1">
-                          <Icon className="w-4 h-4 text-primary" />
-                          <h3 className="text-sm font-bold text-foreground/80 uppercase tracking-wide">{meta.label}</h3>
-                          <span className="text-[11px] text-muted-foreground font-semibold bg-secondary/70 rounded-full min-w-[36px] text-center px-1.5 py-0.5">
+                          <Icon className="w-4 h-4 text-[#164c3e]" />
+                          <h3 className="text-sm font-bold text-[#183d34]/80 uppercase tracking-wide">{meta.label}</h3>
+                          <span className="text-[11px] text-[#6d8474] font-semibold bg-[#f4f7f3] border border-[#c9d6c8] rounded-full min-w-[36px] text-center px-1.5 py-0.5">
                             {confirmedCount}/{items.length}
                           </span>
                         </div>
@@ -497,7 +496,7 @@ export default function CenterOnboardingWizard() {
                           {items.map((item) => (
                             <label
                               key={item.id}
-                              className="flex items-start gap-3 p-3 rounded-xl border border-border/40 cursor-pointer hover:bg-secondary/40 transition-colors"
+                              className="flex items-start gap-3 p-3 rounded-xl border border-[#c9d6c8] bg-white cursor-pointer hover:bg-[#f8faf7] transition-colors"
                             >
                               <Checkbox
                                 checked={!!acknowledged[item.id]}
@@ -506,9 +505,9 @@ export default function CenterOnboardingWizard() {
                                 }
                               />
                               <div>
-                                <p className="text-sm font-medium">{item.label}</p>
+                                <p className="text-sm font-medium text-[#183d34]">{item.label}</p>
                                 {item.description && (
-                                  <p className="text-xs text-muted-foreground">{item.description}</p>
+                                  <p className="text-xs text-[#6d8474]">{item.description}</p>
                                 )}
                               </div>
                             </label>
@@ -520,7 +519,7 @@ export default function CenterOnboardingWizard() {
                 </div>
               )}
               <Button
-                className="w-full gradient-primary text-white h-11"
+                className="w-full bg-[#164c3e] hover:bg-[#12382d] text-white h-11 rounded-[10px] shadow-[0_8px_20px_rgba(22,76,62,0.22)]"
                 disabled={checklistLoading || !allAcknowledged}
                 onClick={() => setStep("verify")}
               >
@@ -531,17 +530,18 @@ export default function CenterOnboardingWizard() {
         )}
 
         {step === "verify" && (
-          <Card className="border-border/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+          <Card className="border border-[#d5e0d4] rounded-2xl bg-white shadow-[0_12px_40px_rgba(22,76,62,0.06)]">
             <CardContent className="p-6 sm:p-8">
-              <h2 className="text-lg font-semibold mb-1">Verify your license</h2>
-              <p className="text-sm text-muted-foreground mb-5">
+              <h2 className="text-lg font-semibold text-[#183d34] mb-1">Verify your license</h2>
+              <p className="text-sm text-[#6d8474] mb-5">
                 We'll check your CNIC and license number with the Bureau.
               </p>
               <form onSubmit={handleVerifyLicense} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="cnic">CNIC (13 digits, no dashes)</Label>
+                  <Label htmlFor="cnic" className="text-[#183d34]">CNIC (13 digits, no dashes)</Label>
                   <Input
                     id="cnic"
+                    className="h-11"
                     inputMode="numeric"
                     maxLength={13}
                     value={cnic}
@@ -550,15 +550,20 @@ export default function CenterOnboardingWizard() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="license">License Number</Label>
+                  <Label htmlFor="license" className="text-[#183d34]">License Number</Label>
                   <Input
                     id="license"
+                    className="h-11"
                     value={licenseNumber}
                     onChange={(e) => setLicenseNumber(e.target.value.toUpperCase())}
                     placeholder="ABC-12345"
                   />
                 </div>
-                <Button type="submit" className="w-full gradient-primary text-white h-11" disabled={loading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-[#164c3e] hover:bg-[#12382d] text-white h-11 rounded-[10px] shadow-[0_8px_20px_rgba(22,76,62,0.22)]"
+                  disabled={loading}
+                >
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Verify
                 </Button>
@@ -568,31 +573,35 @@ export default function CenterOnboardingWizard() {
         )}
 
         {step === "otp" && (
-          <Card className="border-border/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+          <Card className="border border-[#d5e0d4] rounded-2xl bg-white shadow-[0_12px_40px_rgba(22,76,62,0.06)]">
             <CardContent className="p-6 sm:p-8">
-              <h2 className="text-lg font-semibold mb-1">Enter OTP</h2>
-              <p className="text-sm text-muted-foreground mb-5">
+              <h2 className="text-lg font-semibold text-[#183d34] mb-1">Enter OTP</h2>
+              <p className="text-sm text-[#6d8474] mb-5">
                 We sent a code to {phone ? maskPhone(phone) : "your registered number"}.
               </p>
               <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="otp">One-time code</Label>
+                  <Label htmlFor="otp" className="text-[#183d34]">One-time code</Label>
                   <InputOTP id="otp" maxLength={6} value={otp} onChange={(value) => setOtp(value.replace(/\D/g, ""))}>
                     <InputOTPGroup className="gap-2">
-                      <InputOTPSlot index={0} className="h-12 w-12 text-lg border-border/60" />
-                      <InputOTPSlot index={1} className="h-12 w-12 text-lg border-border/60" />
-                      <InputOTPSlot index={2} className="h-12 w-12 text-lg border-border/60" />
-                      <InputOTPSlot index={3} className="h-12 w-12 text-lg border-border/60" />
-                      <InputOTPSlot index={4} className="h-12 w-12 text-lg border-border/60" />
-                      <InputOTPSlot index={5} className="h-12 w-12 text-lg border-border/60" />
+                      <InputOTPSlot index={0} className="h-12 w-12 text-lg border-[#c9d6c8]" />
+                      <InputOTPSlot index={1} className="h-12 w-12 text-lg border-[#c9d6c8]" />
+                      <InputOTPSlot index={2} className="h-12 w-12 text-lg border-[#c9d6c8]" />
+                      <InputOTPSlot index={3} className="h-12 w-12 text-lg border-[#c9d6c8]" />
+                      <InputOTPSlot index={4} className="h-12 w-12 text-lg border-[#c9d6c8]" />
+                      <InputOTPSlot index={5} className="h-12 w-12 text-lg border-[#c9d6c8]" />
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <Button type="submit" className="w-full gradient-primary text-white h-11" disabled={loading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-[#164c3e] hover:bg-[#12382d] text-white h-11 rounded-[10px] shadow-[0_8px_20px_rgba(22,76,62,0.22)]"
+                  disabled={loading}
+                >
                   {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Verify OTP
                 </Button>
-                <Button type="button" variant="ghost" className="w-full" onClick={handleResendOtp}>
+                <Button type="button" variant="ghost" className="w-full text-[#6d8474]" onClick={handleResendOtp}>
                   Resend OTP
                 </Button>
               </form>
@@ -631,13 +640,13 @@ export default function CenterOnboardingWizard() {
 
         {step === "status" && application && (
           <div className="space-y-4">
-            <Card className="border-border/40 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+            <Card className="border border-[#d5e0d4] rounded-2xl bg-white shadow-[0_12px_40px_rgba(22,76,62,0.06)]">
               <CardContent className="p-6 sm:p-8 text-center space-y-3">
-                <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
-                <h2 className="text-lg font-semibold">
+                <CheckCircle2 className="w-12 h-12 text-[#164c3e] mx-auto" />
+                <h2 className="text-lg font-semibold text-[#183d34]">
                   {STATUS_COPY[application.status]?.title ?? application.status}
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-[#6d8474]">
                   {STATUS_COPY[application.status]?.body ??
                     "You can check back later for updates on your application."}
                 </p>
@@ -646,43 +655,43 @@ export default function CenterOnboardingWizard() {
 
             {HAS_SCHEDULE_INFO.has(application.status) && (
               <>
-                <Card className="border-border/40 rounded-2xl">
+                <Card className="border border-[#d5e0d4] rounded-2xl bg-white">
                   <CardContent className="p-5 flex items-center gap-2.5">
-                    <CalendarClock className="w-4 h-4 text-primary shrink-0" />
+                    <CalendarClock className="w-4 h-4 text-[#164c3e] shrink-0" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Scheduled Inspection Date</p>
-                      <p className="text-sm font-semibold text-foreground">
+                      <p className="text-xs text-[#6d8474]">Scheduled Inspection Date</p>
+                      <p className="text-sm font-semibold text-[#183d34]">
                         {formatDate(application.scheduledInspectionDate) ?? "Not scheduled yet"}
                       </p>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="border-border/40 rounded-2xl">
+                <Card className="border border-[#d5e0d4] rounded-2xl bg-white">
                   <CardContent className="p-5 space-y-4">
                     <div className="flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4 text-primary" />
-                      <h3 className="text-sm font-semibold text-foreground">Committee Updates</h3>
+                      <MessageSquare className="w-4 h-4 text-[#164c3e]" />
+                      <h3 className="text-sm font-semibold text-[#183d34]">Committee Updates</h3>
                     </div>
                     {commentsLoading ? (
                       <div className="flex justify-center py-6">
                         <Loader2 className="w-5 h-5 animate-spin text-primary" />
                       </div>
                     ) : comments.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No updates yet.</p>
+                      <p className="text-sm text-[#6d8474]">No updates yet.</p>
                     ) : (
                       <div className="space-y-3">
                         {comments.map((comment) => (
-                          <div key={comment.id} className="p-3 rounded-xl bg-secondary/30 border border-border/40">
+                          <div key={comment.id} className="p-3 rounded-xl bg-[#f4f7f3] border border-[#c9d6c8]">
                             <div className="flex items-center justify-between gap-2 mb-1">
-                              <p className="text-xs font-semibold text-foreground">
+                              <p className="text-xs font-semibold text-[#183d34]">
                                 {comment.author.firstName} {comment.author.lastName}
                               </p>
-                              <p className="text-[11px] text-muted-foreground">
+                              <p className="text-[11px] text-[#6d8474]">
                                 {formatDate(comment.createdAt)}
                               </p>
                             </div>
-                            <p className="text-sm text-muted-foreground">{comment.text}</p>
+                            <p className="text-sm text-[#6d8474]">{comment.text}</p>
                           </div>
                         ))}
                       </div>

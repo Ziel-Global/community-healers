@@ -173,8 +173,8 @@ export default function CenterApplicationDetailPage() {
                 )}
 
                 {application.status === "APPROVED" && (
-                    <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                        <p className="text-sm text-emerald-700">
+                    <div className="p-4 rounded-xl bg-[#f3f8ed] border border-[#c7ddb5]">
+                        <p className="text-sm text-[#426f36]">
                             Approved {formatDateTime(application.reviewedAt)} — the center and its admin login are now live.
                         </p>
                     </div>
