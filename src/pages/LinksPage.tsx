@@ -175,7 +175,7 @@ export default function LinksPage() {
             </h1>
 
             <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2">
-              Candidates should head to the main site — everyone else, pick your portal below.
+              Candidates should head to the main site, everyone else, pick your portal below.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">

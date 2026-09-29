@@ -21,7 +21,7 @@ export default function InspectionReportsMemberPage() {
   const { data: reports, isLoading } = useInspectionReports(applicationId);
 
   const member = useMemo(
-    () => reports?.members.find((m) => m.memberUserId === memberUserId),
+    () => reports?.members.find((m) => String(m.memberUserId) === String(memberUserId)),
     [reports, memberUserId],
   );
 
@@ -91,7 +91,7 @@ export default function InspectionReportsMemberPage() {
           />
         ) : (
           <p className="text-sm text-muted-foreground px-1">
-            Checklist detail is not included in the summary response. Recommendation and notes are shown above.
+            No checklist items returned for this member&apos;s report.
           </p>
         )}
       </div>

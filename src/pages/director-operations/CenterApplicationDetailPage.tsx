@@ -14,8 +14,6 @@ import { directorOperationsCenterApplicationService } from "@/services/centerApp
 import { AssignCommitteeDialog } from "@/components/DirectorOperationsPortal/CenterApplications/AssignCommitteeDialog";
 import { APPLICATION_STATUS_META } from "@/components/DirectorOperationsPortal/CenterApplications/statusMeta";
 import { CommitteeAttendanceCard } from "@/components/DirectorOperationsPortal/CenterApplications/CommitteeAttendanceCard";
-import { ChecklistResultsSection } from "@/components/DirectorOperationsPortal/CenterApplications/ChecklistResultsSection";
-import { CommentThread } from "@/components/CommentThread";
 import type { CenterApplicationSummary } from "@/services/centerApplicationService";
 
 function formatDateTime(iso: string | null): string {
@@ -51,7 +49,7 @@ export default function CenterApplicationDetailPage() {
         );
     }
 
-    const { application, checklistResults, attendance } = data;
+    const { application, attendance } = data;
 
     return (
         <DashboardLayout
@@ -189,35 +187,6 @@ export default function CenterApplicationDetailPage() {
 
                 {/* Committee attendance — who's confirmed/declined the scheduled inspection */}
                 {application.committee && <CommitteeAttendanceCard attendance={attendance} />}
-
-                {/* Checklist results — everything the committee submitted */}
-                <ChecklistResultsSection
-                    checklistResults={checklistResults}
-                    getEvidenceBlob={directorOperationsCenterApplicationService.getEvidenceBlob}
-                />
-
-                {application.chairmanReturnReason && (
-                    <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
-                        <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">Returned from chairman review</p>
-                        <p className="text-sm text-muted-foreground">{application.chairmanReturnReason}</p>
-                    </div>
-                )}
-
-                {/* Decision — made by the committee directly now; this is view-only. */}
-                {application.status === "REJECTED" && application.rejectionReason && (
-                    <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">
-                        <p className="text-sm font-medium text-destructive mb-1">Rejection reason</p>
-                        <p className="text-sm text-muted-foreground">{application.rejectionReason}</p>
-                    </div>
-                )}
-
-                {application.status === "APPROVED" && (
-                    <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                        <p className="text-sm text-emerald-700">
-                            Approved {formatDateTime(application.reviewedAt)} — the center and its admin login are now live.
-                        </p>
-                    </div>
-                )}
 
             </div>
 
