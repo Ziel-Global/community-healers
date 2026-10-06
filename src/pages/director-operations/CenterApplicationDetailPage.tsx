@@ -96,14 +96,6 @@ export default function CenterApplicationDetailPage() {
                             <span className="text-muted-foreground">Center Phone:</span> {application.centerPhone ?? "—"}
                         </div>
                         <div className="sm:col-span-2 text-muted-foreground">{application.address}</div>
-                        {application.isJointVenture && (
-                            <div className="sm:col-span-2 flex items-center gap-2">
-                                <Badge variant="outline" className="text-[11px]">Joint Venture</Badge>
-                                {application.jointVentureLicenseNumber && (
-                                    <span className="text-xs text-muted-foreground font-mono">{application.jointVentureLicenseNumber}</span>
-                                )}
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
 

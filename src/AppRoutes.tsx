@@ -38,6 +38,7 @@ const AdminComplaintsPage = lazy(() => import("./pages/admin/ComplaintsPage"));
 const QuestionsPage = lazy(() => import("./pages/admin/QuestionsPage"));
 const AcademyPage = lazy(() => import("./pages/admin/AcademyPage"));
 const AuditPage = lazy(() => import("./pages/admin/AuditPage"));
+const ActionLogsPage = lazy(() => import("./pages/admin/LogsPage"));
 
 const MinistryPortal = lazy(() => import("./pages/MinistryPortal"));
 const ReviewPage = lazy(() => import("./pages/ministry/ReviewPage"));
@@ -168,6 +169,7 @@ export function AppRoutes() {
                 <Route path="/admin/questions" element={<ProtectedRoute portalType="admin"><QuestionsPage /></ProtectedRoute>} />
                 <Route path="/admin/content" element={<ProtectedRoute portalType="admin"><AcademyPage /></ProtectedRoute>} />
                 <Route path="/admin/audit" element={<ProtectedRoute portalType="admin"><AuditPage /></ProtectedRoute>} />
+                <Route path="/admin/logs" element={<ProtectedRoute portalType="admin"><ActionLogsPage /></ProtectedRoute>} />
 
 
 

@@ -1,3 +1,5 @@
+import type { UserRole } from './roles';
+
 export interface ExamSettings {
     durationMinutes: number;
     numberOfQuestions: number;
@@ -55,20 +57,6 @@ export interface Tehsil {
     id: string;
     name: string;
     districtId: string;
-}
-
-export interface CreateCenterRequest {
-    name: string;
-    cityId: string;
-    licenseNumber: string;
-    address: string;
-    capacity: number;
-    centerAdmin: {
-        email: string;
-        password: string;
-        firstName: string;
-        lastName: string;
-    };
 }
 
 export interface SuperAdminCenter {
@@ -240,4 +228,32 @@ export interface CenterRegisteredCandidatesResponse {
     };
     date: string;
     registeredCandidates: RegisteredCandidate[];
+}
+
+/** One meaningful business action by a staff/admin role — "Report submitted", "Committee assigned". */
+export interface ActionLog {
+    id: string;
+    createdAt: string;
+    actorRole: UserRole;
+    actorName: string | null;
+    actorEmail: string | null;
+    action: string;
+    message: string;
+    targetId: string | null;
+}
+
+export interface ActionLogsResponse {
+    data: ActionLog[];
+    total: number;
+    page: number;
+    limit: number;
+}
+
+export interface GetActionLogsParams {
+    role?: UserRole;
+    search?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
 }

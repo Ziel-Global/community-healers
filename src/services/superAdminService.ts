@@ -1,6 +1,6 @@
 import { api } from './api';
 import { getApiErrorMessage } from '../lib/errors';
-import { ExamSettings, City, UpdateCityLocationRequest, Province, District, Tehsil, CreateCenterRequest, CenterAdmin, Question, CreateQuestionRequest, DashboardStats, AuditLogResponse, ExamParticipationTrend, CenterRegisteredCandidatesResponse, SuperAdminCenter, SuperAdminCenterDetails } from '../types/superAdmin';
+import { ExamSettings, City, UpdateCityLocationRequest, Province, District, Tehsil, CenterAdmin, Question, CreateQuestionRequest, DashboardStats, AuditLogResponse, ExamParticipationTrend, CenterRegisteredCandidatesResponse, SuperAdminCenter, SuperAdminCenterDetails, ActionLogsResponse, GetActionLogsParams } from '../types/superAdmin';
 
 export const updateExamSettings = async (settings: ExamSettings): Promise<void> => {
     try {
@@ -103,16 +103,6 @@ export const updateCityLocation = async (cityId: string, payload: UpdateCityLoca
     }
 };
 
-export const createCenter = async (centerData: CreateCenterRequest): Promise<SuperAdminCenter> => {
-    try {
-        const response = await api.post('/super-admin/center', centerData);
-        return response.data;
-    } catch (error: unknown) {
-        console.error('Create Center error:', error);
-        throw new Error(getApiErrorMessage(error, 'Failed to create center.'));
-    }
-};
-
 export const getCenters = async (): Promise<SuperAdminCenter[]> => {
     try {
         const response = await api.get('/super-admin/centers');
@@ -197,6 +187,16 @@ export const getAuditLogs = async (): Promise<AuditLogResponse> => {
     } catch (error: unknown) {
         console.error('Get Audit Logs error:', error);
         throw new Error(getApiErrorMessage(error, 'Failed to fetch audit logs.'));
+    }
+};
+
+export const getActionLogs = async (params: GetActionLogsParams = {}): Promise<ActionLogsResponse> => {
+    try {
+        const response = await api.get('/super-admin/action-logs', { params });
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Get Action Logs error:', error);
+        throw new Error(getApiErrorMessage(error, 'Failed to fetch action logs.'));
     }
 };
 
@@ -303,7 +303,6 @@ export const superAdminService = {
     getTehsils,
     createCity,
     updateCityLocation,
-    createCenter,
     getCenters,
     getCenterDetails,
     getCenterAdmins,
@@ -313,6 +312,7 @@ export const superAdminService = {
     deleteQuestion,
     getDashboardStats,
     getAuditLogs,
+    getActionLogs,
     getExamParticipationTrend,
     getCenterRegisteredCandidates,
 };

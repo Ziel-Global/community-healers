@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { superAdminService, UpdateCertificateDetailsPayload } from "@/services/superAdminService";
-import { CreateQuestionRequest, ExamSettings, CreateCenterRequest, UpdateCityLocationRequest } from "@/types/superAdmin";
+import { CreateQuestionRequest, ExamSettings, UpdateCityLocationRequest, GetActionLogsParams } from "@/types/superAdmin";
 import { referenceKeys } from "./useReferenceQueries";
 
 export const superAdminKeys = {
@@ -8,6 +8,7 @@ export const superAdminKeys = {
     dashboardStats: () => [...superAdminKeys.all, "dashboardStats"] as const,
     examParticipationTrend: (period: string) => [...superAdminKeys.all, "examParticipationTrend", period] as const,
     auditLogs: () => [...superAdminKeys.all, "auditLogs"] as const,
+    actionLogs: (params: GetActionLogsParams) => [...superAdminKeys.all, "actionLogs", params] as const,
     examSettings: () => [...superAdminKeys.all, "examSettings"] as const,
     centers: () => [...superAdminKeys.all, "centers"] as const,
     centerDetails: (centerId: string) => [...superAdminKeys.all, "centerDetails", centerId] as const,
@@ -36,6 +37,13 @@ export function useAuditLogs() {
     return useQuery({
         queryKey: superAdminKeys.auditLogs(),
         queryFn: superAdminService.getAuditLogs,
+    });
+}
+
+export function useActionLogs(params: GetActionLogsParams) {
+    return useQuery({
+        queryKey: superAdminKeys.actionLogs(params),
+        queryFn: () => superAdminService.getActionLogs(params),
     });
 }
 
@@ -126,16 +134,6 @@ export function useUpdateExamSettings() {
         mutationFn: (settings: ExamSettings) => superAdminService.updateExamSettings(settings),
         onSuccess: (_data, settings) => {
             queryClient.setQueryData(superAdminKeys.examSettings(), settings);
-        },
-    });
-}
-
-export function useCreateCenter() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (centerData: CreateCenterRequest) => superAdminService.createCenter(centerData),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: superAdminKeys.centers() });
         },
     });
 }

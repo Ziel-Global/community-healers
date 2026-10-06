@@ -67,8 +67,6 @@ export interface CenterApplicationSummary {
     inspectionCompletedAt: string | null;
     reviewedAt: string | null;
     rejectionReason: string | null;
-    isJointVenture: boolean;
-    jointVentureLicenseNumber: string | null;
     createdAt: string;
     updatedAt: string;
     chairmanReviewedAt?: string | null;

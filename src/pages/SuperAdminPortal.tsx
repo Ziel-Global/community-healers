@@ -17,7 +17,8 @@ import {
   Loader2,
   ClipboardCheck,
   UserCog,
-  MessageSquareWarning
+  MessageSquareWarning,
+  ScrollText
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,11 @@ export const superAdminNavItems = [
   //   href: "/admin/content",
   //   icon: <BookOpen className="w-4 h-4" />,
   // },
+  {
+    label: "Logs",
+    href: "/admin/logs",
+    icon: <ScrollText className="w-4 h-4" />,
+  },
   {
     label: "Audit Logs",
     href: "/admin/audit",

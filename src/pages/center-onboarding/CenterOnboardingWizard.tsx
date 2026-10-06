@@ -103,8 +103,6 @@ const emptyCenterInfo: CenterInfoFormState = {
   latitude: null,
   longitude: null,
   city: null,
-  isJointVenture: false,
-  jointVentureLicenseNumber: "",
 };
 
 export default function CenterOnboardingWizard() {
@@ -200,8 +198,6 @@ export default function CenterOnboardingWizard() {
       latitude: app.latitude,
       longitude: app.longitude,
       city: app.city ?? null,
-      isJointVenture: app.isJointVenture,
-      jointVentureLicenseNumber: app.jointVentureLicenseNumber ?? "",
     });
 
     setStep(DETAILS_STEP_ORDER[Math.min(Math.max(app.detailsStep, 1), 3) - 1]);
@@ -413,11 +409,6 @@ export default function CenterOnboardingWizard() {
       toast.error("Couldn't detect a city for this pin — try a location closer to a populated area");
       return;
     }
-    if (centerInfo.isJointVenture && !centerInfo.jointVentureLicenseNumber.trim()) {
-      toast.error("Please provide the Joint Venture license number");
-      return;
-    }
-
     setLoading(true);
     try {
       const result = await centerOnboardingService.submitCenterInfo(applicationId, sessionToken, {
@@ -428,10 +419,6 @@ export default function CenterOnboardingWizard() {
         latitude: centerInfo.latitude,
         longitude: centerInfo.longitude,
         city: centerInfo.city,
-        isJointVenture: centerInfo.isJointVenture,
-        jointVentureLicenseNumber: centerInfo.isJointVenture
-          ? centerInfo.jointVentureLicenseNumber.trim()
-          : undefined,
       });
       setApplication(result);
       setStep("status");

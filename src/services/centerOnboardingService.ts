@@ -96,9 +96,6 @@ export interface CenterApplication {
     cityId: string | null;
     city?: string | null;
 
-    isJointVenture: boolean;
-    jointVentureLicenseNumber: string | null;
-
     scheduledInspectionDate: string | null;
     rejectionReason?: string | null;
     staff?: ApplicationStaffRow[];
@@ -127,8 +124,6 @@ export interface CenterInfoPayload {
     latitude: number;
     longitude: number;
     city: string;
-    isJointVenture: boolean;
-    jointVentureLicenseNumber?: string;
 }
 
 function asChecklistItems(data: unknown): ChecklistItem[] {

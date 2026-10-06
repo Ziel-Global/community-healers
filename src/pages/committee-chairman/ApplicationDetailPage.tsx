@@ -212,14 +212,6 @@ export default function CommitteeChairmanApplicationDetailPage() {
                 {application.buildingOwnership ? ` · ${application.buildingOwnership}` : ""}
               </div>
             )}
-            {application.isJointVenture && (
-              <div className="sm:col-span-2 flex items-center gap-2">
-                <Badge variant="outline" className="text-[11px]">Joint venture</Badge>
-                {application.jointVentureLicenseNumber && (
-                  <span className="text-xs text-muted-foreground font-mono">{application.jointVentureLicenseNumber}</span>
-                )}
-              </div>
-            )}
           </CardContent>
         </Card>
 

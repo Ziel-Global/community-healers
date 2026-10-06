@@ -1,10 +1,9 @@
-import { Building2, Loader2, Phone, Mail, ArrowLeft, CheckCircle2, ShieldQuestion } from "lucide-react";
+import { Building2, Loader2, Phone, Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LocationPicker } from "@/components/LocationPicker";
-import { YesNoRow } from "./SegmentedToggle";
 
 export interface CenterInfoFormState {
     centerName: string;
@@ -14,8 +13,6 @@ export interface CenterInfoFormState {
     latitude: number | null;
     longitude: number | null;
     city: string | null;
-    isJointVenture: boolean;
-    jointVentureLicenseNumber: string;
 }
 
 interface CenterInfoStepProps {
@@ -108,33 +105,6 @@ export function CenterInfoStep({ value, onChange, onLocationChange, onSubmit, on
                     <section className="space-y-3.5">
                         <SectionLabel>Map location</SectionLabel>
                         <LocationPicker latitude={value.latitude} longitude={value.longitude} onLocationChange={onLocationChange} />
-                    </section>
-
-                    <section className="space-y-3.5">
-                        <SectionLabel>Joint venture</SectionLabel>
-                        <YesNoRow
-                            label="Is this a Joint Venture?"
-                            description="Two or more license holders operating this center together."
-                            value={value.isJointVenture}
-                            onChange={(v) => onChange({ isJointVenture: v })}
-                        />
-                        {value.isJointVenture && (
-                            <div className="space-y-2 p-4 rounded-xl border border-[#c9d6c8] bg-[#f4f7f3]">
-                                <Label htmlFor="jvLicense" className="flex items-center gap-1.5 text-[#183d34]">
-                                    <ShieldQuestion className="w-3.5 h-3.5 text-[#164c3e]" /> Joint Venture License Number
-                                </Label>
-                                <Input
-                                    id="jvLicense"
-                                    className="h-11"
-                                    value={value.jointVentureLicenseNumber}
-                                    onChange={(e) => onChange({ jointVentureLicenseNumber: e.target.value })}
-                                    placeholder="Enter the Joint Venture license number"
-                                />
-                                <p className="text-xs text-[#6d8474]">
-                                    We'll check this isn't already registered to another center.
-                                </p>
-                            </div>
-                        )}
                     </section>
                 </div>
 
