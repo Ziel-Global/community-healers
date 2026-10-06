@@ -95,6 +95,7 @@ export interface CenterApplication {
     longitude: number | null;
     cityId: string | null;
     city?: string | null;
+    customFieldValues?: Record<string, string | number | boolean> | null;
 
     scheduledInspectionDate: string | null;
     rejectionReason?: string | null;
@@ -118,12 +119,13 @@ export interface BuildingDetailsPayload {
 
 export interface CenterInfoPayload {
     centerName: string;
-    address: string;
-    centerPhone: string;
+    address?: string;
+    centerPhone?: string;
     email: string;
-    latitude: number;
-    longitude: number;
-    city: string;
+    latitude?: number;
+    longitude?: number;
+    city?: string;
+    customFieldValues?: Record<string, string | number | boolean>;
 }
 
 function asChecklistItems(data: unknown): ChecklistItem[] {

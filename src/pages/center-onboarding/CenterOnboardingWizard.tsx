@@ -19,7 +19,9 @@ import type { ApplicationComment } from "@/services/centerApplicationCommentServ
 import { StepIndicator, type WizardStep } from "@/components/CenterOnboarding/StepIndicator";
 import { BuildingStep, type BuildingFormState } from "@/components/CenterOnboarding/BuildingStep";
 import { StaffStep, type StaffFormRow } from "@/components/CenterOnboarding/StaffStep";
-import { CenterInfoStep, type CenterInfoFormState } from "@/components/CenterOnboarding/CenterInfoStep";
+import { CenterInfoStep, type CenterInfoFormState, type CustomFieldValues } from "@/components/CenterOnboarding/CenterInfoStep";
+import { getFormFields } from "@/services/formBuilderService";
+import type { FormFieldDefinition } from "@/types/formBuilder";
 
 type Step = "prerequisites" | "verify" | "otp" | "building" | "staff" | "center-info" | "status";
 
@@ -132,6 +134,8 @@ export default function CenterOnboardingWizard() {
   const [rosterSaved, setRosterSaved] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [centerInfo, setCenterInfo] = useState<CenterInfoFormState>(emptyCenterInfo);
+  const [centerInfoFields, setCenterInfoFields] = useState<FormFieldDefinition[]>([]);
+  const [customFieldValues, setCustomFieldValues] = useState<CustomFieldValues>({});
 
   useEffect(() => {
     centerOnboardingService
@@ -139,6 +143,14 @@ export default function CenterOnboardingWizard() {
       .then(setChecklist)
       .catch((error) => toast.error(getApiErrorMessage(error, "Failed to load prerequisites")))
       .finally(() => setChecklistLoading(false));
+  }, []);
+
+  // Bureau can add/hide/reorder fields on this step — fetched once up front so
+  // CenterInfoStep always renders whatever is currently switched on.
+  useEffect(() => {
+    getFormFields("CENTER_INFO")
+      .then(setCenterInfoFields)
+      .catch((error) => toast.error(getApiErrorMessage(error, "Failed to load the center-info form")));
   }, []);
 
   const checklistItems = Array.isArray(checklist) ? checklist : [];
@@ -199,6 +211,7 @@ export default function CenterOnboardingWizard() {
       longitude: app.longitude,
       city: app.city ?? null,
     });
+    setCustomFieldValues(app.customFieldValues ?? {});
 
     setStep(DETAILS_STEP_ORDER[Math.min(Math.max(app.detailsStep, 1), 3) - 1]);
   };
@@ -389,11 +402,20 @@ export default function CenterOnboardingWizard() {
   const handleSubmitCenterInfo = async () => {
     if (!applicationId || !sessionToken) return;
 
-    if (!centerInfo.centerName.trim() || !centerInfo.address.trim()) {
-      toast.error("Please fill in center name and address");
+    // Which native fields Bureau currently requires — centerName/email are
+    // always required (locked), everything else depends on the live config.
+    const isNativeRequired = (fieldKey: string) =>
+      centerInfoFields.some((f) => f.kind === "NATIVE" && f.visible && f.required && f.fieldKey === fieldKey);
+
+    if (isNativeRequired("centerName") && !centerInfo.centerName.trim()) {
+      toast.error("Please fill in the center name");
       return;
     }
-    if (!centerInfo.centerPhone.trim()) {
+    if (isNativeRequired("address") && !centerInfo.address.trim()) {
+      toast.error("Please fill in the center address");
+      return;
+    }
+    if (isNativeRequired("centerPhone") && !centerInfo.centerPhone.trim()) {
       toast.error("Please provide the center's phone number");
       return;
     }
@@ -401,24 +423,36 @@ export default function CenterOnboardingWizard() {
       toast.error("Please provide a valid email — we'll send your password setup link there");
       return;
     }
-    if (centerInfo.latitude == null || centerInfo.longitude == null) {
-      toast.error("Please pick your center's location on the map");
-      return;
+    if (isNativeRequired("location")) {
+      if (centerInfo.latitude == null || centerInfo.longitude == null) {
+        toast.error("Please pick your center's location on the map");
+        return;
+      }
+      if (!centerInfo.city) {
+        toast.error("Couldn't detect a city for this pin — try a location closer to a populated area");
+        return;
+      }
     }
-    if (!centerInfo.city) {
-      toast.error("Couldn't detect a city for this pin — try a location closer to a populated area");
-      return;
+    for (const field of centerInfoFields) {
+      if (field.kind !== "CUSTOM" || !field.required) continue;
+      const value = customFieldValues[field.id];
+      if (value === undefined || value === null || value === "") {
+        toast.error(`Please fill in "${field.label}"`);
+        return;
+      }
     }
+
     setLoading(true);
     try {
       const result = await centerOnboardingService.submitCenterInfo(applicationId, sessionToken, {
         centerName: centerInfo.centerName.trim(),
-        address: centerInfo.address.trim(),
-        centerPhone: centerInfo.centerPhone.trim(),
+        address: centerInfo.address.trim() || undefined,
+        centerPhone: centerInfo.centerPhone.trim() || undefined,
         email: centerInfo.email.trim(),
-        latitude: centerInfo.latitude,
-        longitude: centerInfo.longitude,
-        city: centerInfo.city,
+        latitude: centerInfo.latitude ?? undefined,
+        longitude: centerInfo.longitude ?? undefined,
+        city: centerInfo.city ?? undefined,
+        customFieldValues: Object.keys(customFieldValues).length ? customFieldValues : undefined,
       });
       setApplication(result);
       setStep("status");
@@ -619,6 +653,9 @@ export default function CenterOnboardingWizard() {
             value={centerInfo}
             onChange={(patch) => setCenterInfo((prev) => ({ ...prev, ...patch }))}
             onLocationChange={handleLocationChange}
+            fields={centerInfoFields}
+            customValues={customFieldValues}
+            onCustomChange={(fieldId, fieldValue) => setCustomFieldValues((prev) => ({ ...prev, [fieldId]: fieldValue }))}
             onSubmit={handleSubmitCenterInfo}
             onBack={() => setStep("staff")}
             loading={loading}

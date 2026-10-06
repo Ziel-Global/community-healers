@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ClipboardList, LayoutDashboard, Building2, Loader2 } from "lucide-react";
+import { ClipboardList, LayoutDashboard, Building2, Loader2, FileEdit } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useCenterApplications } from "@/hooks/queries/useDirectorOperationsCenterApplicationQueries";
 import { useCommitteeForDirectorOperations } from "@/hooks/queries/useCommitteeQueries";
@@ -15,6 +15,7 @@ export const directorOperationsNavItems = [
   { label: "Dashboard", href: "/bureau", icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: "Center Applications", href: "/bureau/applications", icon: <ClipboardList className="w-4 h-4" /> },
   { label: "Centers", href: "/bureau/centers", icon: <Building2 className="w-4 h-4" /> },
+  { label: "Form Builder", href: "/bureau/form-builder", icon: <FileEdit className="w-4 h-4" /> },
 ];
 
 const ACTIVE_STATUSES = new Set([

@@ -83,6 +83,7 @@ const DirectorOperationsPortal = lazy(() => import("./pages/DirectorOperationsPo
 const DoCenterApplicationsPage = lazy(() => import("./pages/director-operations/CenterApplicationsPage"));
 const DoCenterApplicationDetailPage = lazy(() => import("./pages/director-operations/CenterApplicationDetailPage"));
 const DoCentersPage = lazy(() => import("./pages/director-operations/CentersPage"));
+const DoFormBuilderPage = lazy(() => import("./pages/director-operations/FormBuilderPage"));
 
 const CenterOnboardingWizard = lazy(() => import('./pages/center-onboarding/CenterOnboardingWizard'));
 const LandingTest = lazy(() => import('./pages/LandingTest'));
@@ -205,6 +206,7 @@ export function AppRoutes() {
                 <Route path="/bureau/applications" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationsPage /></ProtectedRoute>} />
                 <Route path="/bureau/applications/:applicationId" element={<ProtectedRoute portalType="director-operations"><DoCenterApplicationDetailPage /></ProtectedRoute>} />
                 <Route path="/bureau/centers" element={<ProtectedRoute portalType="director-operations"><DoCentersPage /></ProtectedRoute>} />
+                <Route path="/bureau/form-builder" element={<ProtectedRoute portalType="director-operations"><DoFormBuilderPage /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="/landing-test" element={<LandingTest />} />
                 {/* <Route path="/training-test" element={<TrainingTest />} /> */}
