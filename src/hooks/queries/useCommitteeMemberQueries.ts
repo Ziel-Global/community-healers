@@ -10,6 +10,7 @@ export const committeeMemberKeys = {
     applications: () => [...committeeMemberKeys.all, "applications"] as const,
     applicationDetail: (id: string) => [...committeeMemberKeys.all, "applicationDetail", id] as const,
     myReport: (id: string) => [...committeeMemberKeys.all, "myReport", id] as const,
+    myRescheduleRequests: (id: string) => [...committeeMemberKeys.all, "myRescheduleRequests", id] as const,
 };
 
 export function useAssignedApplications() {
@@ -93,6 +94,24 @@ export function useSetAttendance(applicationId: string) {
             committeeMemberService.setAttendance(applicationId, attending, reason),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: committeeMemberKeys.applicationDetail(applicationId) });
+        },
+    });
+}
+
+export function useMyRescheduleRequests(applicationId: string) {
+    return useQuery({
+        queryKey: committeeMemberKeys.myRescheduleRequests(applicationId),
+        queryFn: () => committeeMemberService.getMyRescheduleRequests(applicationId),
+        enabled: !!applicationId,
+    });
+}
+
+export function useRequestReschedule(applicationId: string) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (reason: string) => committeeMemberService.requestReschedule(applicationId, reason),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: committeeMemberKeys.myRescheduleRequests(applicationId) });
         },
     });
 }

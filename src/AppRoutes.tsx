@@ -194,6 +194,7 @@ export function AppRoutes() {
                 <Route path="/committee-chairman" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanPortal /></ProtectedRoute>} />
                 <Route path="/committee-chairman/applications" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanApplicationsPage /></ProtectedRoute>} />
                 <Route path="/committee-chairman/applications/:applicationId" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanApplicationDetailPage /></ProtectedRoute>} />
+                <Route path="/committee-chairman/applications/:applicationId/inspection" element={<ProtectedRoute portalType="committee-chairman"><CommitteeInspectionWorkPage portal="chairman" /></ProtectedRoute>} />
                 <Route path="/committee-chairman/members" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanMembersPage /></ProtectedRoute>} />
                 <Route path="/committee-chairman/inspection-reports" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanInspectionReportsPage /></ProtectedRoute>} />
                 <Route path="/committee-chairman/inspection-reports/:applicationId" element={<ProtectedRoute portalType="committee-chairman"><CommitteeChairmanInspectionReportsCenterPage /></ProtectedRoute>} />

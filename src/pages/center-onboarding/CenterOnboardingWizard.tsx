@@ -128,6 +128,7 @@ export default function CenterOnboardingWizard() {
   const [commentsLoading, setCommentsLoading] = useState(false);
 
   const [building, setBuilding] = useState<BuildingFormState>(emptyBuilding);
+  const [buildingFields, setBuildingFields] = useState<FormFieldDefinition[]>([]);
   const [staffRows, setStaffRows] = useState<StaffFormRow[]>([
     { name: "", cnic: "", category: "TRAINER", qualification: "" },
   ]);
@@ -145,9 +146,14 @@ export default function CenterOnboardingWizard() {
       .finally(() => setChecklistLoading(false));
   }, []);
 
-  // Bureau can add/hide/reorder fields on this step — fetched once up front so
-  // CenterInfoStep always renders whatever is currently switched on.
+  // Bureau can add/hide/reorder fields on these two steps — fetched once up
+  // front so BuildingStep/CenterInfoStep always render whatever is currently
+  // switched on. customFieldValues is shared across both: CUSTOM field ids
+  // are globally unique, so there's never a key collision between the steps.
   useEffect(() => {
+    getFormFields("BUILDING_DETAILS")
+      .then(setBuildingFields)
+      .catch((error) => toast.error(getApiErrorMessage(error, "Failed to load the building-details form")));
     getFormFields("CENTER_INFO")
       .then(setCenterInfoFields)
       .catch((error) => toast.error(getApiErrorMessage(error, "Failed to load the center-info form")));
@@ -283,27 +289,45 @@ export default function CenterOnboardingWizard() {
   const handleSubmitBuilding = async () => {
     if (!applicationId || !sessionToken) return;
 
-    const area = Number(building.buildingArea);
-    const capacity = Number(building.buildingCapacity);
-    if (!area || area <= 0) {
+    // Which native fields Bureau currently requires — depends entirely on
+    // the live BUILDING_DETAILS config, same pattern as Center Info below.
+    const isNativeRequired = (fieldKey: string) =>
+      buildingFields.some((f) => f.kind === "NATIVE" && f.visible && f.required && f.fieldKey === fieldKey);
+
+    const area = building.buildingArea.trim() ? Number(building.buildingArea) : undefined;
+    const capacity = building.buildingCapacity.trim() ? Number(building.buildingCapacity) : undefined;
+
+    if (isNativeRequired("buildingArea") && (!area || area <= 0)) {
       toast.error("Enter a valid building area");
       return;
     }
-    if (!capacity || capacity <= 0) {
+    if (isNativeRequired("buildingCapacity") && (!capacity || capacity <= 0)) {
       toast.error("Enter a valid building capacity");
       return;
     }
-    if (!building.buildingOwnership) {
+    if (isNativeRequired("buildingOwnership") && !building.buildingOwnership) {
       toast.error("Select whether the building is rented or owned");
       return;
     }
-    if (
-      building.receptionAvailable === null ||
-      building.requiredSystemsAvailable === null ||
-      building.camerasAvailable === null
-    ) {
-      toast.error("Please answer every question about the building");
+    if (isNativeRequired("receptionAvailable") && building.receptionAvailable === null) {
+      toast.error("Please answer the reception availability question");
       return;
+    }
+    if (isNativeRequired("requiredSystemsAvailable") && building.requiredSystemsAvailable === null) {
+      toast.error("Please answer the required systems question");
+      return;
+    }
+    if (isNativeRequired("camerasAvailable") && building.camerasAvailable === null) {
+      toast.error("Please answer the cameras / CCTV question");
+      return;
+    }
+    for (const field of buildingFields) {
+      if (field.kind !== "CUSTOM" || !field.required) continue;
+      const fieldValue = customFieldValues[field.id];
+      if (fieldValue === undefined || fieldValue === null || fieldValue === "") {
+        toast.error(`Please fill in "${field.label}"`);
+        return;
+      }
     }
 
     setLoading(true);
@@ -311,11 +335,12 @@ export default function CenterOnboardingWizard() {
       const result = await centerOnboardingService.submitBuildingDetails(applicationId, sessionToken, {
         buildingArea: area,
         buildingCapacity: capacity,
-        buildingOwnership: building.buildingOwnership,
-        receptionAvailable: building.receptionAvailable,
-        requiredSystemsAvailable: building.requiredSystemsAvailable,
-        camerasAvailable: building.camerasAvailable,
+        buildingOwnership: building.buildingOwnership ?? undefined,
+        receptionAvailable: building.receptionAvailable ?? undefined,
+        requiredSystemsAvailable: building.requiredSystemsAvailable ?? undefined,
+        camerasAvailable: building.camerasAvailable ?? undefined,
         camerasInfo: building.camerasInfo.trim() || undefined,
+        customFieldValues: Object.keys(customFieldValues).length ? customFieldValues : undefined,
       });
       setApplication(result);
       setStep("staff");
@@ -631,7 +656,15 @@ export default function CenterOnboardingWizard() {
         )}
 
         {step === "building" && (
-          <BuildingStep value={building} onChange={(patch) => setBuilding((prev) => ({ ...prev, ...patch }))} onSubmit={handleSubmitBuilding} loading={loading} />
+          <BuildingStep
+            value={building}
+            onChange={(patch) => setBuilding((prev) => ({ ...prev, ...patch }))}
+            fields={buildingFields}
+            customValues={customFieldValues}
+            onCustomChange={(fieldId, fieldValue) => setCustomFieldValues((prev) => ({ ...prev, [fieldId]: fieldValue }))}
+            onSubmit={handleSubmitBuilding}
+            loading={loading}
+          />
         )}
 
         {step === "staff" && (

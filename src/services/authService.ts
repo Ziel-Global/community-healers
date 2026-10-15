@@ -156,6 +156,15 @@ const setPassword = async (token: string, password: string): Promise<{ message: 
     }
 };
 
+/** Pure read — checked on page load so an already-used or expired link shows as dead before the form ever renders. Throws with the specific reason (invalid / already used / expired) on failure. */
+const checkSetPasswordToken = async (token: string): Promise<void> => {
+    try {
+        await api.get('/auth/set-password/validate', { params: { token } });
+    } catch (error: unknown) {
+        throw new Error(getApiErrorMessage(error, 'This link is invalid or has expired.'));
+    }
+};
+
 const checkExamScheduled = async (): Promise<ExamScheduledResponse> => {
     try {
         const response = await api.get('/candidates/me/exam-scheduled');
@@ -185,4 +194,5 @@ export const authService = {
     getMe,
     checkExamScheduled,
     setPassword,
+    checkSetPasswordToken,
 };

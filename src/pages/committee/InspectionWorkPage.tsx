@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { committeeNavItems } from "../CommitteeMemberPortal";
+import { committeeChairmanNavItems } from "../CommitteeChairmanPortal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +31,16 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { CommentThread } from "@/components/CommentThread";
 import { CameraCaptureDialog } from "@/components/CameraCaptureDialog";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { CommitteeChecklistItem, ChecklistCategory } from "@/services/committeeMemberService";
 import type { ReportRecommendation } from "@/services/committeeChairmanService";
 
@@ -52,7 +63,14 @@ function formatDate(iso: string | null): string | null {
   return new Date(iso).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
 }
 
-export default function CommitteeInspectionWorkPage() {
+/**
+ * The checklist + report-submission UI. Shared verbatim between a Committee
+ * Member and the Committee Chairman — both hit the same `/internal/committee/*`
+ * endpoints with their own userId, so the only thing that differs is which
+ * portal shell (nav, base path) wraps it. Default stays "member" so the
+ * existing /committee/... route needs no change.
+ */
+export default function CommitteeInspectionWorkPage({ portal = "member" }: { portal?: "member" | "chairman" }) {
   const { applicationId = "" } = useParams();
   const navigate = useNavigate();
   const { data, isLoading } = useCommitteeApplicationDetail(applicationId);
@@ -64,8 +82,13 @@ export default function CommitteeInspectionWorkPage() {
   const [cameraTargetItemId, setCameraTargetItemId] = useState<string | null>(null);
   const [recommendation, setRecommendation] = useState<ReportRecommendation>("APPROVE");
   const [reportNotes, setReportNotes] = useState("");
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
 
-  const detailPath = `/committee/applications/${applicationId}`;
+  const isChairman = portal === "chairman";
+  const portalType = isChairman ? "committee-chairman" : "committee";
+  const navItems = isChairman ? committeeChairmanNavItems : committeeNavItems;
+  const basePath = isChairman ? "/committee-chairman" : "/committee";
+  const detailPath = `${basePath}/applications/${applicationId}`;
 
   useEffect(() => {
     if (isLoading || !data) return;
@@ -84,7 +107,7 @@ export default function CommitteeInspectionWorkPage() {
 
   if (isLoading) {
     return (
-      <DashboardLayout title="Loading..." portalType="committee" navItems={committeeNavItems}>
+      <DashboardLayout title="Loading..." portalType={portalType} navItems={navItems}>
         <div className="flex justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -112,7 +135,7 @@ export default function CommitteeInspectionWorkPage() {
 
   if ((!isAttending && !isReportSubmitted) || (!isInspectionOpen && !isReportSubmitted)) {
     return (
-      <DashboardLayout title="Loading..." portalType="committee" navItems={committeeNavItems}>
+      <DashboardLayout title="Loading..." portalType={portalType} navItems={navItems}>
         <div className="max-w-3xl mx-auto space-y-4 py-6">
           {!isInspectionOpen && inspection?.message ? (
             <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/25 text-sm text-amber-900 dark:text-amber-200">
@@ -161,7 +184,7 @@ export default function CommitteeInspectionWorkPage() {
       {
         onSuccess: () => {
           toast.success("Report submitted to the chairman");
-          navigate("/committee");
+          navigate(basePath);
         },
         onError: (error) => toast.error(getApiErrorMessage(error, "Failed to submit report")),
       },
@@ -172,8 +195,8 @@ export default function CommitteeInspectionWorkPage() {
     <DashboardLayout
       title={application.centerName || "Inspection"}
       subtitle={application.address || undefined}
-      portalType="committee"
-      navItems={committeeNavItems}
+      portalType={portalType}
+      navItems={navItems}
     >
       <div className="max-w-3xl mx-auto space-y-4">
         <Button variant="ghost" size="sm" className="gap-1.5 -ml-2" onClick={() => navigate(detailPath)}>
@@ -328,18 +351,41 @@ export default function CommitteeInspectionWorkPage() {
                   {!allDocumented && (
                     <p className="text-xs text-muted-foreground">Complete every checklist item before submitting.</p>
                   )}
-                  <Button
-                    className="w-full bg-primary text-white gap-2"
-                    disabled={!canSubmitReport}
-                    onClick={handleSubmitReport}
-                  >
-                    {submitReportMutation.isPending ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                    Submit report
-                  </Button>
+                  <AlertDialog open={confirmSubmit} onOpenChange={setConfirmSubmit}>
+                    <Button
+                      className="w-full bg-primary text-white gap-2"
+                      disabled={!canSubmitReport}
+                      onClick={() => setConfirmSubmit(true)}
+                    >
+                      {submitReportMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                      Submit report
+                    </Button>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Submit your report?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          You're recommending {recommendation === "APPROVE" ? "approval" : "rejection"}. Once
+                          submitted, your checklist locks and the chairman can read your report — it can't be changed
+                          afterward.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            handleSubmitReport();
+                            setConfirmSubmit(false);
+                          }}
+                        >
+                          Submit report
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </CardContent>
               </Card>
             )}

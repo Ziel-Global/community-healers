@@ -108,13 +108,14 @@ export interface VerifyOtpResult {
 }
 
 export interface BuildingDetailsPayload {
-    buildingArea: number;
-    buildingCapacity: number;
-    buildingOwnership: BuildingOwnership;
-    receptionAvailable: boolean;
-    requiredSystemsAvailable: boolean;
-    camerasAvailable: boolean;
+    buildingArea?: number;
+    buildingCapacity?: number;
+    buildingOwnership?: BuildingOwnership;
+    receptionAvailable?: boolean;
+    requiredSystemsAvailable?: boolean;
+    camerasAvailable?: boolean;
     camerasInfo?: string;
+    customFieldValues?: Record<string, string | number | boolean>;
 }
 
 export interface CenterInfoPayload {

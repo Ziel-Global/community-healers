@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { Lock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Loader2, Lock, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/authService";
 import { resetPasswordSchema } from "@/schemas/authSchemas";
@@ -21,6 +21,30 @@ export default function CenterSetPasswordPage() {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+
+  // Checked once up front so an already-used or expired link shows as dead
+  // immediately — the form never renders for it, rather than rendering and
+  // only failing once the user has typed a password and submitted.
+  const [checking, setChecking] = useState(!!token);
+  const [linkError, setLinkError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    authService
+      .checkSetPasswordToken(token)
+      .then(() => {
+        if (!cancelled) setChecking(false);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setLinkError(getApiErrorMessage(error, "This link is invalid or has expired."));
+        setChecking(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +113,23 @@ export default function CenterSetPasswordPage() {
               <p className="text-[#64736d]">
                 This link is missing its token. Please use the link from your approval email.
               </p>
+            </div>
+          ) : checking ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : linkError ? (
+            <div className="text-center space-y-4">
+              <AlertTriangle className="w-12 h-12 text-destructive mx-auto" />
+              <h2 className="text-2xl font-display font-semibold text-[#183d34]">This Link No Longer Works</h2>
+              <p className="text-[#64736d]">{linkError}</p>
+              <Button
+                variant="outline"
+                className="w-full h-12"
+                onClick={() => navigate("/center/auth")}
+              >
+                Go to Sign In
+              </Button>
             </div>
           ) : done ? (
             <div className="text-center space-y-4">

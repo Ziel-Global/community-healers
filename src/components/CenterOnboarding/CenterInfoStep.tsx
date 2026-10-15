@@ -3,8 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { LocationPicker } from "@/components/LocationPicker";
+import { CustomFieldInput } from "./CustomFieldInput";
 import type { FormFieldDefinition } from "@/types/formBuilder";
 
 export interface CenterInfoFormState {
@@ -39,70 +39,6 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function RequiredMark({ required }: { required: boolean }) {
     return required ? <span className="text-[#b14c4c]"> *</span> : null;
-}
-
-/** Bureau-added field — one generic input per FormFieldType. */
-function CustomFieldInput({
-    field,
-    value,
-    onChange,
-}: {
-    field: FormFieldDefinition;
-    value: string | number | boolean | undefined;
-    onChange: (value: string | number | boolean) => void;
-}) {
-    switch (field.fieldType) {
-        case "NUMBER":
-            return (
-                <Input
-                    id={field.id}
-                    type="number"
-                    className="h-11"
-                    value={typeof value === "number" ? value : ""}
-                    onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
-                />
-            );
-        case "BOOLEAN":
-            return (
-                <div className="flex items-center gap-2 h-11">
-                    <Switch checked={value === true} onCheckedChange={(checked) => onChange(checked)} />
-                </div>
-            );
-        case "SELECT":
-            return (
-                <select
-                    id={field.id}
-                    className="h-11 w-full rounded-md border border-[#c9d6c8] bg-white px-3 text-sm"
-                    value={typeof value === "string" ? value : ""}
-                    onChange={(e) => onChange(e.target.value)}
-                >
-                    <option value="" disabled>Select…</option>
-                    {(field.options ?? []).map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                </select>
-            );
-        case "DATE":
-            return (
-                <Input
-                    id={field.id}
-                    type="date"
-                    className="h-11"
-                    value={typeof value === "string" ? value : ""}
-                    onChange={(e) => onChange(e.target.value)}
-                />
-            );
-        case "TEXT":
-        default:
-            return (
-                <Input
-                    id={field.id}
-                    className="h-11"
-                    value={typeof value === "string" ? value : ""}
-                    onChange={(e) => onChange(e.target.value)}
-                />
-            );
-    }
 }
 
 export function CenterInfoStep({

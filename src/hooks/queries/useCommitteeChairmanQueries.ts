@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { committeeChairmanService } from '@/services/committeeChairmanService';
+import { committeeChairmanService, type RescheduleRequestResolution } from '@/services/committeeChairmanService';
 
 export const committeeChairmanKeys = {
     all: ['committeeChairman'] as const,
     applications: () => [...committeeChairmanKeys.all, 'applications'] as const,
     applicationDetail: (id: string) => [...committeeChairmanKeys.all, 'applicationDetail', id] as const,
     inspectionReports: (id: string) => [...committeeChairmanKeys.all, 'inspectionReports', id] as const,
+    rescheduleRequests: () => [...committeeChairmanKeys.all, 'rescheduleRequests'] as const,
 };
 
 export function useChairmanApplications() {
@@ -69,6 +70,35 @@ export function useChairmanReject(applicationId: string) {
     return useMutation({
         mutationFn: (reason: string) => committeeChairmanService.rejectApplication(applicationId, reason),
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: committeeChairmanKeys.all });
+        },
+    });
+}
+
+/** The alert list — every pending "something came up" request across the whole committee. */
+export function useRescheduleRequests() {
+    return useQuery({
+        queryKey: committeeChairmanKeys.rescheduleRequests(),
+        queryFn: committeeChairmanService.listRescheduleRequests,
+    });
+}
+
+export function useResolveRescheduleRequest() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({
+            requestId,
+            resolution,
+            scheduledInspectionDate,
+        }: {
+            requestId: string;
+            resolution: RescheduleRequestResolution;
+            scheduledInspectionDate?: string;
+        }) => committeeChairmanService.resolveRescheduleRequest(requestId, { resolution, scheduledInspectionDate }),
+        onSuccess: () => {
+            // Resolving can touch attendance, the application's date, and every
+            // pending request on it — invalidate broadly rather than tracking
+            // which specific application/query keys were affected.
             queryClient.invalidateQueries({ queryKey: committeeChairmanKeys.all });
         },
     });

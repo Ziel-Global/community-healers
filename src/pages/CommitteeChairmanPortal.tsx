@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
-import { useChairmanApplications } from "@/hooks/queries/useCommitteeChairmanQueries";
+import { useChairmanApplications, useRescheduleRequests } from "@/hooks/queries/useCommitteeChairmanQueries";
+import { RescheduleRequestAlertList } from "@/components/committee-chairman/RescheduleRequestAlert";
 import type { CenterApplicationSummary } from "@/services/centerApplicationService";
 import type { LucideIcon } from "lucide-react";
 
@@ -109,6 +110,7 @@ function Stat({
 export default function CommitteeChairmanPortal() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("months");
   const { data: applications = [], isLoading } = useChairmanApplications();
+  const { data: rescheduleRequests = [] } = useRescheduleRequests();
   const trend = useMemo(
     () => confirmedCenterTrend(applications, timeFilter),
     [applications, timeFilter],
@@ -128,6 +130,15 @@ export default function CommitteeChairmanPortal() {
       navItems={committeeChairmanNavItems}
     >
       <div className="max-w-[1600px] mx-auto space-y-6 pb-12">
+        {rescheduleRequests.length > 0 && (
+          <div className="space-y-2.5">
+            <p className="text-xs font-bold uppercase tracking-wide text-amber-700">
+              {rescheduleRequests.length === 1 ? "1 reschedule request needs your attention" : `${rescheduleRequests.length} reschedule requests need your attention`}
+            </p>
+            <RescheduleRequestAlertList requests={rescheduleRequests} />
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />

@@ -33,6 +33,7 @@ import { APPLICATION_STATUS_META } from "@/components/DirectorOperationsPortal/C
 import { CommitteeAttendanceCard } from "@/components/DirectorOperationsPortal/CenterApplications/CommitteeAttendanceCard";
 import { CommentThread } from "@/components/CommentThread";
 import { ForwardWithScheduleDialog } from "@/components/committee-chairman/ForwardWithScheduleDialog";
+import { MyInspectionAttendanceCard } from "@/components/CommitteeMemberPortal/MyInspectionAttendanceCard";
 import {
   useChairmanApplicationDetail,
   useForwardChairmanApplication,
@@ -166,20 +167,28 @@ export default function CommitteeChairmanApplicationDetailPage() {
         )}
 
         {isScheduled && (
-          <Card className="border-border/40">
-            <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <p className="text-sm text-muted-foreground">
-                Inspection is scheduled for {formatDate(application.scheduledInspectionDate)}. Review member reports and make the final decision.
-              </p>
-              <Button
-                variant="outline"
-                className="shrink-0"
-                onClick={() => navigate(`/committee-chairman/inspection-reports/${application.id}`)}
-              >
-                View inspection reports
-              </Button>
-            </CardContent>
-          </Card>
+          <>
+            <Card className="border-border/40">
+              <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Inspection is scheduled for {formatDate(application.scheduledInspectionDate)}. Review member reports and make the final decision.
+                </p>
+                <Button
+                  variant="outline"
+                  className="shrink-0"
+                  onClick={() => navigate(`/committee-chairman/inspection-reports/${application.id}`)}
+                >
+                  View inspection reports
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* The chairman can also attend and file their own report, same as any member. */}
+            <MyInspectionAttendanceCard
+              applicationId={application.id}
+              inspectionPath={`/committee-chairman/applications/${application.id}/inspection`}
+            />
+          </>
         )}
 
         <Card className="border-border/40 bg-card/60 backdrop-blur-sm">

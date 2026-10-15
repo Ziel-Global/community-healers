@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
+  AlertTriangle,
   ArrowLeft,
   Check,
   CheckCircle2,
@@ -35,6 +36,7 @@ import {
   useChairmanReject,
   useInspectionReports,
 } from "@/hooks/queries/useCommitteeChairmanQueries";
+import { RescheduleRequestAlertList } from "@/components/committee-chairman/RescheduleRequestAlert";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useToast } from "@/hooks/use-toast";
 import { committeeChairmanNavItems } from "../../CommitteeChairmanPortal";
@@ -181,6 +183,23 @@ export default function InspectionReportsCenterPage() {
           <ArrowLeft className="w-4 h-4" /> All scheduled centers
         </Link>
 
+        {reports.pendingRescheduleRequests.length > 0 && (
+          <RescheduleRequestAlertList requests={reports.pendingRescheduleRequests} />
+        )}
+
+        {reports.noShow && (
+          <div className="p-4 rounded-[14px] border border-red-200 bg-red-50 flex items-start gap-3">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-red-700">No reports submitted</p>
+              <p className="text-xs text-red-600/80 mt-0.5">
+                The scheduled inspection date has passed and no committee member has submitted a report — it looks
+                like nobody attended. Reschedule the inspection to get this moving again.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard
             label="Attending"
@@ -280,7 +299,14 @@ export default function InspectionReportsCenterPage() {
                         >
                           {initials(member.memberName)}
                         </div>
-                        <p className="text-sm font-semibold text-[#183d34] truncate">{member.memberName}</p>
+                        <div className="min-w-0 flex items-center gap-1.5">
+                          <p className="text-sm font-semibold text-[#183d34] truncate">{member.memberName}</p>
+                          {member.role === "COMMITTEE_CHAIRMAN" && (
+                            <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-[#164c3e] bg-[#eef6df] border border-[#d5e8c4] rounded-full px-1.5 py-0.5">
+                              Chairman
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="px-4 py-3.5">

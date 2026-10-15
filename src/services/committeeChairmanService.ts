@@ -12,6 +12,8 @@ export type ReportRecommendation = 'APPROVE' | 'REJECT';
 export interface InspectionReportMemberRow {
     memberUserId: string;
     memberName: string;
+    /** 'COMMITTEE_CHAIRMAN' for the chairman's own row — they can attend and report too. */
+    role?: string;
     attending: boolean | null;
     absenceReason: string | null;
     submitted: boolean;
@@ -33,11 +35,29 @@ export interface InspectionReportsSummary {
     recommendReject: number;
 }
 
+export type RescheduleRequestResolution = 'RESCHEDULED' | 'ABSENCE_ACCEPTED';
+
+/** One pending "something came up" flag — the chairman's alert list, global or scoped to one application. */
+export interface RescheduleRequestAlert {
+    id: string;
+    applicationId: string;
+    /** Only present on the global list (listRescheduleRequests); per-application rows already know their own center. */
+    centerName?: string | null;
+    requestedByUserId: string;
+    requestedByName: string;
+    requestedByRole?: string;
+    reason: string;
+    createdAt: string;
+}
+
 export interface InspectionReportsDashboard {
     members: InspectionReportMemberRow[];
     summary: InspectionReportsSummary;
     readyToDecide: boolean;
     outstandingMembers: string[];
+    /** The inspection date has passed, nobody submitted a report, and nobody flagged why. */
+    noShow: boolean;
+    pendingRescheduleRequests: RescheduleRequestAlert[];
 }
 
 export interface ChairmanApproveResult {
@@ -78,6 +98,7 @@ function normalizeInspectionReportsDashboard(raw: Record<string, unknown>): Insp
         return {
             memberUserId: String(row.memberUserId ?? row.userId ?? ''),
             memberName: String(row.memberName ?? row.name ?? 'Member'),
+            role: row.role as string | undefined,
             attending: row.attending as boolean | null,
             absenceReason: (row.absenceReason ?? row.reason ?? null) as string | null,
             submitted: Boolean(row.submitted ?? row.hasSubmitted ?? row.submittedAt),
@@ -106,6 +127,10 @@ function normalizeInspectionReportsDashboard(raw: Record<string, unknown>): Insp
         outstandingMembers: Array.isArray(raw.outstandingMembers)
             ? (raw.outstandingMembers as string[])
             : [],
+        noShow: Boolean(raw.noShow),
+        pendingRescheduleRequests: Array.isArray(raw.pendingRescheduleRequests)
+            ? (raw.pendingRescheduleRequests as RescheduleRequestAlert[])
+            : [],
     };
 }
 
@@ -129,6 +154,20 @@ const getEvidenceBlob = async (evidenceId: string): Promise<Blob> => {
     return response.data;
 };
 
+/** Every pending reschedule request across the chairman's committee — the alert list. */
+const listRescheduleRequests = async (): Promise<RescheduleRequestAlert[]> => {
+    const response = await api.get('/internal/committee-chairman/reschedule-requests');
+    return response.data;
+};
+
+/** Reschedule the whole inspection, or accept just this person's absence. */
+const resolveRescheduleRequest = async (
+    requestId: string,
+    payload: { resolution: RescheduleRequestResolution; scheduledInspectionDate?: string },
+): Promise<void> => {
+    await api.post(`/internal/committee-chairman/reschedule-requests/${requestId}/resolve`, payload);
+};
+
 export const committeeChairmanService = {
     listApplications,
     getApplicationDetail,
@@ -138,4 +177,6 @@ export const committeeChairmanService = {
     approveApplication,
     rejectApplication,
     getEvidenceBlob,
+    listRescheduleRequests,
+    resolveRescheduleRequest,
 };

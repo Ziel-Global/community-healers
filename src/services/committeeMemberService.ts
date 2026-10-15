@@ -71,6 +71,20 @@ export interface SubmitReportPayload {
     notes?: string;
 }
 
+export type RescheduleRequestStatus = 'PENDING' | 'RESOLVED';
+export type RescheduleRequestResolution = 'RESCHEDULED' | 'ABSENCE_ACCEPTED';
+
+export interface RescheduleRequest {
+    id: string;
+    applicationId: string;
+    requestedByUserId: string;
+    reason: string;
+    status: RescheduleRequestStatus;
+    resolution: RescheduleRequestResolution | null;
+    resolvedAt: string | null;
+    createdAt: string;
+}
+
 const getAssignedApplications = async (): Promise<CommitteeApplication[]> => {
     const response = await api.get('/internal/committee/applications');
     return response.data;
@@ -122,6 +136,17 @@ const setAttendance = async (
     return response.data;
 };
 
+/** "Something came up" — flags the chairman that this attending member/chairman may need the inspection rescheduled. */
+const requestReschedule = async (applicationId: string, reason: string): Promise<RescheduleRequest> => {
+    const response = await api.post(`/internal/committee/applications/${applicationId}/reschedule-request`, { reason });
+    return response.data;
+};
+
+const getMyRescheduleRequests = async (applicationId: string): Promise<RescheduleRequest[]> => {
+    const response = await api.get(`/internal/committee/applications/${applicationId}/reschedule-request`);
+    return response.data;
+};
+
 export const committeeMemberService = {
     getAssignedApplications,
     getApplicationDetail,
@@ -130,4 +155,6 @@ export const committeeMemberService = {
     uploadEvidence,
     setChecklistChecked,
     setAttendance,
+    requestReschedule,
+    getMyRescheduleRequests,
 };
